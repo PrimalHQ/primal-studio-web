@@ -1,0 +1,69 @@
+.layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: fit-content;
+  margin-inline: auto;
+
+  header {
+    width: 100%;
+    height: 84px;
+    border: 1px solid darkgoldenrod;
+  }
+
+  footer {
+    width: 100%;
+    height: 84px;
+    border: 1px solid darkgreen;
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    width: 100%;
+    gap: 20px;
+  }
+
+  aside {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 300px;
+    height: 100%;
+    padding-block: 12px;
+    padding-inline: 12px;
+
+    border: 1px solid darkslategrey;
+  }
+
+  .branding {
+    width: 100%;
+    height: 84px;
+  }
+
+  .search {
+    width: 100%;
+    height: 84px;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: fit-content;
+    min-height: 100dvh;
+
+    .central {
+      width: 640px;
+      flex-grow: 1;
+    }
+  }
+}

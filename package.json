@@ -1,0 +1,31 @@
+{
+  "name": "vite-template-solid",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "dev:host": "vite --host",
+    "build": "vite build",
+    "build:unminified": "vite build --minify=false",
+    "serve": "vite preview",
+    "host": "vite preview --host",
+    "extract": "formatjs extract",
+    "compile": "formatjs compile"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/pako": "^2.0.3",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.0",
+    "vite-plugin-solid": "^2.11.0"
+  },
+  "dependencies": {
+    "@cookbook/solid-intl": "^0.1.2",
+    "@solidjs/router": "^0.15.2",
+    "pako": "^2.1.0",
+    "sass": "^1.83.0",
+    "solid-js": "^1.9.3"
+  }
+}
