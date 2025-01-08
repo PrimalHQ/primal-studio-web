@@ -62,6 +62,13 @@ export type FeedRange = {
   elements: string[],
 };
 
+export type FeedResult = {
+  specification: string,
+  mainEvents: string[],
+  auxEvents: string[],
+  range: FeedRange,
+}
+
 export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification';
 
 export type UserMetadata = {

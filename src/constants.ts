@@ -82,4 +82,4 @@ export enum Kind  {
   LongFormShell = 10_030_023,
 }
 
-export const FEED_LIMIT = 10;
+export const FEED_LIMIT = 20;

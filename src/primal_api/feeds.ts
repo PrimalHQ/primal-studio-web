@@ -1,6 +1,5 @@
-import { FeedPaging, FeedRange } from "../primal";
+import { FeedPaging, FeedRange, FeedResult, NostrEventContent } from "../primal";
 import { sendMessage, subsTo } from "../utils/socket";
-import { addEventToStore } from '../stores/EventStore';
 import { Kind } from "../constants";
 
 
@@ -47,22 +46,51 @@ export const getMegaFeed = (
 
 export const fetchMegaFeed = (
   pubkey: string | undefined,
-  specification: any,
+  kind: number,
+  specification: string,
   subId: string,
   paging?: FeedPaging,
 ) => {
-    return new Promise<FeedRange>((resolve) => {
-      let feedRange = emptyFeedRange();
+    return new Promise<FeedResult>((resolve) => {
+      let range = emptyFeedRange();
+      let mainEvents: string[] = [];
+      let auxEvents: string[] = [];
 
       const unsub = subsTo(subId, {
         onEose: () => {
           unsub();
-          resolve(feedRange);
+          resolve({
+            specification,
+            mainEvents,
+            auxEvents,
+            range,
+          });
         },
         onEvent: (_, content) => {
           if (content.kind === Kind.FeedRange) {
-            feedRange = JSON.parse(content.content || '{}') as FeedRange;
+            range = JSON.parse(content.content || '{}') as FeedRange;
+            return;
           }
+
+          if (content.kind === kind) {
+            // For metadata use pubkey instead of event id.
+            const id = kind === Kind.Metadata ? content.pubkey! : content.id;
+            mainEvents.push(id);
+            return;
+          }
+
+          if (content.kind === Kind.Repost) {
+            const reposted = JSON.parse(content.content || '{ id: "" }') as NostrEventContent;
+
+            if (reposted.kind === kind) {
+              // For metadata use pubkey instead of event id.
+              const id = kind === Kind.Metadata ? content.pubkey! : content.id;
+              mainEvents.push(id);
+              return;
+            }
+          }
+
+          auxEvents.push(content.id);
         }
       });
 

@@ -3,7 +3,7 @@ import { APP_ID } from "../../App";
 import { emptyFeedRange, fetchMegaFeed } from "../../primal_api/feeds";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
 import { FeedRange, NostrEventContent } from "../../primal";
-import { FEED_LIMIT } from "../../constants";
+import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 
 export const calculateNotesOffset = (notes: NostrEventContent[], paging: FeedRange) => {
@@ -44,7 +44,17 @@ export const fetchHomeFeed = query(
   async (pubkey: string, feedRange?: FeedRange) => {
     const range = feedRange || emptyFeedRange();
 
-    if (pageStore.home.isFetching) return { ...range };
+    if (pageStore.home.isFetching) {
+      const pages = pageStore.home.feedPages;
+
+      return pages[pages.length] ||
+        {
+          specification: '',
+          mainEvents: [],
+          auxEvents: [],
+          range: emptyFeedRange(),
+        };
+    }
 
     const page = {
       limit: FEED_LIMIT,
@@ -53,25 +63,37 @@ export const fetchHomeFeed = query(
 
     updatePageStore('home', 'isFetching', () => true);
 
-    const nextRange = await fetchMegaFeed(
+    const result = await fetchMegaFeed(
       pubkey,
+      Kind.Text,
       "{\"id\":\"latest\",\"kind\":\"notes\"}",
       `home_feed_${APP_ID}`,
       page,
     );
 
+    let index = pageStore.home.feedPages.findIndex(fp => {
+      return fp.specification === result.specification &&
+        fp.range.since === result.range.since &&
+        fp.range.until === result.range.until;
+    })
+
+    if (index === -1) {
+      index = pageStore.home.feedPages.length;
+    }
+
     batch(() => {
-      updatePageStore('home', 'range', () => nextRange);
-      updatePageStore('home', 'notes', (notes) => [ ...notes, ...nextRange.elements]);
+      updatePageStore('home', 'feedPages', index, () => ({ ...result }));
+
+      updatePageStore('home', 'lastRange', () => ({ ...result.range }));
       updatePageStore('home', 'isFetching', () => false);
     });
 
-    return nextRange;
+    return result;
   },
   'fetchHomeFeed',
 );
 
 export default function preloadHome(pubkey: string | undefined) {
-  if (!pubkey || pageStore.home.range.since > 0) return;
+  if (!pubkey || pageStore.home.lastRange.since > 0) return;
   fetchHomeFeed(pubkey);
 }

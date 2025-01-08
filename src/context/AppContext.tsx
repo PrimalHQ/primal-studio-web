@@ -4,12 +4,12 @@ import {
   createEffect,
   JSXElement,
   onCleanup,
-  onMount,
   useContext
 } from "solid-js";
-import { NostrEOSE, NostrEvent, NostrEventContent, NostrEvents } from "../primal";
+import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
 import { isConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../utils/socket";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
+
 
 export type AppContextStore = {
   actions: {
@@ -35,7 +35,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }
 
     if (type === 'EVENT') {
-
       addEventToStore(content);
     }
   };

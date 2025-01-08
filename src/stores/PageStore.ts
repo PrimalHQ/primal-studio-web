@@ -1,25 +1,25 @@
 import { createStore } from "solid-js/store";
-import { FeedPaging, FeedRange } from "../primal";
+import { FeedRange, FeedResult } from "../primal";
+import { emptyFeedRange } from "../primal_api/feeds";
+
+export type PageInfo = {
+  height: number,
+}
 
 export type PageStore = {
   home: {
-    notes: string[],
-    range: FeedRange,
+    feedPages: FeedResult[],
+    lastRange: FeedRange,
     isFetching: boolean,
-    noteSizes: Record<string,  number>
+    pageInfo: Record<string,  PageInfo>
   };
 }
 
 export const emptyStore = () => ({
   home: {
-    notes: [],
-    range: {
-      order_by: 'created_at',
-      since: 0,
-      until: 0,
-      elements: [],
-    },
-    noteSizes: {},
+    feedPages: [],
+    lastRange: emptyFeedRange(),
+    pageInfo: {},
     isFetching: false,
   }
 });

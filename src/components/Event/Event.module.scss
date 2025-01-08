@@ -3,9 +3,7 @@
   width: 100%;
   border: 1px solid blue;
   padding: 2px;
-}
 
-.eventLink {
   text-decoration: none;
   color: var(--text-primary);
 }
@@ -16,5 +14,18 @@
 }
 
 .note {
+  width: 100%;
+  word-break: break-all;
+}
+
+.feedPage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.hiddenPage {
   width: 100%;
 }
