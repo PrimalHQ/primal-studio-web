@@ -1,0 +1,20 @@
+.event {
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid blue;
+  padding: 2px;
+}
+
+.eventLink {
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.reposters {
+  border: 1px dashed red;
+  padding: 2px;
+}
+
+.note {
+  width: 100%;
+}

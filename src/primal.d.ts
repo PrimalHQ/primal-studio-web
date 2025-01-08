@@ -1,3 +1,7 @@
+export type EventRegistry = Record<string, NostrEventContent>;
+
+export type EventStore = Record<string, NostrEventContent>;
+
 export type PrimalWindow = Window & typeof globalThis & {
   loadPrimalStores: () => void,
   primal?: any,
@@ -7,6 +11,7 @@ export type PrimalWindow = Window & typeof globalThis & {
   onPrimalUploadServerConnected?: (url: string, ws: WebSocket | undefined) => void,
   onPrimalCacheServerMessageReceived?: (url: string, data: any) => void,
   onPrimalCacheServerMessageSent?: (url: string, data: any) => void,
+  eventStore: EventStore,
 };
 
 export type NostrEventType = "EVENT" | "EOSE" | "NOTICE";
@@ -42,3 +47,37 @@ export type NostrNotice = [
   subkey: string,
   reason: string,
 ];
+
+export type FeedPaging = {
+  limit?: number,
+  until?: number,
+  since?: number,
+  offset?: number | number[],
+}
+
+export type FeedRange = {
+  order_by: string,
+  since: number,
+  until: number,
+  elements: string[],
+};
+
+export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification';
+
+export type UserMetadata = {
+  id: string,
+  pubkey: string,
+  name?: string,
+  username?: string,
+  about?: string,
+  picture?: string,
+  nip05?: string,
+  banner?: string,
+  display_name?: string,
+  displayName?: string,
+  lud06: string,
+  lud16: string,
+  website: string,
+  tags: string[][],
+  bot: boolean,
+};

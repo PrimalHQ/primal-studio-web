@@ -26,7 +26,7 @@ export const AccountProvider = (props: { children: JSXElement }) => {
 // EFFECTS --------------------------------------
 
 onMount(() => {
-  updateStore('pubkey', 'npub13rxpxjc6vh65aay2eswlxejsv0f7530sf64c4arydetpckhfjpustsjeaf');
+  updateStore('pubkey', '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079');
 })
 
 // STORES ---------------------------------------

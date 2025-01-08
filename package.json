@@ -1,6 +1,6 @@
 {
   "name": "vite-template-solid",
-  "version": "0.0.0",
+  "version": "2.0.23",
   "description": "",
   "type": "module",
   "scripts": {
@@ -23,7 +23,10 @@
   },
   "dependencies": {
     "@cookbook/solid-intl": "^0.1.2",
+    "@kobalte/core": "^0.13.7",
     "@solidjs/router": "^0.15.2",
+    "dompurify": "^3.2.3",
+    "nostr-tools": "^2.10.4",
     "pako": "^2.1.0",
     "sass": "^1.83.0",
     "solid-js": "^1.9.3"
