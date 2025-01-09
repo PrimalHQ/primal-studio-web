@@ -4,6 +4,7 @@ import { ReactiveMap } from '@solid-primitives/map';
 import { fetchEvents } from "../primal_api/feeds";
 import { accountStore } from "./AccountStore";
 import { APP_ID } from "../App";
+import { openDB } from 'idb';
 
 
 export const eventStore = new ReactiveMap<string, NostrEventContent>();
@@ -66,6 +67,20 @@ export const getEventFromStore = async (id: string) => {
   if (event) return event;
 
   //TODO: Read from indexdb
+  let db = await openDB('store', 1, {
+    upgrade(database, oldVersion, newVersion, transaction, event) {
+      if (oldVersion === 0) {
+        database.createObjectStore('events', { keyPath: 'id' });
+      }
+    },
+  });
+
+  let transaction = db.transaction('events', 'readonly');
+  let eventsDb = transaction.objectStore('events');
+
+  event = await eventsDb.get(id);
+
+  if (event) return event;
 
   // Fetch from API
   const fetchedEvents = await fetchEvents(
@@ -98,7 +113,40 @@ export const getEventsFromStore = async (ids: string[], i:number) => {
     foundEvents.push(event);
   }
 
-  //TODO: Read from indexdb
+
+  if (missingEvents.length > 0) {
+    //TODO: Read from indexdb
+    let db = await openDB('store', 1, {
+      upgrade(database, oldVersion, newVersion, transaction, event) {
+        if (oldVersion === 0) {
+          database.createObjectStore('events', { keyPath: 'id' });
+        }
+      },
+    });
+
+    let transaction = db.transaction('events', 'readonly');
+    let eventsDb = transaction.objectStore('events');
+
+    let events: NostrEventContent[] = [];
+    let foundIds: string[] = [];
+
+    for (let i=0; i<missingEvents.length; i++) {
+      const ev = await eventsDb.get(missingEvents[i]);
+
+      if (ev) {
+        foundIds.push(missingEvents[i]);
+        events.push(ev);
+      }
+    }
+
+    await transaction.done;
+
+    missingEvents = missingEvents.filter(id => !foundIds.includes(id));
+
+    db.close();
+
+    foundEvents.push.apply(foundEvents, events);
+  }
 
   // Fetch from API
   if (missingEvents.length > 0) {

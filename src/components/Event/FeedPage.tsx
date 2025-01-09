@@ -60,6 +60,12 @@ const FeedPage: Component<{
     !props.isRenderEmpty && getNotes();
   });
 
+  const forget = async () => {
+    await forgetPage('home', index);
+    track(() => props.isRenderEmpty);
+    setNotes(() => []);
+  };
+
   createEffect(on(() => props.isRenderEmpty, (isEmpty, prev) => {
     if (firstRun) {
       firstRun = false;
@@ -67,9 +73,7 @@ const FeedPage: Component<{
     }
 
     if (isEmpty === true) {
-      track(() => props.isRenderEmpty);
-      forgetPage('home', index);
-      setNotes(() => []);
+      forget();
       return;
     }
   }));
