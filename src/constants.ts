@@ -83,3 +83,8 @@ export enum Kind  {
 }
 
 export const FEED_LIMIT = 20;
+
+export const profileRegex = /((nostr:)?(npub|nprofile)1\w+)\b/;
+export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
+export const noteRegex = /((nostr:)?(note|nevent)1\w+)\b/;
+export const noteRegexG = /((nostr:)?(note|nevent)1\w+)\b/g;

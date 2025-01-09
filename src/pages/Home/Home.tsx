@@ -1,13 +1,6 @@
-import { createAsync, query } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, onMount } from 'solid-js';
-import { APP_ID } from '../../App';
-import Event from '../../components/Event/Event';
-import { Kind } from '../../constants';
+import { Component, createSignal, For } from 'solid-js';
 import { useAccountContext } from '../../context/AccountContext';
-import { eventStore } from '../../stores/EventStore';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
-import { FeedPaging, FeedResult, NostrEventContent } from '../../primal';
-import { fetchMegaFeed } from '../../primal_api/feeds';
 import { translate } from '../../translations/translate';
 import { fetchHomeFeed } from './Home.data';
 
@@ -33,6 +26,7 @@ const Home: Component = () => {
   const [visiblePages, setVisiblePages] = createSignal<number[]>([]);
 
   let observer: IntersectionObserver | undefined;
+  let timeout = 0;
 
   observer = new IntersectionObserver(entries => {
     let i=0;
@@ -44,16 +38,19 @@ const Home: Component = () => {
       const id = parseInt(target.getAttribute('data-page-index') || '0');
 
       if (entry.isIntersecting) {
-        const min = id < 3 ? 0 : id - 3;
-        const max = id + 3;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          const min = id < 3 ? 0 : id - 3;
+          const max = id + 3;
 
-        let config: number[] = [];
+          let config: number[] = [];
 
-        for (let i=min; i<= max; i++) {
-          config.push(i);
-        }
+          for (let i=min; i<= max; i++) {
+            config.push(i);
+          }
 
-        setVisiblePages(() => [...config]);
+          setVisiblePages(() => [...config]);
+        }, 500);
       }
     }
   });

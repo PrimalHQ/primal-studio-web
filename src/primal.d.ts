@@ -1,6 +1,8 @@
+import { type ReactiveMap } from '@solid-primitives/map';
+
 export type EventRegistry = Record<string, NostrEventContent>;
 
-export type EventStore = Record<string, NostrEventContent>;
+export type EventStore = ReactiveMap<string, NostrEventContent>;
 
 export type PrimalWindow = Window & typeof globalThis & {
   loadPrimalStores: () => void,
@@ -67,6 +69,11 @@ export type FeedResult = {
   mainEvents: string[],
   auxEvents: string[],
   range: FeedRange,
+}
+
+export type EventsResult = {
+  mainEvents: string[],
+  auxEvents: string[],
 }
 
 export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification';

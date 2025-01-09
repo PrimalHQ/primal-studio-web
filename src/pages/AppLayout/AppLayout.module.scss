@@ -1,9 +1,10 @@
 .layout {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: fit-content;
+  position: relative;
+  display: grid;
+  grid-template-columns: 184px 640px 348px;
   margin-inline: auto;
+  width: 1172px;
+  border: 1px solid gold;
 
   header {
     width: 100%;
@@ -31,16 +32,28 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    width: 300px;
-    height: 100%;
     padding-block: 12px;
-    padding-inline: 12px;
+    width: 184px;
 
     border: 1px solid darkslategrey;
+
+    &.left {
+      padding-right: 12px;
+      width: 172px;
+    }
+
+    &.right {
+      padding-left: 12px;
+      width: 336px;
+    }
+
+    .fixed {
+      position: fixed;
+    }
   }
 
   .branding {
-    width: 100%;
+    width: 160px;
     height: 84px;
   }
 
@@ -58,8 +71,9 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    width: fit-content;
+    width: 640px;
     min-height: 100dvh;
+    // margin-left: 184px;
 
     .central {
       width: 640px;

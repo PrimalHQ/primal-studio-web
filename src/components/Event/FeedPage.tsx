@@ -1,13 +1,28 @@
-import { Component, createEffect, For, JSX, onCleanup, onMount, Show } from 'solid-js';
+import {
+  Component,
+  createEffect,
+  createReaction,
+  createSignal,
+  For,
+  on,
+  onCleanup,
+  onMount,
+  Show,
+  untrack,
+} from 'solid-js';
 
-import styles from './Event.module.scss';
-import { pageStore, updatePageStore } from '../../stores/PageStore';
-import { generateSecretKey } from 'nostr-tools';
+import {
+  forgetPage,
+  pageStore,
+  updatePageStore,
+} from '../../stores/PageStore';
+
 import { Kind } from '../../constants';
 import { FeedResult, NostrEventContent } from '../../primal';
-import { eventStore } from '../../stores/EventStore';
+import { getEventsFromStore } from '../../stores/EventStore';
 import Event from './Event';
 
+import styles from './Event.module.scss';
 
 const FeedPage: Component<{
   page: FeedResult,
@@ -15,19 +30,22 @@ const FeedPage: Component<{
   isRenderEmpty?: boolean,
   observer?: IntersectionObserver,
 }> = (props) => {
+  const index = untrack(() => props.pageIndex)
   let pageHolder: HTMLDivElement | undefined;
 
   createEffect(() => {
-    if (!pageHolder || props.isRenderEmpty) return;
+    if (notes().length === 0) return;
 
-    const rect = pageHolder.getBoundingClientRect();
-    updatePageStore('home', 'pageInfo', `${props.pageIndex}`, () => ({ height: rect.height }));
+    const rect = pageHolder?.getBoundingClientRect() || { height: 0};
+    updatePageStore('home', 'pageInfo', `${index}`, () => ({ height: rect.height }));
   });
 
   onMount(() => {
     if (!props.observer || !pageHolder) return;
 
     props.observer?.observe(pageHolder);
+
+    getNotes();
   });
 
   onCleanup(() => {
@@ -36,15 +54,39 @@ const FeedPage: Component<{
     props.observer?.unobserve(pageHolder);
   });
 
+  let firstRun = true;
 
-  const notes = () => {
+  const track = createReaction(() => {
+    !props.isRenderEmpty && getNotes();
+  });
+
+  createEffect(on(() => props.isRenderEmpty, (isEmpty, prev) => {
+    if (firstRun) {
+      firstRun = false;
+      return;
+    }
+
+    if (isEmpty === true) {
+      track(() => props.isRenderEmpty);
+      forgetPage('home', index);
+      setNotes(() => []);
+      return;
+    }
+  }));
+
+  const [notes, setNotes] = createSignal<{ event: NostrEventContent, reposters: string[]}[]>([]);
+
+
+  const getNotes = async () => {
     const page = props.page;
     const ids = page.mainEvents;
 
+    const storedEvents = await getEventsFromStore(ids, index);
+
     let events: { event: NostrEventContent, reposters: string[]}[] = [];
 
-    for (let i=0; i<ids.length; i++) {
-      const ev = eventStore[ids[i]];
+    for (let i=0; i<storedEvents.length; i++) {
+      const ev = storedEvents[i];
 
       if (!ev) continue;
 
@@ -66,18 +108,19 @@ const FeedPage: Component<{
       events.push({ event: ev, reposters: []});
     }
 
-    return events;
+    setNotes(() => events);
   };
 
   return (
     <div
       ref={pageHolder}
-      data-page-index={props.pageIndex}
+      data-page-index={index}
       class={styles.feedPage}
+      style={props.isRenderEmpty || notes().length === 0 ? `height: ${pageStore.home.pageInfo[index]?.height || 0}px;` : ''}
     >
+      <div>INDEX: {index}</div>
       <Show
         when={!props.isRenderEmpty}
-        fallback={<div style={`height: ${pageStore.home.pageInfo[props.pageIndex]?.height || 0}px;`}></div>}
       >
         <For each={notes()}>
           {(note) => (

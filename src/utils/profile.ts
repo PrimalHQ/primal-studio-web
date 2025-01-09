@@ -25,7 +25,8 @@ export const userName = (pubkey: string | undefined) => {
     return '';
   }
 
-  const userEvent = eventStore[pubkey];
+  // const userEvent = eventStore[pubkey];
+  const userEvent = eventStore.get(pubkey);
   const npub = hexToNpub(pubkey);
 
   if (!userEvent) return truncateNpub(npub);

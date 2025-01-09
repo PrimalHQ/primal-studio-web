@@ -3,7 +3,6 @@ import { Component, onCleanup, onMount } from 'solid-js';
 import styles from './App.module.scss';
 import { AccountProvider } from './context/AccountContext';
 import { AppProvider } from './context/AppContext';
-import { eventStore } from './stores/EventStore';
 import { PrimalWindow } from './primal';
 import AppRouter from './Router';
 import { connect, disconnect } from './utils/socket';
@@ -25,9 +24,7 @@ const App: Component = () => {
 
   const primalWindow = window as PrimalWindow;
 
-  const isDev = localStorage.getItem('devMode') === 'true';
-
-  primalWindow.eventStore = eventStore;
+  // primalWindow.eventStore = eventStore;
 
   return (
     <div class={styles.App}>

@@ -44,6 +44,32 @@ export const getMegaFeed = (
   ]));
 }
 
+export const getEvents = (
+  user_pubkey: string | undefined,
+  eventIds: string[],
+  subid: string,
+  extendResponse?: boolean,
+) => {
+
+  let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =
+    { event_ids: eventIds } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (extendResponse) {
+    payload.extended_response = extendResponse;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["events", payload]},
+  ]));
+
+};
+
 export const fetchMegaFeed = (
   pubkey: string | undefined,
   kind: number,
@@ -114,6 +140,30 @@ export const fetchMegaFeed = (
       }
 
       getMegaFeed(pubkey, specification, subId, until, limit, since, offset);
+
+    });
+};
+
+
+export const fetchEvents = (
+  pubkey: string | undefined,
+  eventIds: string[],
+  subId: string,
+) => {
+    return new Promise<NostrEventContent[]>((resolve) => {
+      let events: NostrEventContent[] = [];
+
+      const unsub = subsTo(subId, {
+        onEose: () => {
+          unsub();
+          resolve(events);
+        },
+        onEvent: (_, content) => {
+          events.push(content);
+        }
+      });
+
+      getEvents(pubkey, eventIds, subId, true);
 
     });
 };
