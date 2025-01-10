@@ -1,13 +1,11 @@
 import { Component, onMount } from 'solid-js';
-import { useAccountContext } from '../../context/AccountContext';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Explore.module.scss';
+import { accountStore } from '../../stores/AccountStore';
 
 const Explore: Component = () => {
-  const account = useAccountContext();
-
   onMount(() => {
     const h2 = document.querySelector('h2');
 
@@ -21,7 +19,7 @@ const Explore: Component = () => {
     <Wormhole to="header">Explore header</Wormhole>
     <Wormhole to="sidebar">Explore Sidebar</Wormhole>
     <h1>{translate('explore', 'title')}</h1>
-    <h2>{account?.pubkey}</h2>
+    <h2>{accountStore.pubkey}</h2>
 
     <Wormhole to="footer">Explore Footer</Wormhole>
     </>

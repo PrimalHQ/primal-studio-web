@@ -2,10 +2,9 @@ import { Component, lazy } from 'solid-js';
 import { Router, Route } from "@solidjs/router";
 
 import preloadHome from './pages/Home/Home.data';
-import { useAccountContext } from './context/AccountContext';
+import { accountStore } from './stores/AccountStore';
 
 const AppRouter: Component = () => {
-  const account = useAccountContext()
 
   const AppLayout = lazy(() => import('./pages/AppLayout/AppLayout'));
   const Home = lazy(() => import('./pages/Home/Home'));
@@ -21,7 +20,7 @@ const AppRouter: Component = () => {
   const Profile = lazy(() => import('./pages/Profile/Profile'));
   const NotFound = lazy(() => import('./pages/NotFound'));
 
-  const homePreload = () => preloadHome(account?.pubkey);
+  const homePreload = () => preloadHome(accountStore.pubkey);
 
   return (
     <Router root={AppLayout} preload={true}>

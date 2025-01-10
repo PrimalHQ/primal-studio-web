@@ -13,7 +13,8 @@ export type PageStore = {
     feedPages: FeedResult[],
     lastRange: FeedRange,
     isFetching: boolean,
-    pageInfo: Record<string,  PageInfo>
+    pageInfo: Record<string,  PageInfo>,
+    scrollTop: number,
   },
 }
 
@@ -23,6 +24,7 @@ export const emptyStore = () => ({
     lastRange: emptyFeedRange(),
     pageInfo: {},
     isFetching: false,
+    scrollTop: 0,
   }
 });
 

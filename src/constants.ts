@@ -88,3 +88,6 @@ export const profileRegex = /((nostr:)?(npub|nprofile)1\w+)\b/;
 export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
 export const noteRegex = /((nostr:)?(note|nevent)1\w+)\b/;
 export const noteRegexG = /((nostr:)?(note|nevent)1\w+)\b/g;
+
+export const pinEncodePrefix = 'prpec';
+export const pinEncodeIVSeparator = '?iv=';

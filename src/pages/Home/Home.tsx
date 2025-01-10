@@ -1,22 +1,35 @@
-import { Component, createSignal, For } from 'solid-js';
-import { useAccountContext } from '../../context/AccountContext';
+import { Component, createSignal, For, onMount } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 import { fetchHomeFeed } from './Home.data';
 
 import styles from './Home.module.scss';
 import Paginator from '../../components/Paginator/Paginator';
-import { pageStore } from '../../stores/PageStore';
+import { pageStore, updatePageStore } from '../../stores/PageStore';
 import FeedPage from '../../components/Event/FeedPage';
+import { accountStore } from '../../stores/AccountStore';
+import { useBeforeLeave } from '@solidjs/router';
 
 
 const Home: Component = () => {
-  const account = useAccountContext();
 
   const pages = () => pageStore.home.feedPages;
 
+  useBeforeLeave(() => {
+    const sTop = window.scrollY;
+
+    updatePageStore('home', 'scrollTop', () => sTop);
+  });
+
+  onMount(() => {
+    setTimeout(() => {
+      window.scrollTo({ top: pageStore.home.scrollTop });
+    }, 10)
+  });
+
   const loadNextPage = () => {
-    fetchHomeFeed(account?.pubkey || '', pageStore.home.lastRange);
+    if (pageStore.home.lastRange.since === 0) return;
+    fetchHomeFeed(accountStore.pubkey || '', pageStore.home.lastRange);
   };
 
   const shouldRenderEmpty = (index: number) => {
@@ -26,7 +39,7 @@ const Home: Component = () => {
   const [visiblePages, setVisiblePages] = createSignal<number[]>([]);
 
   let observer: IntersectionObserver | undefined;
-  let timeout = 0;
+  // let timeout = 0;
 
   observer = new IntersectionObserver(entries => {
     let i=0;
@@ -38,8 +51,8 @@ const Home: Component = () => {
       const id = parseInt(target.getAttribute('data-page-index') || '0');
 
       if (entry.isIntersecting) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
+        // clearTimeout(timeout);
+        // timeout = setTimeout(() => {
           const min = id < 3 ? 0 : id - 3;
           const max = id + 3;
 
@@ -50,7 +63,7 @@ const Home: Component = () => {
           }
 
           setVisiblePages(() => [...config]);
-        }, 500);
+        // }, 300);
       }
     }
   });
@@ -61,7 +74,7 @@ const Home: Component = () => {
       <Wormhole to="sidebar">Home Sidebar</Wormhole>
       <h1>{translate('home', 'title')}</h1>
 
-      <div class={styles.feed}>
+      <div class={styles.feed} style={`min-height: 300dvh;`}>
         <For each={pages()}>
           {(page, pageIndex) => (
             <FeedPage

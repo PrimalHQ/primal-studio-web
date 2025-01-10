@@ -95,3 +95,43 @@ export type UserMetadata = {
   tags: string[][],
   bot: boolean,
 };
+
+export type NostrRelayConfig = Record<string, { read: boolean, write: boolean }>;
+
+export type NostrRelayEvent = {
+  kind: number,
+  content: any,
+  created_at: number,
+  tags: string[][],
+};
+
+export type NostrRelaySignedEvent = NostrRelayEvent & {
+  id: string,
+  pubkey: string,
+  sig: string,
+};
+
+interface SendPaymentResponse {
+  preimage: string;
+}
+
+export type NostrExtension = {
+  getPublicKey: () => Promise<string>,
+  getRelays: () => Promise<NostrRelayConfig>,
+  signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
+  nip04: {
+    encrypt: (pubkey: string, message: string) => Promise<string>,
+    decrypt: (pubkey: string, message: string) => Promise<string>,
+  },
+};
+
+export type WebLnExtension = {
+  enable: () => Promise<void>,
+  sendPayment: (req: string) => Promise<SendPaymentResponse>;
+};
+
+export type NostrWindow = Window & typeof globalThis & {
+  nostr?: NostrExtension,
+  webln?: WebLnExtension,
+  walletStore: any,
+};

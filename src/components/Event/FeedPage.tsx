@@ -33,19 +33,12 @@ const FeedPage: Component<{
   const index = untrack(() => props.pageIndex)
   let pageHolder: HTMLDivElement | undefined;
 
-  createEffect(() => {
-    if (notes().length === 0) return;
-
-    const rect = pageHolder?.getBoundingClientRect() || { height: 0};
-    updatePageStore('home', 'pageInfo', `${index}`, () => ({ height: rect.height }));
-  });
-
   onMount(() => {
     if (!props.observer || !pageHolder) return;
 
     props.observer?.observe(pageHolder);
 
-    getNotes();
+    getEvents();
   });
 
   onCleanup(() => {
@@ -54,10 +47,21 @@ const FeedPage: Component<{
     props.observer?.unobserve(pageHolder);
   });
 
+  createEffect(() => {
+    // calculate page height
+    // used for "forgetting" a page while perserving it's size in the DOM
+    if (notes().length === 0) return;
+
+    const rect = pageHolder?.getBoundingClientRect() || { height: 0};
+    updatePageStore('home', 'pageInfo', `${index}`, () => ({ height: rect.height }));
+  });
+
   let firstRun = true;
 
   const track = createReaction(() => {
-    !props.isRenderEmpty && getNotes();
+    if (props.isRenderEmpty) return;
+
+    getEvents();
   });
 
   const forget = async () => {
@@ -78,10 +82,12 @@ const FeedPage: Component<{
     }
   }));
 
-  const [notes, setNotes] = createSignal<{ event: NostrEventContent, reposters: string[]}[]>([]);
+  const [notes, setNotes] = createSignal<{
+    event: NostrEventContent,
+    reposters: string[],
+  }[]>([]);
 
-
-  const getNotes = async () => {
+  const getEvents = async () => {
     const page = props.page;
     const ids = page.mainEvents;
 
@@ -122,7 +128,6 @@ const FeedPage: Component<{
       class={styles.feedPage}
       style={props.isRenderEmpty || notes().length === 0 ? `height: ${pageStore.home.pageInfo[index]?.height || 0}px;` : ''}
     >
-      <div>INDEX: {index}</div>
       <Show
         when={!props.isRenderEmpty}
       >

@@ -4,11 +4,18 @@ import {
   createEffect,
   JSXElement,
   onCleanup,
-  useContext
+  useContext,
 } from "solid-js";
+import {
+  isConnected,
+  readData,
+  refreshSocketListeners,
+  removeSocketListeners,
+  socket,
+} from "../utils/socket";
 import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
-import { isConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../utils/socket";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
+import { accountStore, fetchNostrKey, PRIMAL_PUBKEY } from "../stores/AccountStore";
 
 
 export type AppContextStore = {
@@ -49,6 +56,12 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
 // EFFECTS --------------------------------------
+
+  createEffect(() => {
+    if (accountStore.pubkey === PRIMAL_PUBKEY) {
+      fetchNostrKey();
+    }
+  })
 
   createEffect(() => {
     if (isConnected()) {

@@ -1,7 +1,6 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 
 import styles from './App.module.scss';
-import { AccountProvider } from './context/AccountContext';
 import { AppProvider } from './context/AppContext';
 import { PrimalWindow } from './primal';
 import AppRouter from './Router';
@@ -29,9 +28,7 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <AppProvider>
-        <AccountProvider>
-          <AppRouter />
-        </AccountProvider>
+        <AppRouter />
       </AppProvider>
     </div>
   );
