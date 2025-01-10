@@ -6,32 +6,6 @@ import { FeedRange, NostrEventContent } from "../../primal";
 import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 
-export const calculateNotesOffset = (notes: NostrEventContent[], paging: FeedRange) => {
-  let offset = 0;
-
-  for (let i=notes.length-1;i>=0;i--) {
-    const note = notes[i];
-
-    if (
-      paging.order_by === 'created_at' &&
-      note.created_at !== paging.since
-    ) break;
-
-    // if (
-    //   paging.order_by === 'satszapped' &&
-    //   note.satszapped !== paging.since
-    // ) break;
-
-    // if (
-    //   paging.order_by === 'score' &&
-    //   note.score !== paging.since
-    // ) break;
-
-    offset++;
-  }
-
-  return offset;
-}
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
   return paging.elements.reduce<string[]>(
@@ -41,8 +15,8 @@ export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
 }
 
 export const fetchHomeFeed = query(
-  async (pubkey: string, feedRange?: FeedRange) => {
-    const range = feedRange || emptyFeedRange();
+  async (pubkey: string, options?: { feedRange?: FeedRange, offset?: number }) => {
+    const range = options?.feedRange || emptyFeedRange();
 
     if (pageStore.home.isFetching) {
       const pages = pageStore.home.feedPages;
@@ -59,6 +33,7 @@ export const fetchHomeFeed = query(
     const page = {
       limit: FEED_LIMIT,
       until: range.since,
+      offset: options?.offset || 0,
     };
 
     updatePageStore('home', 'isFetching', () => true);

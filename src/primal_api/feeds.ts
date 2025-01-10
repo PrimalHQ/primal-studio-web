@@ -123,21 +123,7 @@ export const fetchMegaFeed = (
       const until = paging?.until || 0;
       const since = paging?.since || 0;
       const limit = paging?.limit || 0;
-
-      let offset = 0;
-
-      if (typeof paging?.offset === 'number') {
-        offset = paging.offset;
-      }
-      else if (Array.isArray(paging?.offset)) {
-        if (until > 0) {
-          offset = (paging?.offset || []).filter(v => v === until).length;
-        }
-
-        if (since > 0) {
-          offset = (paging?.offset || []).filter(v => v === since).length;
-        }
-      }
+      const offset = paging?.offset || 0;
 
       getMegaFeed(pubkey, specification, subId, until, limit, since, offset);
 

@@ -54,7 +54,7 @@ export type FeedPaging = {
   limit?: number,
   until?: number,
   since?: number,
-  offset?: number | number[],
+  offset?: number,
 }
 
 export type FeedRange = {

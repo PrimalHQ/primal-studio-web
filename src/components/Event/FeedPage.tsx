@@ -36,9 +36,11 @@ const FeedPage: Component<{
   onMount(() => {
     if (!props.observer || !pageHolder) return;
 
-    props.observer?.observe(pageHolder);
+    setTimeout(() => {
+      props.observer?.observe(pageHolder);
 
-    getEvents();
+      getEvents();
+    }, 1);
   });
 
   onCleanup(() => {
@@ -50,13 +52,11 @@ const FeedPage: Component<{
   createEffect(() => {
     // calculate page height
     // used for "forgetting" a page while perserving it's size in the DOM
-    if (notes().length === 0) return;
+    if (events().length === 0) return;
 
     const rect = pageHolder?.getBoundingClientRect() || { height: 0};
     updatePageStore('home', 'pageInfo', `${index}`, () => ({ height: rect.height }));
   });
-
-  let firstRun = true;
 
   const track = createReaction(() => {
     if (props.isRenderEmpty) return;
@@ -65,24 +65,21 @@ const FeedPage: Component<{
   });
 
   const forget = async () => {
+    setEvents(() => []);
     await forgetPage('home', index);
     track(() => props.isRenderEmpty);
-    setNotes(() => []);
   };
 
-  createEffect(on(() => props.isRenderEmpty, (isEmpty, prev) => {
-    if (firstRun) {
-      firstRun = false;
-      return;
-    }
-
+  createEffect(on(() => props.isRenderEmpty, (isEmpty) => {
     if (isEmpty === true) {
       forget();
       return;
     }
+
+    getEvents();
   }));
 
-  const [notes, setNotes] = createSignal<{
+  const [events, setEvents] = createSignal<{
     event: NostrEventContent,
     reposters: string[],
   }[]>([]);
@@ -118,7 +115,7 @@ const FeedPage: Component<{
       events.push({ event: ev, reposters: []});
     }
 
-    setNotes(() => events);
+    setEvents(() => events);
   };
 
   return (
@@ -126,16 +123,16 @@ const FeedPage: Component<{
       ref={pageHolder}
       data-page-index={index}
       class={styles.feedPage}
-      style={props.isRenderEmpty || notes().length === 0 ? `height: ${pageStore.home.pageInfo[index]?.height || 0}px;` : ''}
+      style={props.isRenderEmpty || events().length === 0 ? `height: ${pageStore.home.pageInfo[index]?.height || 0}px;` : ''}
     >
       <Show
         when={!props.isRenderEmpty}
       >
-        <For each={notes()}>
-          {(note) => (
+        <For each={events()}>
+          {(e) => (
             <Event
-              event={note.event}
-              reposters={note.reposters}
+              event={e.event}
+              reposters={e.reposters}
               variant='feed'
             />
           )}

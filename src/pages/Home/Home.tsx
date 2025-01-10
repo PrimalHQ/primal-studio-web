@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount } from 'solid-js';
+import { Component, createSignal, For, onCleanup, onMount } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 import { fetchHomeFeed } from './Home.data';
@@ -9,6 +9,7 @@ import { pageStore, updatePageStore } from '../../stores/PageStore';
 import FeedPage from '../../components/Event/FeedPage';
 import { accountStore } from '../../stores/AccountStore';
 import { useBeforeLeave } from '@solidjs/router';
+import { calculateOffset } from '../../stores/EventStore';
 
 
 const Home: Component = () => {
@@ -27,9 +28,18 @@ const Home: Component = () => {
     }, 10)
   });
 
+  onCleanup(() => {
+    observer?.disconnect();
+  });
+
   const loadNextPage = () => {
     if (pageStore.home.lastRange.since === 0) return;
-    fetchHomeFeed(accountStore.pubkey || '', pageStore.home.lastRange);
+
+    const pageNotes = pageStore.home.feedPages.at(-1)?.mainEvents || [];
+    const feedRange = pageStore.home.lastRange;
+    const offset = calculateOffset(pageNotes, feedRange);
+
+    fetchHomeFeed(accountStore.pubkey || '', { feedRange, offset });
   };
 
   const shouldRenderEmpty = (index: number) => {
@@ -40,6 +50,7 @@ const Home: Component = () => {
 
   let observer: IntersectionObserver | undefined;
   // let timeout = 0;
+
 
   observer = new IntersectionObserver(entries => {
     let i=0;

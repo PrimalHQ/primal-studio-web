@@ -1,5 +1,5 @@
 import { Kind } from "../constants";
-import { NostrEventContent } from "../primal";
+import { FeedRange, NostrEventContent } from "../primal";
 import { ReactiveMap } from '@solid-primitives/map';
 import { fetchEvents } from "../primal_api/feeds";
 import { accountStore } from "./AccountStore";
@@ -14,6 +14,7 @@ export const eventStore = new ReactiveMap<string, NostrEventContent>();
 
 export const addEventToStore = (event: NostrEventContent) => {
   let ev = { ...event };
+
   let key = ev.id;
 
   if (ev.kind === Kind.Metadata) {
@@ -95,7 +96,36 @@ export const getEventFromStore = async (id: string) => {
 
 };
 
-export const getEventsFromStore = async (ids: string[], i:number) => {
+export const calculateOffset = (ids: string[], range: FeedRange) => {
+  let offset = 0;
+
+  const { foundEvents } = getRecentEventsFromStore(ids);
+
+  for (let i=foundEvents.length-1;i>=0;i--) {
+    const note = foundEvents[i];
+
+    if (
+      range.order_by === 'created_at' &&
+      note.created_at !== range.since
+    ) break;
+
+    // if (
+    //   paging.order_by === 'satszapped' &&
+    //   note.satszapped !== paging.since
+    // ) break;
+
+    // if (
+    //   paging.order_by === 'score' &&
+    //   note.score !== paging.since
+    // ) break;
+
+    offset++;
+  }
+
+  return offset;
+};
+
+export const getRecentEventsFromStore = (ids: string[]) => {
   let missingEvents: string[] = [];
   let foundEvents: NostrEventContent[] = [];
 
@@ -113,6 +143,29 @@ export const getEventsFromStore = async (ids: string[], i:number) => {
     foundEvents.push(event);
   }
 
+  return { foundEvents, missingEvents };
+}
+
+export const getEventsFromStore = async (ids: string[], index:number) => {
+
+  let { foundEvents, missingEvents } = getRecentEventsFromStore(ids);
+
+  // let missingEvents: string[] = [];
+  // let foundEvents: NostrEventContent[] = [];
+
+  // for(let i=0; i<ids.length; i++) {
+  //   const id = ids[i];
+
+  //   // let event = eventStore[id];
+  //   let event = eventStore.get(id);
+
+  //   if (!event) {
+  //     missingEvents.push(id);
+  //     continue;
+  //   }
+
+  //   foundEvents.push(event);
+  // }
 
   if (missingEvents.length > 0) {
     //TODO: Read from indexdb
@@ -153,7 +206,7 @@ export const getEventsFromStore = async (ids: string[], i:number) => {
     const fetchedEvents = await fetchEvents(
       accountStore.pubkey,
       missingEvents,
-      `missing_${i}_${APP_ID}`,
+      `missing_${index}_${APP_ID}`,
     )
 
     addEventsToStore(fetchedEvents);

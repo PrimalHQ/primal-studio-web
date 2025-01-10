@@ -4,9 +4,12 @@ import {
   createEffect,
   JSXElement,
   onCleanup,
+  onMount,
   useContext,
 } from "solid-js";
 import {
+  connect,
+  disconnect,
   isConnected,
   readData,
   refreshSocketListeners,
@@ -16,6 +19,9 @@ import {
 import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
 import { accountStore, fetchNostrKey, PRIMAL_PUBKEY } from "../stores/AccountStore";
+import { appStore, updateAppStore } from "../stores/AppStore";
+import { logInfo } from "../utils/logger";
+import { MINUTE } from "../constants";
 
 
 export type AppContextStore = {
@@ -30,6 +36,75 @@ const initialData = {
 export const AppContext = createContext<AppContextStore>();
 
 export const AppProvider = (props: { children: JSXElement }) => {
+
+  //  Monitor user's inactivity ------------------------------------------------
+
+  let inactivityCounter = 0;
+
+  const monitorActivity = () => {
+    clearTimeout(inactivityCounter);
+
+    if (appStore.isInactive) {
+      updateAppStore('isInactive', () => false);
+    }
+
+    inactivityCounter = setTimeout(() => {
+      updateAppStore('isInactive', () => true);
+    }, 5 * MINUTE);
+  };
+
+  onMount(() => {
+    document.addEventListener('mousemove', monitorActivity);
+    document.addEventListener('scroll', monitorActivity);
+    document.addEventListener('keydown', monitorActivity);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener('mousemove', monitorActivity);
+    document.removeEventListener('scroll', monitorActivity);
+    document.removeEventListener('keydown', monitorActivity);
+  });
+
+  let wakingTimeout = 0;
+
+  createEffect(() => {
+    if (appStore.isInactive) {
+      updateAppStore('appState', () => 'sleep');
+      clearTimeout(wakingTimeout);
+      return;
+    }
+    // Set this state in order to make sure that we reload page
+    // when user requests future notes because we didn't fetch them yet
+    updateAppStore('appState', () => 'waking');
+
+    // Give time for future notes fetching to fire before changing state
+    wakingTimeout = setTimeout(() => {
+      updateAppStore('appState', () => 'woke');
+    }, 36_000);
+  });
+
+  // Handle main socket connect/disconnect based on user's activity ------------
+
+  createEffect(() => {
+    if (appStore.appState === 'sleep') {
+      logInfo(
+        'Disconnected from Primal socket due to inactivity at: ',
+        (new Date()).toLocaleTimeString(),
+      );
+      disconnect(false);
+      return;
+    }
+
+    if (appStore.appState === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
+      logInfo(
+        'Reconnected to Primal socket at: ',
+        (new Date()).toLocaleTimeString(),
+      );
+      connect();
+    }
+  })
+
+  // Event handling ------------------------------------------------------------
 
   const onMessage = async (event: MessageEvent) => {
     const data = await readData(event);
@@ -46,6 +121,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }
   };
 
+  // Handle fetching users identity --------------------------------------------
+
+  createEffect(() => {
+    if (accountStore.pubkey === PRIMAL_PUBKEY) {
+      fetchNostrKey();
+    }
+  })
+
+  // Handle main socket reconnection -------------------------------------------
+
   const onSocketClose = (closeEvent: CloseEvent) => {
     const webSocket = closeEvent.target as WebSocket;
 
@@ -55,14 +140,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
     );
   };
 
-// EFFECTS --------------------------------------
-
-  createEffect(() => {
-    if (accountStore.pubkey === PRIMAL_PUBKEY) {
-      fetchNostrKey();
-    }
-  })
-
   createEffect(() => {
     if (isConnected()) {
       refreshSocketListeners(
@@ -70,13 +147,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
         { message: onMessage, close: onSocketClose },
       );
     }
-  });
-
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
   });
 
 // STORES ---------------------------------------

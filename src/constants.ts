@@ -91,3 +91,6 @@ export const noteRegexG = /((nostr:)?(note|nevent)1\w+)\b/g;
 
 export const pinEncodePrefix = 'prpec';
 export const pinEncodeIVSeparator = '?iv=';
+
+export const MINUTE = 60_000;
+export const SECOND = 1_000;
