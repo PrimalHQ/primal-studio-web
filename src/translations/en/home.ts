@@ -1,1 +1,4 @@
-export const title = 'Home Page';
+export default {
+  title: 'Home Page',
+  header: 'Home'
+}

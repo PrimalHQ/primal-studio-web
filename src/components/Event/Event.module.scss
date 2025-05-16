@@ -1,8 +1,8 @@
 .event {
   overflow: hidden;
-  width: 100%;
+  // width: 100%;
   // border: 1px solid blue;
-  padding: 2px;
+  padding: 12px;
 
   text-decoration: none;
   color: var(--text-primary);
@@ -11,7 +11,8 @@
   flex-direction: column;
 
   &.embedded {
-    // border: 4px solid darkslategrey;
+    padding: 12px;
+    border: 1px solid darkslategrey;
   }
 }
 
@@ -21,8 +22,9 @@
 }
 
 .note {
-  width: 100%;
+  // width: 100%;
   word-break: break-all;
+  padding: 12px;
 }
 
 .feedPage {

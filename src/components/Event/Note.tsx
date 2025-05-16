@@ -72,7 +72,6 @@ const Note: Component<{
             break;
         }
       } catch (e) {
-
       }
 
       // const n = eventStore[id];

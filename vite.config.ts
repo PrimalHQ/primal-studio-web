@@ -19,4 +19,11 @@ export default defineConfig({
   esbuild: {
     keepNames: true,
   },
+  resolve: {
+    alias: {
+      src: "/src",
+      components: "/src/components",
+      assets: "/src/assets",
+    },
+  },
 });

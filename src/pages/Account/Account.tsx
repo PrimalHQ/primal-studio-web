@@ -2,21 +2,20 @@ import { Component } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
-import styles from './Home.module.scss';
+import styles from './Account.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 
-
-const Home: Component = () => {
+const Account: Component = () => {
 
   return (
     <>
       <Wormhole to="header">
-        <HeaderTitle title={translate('home', 'header')}/>
+        <HeaderTitle title={translate('account', 'header')}/>
       </Wormhole>
 
-      <h1>{translate('home', 'title')}</h1>
+      <h1>{translate('account', 'title')}</h1>
     </>
   );
 }
 
-export default Home;
+export default Account;

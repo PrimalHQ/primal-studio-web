@@ -84,10 +84,10 @@ export enum Kind  {
 
 export const FEED_LIMIT = 20;
 
-export const profileRegex = /((nostr:)?(npub|nprofile)1\w+)\b/;
-export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
-export const noteRegex = /((nostr:)?(note|nevent)1\w+)\b/;
-export const noteRegexG = /((nostr:)?(note|nevent)1\w+)\b/g;
+export const profileRegex = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegexG = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const noteRegex = /((nostr:)?(note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const noteRegexG = /((nostr:)?(note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
 
 export const pinEncodePrefix = 'prpec';
 export const pinEncodeIVSeparator = '?iv=';

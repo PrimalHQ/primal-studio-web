@@ -1,7 +1,10 @@
 import { A, RouteSectionProps, } from '@solidjs/router';
 import { Component } from 'solid-js';
 
+import primalBranding from 'assets/images/branding.svg';
+
 import styles from './AppLayout.module.scss';
+import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -9,19 +12,70 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
     <div class={styles.layout}>
       <aside class={styles.left}>
         <div class={styles.fixed}>
-          <section id="branding" class={styles.branding}>Logo</section>
+          <section id="branding" class={styles.branding}>
+            <img src={primalBranding} />
+          </section>
 
           <nav>
-            <A href="/">Home</A>
-            <A href="/reads">Reads</A>
-            <A href="/explore">Explore</A>
-            <A href="/messages">Messages</A>
-            <A href="/bookmarks">Bookmarks</A>
-            <A href="/notifications">Notifications</A>
-            <A href="/downloads">Downloads</A>
-            <A href="/premium">Premium</A>
-            <A href="/settings">Settings</A>
+            <A
+              class={styles.navItem}
+              href="/"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.homeIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Home</div>
+            </A>
+            <A
+              class={styles.navItem}
+              href="/notes"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.notesIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Notes</div>
+            </A>
+            <A
+              class={styles.navItem}
+              href="/articles"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.articlesIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Articles</div>
+              </A>
+            <A
+              class={styles.navItem}
+              href="/media"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.mediaIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Media Files</div>
+            </A>
+            <A
+              class={styles.navItem}
+              href="/account"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.accountIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Account</div>
+            </A>
+            <A
+              class={styles.navItem}
+              href="/settings"
+              activeClass={styles.active}
+              end
+            >
+              <div class={`${styles.settingsIcon} ${styles.icon}`}></div>
+              <div class={styles.label}>Settings</div>
+            </A>
           </nav>
+
+          <footer>
+            <ProfileWidget />
+          </footer>
         </div>
       </aside>
 
@@ -34,14 +88,6 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
 
         <footer id="footer"></footer>
       </main>
-
-      <aside class={styles.right}>
-        <div class={styles.fixed}>
-          <section id="search" class={styles.search}>Search</section>
-
-          <section id="sidebar" class={styles.sidebar}></section>
-        </div>
-      </aside>
     </div>
   );
 }

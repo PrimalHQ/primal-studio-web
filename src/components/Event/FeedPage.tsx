@@ -13,6 +13,7 @@ import {
 
 import {
   forgetPage,
+  PageStore,
   pageStore,
   updatePageStore,
 } from '../../stores/PageStore';
@@ -29,6 +30,7 @@ const FeedPage: Component<{
   pageIndex: number,
   isRenderEmpty?: boolean,
   observer?: IntersectionObserver,
+  key: keyof PageStore,
 }> = (props) => {
   const index = untrack(() => props.pageIndex)
   let pageHolder: HTMLDivElement | undefined;
@@ -55,7 +57,7 @@ const FeedPage: Component<{
     if (events().length === 0) return;
 
     const rect = pageHolder?.getBoundingClientRect() || { height: 0};
-    updatePageStore('home', 'pageInfo', `${index}`, () => ({ height: rect.height }));
+    updatePageStore(props.key, 'pageInfo', `${index}`, () => ({ height: rect.height }));
   });
 
   const track = createReaction(() => {
@@ -66,7 +68,7 @@ const FeedPage: Component<{
 
   const forget = async () => {
     setEvents(() => []);
-    await forgetPage('home', index);
+    await forgetPage(props.key, index);
     track(() => props.isRenderEmpty);
   };
 
@@ -123,7 +125,7 @@ const FeedPage: Component<{
       ref={pageHolder}
       data-page-index={index}
       class={styles.feedPage}
-      style={props.isRenderEmpty || events().length === 0 ? `height: ${pageStore.home.pageInfo[index]?.height || 0}px;` : ''}
+      style={props.isRenderEmpty || events().length === 0 ? `height: ${pageStore[props.key]?.pageInfo[index]?.height || 0}px;` : ''}
     >
       <Show
         when={!props.isRenderEmpty}

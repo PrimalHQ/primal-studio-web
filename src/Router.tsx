@@ -1,38 +1,31 @@
 import { Component, lazy } from 'solid-js';
 import { Router, Route } from "@solidjs/router";
 
-import preloadHome from './pages/Home/Home.data';
 import { accountStore } from './stores/AccountStore';
+import preloadNotes from './pages/Notes/Notes.data';
 
 const AppRouter: Component = () => {
 
   const AppLayout = lazy(() => import('./pages/AppLayout/AppLayout'));
   const Home = lazy(() => import('./pages/Home/Home'));
-  const Reads = lazy(() => import('./pages/Reads/Reads'));
-  const Explore = lazy(() => import('./pages/Explore/Explore'));
-  const Messages = lazy(() => import('./pages/Messages/Messages'));
-  const Bookmarks = lazy(() => import('./pages/Bookmarks/Bookmarks'));
-  const Notifications = lazy(() => import('./pages/Notifications/Notifications'));
-  const Downloads = lazy(() => import('./pages/Downloads/Downloads'));
-  const Premium = lazy(() => import('./pages/Premium/Premium'));
+  const Notes = lazy(() => import('./pages/Notes/Notes'));
+  const Articles = lazy(() => import('./pages/Articles/Articles'));
+  const Media = lazy(() => import('./pages/Media/Media'));
+  const Account = lazy(() => import('./pages/Account/Account'));
   const Settings = lazy(() => import('./pages/Settings/Settings'));
   const Thread = lazy(() => import('./pages/Thread/Thread'));
   const Profile = lazy(() => import('./pages/Profile/Profile'));
   const NotFound = lazy(() => import('./pages/NotFound'));
 
-  const homePreload = () => preloadHome(accountStore.pubkey);
+  const notesPreload = () => preloadNotes(accountStore.pubkey);
 
   return (
     <Router root={AppLayout} preload={true}>
-      <Route path="/" component={Home} preload={homePreload} />
-      <Route path="/home" component={Home} preload={homePreload}/>
-      <Route path="/reads" component={Reads} />
-      <Route path="/explore" component={Explore} />
-      <Route path="/messages" component={Messages} />
-      <Route path="/bookmarks" component={Bookmarks} />
-      <Route path="/notifications" component={Notifications} />
-      <Route path="/downloads" component={Downloads} />
-      <Route path="/premium" component={Premium} />
+      <Route path="/" component={Home} />
+      <Route path="/notes" component={Notes} preload={notesPreload}/>
+      <Route path="/articles" component={Articles} />
+      <Route path="/media" component={Media} />
+      <Route path="/account" component={Account} />
       <Route path="/settings" component={Settings} />
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />

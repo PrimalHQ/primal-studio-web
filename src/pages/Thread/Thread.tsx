@@ -10,13 +10,10 @@ const Thread: Component = () => {
 
   return (
     <>
-    <Wormhole to="header">Thread header</Wormhole>
-    <Wormhole to="sidebar">Thread Sidebar</Wormhole>
-    <h1>{translate('thread', 'title')}</h1>
+      <Wormhole to="header">{translate('thread', 'header')}</Wormhole>
+      <h1>{translate('thread', 'title')}</h1>
 
-    <div>{params.note_id}</div>
-
-    <Wormhole to="footer">Thread Footer</Wormhole>
+      <div>{params.note_id}</div>
     </>
   );
 }

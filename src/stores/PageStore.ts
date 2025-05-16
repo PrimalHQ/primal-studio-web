@@ -9,7 +9,7 @@ export type PageInfo = {
 }
 
 export type PageStore = {
-  home: {
+  notes: {
     feedPages: FeedResult[],
     lastRange: FeedRange,
     isFetching: boolean,
@@ -19,7 +19,7 @@ export type PageStore = {
 }
 
 export const emptyStore = () => ({
-  home: {
+  notes: {
     feedPages: [],
     lastRange: emptyFeedRange(),
     pageInfo: {},

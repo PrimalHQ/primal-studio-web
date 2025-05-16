@@ -11,13 +11,10 @@ const Profile: Component = () => {
 
   return (
     <>
-    <Wormhole to="header">Profile header</Wormhole>
-    <Wormhole to="sidebar">Profile Sidebar</Wormhole>
-    <h1>{translate('profile', 'title')}</h1>
+      <Wormhole to="header">{translate('profile', 'header')}</Wormhole>
+      <h1>{translate('profile', 'title')}</h1>
 
-    <div>{userName(params.id)}</div>
-
-    <Wormhole to="footer">Profile Footer</Wormhole>
+      <div>{userName(params.id)}</div>
     </>
   );
 }

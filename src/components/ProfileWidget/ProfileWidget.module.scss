@@ -1,0 +1,95 @@
+.userProfile {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 148px;
+  height: 48px;
+  border-radius: 24px;
+  text-decoration: none;
+  padding-inline: 6px;
+  background-color: var(--background-header-input);
+  border: none;
+
+  &:hover {
+    background-color: var(--background-input);
+  }
+
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-left: 6px;
+}
+
+.userName {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--active-reply);
+  width: 80px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.userVerification {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  width: 82px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.contextMenu {
+  display: flex;
+  align-items: center;
+}
+
+.contextIcon {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  vertical-align: middle;
+
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}
+
+@media only screen and (max-width: 1300px) {
+  .userProfile {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    grid-template-columns: 40px;
+    grid-column-gap: 0px;
+    margin: 0;
+    padding-inline: 2px;
+
+    .background {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .contextMenu {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .userProfile {
+    display: none;
+  }
+}

@@ -259,3 +259,23 @@ export const subsTo = (
     socket()?.removeEventListener('message', listener);
   };
 };
+
+
+export const handleSubscription = (
+  subId: string,
+  fetcher: () => void,
+  onEventHandler?: (content: NostrEventContent) => void,
+  onEoseHandler?: () => void,
+) => {
+  const unsub = subsTo(subId, {
+    onEvent: (_, content) => {
+      onEventHandler && onEventHandler(content);
+    },
+    onEose: () => {
+      onEoseHandler && onEoseHandler();
+      unsub();
+    },
+  });
+
+  fetcher();
+}

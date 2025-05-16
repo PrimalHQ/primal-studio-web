@@ -135,3 +135,57 @@ export type NostrWindow = Window & typeof globalThis & {
   webln?: WebLnExtension,
   walletStore: any,
 };
+
+export type UserStats = {
+  pubkey: string,
+  follows_count: number,
+  followers_count: number,
+  note_count: number,
+  reply_count: number,
+  time_joined: number,
+  total_zap_count: number,
+  total_satszapped: number,
+  relay_count: number,
+  media_count: number,
+  long_form_note_count?: number,
+  followers_increase?: {
+    increase: number,
+    ratio: number,
+    count: number,
+  },
+};
+
+export type PrimalUser = {
+  id: string,
+  pubkey: string,
+  npub: string,
+  name: string,
+  about: string,
+  picture: string,
+  nip05: string,
+  banner: string,
+  displayName: string,
+  location: string,
+  lud06: string,
+  lud16: string,
+  website: string,
+  tags: string[][],
+  userStats?: UserStats,
+  event: NostrEventContent,
+};
+
+export type UserMetadataContent = {
+  name?: string,
+  about?: string,
+  picture?: string,
+  displayName?: string,
+  display_name?: string,
+  website?: string,
+  lud06?: string,
+  lud16?: string,
+  nip05?: string,
+  banner?: string
+  bot?: string,
+  birthday?: string,
+  location?: string,
+}

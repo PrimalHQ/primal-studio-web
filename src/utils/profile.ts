@@ -1,6 +1,8 @@
 import { nip19 } from "nostr-tools";
 import { eventStore } from "../stores/EventStore";
-import { UserMetadata } from "../primal";
+import { NostrEventContent, PrimalUser, UserMetadata, UserMetadataContent } from "../primal";
+import { logError } from "./logger";
+import { Kind } from "src/constants";
 
 export const hexToNpub = (hex: string | undefined): string =>  {
 
@@ -40,3 +42,41 @@ export const userName = (pubkey: string | undefined) => {
 
   return name || truncateNpub(npub);
 };
+
+export const parseUserMetadata = (metadata: NostrEventContent) => {
+  if (metadata.kind !== Kind.Metadata) return;
+
+  let userMeta: UserMetadataContent = {};
+
+  try {
+    userMeta = JSON.parse(metadata.content || '{}');
+  } catch (e) {
+    logError('Error in user meta JSON: ', e);
+  }
+
+  return {
+    id: metadata.id,
+    pubkey: metadata.pubkey,
+    tags: metadata.tags,
+    npub: hexToNpub(metadata.pubkey),
+    name: (userMeta.name || ''),
+    about: (userMeta.about || ''),
+    picture: (userMeta.picture || ''),
+    nip05: (userMeta.nip05 || ''),
+    banner: (userMeta.banner || ''),
+    displayName: (userMeta.display_name || userMeta.displayName || ''),
+    location: (userMeta.location || ''),
+    lud06: (userMeta.lud06 || ''),
+    lud16: (userMeta.lud16 || ''),
+    website: (userMeta.website || ''),
+    event: { ...metadata },
+  } as PrimalUser;
+}
+
+export const trimVerification = (address: string | undefined) => {
+  if (address === undefined) {
+    return '';
+  }
+
+  return address.split('@');
+}

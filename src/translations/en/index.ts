@@ -1,24 +1,22 @@
-import * as home from './home';
-import * as reads from './reads';
-import * as explore from './explore';
-import * as messages from './messages';
-import * as bookmarks from './bookmarks';
-import * as notifications from './notifications';
-import * as downloads from './downloads';
-import * as premium from './premium';
-import * as settings from './settings';
-import * as notFound from './notFound';
+import home from './home';
+import notes from './notes';
+import articles from './articles';
+import media from './media';
+import account from './account';
+import settings from './settings';
+import profile from './profile';
+import thread from './thread';
+import notFound from './notFound';
 
 
 export default {
   home: home as Record<string, string>,
-  reads: reads as Record<string, string>,
-  explore: explore as Record<string, string>,
-  messages: messages as Record<string, string>,
-  bookmarks: bookmarks as Record<string, string>,
-  notifications: notifications as Record<string, string>,
-  downloads: downloads as Record<string, string>,
-  premium: premium as Record<string, string>,
+  notes: notes as Record<string, string>,
+  articles: articles as Record<string, string>,
+  media: media as Record<string, string>,
+  account: account as Record<string, string>,
   settings: settings as Record<string, string>,
+  profile: profile as Record<string, string>,
+  thread: thread as Record<string, string>,
   notFound: notFound as Record<string, string>,
 }

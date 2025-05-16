@@ -1,1 +1,4 @@
-export const title = 'Settings Page';
+export default {
+  title: 'Settings Page',
+  header: 'Settings'
+}
