@@ -79,8 +79,6 @@ export const connect = () => {
       localStorage.getItem('cacheServer') ||
       import.meta.env.PRIMAL_CACHE_URL;
 
-    logInfo('CACHE SERVER: ', import.meta.env);
-
     let s = new WebSocket(cacheServer);
     s.binaryType = 'arraybuffer';
     setSocket(s);
