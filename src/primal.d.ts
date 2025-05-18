@@ -189,3 +189,5 @@ export type UserMetadataContent = {
   birthday?: string,
   location?: string,
 }
+
+export type PrimalTheme = 'sunrise' | 'sunset' | 'midnight' | 'ice';

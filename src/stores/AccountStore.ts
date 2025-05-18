@@ -1,7 +1,7 @@
 import { createStore } from "solid-js/store";
 import { NostrEventContent, NostrWindow } from "../primal";
 import { logError, logInfo } from "../utils/logger";
-import { readSecFromStorage, readStoredProfile } from "../utils/localStore";
+import { readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storePubkey } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
@@ -58,8 +58,15 @@ const setSec = (sec: string | undefined, force?: boolean) => {
   }
 }
 
-export const fetchNostrKey = async () => {
+export const loadStoredPubkey = () => {
+  const pubkey = readPubkeyFromStorage();
 
+  if (!pubkey) return;
+
+  updateAccountStore('pubkey', () => pubkey);
+};
+
+export const fetchNostrKey = async () => {
   const storedKey = localStorage.getItem('pubkey');
 
   if (storedKey) {
@@ -111,7 +118,7 @@ export const fetchNostrKey = async () => {
     const key = await getNostrPublicKey();
 
     updateAccountStore('pubkey', () => key);
-    localStorage.setItem('pubkey', key);
+    storePubkey(key);
 
     // Read profile from storage
     const storedUser = readStoredProfile(key);

@@ -24,6 +24,89 @@
   @include palette.ice_wave;
 }
 
+:root {
+  --missing-avatar-text: #FFFFFF;
+
+  --z-index-lifted: 10;
+  --z-index-header: 20;
+  --z-index-floater: 30;
+  --z-index-floater-2: 32;
+  --z-index-overlay: 40;
+
+  --border-radius-small: 8px;
+  --border-radius-big: 12px;
+  --border-radius-large: 16px;
+
+  --central-content-width: 640px;
+
+  --sidebar-section-icon-gradient: linear-gradient(175.11deg, #FA9A43 6.94%, #FA4343 29.79%, #5B12A4 97.76%), linear-gradient(170.29deg, #CCCCCC 12.73%, #808080 94.98%), #D9D9D9;
+
+  --light-input: #E5E5E5;
+  --light-back: #F5F5F5;
+  --dark-input: #222222;
+  --dark-back: #000000;
+
+  --warning-color: #FA3C3C;
+  --warning-color-2: #FF5834;
+  --success-color: #66E205;
+  --success-color-2: #2CA85E;
+  --success-color-3: #0E8A40;
+
+  --premium-orange: #FA3C3C;
+
+  --media-stats-image: #BC1870;
+  --media-stats-video: #0090F8;
+  --media-stats-other: #FF9F2F;
+
+  --left-col-w: 184px;
+  --center-col-w: 640px;
+  --right-col-w: 348px;
+  --full-site-w: 1174px;
+  --header-height: 72px;
+
+  --search-input-width: 300px;
+
+  --profile-animation-duration: 350ms;
+  --profile-banner-animation-delay: 0ms;
+  --profile-card-animation-delay: 150ms;
+  --profile-avatar-animation-delay: 350ms;
+
+  --legend-gold: linear-gradient(180deg, #FFB700 0%, #FFB700 49%, #CB721E 50%, #FFB700 100%);
+  --legend-aqua: linear-gradient(180deg, #6BCCFF 0%, #6BCCFF 49%, #247FFF 50%, #6BCCFF 100%);
+  --legend-silver: linear-gradient(180deg, #CCC 0%, #CCC 49%, #777 50%, #CCC 100%);
+  --legend-purple: linear-gradient(135deg, #C803EC 15.94%, #5613FF 85.31%);
+  --legend-purplehaze: linear-gradient(135deg, #FB00C4 0%, #04F7FC 100%);
+  --legend-teal: linear-gradient(160deg, #40FCFF 20%, #007D9F 75%);
+  --legend-brown: linear-gradient(160deg, #BB9971 20%, #5C3B22 75%);
+  --legend-blue: linear-gradient(160deg, #01E0FF 4.5%, #0190F8 35%, #2555EE 75%);
+  --legend-sunfire: linear-gradient(135deg, #FFA722 4.5%, #FA3C3C 35%, #F00492 75%);
+
+  --legend-glow-gold: #FFB700;
+  --legend-glow-aqua: #6BCCFF;
+  --legend-glow-silver: #CCC;
+  --legend-glow-purple: #B300D3;
+  --legend-glow-purplehaze: #8279DF;
+  --legend-glow-teal: #40FCFF;
+  --legend-glow-brown: #BB9971;
+  --legend-glow-blue: #01E0FF;
+  --legend-glow-sunfire: #FFA722;
+
+  background-color: var(--background-site);
+
+  * {
+    ::-moz-selection {
+      color: var(--background-site);
+      background: var(--text-primary);
+    }
+
+    ::selection {
+      color: var(--background-site);
+      background: var(--text-primary);
+    }
+  }
+
+}
+
 /* Automatically enabled if user has Dark mode enabled */
 @media only screen and (prefers-color-scheme: dark) {
   :root {

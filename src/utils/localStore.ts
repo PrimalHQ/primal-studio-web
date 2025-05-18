@@ -1,14 +1,20 @@
 import { Kind } from "src/constants";
-import { NostrEventContent, UserMetadataContent } from "src/primal";
+import { NostrEventContent, PrimalTheme, UserMetadataContent } from "src/primal";
 
 
 export type LocalStore = {
   metadata: NostrEventContent | undefined,
+  theme: PrimalTheme | undefined,
+  chooserTheme: PrimalTheme | undefined,
+  useSystemDarkMode: boolean,
 };
 
 
 export const emptyStorage: LocalStore = {
   metadata: undefined,
+  theme: undefined,
+  chooserTheme: undefined,
+  useSystemDarkMode: false,
 }
 
 
@@ -59,6 +65,20 @@ export const storeSec = (sec: string | undefined) => {
   localStorage.setItem('primalSec', sec);
 };
 
+
+export const readPubkeyFromStorage = () => {
+  return localStorage.getItem('pubkey') || undefined;
+};
+
+export const storePubkey = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    localStorage.removeItem('pubkey');
+    return;
+  }
+
+  localStorage.setItem('pubkey', pubkey);
+};
+
 // ------------------------------------------------
 
 export const readStoredProfile = (pubkey: string) => {
@@ -75,3 +95,70 @@ export const storeProfile = (profile: NostrEventContent) => {
 
   setStorage(profile.pubkey, store);
 };
+
+// ------------------------------------------------
+
+
+export const storeTheme = (pubkey: string | undefined, theme: PrimalTheme) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.theme = theme;
+
+  setStorage(pubkey, store);
+};
+
+export const readTheme = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return 'sunrise' as PrimalTheme;
+  }
+
+  const store = getStorage(pubkey);
+
+  return (store.theme || 'sunrise') as PrimalTheme;
+}
+
+
+export const storeChooserTheme = (pubkey: string | undefined, theme: PrimalTheme) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.chooserTheme = theme;
+
+  setStorage(pubkey, store);
+};
+
+export const readChooserTheme = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return 'sunrise' as PrimalTheme;
+  }
+
+  const store = getStorage(pubkey);
+
+  return (store.chooserTheme || 'sunrise') as PrimalTheme;
+}
+
+export const storeSystemDarkMode = (pubkey: string | undefined, flag: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.useSystemDarkMode = flag;
+
+  setStorage(pubkey, store);
+};
+
+export const readSystemDarkMode = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.useSystemDarkMode || false;
+}

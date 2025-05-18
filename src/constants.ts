@@ -1,3 +1,5 @@
+export const THEMES = ['sunset', 'sunrise', 'midnight', 'ice'];
+
 
 export enum Kind  {
   Metadata = 0,

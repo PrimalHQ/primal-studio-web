@@ -13,6 +13,8 @@ const AppRouter: Component = () => {
   const Media = lazy(() => import('./pages/Media/Media'));
   const Account = lazy(() => import('./pages/Account/Account'));
   const Settings = lazy(() => import('./pages/Settings/Settings'));
+  const SettingsMenu = lazy(() => import('./pages/Settings/Menu'));
+  const SettingsAppearance = lazy(() => import('./pages/Settings/Appearance'));
   const Thread = lazy(() => import('./pages/Thread/Thread'));
   const Profile = lazy(() => import('./pages/Profile/Profile'));
   const NotFound = lazy(() => import('./pages/NotFound'));
@@ -26,7 +28,10 @@ const AppRouter: Component = () => {
       <Route path="/articles" component={Articles} />
       <Route path="/media" component={Media} />
       <Route path="/account" component={Account} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/settings" component={Settings}>
+        <Route path="/" component={SettingsMenu} />
+        <Route path="/appearance" component={SettingsAppearance} />
+      </Route>
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />
       <Route path="/*" component={NotFound} />

@@ -23,7 +23,6 @@ const Avatar: Component<{ pubkey: string }> = (props) => {
 
     const url = (user && user.picture) ? user.picture : defaultAvatar;
 
-    console.log('URL: ', url)
     setSrc(url);
   }
 

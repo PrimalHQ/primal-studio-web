@@ -18,10 +18,11 @@ import {
 } from "../utils/socket";
 import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
-import { accountStore, fetchNostrKey, PRIMAL_PUBKEY } from "../stores/AccountStore";
+import { accountStore, fetchNostrKey, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
+import { loadDefaults, loadSettings, loadStoredSettings } from "src/stores/SettingsStore";
 
 
 export type AppContextStore = {
@@ -121,11 +122,21 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }
   };
 
+  // Load default settings -----------------------------------------------------
+
+  onMount(() => {
+    loadDefaults();
+    loadStoredSettings();
+    loadStoredPubkey();
+
+    fetchNostrKey();
+  })
+
   // Handle fetching users identity --------------------------------------------
 
   createEffect(() => {
-    if (accountStore.pubkey === PRIMAL_PUBKEY) {
-      fetchNostrKey();
+    if (accountStore.pubkey.length > 0) {
+      loadSettings(accountStore.pubkey);
     }
   })
 
