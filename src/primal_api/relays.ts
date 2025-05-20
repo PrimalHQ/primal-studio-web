@@ -1,5 +1,6 @@
 import { Kind } from "src/constants";
 import { primalAPI, sendMessage } from "src/utils/socket";
+import { sendEvent } from "./nostr";
 
 export const getDefaultRelays = async (subId: string) => {
   let relayList: string[] = [];
@@ -41,3 +42,15 @@ export const getRelays = async (pubkey: string | undefined, subid: string) => {
     {cache: ["get_user_relays", { pubkey }]},
   ]));
 };
+
+
+export const sendBlossomEvent = async (list: string[]) => {
+  const event = {
+    content: '',
+    kind: Kind.Blossom,
+    tags: list.map(url => ['server', url]),
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event);
+}

@@ -193,3 +193,9 @@ export type UserMetadataContent = {
 export type PrimalTheme = 'sunrise' | 'sunset' | 'midnight' | 'ice';
 
 export type NostrRelaySettings = Record<string, { read: boolean, write: boolean }>;
+
+export type SendNoteResult = {
+  success: boolean,
+  reasons?: string[],
+  note?: NostrRelaySignedEvent,
+};

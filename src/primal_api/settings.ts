@@ -1,7 +1,7 @@
 import { Kind, THEMES } from "src/constants";
 import { PrimalTheme } from "src/primal";
 import { signEvent } from "src/utils/nostrApi";
-import { sendMessage } from "src/utils/socket";
+import { primalAPI, sendMessage } from "src/utils/socket";
 
 export const getSettings = async (pubkey: string | undefined, subid: string) => {
   const event = {
@@ -64,3 +64,25 @@ export const sendSettings = async (settings: any, subid: string) => {
 export const isValidTheme = (theme: string): theme is PrimalTheme => {
   return THEMES.includes(theme);
 }
+
+export const getDefaultBlossomServers = async (subId: string) => {
+  let list: string[] = [];
+
+  return new Promise<string[]>((resolve) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: ["get_recommended_blossom_servers"]},
+        ]))
+      },
+      onEvent: (event) => {
+        list = JSON.parse(event.content || '[]') as string[];
+      },
+      onEose: () => resolve(list),
+  });
+  })
+
+};

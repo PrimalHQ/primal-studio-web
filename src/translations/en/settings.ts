@@ -12,6 +12,13 @@ export default {
   },
   uploads: {
     mediaServer: 'Media Server',
+    switchServer: 'Switch media server',
+    blossomServerUrl: 'enter blossom server url...',
+    restoreBlossomServer: 'Restore default media server',
+    mediaMirrors: 'Media Mirrors',
+    mediaMirrorsDescription: 'You can enable one or more media mirror servers. When enabled, your uploads to the primary media server will be automatically copied to the mirror(s).',
+    addMirror: 'Add media mirror server',
+    suggestedMirrors: 'Suggested media mirror servers',
   },
   network: {
     cachingService: 'Caching Service',

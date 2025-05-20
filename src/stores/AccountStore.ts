@@ -9,14 +9,21 @@ import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
 import { primalAPI } from "src/utils/socket";
 import { getUserProfiles } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
+import { getReplacableEvent, triggerImportEvents } from "src/primal_api/events";
+import { areUrlsSame } from "src/utils/blossom";
+import { getDefaultBlossomServers } from "src/primal_api/settings";
+import { sendBlossomEvent } from "src/primal_api/relays";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+
+export const primalBlossom = 'https://blossom.primal.net';
 
 export type AccountStore = {
   pubkey: string;
   sec: string | undefined,
   metadata: NostrEventContent | undefined,
   blossomServers: string[],
+  recomendedBlossomServers: string[],
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -24,6 +31,7 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   sec: undefined,
   metadata: undefined,
   blossomServers: [],
+  recomendedBlossomServers: [],
 });
 
 let extensionAttempt = 0;
@@ -158,77 +166,87 @@ export const updateAccountProfile = (pubkey: string) => {
 // Blossom Servers --------------------------------------
 
 
-// export const fetchBlossomServers = (pubkey: string) => {
-//   const subId = `blossom_${APP_ID}`;
+export const fetchBlossomServers = (pubkey: string) => {
+  const subId = `blossom_${APP_ID}`;
 
-//   primalAPI({
-//     subId,
-//     action: () => getReplacableEvent(pubkey, Kind.Blossom, subId),
-//     onEvent: (content) => {
-//       const servers = ((content as NostrEventContent).tags || []).reduce((acc, t) => {
-//         if (t[0] !== 'server') return acc;
+  primalAPI({
+    subId,
+    action: () => getReplacableEvent(pubkey, Kind.Blossom, subId),
+    onEvent: (content) => {
+      const servers = ((content as NostrEventContent).tags || []).reduce((acc, t) => {
+        if (t[0] !== 'server') return acc;
 
-//         return [...acc, t[1]];
-//       }, []);
+        return [...acc, t[1]];
+      }, []);
 
-//       updateAccountStore('blossomServers', () => [...servers]);
-//     }
-//   });
-// }
+      console.log('LOAD: ', servers)
+      updateAccountStore('blossomServers', () => [...servers]);
+    }
+  });
+}
 
 
-// export const addBlossomServers = (url: string, append?: boolean) => {
-//   if (append) {
-//     appendBlossomServers(url);
-//     return;
-//   }
+export const addBlossomServers = (url: string, append?: boolean) => {
+  if (append) {
+    appendBlossomServers(url);
+    return;
+  }
 
-//   if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
-//     updateStore('blossomServers', (servers) => [url, ...servers.filter(s => !areUrlsSame(s, url))]);
-//     updateBlossomEvent();
-//     return;
-//   }
+  if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
+    updateAccountStore('blossomServers', (servers) => [url, ...servers.filter(s => !areUrlsSame(s, url))]);
+    updateBlossomEvent();
+    return;
+  }
 
-//   updateStore('blossomServers', (servers) => [url, ...servers]);
-//   updateBlossomEvent();
-// }
+  updateAccountStore('blossomServers', (servers) => [url, ...servers]);
+  updateBlossomEvent();
+}
 
-// export const appendBlossomServers = (url: string) => {
-//   if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
-//     updateStore('blossomServers', (servers) => [...servers.filter(s => !areUrlsSame(s, url)), url]);
-//     updateBlossomEvent();
-//     return;
-//   }
+export const appendBlossomServers = (url: string) => {
+  console.log('APPEND: ', url, [...accountStore.blossomServers])
+  if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
+    updateAccountStore('blossomServers', (servers) => [...servers.filter(s => !areUrlsSame(s, url)), url]);
+    updateBlossomEvent();
+    return;
+  }
 
-//   updateStore('blossomServers', (servers) => [...servers, url]);
-//   updateBlossomEvent();
-// }
+  updateAccountStore('blossomServers', (servers) => [...servers, url]);
+  updateBlossomEvent();
+}
 
-// export const removeBlossomServers = (url: string) => {
-//   if (!accountStore.blossomServers.includes(url)) return;
+export const removeBlossomServers = (url: string) => {
+  if (!accountStore.blossomServers.includes(url)) return;
 
-//   updateStore('blossomServers', (servers) => servers.filter(s => s !== url));
-//   updateBlossomEvent();
-// }
+  updateAccountStore('blossomServers', (servers) => servers.filter(s => s !== url));
+  updateBlossomEvent();
+}
 
-// export const removeBlossomMirrors = (then?: () => void) => {
-//   const main = accountStore.blossomServers[0] || primalBlossom;
-//   updateStore('blossomServers', () => [main]);
-//   updateBlossomEvent(then);
-// }
+export const removeBlossomMirrors = (then?: () => void) => {
+  const main = accountStore.blossomServers[0] || primalBlossom;
+  updateAccountStore('blossomServers', () => [main]);
+  updateBlossomEvent(then);
+}
 
-// export const setBlossomServers = (urls: string[]) => {
-//   updateStore('blossomServers', () => [ ...urls ]);
-//   // updateBlossomEvent();
-// }
+export const setBlossomServers = (urls: string[]) => {
+  updateAccountStore('blossomServers', () => [ ...urls ]);
+  // updateBlossomEvent();
+}
 
-// export const updateBlossomEvent = async (then?: () => void) => {
-//   const { success, note } = await sendBlossomEvent(accountStore.blossomServers, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+export const updateBlossomEvent = async (then?: () => void) => {
+  const { success, note } = await sendBlossomEvent(accountStore.blossomServers);
 
-//   if (!success || !note) {
-//     toast?.sendWarning('Failed to send server list');
-//     return;
-//   }
-//   triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
-// }
+  if (!success || !note) {
+    // toast?.sendWarning('Failed to send server list');
+    return;
+  }
+  triggerImportEvents([note]);
+}
 
+
+export const getRecomendedBlossomServers = async () => {
+  const subId = `recommended_blossom_${APP_ID}`;
+
+  const list = await getDefaultBlossomServers(subId);
+
+  updateAccountStore('recomendedBlossomServers', () => [ ...list ]);
+};
