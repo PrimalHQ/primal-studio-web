@@ -19,7 +19,7 @@ const Menu: Component = () => {
 
         <Show when={accountStore.pubkey}>
           <A href="/settings/uploads">
-            {translate('settings.menu', 'upload')}
+            {translate('settings.menu', 'uploads')}
             <div class={styles.chevron}></div>
           </A>
         </Show>

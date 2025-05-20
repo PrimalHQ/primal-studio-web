@@ -1,3 +1,5 @@
+import { NestedRecord } from '..';
+
 import home from './home';
 import notes from './notes';
 import articles from './articles';
@@ -7,16 +9,18 @@ import settings from './settings';
 import profile from './profile';
 import thread from './thread';
 import notFound from './notFound';
+import defaults from './defaults';
 
 
 export default {
-  home: home as Record<string, string>,
-  notes: notes as Record<string, string>,
-  articles: articles as Record<string, string>,
-  media: media as Record<string, string>,
-  account: account as Record<string, string>,
-  settings: settings as Record<string, string>,
-  profile: profile as Record<string, string>,
-  thread: thread as Record<string, string>,
-  notFound: notFound as Record<string, string>,
+  home: home as NestedRecord,
+  notes: notes as NestedRecord,
+  articles: articles as NestedRecord,
+  media: media as NestedRecord,
+  account: account as NestedRecord,
+  settings: settings as NestedRecord,
+  profile: profile as NestedRecord,
+  thread: thread as NestedRecord,
+  notFound: notFound as NestedRecord,
+  defaults: defaults as NestedRecord,
 }

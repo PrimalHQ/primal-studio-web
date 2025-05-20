@@ -7,3 +7,4 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
     {cache: ["user_infos", { pubkeys }]},
   ]));
 }
+

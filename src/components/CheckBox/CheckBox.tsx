@@ -17,7 +17,7 @@ const CheckBox: Component<{
     <Checkbox
       class={styles.checkbox}
       checked={props.checked}
-      onChange={(v) => props.onChange}
+      onChange={props.onChange}
     >
       <Checkbox.Input class={styles.input} />
       <Checkbox.Control class={styles.control}>

@@ -191,3 +191,5 @@ export type UserMetadataContent = {
 }
 
 export type PrimalTheme = 'sunrise' | 'sunset' | 'midnight' | 'ice';
+
+export type NostrRelaySettings = Record<string, { read: boolean, write: boolean }>;

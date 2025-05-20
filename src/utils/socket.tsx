@@ -260,22 +260,28 @@ export const subsTo = (
   };
 };
 
-
-export const handleSubscription = (
+export type PrimalAPIConfig = {
   subId: string,
-  fetcher: () => void,
-  onEventHandler?: (content: NostrEventContent) => void,
-  onEoseHandler?: () => void,
+  action: () => void,
+  onEvent?: (content: NostrEventContent) => void,
+  onEose?: () => void,
+  onNotice?: () => void,
+};
+
+export const primalAPI = (config: PrimalAPIConfig
 ) => {
-  const unsub = subsTo(subId, {
+  const unsub = subsTo(config.subId, {
     onEvent: (_, content) => {
-      onEventHandler && onEventHandler(content);
+      config.onEvent && config.onEvent(content);
     },
     onEose: () => {
-      onEoseHandler && onEoseHandler();
+      config.onEose && config.onEose();
       unsub();
     },
+    onNotice: () => {
+      config.onNotice && config.onNotice();
+    }
   });
 
-  fetcher();
+  config.action();
 }

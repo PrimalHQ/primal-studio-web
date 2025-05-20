@@ -136,3 +136,8 @@ body::after{
     url(./assets/images/branding.svg)
     ;
 }
+
+.hidden {
+  visibility: hidden;
+  height: 0;
+}

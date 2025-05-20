@@ -3,6 +3,7 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   onMount,
   useContext,
@@ -23,6 +24,7 @@ import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
 import { loadDefaults, loadSettings, loadStoredSettings } from "src/stores/SettingsStore";
+import { updateRelays } from "src/stores/RelayStore";
 
 
 export type AppContextStore = {
@@ -134,11 +136,12 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   // Handle fetching users identity --------------------------------------------
 
-  createEffect(() => {
-    if (accountStore.pubkey.length > 0) {
-      loadSettings(accountStore.pubkey);
-    }
-  })
+  createEffect(on(() => accountStore.pubkey, (pubkey, prev) => {
+    if (!pubkey || pubkey.length === 0 || pubkey === prev) return;
+
+    loadSettings(accountStore.pubkey);
+    updateRelays();
+  }));
 
   // Handle main socket reconnection -------------------------------------------
 

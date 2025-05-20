@@ -6,6 +6,8 @@ import styles from './Settings.module.scss';
 import Menu from './Menu';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import { useLocation } from '@solidjs/router';
+import SettingsSidebar from './SettingsSidebar/SettingsSidebar';
+import StickySidebar from 'src/components/StickySidebar/StickySidebar';
 
 const Settings: Component<{ children?: JSXElement }> = (props) => {
 
@@ -33,7 +35,9 @@ const Settings: Component<{ children?: JSXElement }> = (props) => {
       </div>
 
       <div class={styles.sidebar}>
-
+        <StickySidebar noWormhole={true}>
+          <SettingsSidebar />
+        </StickySidebar>
       </div>
     </div>
   );

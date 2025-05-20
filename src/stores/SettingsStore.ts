@@ -6,7 +6,7 @@ import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
-import { handleSubscription } from "src/utils/socket";
+import { primalAPI } from "src/utils/socket";
 import { getUserProfiles } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
 import { getDefaultSettings, getSettings, isValidTheme, sendSettings } from "src/primal_api/settings";
@@ -75,17 +75,17 @@ export const setTheme = (theme: PrimalTheme, temp?: boolean) => {
 export const loadDefaults = () => {
   const subId = `load_defaults_${APP_ID}`;
 
-  handleSubscription(
+  primalAPI({
     subId,
-    () => getDefaultSettings(subId),
-    (content) => {
+    action: () => getDefaultSettings(subId),
+    onEvent: (content) => {
       if (!content) return;
 
       const settings = JSON.parse(content.content || '{}');
 
       updateSettingsStore('defaultSettingsObject', () => ({ ...settings }));
-    }
-  )
+    },
+  });
 };
 
 export const loadStoredSettings = () => {
@@ -114,10 +114,10 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
   const settingsNWCSubId = `load_nwc_settings_${APP_ID}`;
 
 
-  handleSubscription(
-    settingsSubId,
-    () => getSettings(pubkey, settingsSubId),
-    (content) => {
+  primalAPI( {
+    subId: settingsSubId,
+    action: () => getSettings(pubkey, settingsSubId),
+    onEvent: (content) => {
       if (!content) return;
 
       const settings = JSON.parse(content.content || '{}');
@@ -127,8 +127,8 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
       setTheme(settings.theme);
 
       resolveDarkMode(settingsStore.useSystemTheme, settingsStore.theme);
-    }
-  )
+    },
+  })
 
   // getRecomendedBlossomServers();
 }
@@ -176,8 +176,8 @@ export const saveSettings = () => {
 
   const subId = `save_settings_${APP_ID}`;
 
-  handleSubscription(
+  primalAPI( {
     subId,
-    () => sendSettings(settings, subId),
-  );
+    action: () => sendSettings(settings, subId),
+  });
 }

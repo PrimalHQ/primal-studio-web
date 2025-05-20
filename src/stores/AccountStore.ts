@@ -1,12 +1,12 @@
 import { createStore } from "solid-js/store";
 import { NostrEventContent, NostrWindow } from "../primal";
 import { logError, logInfo } from "../utils/logger";
-import { readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storePubkey } from "../utils/localStore";
+import { readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storePubkey, storeRelaySettings } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
-import { handleSubscription } from "src/utils/socket";
+import { primalAPI } from "src/utils/socket";
 import { getUserProfiles } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
 
@@ -16,12 +16,14 @@ export type AccountStore = {
   pubkey: string;
   sec: string | undefined,
   metadata: NostrEventContent | undefined,
+  blossomServers: string[],
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   pubkey: PRIMAL_PUBKEY,
   sec: undefined,
   metadata: undefined,
+  blossomServers: [],
 });
 
 let extensionAttempt = 0;
@@ -137,17 +139,96 @@ export const fetchNostrKey = async () => {
   }
 }
 
-const updateAccountProfile = (pubkey: string) => {
+export const updateAccountProfile = (pubkey: string) => {
   if (pubkey !== accountStore.pubkey) return;
 
   const subId = `user_profile_${APP_ID}`;
 
-  handleSubscription(
+  primalAPI({
     subId,
-    () => getUserProfiles([pubkey], subId),
-    (content: NostrEventContent) => {
+    action: () => getUserProfiles([pubkey], subId),
+    onEvent: (content: NostrEventContent) => {
       if (content.kind !== Kind.Metadata) return;
+
       updateAccountStore('metadata', () => content);
     },
-  );
+  });
 };
+
+// Blossom Servers --------------------------------------
+
+
+// export const fetchBlossomServers = (pubkey: string) => {
+//   const subId = `blossom_${APP_ID}`;
+
+//   primalAPI({
+//     subId,
+//     action: () => getReplacableEvent(pubkey, Kind.Blossom, subId),
+//     onEvent: (content) => {
+//       const servers = ((content as NostrEventContent).tags || []).reduce((acc, t) => {
+//         if (t[0] !== 'server') return acc;
+
+//         return [...acc, t[1]];
+//       }, []);
+
+//       updateAccountStore('blossomServers', () => [...servers]);
+//     }
+//   });
+// }
+
+
+// export const addBlossomServers = (url: string, append?: boolean) => {
+//   if (append) {
+//     appendBlossomServers(url);
+//     return;
+//   }
+
+//   if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
+//     updateStore('blossomServers', (servers) => [url, ...servers.filter(s => !areUrlsSame(s, url))]);
+//     updateBlossomEvent();
+//     return;
+//   }
+
+//   updateStore('blossomServers', (servers) => [url, ...servers]);
+//   updateBlossomEvent();
+// }
+
+// export const appendBlossomServers = (url: string) => {
+//   if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
+//     updateStore('blossomServers', (servers) => [...servers.filter(s => !areUrlsSame(s, url)), url]);
+//     updateBlossomEvent();
+//     return;
+//   }
+
+//   updateStore('blossomServers', (servers) => [...servers, url]);
+//   updateBlossomEvent();
+// }
+
+// export const removeBlossomServers = (url: string) => {
+//   if (!accountStore.blossomServers.includes(url)) return;
+
+//   updateStore('blossomServers', (servers) => servers.filter(s => s !== url));
+//   updateBlossomEvent();
+// }
+
+// export const removeBlossomMirrors = (then?: () => void) => {
+//   const main = accountStore.blossomServers[0] || primalBlossom;
+//   updateStore('blossomServers', () => [main]);
+//   updateBlossomEvent(then);
+// }
+
+// export const setBlossomServers = (urls: string[]) => {
+//   updateStore('blossomServers', () => [ ...urls ]);
+//   // updateBlossomEvent();
+// }
+
+// export const updateBlossomEvent = async (then?: () => void) => {
+//   const { success, note } = await sendBlossomEvent(accountStore.blossomServers, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+
+//   if (!success || !note) {
+//     toast?.sendWarning('Failed to send server list');
+//     return;
+//   }
+//   triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
+// }
+

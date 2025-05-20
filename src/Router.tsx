@@ -7,16 +7,22 @@ import preloadNotes from './pages/Notes/Notes.data';
 const AppRouter: Component = () => {
 
   const AppLayout = lazy(() => import('./pages/AppLayout/AppLayout'));
+
   const Home = lazy(() => import('./pages/Home/Home'));
   const Notes = lazy(() => import('./pages/Notes/Notes'));
   const Articles = lazy(() => import('./pages/Articles/Articles'));
   const Media = lazy(() => import('./pages/Media/Media'));
-  const Account = lazy(() => import('./pages/Account/Account'));
+
   const Settings = lazy(() => import('./pages/Settings/Settings'));
   const SettingsMenu = lazy(() => import('./pages/Settings/Menu'));
   const SettingsAppearance = lazy(() => import('./pages/Settings/Appearance'));
+  const SettingsMediaUploads = lazy(() => import('./pages/Settings/MediaUploads'));
+  const SettingsNetwork = lazy(() => import('./pages/Settings/Network'));
+
+  const Account = lazy(() => import('./pages/Account/Account'));
   const Thread = lazy(() => import('./pages/Thread/Thread'));
   const Profile = lazy(() => import('./pages/Profile/Profile'));
+
   const NotFound = lazy(() => import('./pages/NotFound'));
 
   const notesPreload = () => preloadNotes(accountStore.pubkey);
@@ -31,6 +37,8 @@ const AppRouter: Component = () => {
       <Route path="/settings" component={Settings}>
         <Route path="/" component={SettingsMenu} />
         <Route path="/appearance" component={SettingsAppearance} />
+        <Route path="/uploads" component={SettingsMediaUploads} />
+        <Route path="/network" component={SettingsNetwork} />
       </Route>
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />

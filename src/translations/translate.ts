@@ -1,7 +1,7 @@
 import { LANG } from "../App";
 import translations, { NestedRecord } from './index';
 
-export const translate = (scope: string, message: string) => {
+export const translate = (scope: string, message: string, opts?: any) => {
   const scopes = scope.split('.');
 
   let lang = translations[LANG];
@@ -15,6 +15,8 @@ export const translate = (scope: string, message: string) => {
   const t = (trans || {[message]: ''})[message]
 
   if (typeof t === 'string') return t;
+
+  if (typeof t === 'function') return t(opts);
 
   return '';
 

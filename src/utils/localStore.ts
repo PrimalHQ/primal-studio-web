@@ -1,5 +1,5 @@
 import { Kind } from "src/constants";
-import { NostrEventContent, PrimalTheme, UserMetadataContent } from "src/primal";
+import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
 
 
 export type LocalStore = {
@@ -7,6 +7,7 @@ export type LocalStore = {
   theme: PrimalTheme | undefined,
   chooserTheme: PrimalTheme | undefined,
   useSystemDarkMode: boolean,
+  relaySettings: NostrRelaySettings,
 };
 
 
@@ -15,6 +16,7 @@ export const emptyStorage: LocalStore = {
   theme: undefined,
   chooserTheme: undefined,
   useSystemDarkMode: false,
+  relaySettings: {},
 }
 
 
@@ -98,7 +100,6 @@ export const storeProfile = (profile: NostrEventContent) => {
 
 // ------------------------------------------------
 
-
 export const storeTheme = (pubkey: string | undefined, theme: PrimalTheme) => {
   if (!pubkey) {
     return;
@@ -161,4 +162,27 @@ export const readSystemDarkMode = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.useSystemDarkMode || false;
+}
+
+//  Relays ---------------------------------------
+
+export const storeRelaySettings = (
+  pubkey: string | undefined,
+  settings: NostrRelaySettings,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.relaySettings = { ...settings };
+
+  setStorage(pubkey, store);
+}
+
+export const readRelaySettings = (pubkey: string | undefined) => {
+  if (!pubkey) return {};
+
+  const store = getStorage(pubkey);
+
+  return store.relaySettings || {};
 }

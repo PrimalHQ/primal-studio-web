@@ -1,4 +1,5 @@
 import { createStore } from "solid-js/store";
+import { reset } from "src/utils/socket";
 
 export type AppContextStore = {
   isInactive: boolean,
@@ -38,3 +39,16 @@ export const profileLink = (pubkey: string | undefined) => {
   // }
 
 }
+
+
+
+export const changeCachingService = (url?: string) => {
+  if (!url) {
+    localStorage.removeItem('cacheServer');
+  }
+  else {
+    localStorage.setItem('cacheServer', url);
+  }
+
+  reset();
+};

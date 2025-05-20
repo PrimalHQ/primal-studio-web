@@ -6,8 +6,7 @@ import {
 } from 'nostr-tools';
 
 // @ts-ignore
-import { AbstractRelay as Relay } from 'nostr-tools/abstract-relay';
-import { Relay as RelayFactory } from 'nostr-tools';
+import { Relay } from 'nostr-tools';
 
 import {
   nip04,
@@ -18,7 +17,7 @@ import {
 } from "nostr-tools";
 
 const relayInit = (url: string) => {
-  const relay = new RelayFactory(url);
+  const relay = new Relay(url);
   return relay;
 }
 
@@ -33,7 +32,6 @@ export {
   generatePrivateKey,
   generateNsec,
   Relay,
-  RelayFactory,
   relayInit,
   getPublicKey,
   verifyEvent,
