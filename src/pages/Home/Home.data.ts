@@ -5,6 +5,8 @@ import { pageStore, updatePageStore } from "../../stores/PageStore";
 import { FeedRange, NostrEventContent } from "../../primal";
 import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
+import { createStore } from "solid-js/store";
+import { emptyStudioTotals, getHomeGraph, getHomeTotals, StudioGraph, StudioTotals } from "src/primal_api/studio";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -14,61 +16,101 @@ export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
   );
 }
 
-export const fetchHomeFeed = query(
-  async (pubkey: string, options?: { feedRange?: FeedRange, offset?: number }) => {
-    const range = options?.feedRange || emptyFeedRange();
+// export const fetchHomeFeed = query(
+//   async (pubkey: string, options?: { feedRange?: FeedRange, offset?: number }) => {
+//     const range = options?.feedRange || emptyFeedRange();
 
-    if (pageStore.home.isFetching) {
-      const pages = pageStore.home.feedPages;
+//     if (pageStore.home.isFetching) {
+//       const pages = pageStore.home.feedPages;
 
-      return pages[pages.length] ||
-        {
-          specification: '',
-          mainEvents: [],
-          auxEvents: [],
-          range: emptyFeedRange(),
-        };
-    }
+//       return pages[pages.length] ||
+//         {
+//           specification: '',
+//           mainEvents: [],
+//           auxEvents: [],
+//           range: emptyFeedRange(),
+//         };
+//     }
 
-    const page = {
-      limit: FEED_LIMIT,
-      until: range.since,
-      offset: options?.offset || 0,
-    };
+//     const page = {
+//       limit: FEED_LIMIT,
+//       until: range.since,
+//       offset: options?.offset || 0,
+//     };
 
-    updatePageStore('home', 'isFetching', () => true);
+//     updatePageStore('home', 'isFetching', () => true);
 
-    const result = await fetchMegaFeed(
-      pubkey,
-      Kind.Text,
-      "{\"id\":\"latest\",\"kind\":\"notes\"}",
-      `home_feed_${APP_ID}`,
-      page,
-    );
+//     const result = await fetchMegaFeed(
+//       pubkey,
+//       Kind.Text,
+//       "{\"id\":\"latest\",\"kind\":\"notes\"}",
+//       `home_feed_${APP_ID}`,
+//       page,
+//     );
 
-    let index = pageStore.home.feedPages.findIndex(fp => {
-      return fp.specification === result.specification &&
-        fp.range.since === result.range.since &&
-        fp.range.until === result.range.until;
-    })
+//     let index = pageStore.home.feedPages.findIndex(fp => {
+//       return fp.specification === result.specification &&
+//         fp.range.since === result.range.since &&
+//         fp.range.until === result.range.until;
+//     })
 
-    if (index === -1) {
-      index = pageStore.home.feedPages.length;
-    }
+//     if (index === -1) {
+//       index = pageStore.home.feedPages.length;
+//     }
 
-    batch(() => {
-      updatePageStore('home', 'feedPages', index, () => ({ ...result }));
+//     batch(() => {
+//       updatePageStore('home', 'feedPages', index, () => ({ ...result }));
 
-      updatePageStore('home', 'lastRange', () => ({ ...result.range }));
-      updatePageStore('home', 'isFetching', () => false);
-    });
+//       updatePageStore('home', 'lastRange', () => ({ ...result.range }));
+//       updatePageStore('home', 'isFetching', () => false);
+//     });
 
-    return result;
+//     return result;
+//   },
+//   'fetchHomeFeed',
+// );
+
+export type HomeStore = {
+  totals: StudioTotals,
+  graph: StudioGraph[],
+  notes: string[],
+  articles: string[],
+}
+
+export const emptyHomeStore = () => ({
+  totals: emptyStudioTotals(),
+  graph: [],
+  notes: [],
+  articles: [],
+});
+
+export const [homeStore, setHomeStore] = createStore<HomeStore>(emptyHomeStore());
+
+export const fetchHomeTotals = query(
+  async (pubkey: string, options?: { since?: number, until?: number }) => {
+
+    const r = await getHomeTotals({ pubkey, ...options });
+    setHomeStore('totals', () => ({ ...r }))
   },
-  'fetchHomeFeed',
+  'fetchHomeTotals',
+);
+
+export const fetchHomeGraph = query(
+  async (
+    pubkey: string,
+    options?: { since?: number, until?: number, resolution?: 'hour' | 'day' | 'month' }
+  ) => {
+
+    const r = await getHomeGraph({ pubkey, ...options });
+
+    setHomeStore('graph', () => [...r])
+  },
+  'fetchHomeGraph',
 );
 
 export default function preloadHome(pubkey: string | undefined) {
-  if (!pubkey || pageStore.home.lastRange.since > 0) return;
-  fetchHomeFeed(pubkey);
+  if (!pubkey) return;
+  fetchHomeTotals(pubkey);
+  fetchHomeGraph(pubkey);
+  // fetchHomeFeed(pubkey);
 }

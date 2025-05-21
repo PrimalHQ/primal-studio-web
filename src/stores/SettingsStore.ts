@@ -68,7 +68,6 @@ export const setTheme = (theme: PrimalTheme, temp?: boolean) => {
   if (!temp) {
     storeTheme(accountStore.pubkey, theme);
 
-    console.log('set theme')
     saveSettings();
   }
 }
@@ -126,9 +125,7 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
 
       const settings = JSON.parse(content.content || '{}');
 
-      console.log('SETTINGS: ', {...settings})
       updateSettingsStore('settingsObject',   () => ({ ...settings }));
-
 
       setTheme(settings.theme || 'sunrise', true);
 

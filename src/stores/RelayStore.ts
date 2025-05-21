@@ -43,8 +43,6 @@ export const [relayStore, updateRelayStore] = createStore<RelayStore>({
 export const updateRelays = async () => {
   const relays = await getRelays(accountStore.pubkey)
 
-  console.log('GET RELAYS: ', relays);
-
   setRelaySettings(relays, true);
 };
 
@@ -60,8 +58,6 @@ export const closeRelay = (relay: Relay) => {
 
 export const addRelay = async (relayUrl: string) => {
   const url = relayUrl.trim();
-
-  const relay = new Relay(url);
 
   if (relayStore.explicitlyClosed.includes(url)) {
     // Remove relay from the list of explicitly closed relays
@@ -161,7 +157,6 @@ export const setProxyThroughPrimal = async (shouldProxy: boolean, temp?: boolean
   }
 
   if (!temp) {
-    console.log('set proxy')
     saveSettings({ proxyThroughPrimal: shouldProxy });
   }
 }

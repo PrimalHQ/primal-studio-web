@@ -81,7 +81,11 @@ export enum Kind  {
 
   OrderHistory = 10_000_605,
 
+  StudioTotals = 10000901,
+
   LongFormShell = 10_030_023,
+
+
 }
 
 export const FEED_LIMIT = 20;
@@ -94,6 +98,11 @@ export const noteRegexG = /((nostr:)?(note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6m
 export const pinEncodePrefix = 'prpec';
 export const pinEncodeIVSeparator = '?iv=';
 
-export const MINUTE = 60_000;
 export const SECOND = 1_000;
+export const MINUTE = 60 * SECOND;
+export const HOUR = 24 * MINUTE;
+export const DAY = 24 * HOUR;
+export const WEEK = 7 * DAY;
+export const MONTH = 30 * DAY;
+export const YEAR = 365 * DAY;
 

@@ -3,6 +3,7 @@ import { Router, Route } from "@solidjs/router";
 
 import { accountStore } from './stores/AccountStore';
 import preloadNotes from './pages/Notes/Notes.data';
+import preloadHome from './pages/Home/Home.data';
 
 const AppRouter: Component = () => {
 
@@ -25,11 +26,13 @@ const AppRouter: Component = () => {
 
   const NotFound = lazy(() => import('./pages/NotFound'));
 
+
+  const homePreload = () => preloadHome(accountStore.pubkey);
   const notesPreload = () => preloadNotes(accountStore.pubkey);
 
   return (
     <Router root={AppLayout} preload={true}>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Home} preload={homePreload} />
       <Route path="/notes" component={Notes} preload={notesPreload}/>
       <Route path="/articles" component={Articles} />
       <Route path="/media" component={Media} />

@@ -122,8 +122,10 @@
     border-radius: 18px;
     margin: 0;
 
-    @media only screen and (max-width: 720px) {
-      width: calc(100dvw - 32px);
+    & {
+      @media only screen and (max-width: 720px) {
+        width: calc(100dvw - 32px);
+      }
     }
 
     display: flex;

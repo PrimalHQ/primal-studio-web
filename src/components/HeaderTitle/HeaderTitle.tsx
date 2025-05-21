@@ -1,9 +1,13 @@
-import { Component, Show } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 
 import styles from './HeaderTitle.module.scss';
 import { A } from '@solidjs/router';
 
-const HeaderTitle: Component<{ title: string, subTitle?: string }> = (props) => {
+const HeaderTitle: Component<{
+  title: string,
+  subTitle?: string,
+  children: JSXElement,
+ }> = (props) => {
 
 
   return (
@@ -15,6 +19,9 @@ const HeaderTitle: Component<{ title: string, subTitle?: string }> = (props) => 
         <A class={styles.linkBack} href="/settings">{props.title}</A>
         : {props.subTitle}
       </Show>
+      <div>
+        {props.children}
+      </div>
     </div>
   );
 }

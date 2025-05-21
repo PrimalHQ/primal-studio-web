@@ -179,7 +179,6 @@ export const fetchBlossomServers = (pubkey: string) => {
         return [...acc, t[1]];
       }, []);
 
-      console.log('LOAD: ', servers)
       updateAccountStore('blossomServers', () => [...servers]);
     }
   });
@@ -203,7 +202,6 @@ export const addBlossomServers = (url: string, append?: boolean) => {
 }
 
 export const appendBlossomServers = (url: string) => {
-  console.log('APPEND: ', url, [...accountStore.blossomServers])
   if (accountStore.blossomServers.find(u => areUrlsSame(u, url))) {
     updateAccountStore('blossomServers', (servers) => [...servers.filter(s => !areUrlsSame(s, url)), url]);
     updateBlossomEvent();

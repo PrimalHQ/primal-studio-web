@@ -5,3 +5,208 @@
   gap: 0px;
   width: 640px;
 }
+
+.graphSpans {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    border: none;
+    outline: none;
+    background: none;
+
+    display: flex;
+    padding: 6px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    border-radius: 99px;
+    border: 1px solid var(--subtile-devider);
+
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+
+    cursor: pointer;
+
+    &.compact {
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    &.active, &:hover {
+      color: var(--background-site);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+      background: var(--text-primary);
+
+      .calendarIcon {
+        background-color: var(--background-site);
+      }
+    }
+  }
+}
+
+.statHolder {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  margin-inline: 20px;
+
+  .graphHolder {
+    border-radius: 8px;
+    background: var(--background-header-input);
+    width: 548px;
+    height: 200px;
+    canvas {
+      margin: 14px;
+    }
+  }
+
+  .numbersHolder {
+    display: flex;
+    gap: 10px;
+
+    .variousStats {
+      display: grid;
+      grid-template-columns: 88px 88px;
+      gap: 10px;
+
+      .statPod {
+        border-radius: 8px;
+        background: var(--background-header-input);
+        width: 88px;
+        height: 60px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+
+        border: none;
+        outline: none;
+        cursor: pointer;
+
+        &.active, &:hover {
+          background: var(--devider);
+        }
+
+        .label {
+          color: var(--text-primary);
+          text-align: center;
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 12px;
+          // margin-top: 12px
+        }
+
+        .value {
+          color: var(--text-primary);
+          text-align: center;
+          font-size: 18px;
+          font-weight: 700;
+          line-height: 20px;
+          // margin-bottom: 10px;
+        }
+      }
+    }
+
+    .zapStats {
+      border-radius: 8px;
+      background: var(--background-header-input);
+      width: 170px;
+      height: 200px;
+
+      .zapStat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding-block: 15px;
+        margin-inline: 12px;
+
+        background: none;
+        border: none;
+        border-bottom: 1px solid var(--devider);
+        outline: none;
+
+        &:first-child {
+          padding-top: 12px;
+        }
+
+        &:last-child {
+          padding-bottom: 12px;
+          border: none;
+        }
+
+        .label {
+          color: var(--text-primary);
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 12px;
+        }
+
+        .zapNumbers {
+          display: flex;
+          gap: 12px;
+          width: 146px;
+
+          .value {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 20px;
+          }
+
+          .valueMore {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 20px;
+
+            span {
+              color: var(--text-tertiary);
+              font-size: 12px;
+              font-weight: 400;
+              line-height: 14px;
+              margin-left: 4px;
+            }
+
+            &.positive {
+              color: var(--success-bright);
+
+              span {
+                color: var(--success-dim);
+              }
+            }
+
+            &.negative {
+              color: var(--warning-bright);
+
+              span {
+                color: var(--warning-dim);
+              }
+            }
+          }
+        }
+      }
+    }
+
+  }
+}
+
+
+.calendarIcon {
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-secondary);
+  margin-inline: 8px;
+  -webkit-mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
+}
