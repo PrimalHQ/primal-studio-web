@@ -1,7 +1,7 @@
 import { createStore, unwrap } from "solid-js/store";
 import { NostrEventContent, NostrWindow, PrimalTheme } from "../primal";
 import { logError, logInfo } from "../utils/logger";
-import { readPubkeyFromStorage, readSecFromStorage, readStoredProfile, readSystemDarkMode, readTheme, storeChooserTheme, storeSystemDarkMode, storeTheme } from "../utils/localStore";
+import { readProxyThroughPrimal, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, readSystemDarkMode, readTheme, storeChooserTheme, storeSystemDarkMode, storeTheme } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
@@ -13,9 +13,9 @@ import { getDefaultSettings, getSettings, isValidTheme, sendSettings } from "src
 import { runColorMode } from "src/utils/ui";
 import { accountStore } from "./AccountStore";
 import { createEffect } from "solid-js";
+import { setProxyThroughPrimal } from "./RelayStore";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
-
 
 export type SettingsStore = {
   theme: PrimalTheme,
@@ -68,6 +68,7 @@ export const setTheme = (theme: PrimalTheme, temp?: boolean) => {
   if (!temp) {
     storeTheme(accountStore.pubkey, theme);
 
+    console.log('set theme')
     saveSettings();
   }
 }
@@ -93,9 +94,12 @@ export const loadStoredSettings = () => {
 
   if (!pubkey) return;
 
+  const shouldProxy = readProxyThroughPrimal(pubkey);
+  setProxyThroughPrimal(shouldProxy, true);
 
   const theme = readTheme(pubkey);
   const useSystemDarkMode = readSystemDarkMode(pubkey);
+
 
   updateSettingsStore('theme', () => theme);
 
@@ -122,9 +126,13 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
 
       const settings = JSON.parse(content.content || '{}');
 
+      console.log('SETTINGS: ', {...settings})
       updateSettingsStore('settingsObject',   () => ({ ...settings }));
 
-      setTheme(settings.theme);
+
+      setTheme(settings.theme || 'sunrise', true);
+
+      setProxyThroughPrimal(settings.proxyThroughPrimal || false, true);
 
       resolveDarkMode(settingsStore.useSystemTheme, settingsStore.theme);
     },
@@ -168,11 +176,18 @@ export const resolveDarkMode = (useSystemDarkMode: boolean, currentTheme = setti
 
 };
 
-export const saveSettings = () => {
+export const saveSettings = (setts?: Record<string, any>) => {
 
   let settings = unwrap(settingsStore.settingsObject);
 
   settings.theme = settingsStore.theme;
+
+  if (setts) {
+    settings = {
+      ...settings,
+      ...setts,
+    };
+  }
 
   const subId = `save_settings_${APP_ID}`;
 

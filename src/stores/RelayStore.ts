@@ -1,14 +1,14 @@
 import { createStore } from "solid-js/store";
 import { APP_ID } from "src/App";
 import { NostrRelaySettings } from "src/primal";
-import { getDefaultRelays, getRelays } from "src/primal_api/relays";
+import { getDefaultRelays, getRelays, sendRelays } from "src/primal_api/relays";
 import { Relay, utils } from "src/utils/nTools";
-import { primalAPI } from "src/utils/socket";
 import { accountStore } from "./AccountStore";
-import { Kind } from "src/constants";
 import { batch } from "solid-js";
-import { readRelaySettings, storeRelaySettings } from "src/utils/localStore";
+import { readRelaySettings, storeProxyThroughPrimal, storeRelaySettings } from "src/utils/localStore";
 import { logError, logInfo, logWarning } from "src/utils/logger";
+import { saveSettings } from "./SettingsStore";
+import { areUrlsSame } from "src/utils/blossom";
 
 export const relayConnectingTimeout = 1_000;
 export const relayAtemptLimit = 10;
@@ -40,20 +40,12 @@ export const [relayStore, updateRelayStore] = createStore<RelayStore>({
 });
 
 
-export const updateRelays = () => {
-  const subId = `user_relays_${APP_ID}`;
+export const updateRelays = async () => {
+  const relays = await getRelays(accountStore.pubkey)
 
-  primalAPI({
-    subId,
-    action: () => getRelays(accountStore.pubkey, subId),
-    onEvent: (content) => {
-      if (!content || content.kind !== Kind.UserRelays) return;
+  console.log('GET RELAYS: ', relays);
 
-      const relays = extractRelayConfigFromTags(content.tags || []);
-
-      setRelaySettings(relays, true);
-    }
-  });
+  setRelaySettings(relays, true);
 };
 
 export const closeRelay = (relay: Relay) => {
@@ -66,7 +58,9 @@ export const closeRelay = (relay: Relay) => {
 }
 
 
-export const addRelay = (url: string) => {
+export const addRelay = async (relayUrl: string) => {
+  const url = relayUrl.trim();
+
   const relay = new Relay(url);
 
   if (relayStore.explicitlyClosed.includes(url)) {
@@ -74,36 +68,47 @@ export const addRelay = (url: string) => {
     updateRelayStore('explicitlyClosed', (list) => list.filter(u => u !== url));
   }
 
-  batch(() => {
-    if (relayStore.all.find(r => r.url === relay.url) === undefined) {
-      updateRelayStore('all', relayStore.all.length, () => relay );
-    };
-
-    updateRelayStore('settings', () => ({
-      [url]: { write: true, read: true },
-    }))
-  });
-
-  connectToRelay(relay);
-
   // Send Relays
+  const relaySettings = await getRelays(
+    accountStore.pubkey,
+    `before_add_relay_${APP_ID}`
+  );
+
+  setRelaySettings({ ...relaySettings, [url]: { write: true, read: true }}, true);
+
+  sendRelays(relayStore.all, relayStore.settings);
+
 };
 
-
-export const removeRelay = (relay: Relay) => {
+export const removeRelay = async (relay: Relay) => {
   closeRelay(relay);
 
-  const filterRelays = (relays: Relay[]) => relays.filter(r => r.url !== relay.url);
+  const slashedUrl = relay.url.endsWith('/') ? relay.url : `${relay.url}/`;
+  const bareUrl = relay.url.endsWith('/') ? relay.url.slice(0, -1) : relay.url;
+
+  const filterRelays = (relays: Relay[]) => relays.filter(r => !areUrlsSame(r.url, relay.url));
 
   batch(() => {
     updateRelayStore('all', filterRelays);
     updateRelayStore('suspended', filterRelays);
     updateRelayStore('settings', () => ({
-      [relay.url]: undefined,
+      [slashedUrl]: undefined,
+      [bareUrl]: undefined,
     }));
   });
 
   // Send Relays
+  const relaySettings = await getRelays(
+    accountStore.pubkey,
+    `before_add_relay_${APP_ID}`
+  );
+
+  delete relaySettings[slashedUrl];
+  delete relaySettings[bareUrl];
+
+  updateRelayStore('settings', () => ({ ...relaySettings }));
+
+  sendRelays(relayStore.all, relayStore.settings);
 }
 
 export const suspendRelays = () => {
@@ -139,17 +144,25 @@ export const reconnectSuspendedRelays = async () => {
 
   updateRelayStore('suspended', () => []);
 
+  if (relaysToConnect.length === 0) return;
+
   await connectToRelays(relaysToConnect);
 }
 
-export const setProxyThroughPrimal = async (shouldProxy: boolean) => {
+export const setProxyThroughPrimal = async (shouldProxy: boolean, temp?: boolean) => {
   updateRelayStore('proxyThroughPrimal', () => shouldProxy);
+  storeProxyThroughPrimal(accountStore.pubkey, shouldProxy);
 
   if (shouldProxy) {
     suspendRelays();
   }
   else {
     reconnectSuspendedRelays();
+  }
+
+  if (!temp) {
+    console.log('set proxy')
+    saveSettings({ proxyThroughPrimal: shouldProxy });
   }
 }
 
@@ -165,7 +178,9 @@ export const setRelaySettings = (stgns?: NostrRelaySettings, removeMissing?: boo
     settings = attachPriorityRelays(settings);
   }
 
-  updateRelayStore('settings', () => ({ ...settings }));
+  batch(() => {
+    updateRelayStore('settings', () => ({ ...settings }));
+  })
 
   // Remove relays that are not in relay setttings
   if (removeMissing) {
@@ -173,8 +188,8 @@ export const setRelaySettings = (stgns?: NostrRelaySettings, removeMissing?: boo
       if (settings[url]) continue;
 
       updateRelayStore('settings', () => ({[url]: undefined}));
-      const relay = relayStore.all.find(r => r.url === url);
 
+      const relay = relayStore.all.find(r => r.url === url);
       if (relay) {
         removeRelay(relay);
       }
@@ -193,27 +208,6 @@ export const setRelaySettings = (stgns?: NostrRelaySettings, removeMissing?: boo
   return;
 }
 
-
-export const extractRelayConfigFromTags = (tags: string[][]) => {
-  return tags.reduce((acc, tag) => {
-    if (tag[0] !== 'r') return acc;
-
-    let config = { write: true, read: true };
-
-    if (tag[2] === 'write') {
-      config.read = false;
-    }
-
-    if (tag[2] === 'read') {
-      config.write = false;
-    }
-
-    return { ...acc, [tag[1]]: config };
-
-  }, {});
-};
-
-
 export const attachPriorityRelays = (relaySettings: NostrRelaySettings) => {
   const defaultRelays = getPreConfiguredRelays();
 
@@ -231,7 +225,7 @@ export const getPreConfiguredRelays = () => {
 };
 
 export const resetToDefaultRelays = async () => {
-  const subId = `default_relays_${APP_ID}`;
+  const subId = `reset_default_relays_${APP_ID}`;
 
   closeAllRelays();
 
@@ -267,6 +261,7 @@ export const closeAllRelays = () => {
   }
 }
 
+let att =0;
 
 export const connectToRelays = async (relayUrls: string[]) => {
   // If proxying don't bather with relays
@@ -278,6 +273,9 @@ export const connectToRelays = async (relayUrls: string[]) => {
   // if list is empty connect to default list of relays
   if (urls.length === 0) {
     const subId = `default_relays_${APP_ID}`;
+    att += 1;
+
+    if (att > 3) return;
 
     const defaultRelays = await getDefaultRelays(subId);
 
@@ -292,17 +290,11 @@ export const connectToRelays = async (relayUrls: string[]) => {
     urls.push.apply(null, [...ps]);
   }
 
-  let urlsToConnect: string[] = [];
-
   for (let i = 0; i<urls.length; i++) {
     const url = urls[i];
 
-    if (
-      urlsToConnect.includes(url) ||
-      relayStore.connected.find(r => r.url === url)
-    ) continue;
+    if (relayStore.connected.find(r => r.url === url)) continue;
 
-    urlsToConnect.push(url);
     const relay = new Relay(url);
 
     connectToRelay(relay);
@@ -340,8 +332,6 @@ export const connectToRelay = async (relay: Relay) => {
       updateRelayStore('reliability', connectedRelay.url, () => ({ timeout }));
       updateRelayStore('connected', (cr) => [...cr, connectedRelay]);
     })
-
-    console.log('CONNECTED: ', connectedRelay.url, relayStore)
   };
 
   const onFail = (failedRelay: Relay, reasons: any) => {

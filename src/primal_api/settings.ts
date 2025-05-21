@@ -46,6 +46,8 @@ export const sendSettings = async (settings: any, subid: string) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
+  console.log('SAVE SETTINGS: ', { ...content })
+
   try {
     const signedNote = await signEvent(event);
 

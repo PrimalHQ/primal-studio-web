@@ -80,14 +80,23 @@ export const proxyEvent = async (event: NostrRelayEvent) => {
   }
 }
 
-export const sendEvent = async (event: NostrRelayEvent) => {
+export const sendEvent = async (
+  event: NostrRelayEvent,
+  opts?: { relays: Relay[] },
+) => {
 
-  const relays = relayStore.connected;
-  const relaySettings = relayStore.settings;
   const shouldProxy = relayStore.proxyThroughPrimal;
 
   if (shouldProxy) {
     return await proxyEvent(event);
+  }
+
+  const relaySettings = relayStore.settings;
+  let relays = relayStore.connected;
+
+  if (opts?.relays !== undefined) {
+    const unique = opts.relays.filter(or => relays.find(r => r.url === or.url) === undefined);
+    relays = [...relays, ...unique];
   }
 
   let signedNote: NostrRelaySignedEvent | undefined;

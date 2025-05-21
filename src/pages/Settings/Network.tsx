@@ -86,7 +86,6 @@ const Network: Component = () => {
 
   return (
     <div class={styles.networkPage}>
-
       <div class={styles.settingsSection}>
         <div class={`${styles.bigCaption}`}>
           {translate('settings.network', 'cachingService')}

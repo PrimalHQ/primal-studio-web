@@ -8,6 +8,8 @@ export type LocalStore = {
   chooserTheme: PrimalTheme | undefined,
   useSystemDarkMode: boolean,
   relaySettings: NostrRelaySettings,
+  proxyThroughPrimal: boolean,
+  connectToPrimaryRelays: boolean,
 };
 
 
@@ -17,6 +19,8 @@ export const emptyStorage: LocalStore = {
   chooserTheme: undefined,
   useSystemDarkMode: false,
   relaySettings: {},
+  proxyThroughPrimal: false,
+  connectToPrimaryRelays: false,
 }
 
 
@@ -185,4 +189,25 @@ export const readRelaySettings = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.relaySettings || {};
+}
+
+export const storeProxyThroughPrimal = (
+  pubkey: string | undefined,
+  shouldProxy: boolean,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.proxyThroughPrimal = shouldProxy;
+
+  setStorage(pubkey, store);
+}
+
+export const readProxyThroughPrimal = (pubkey: string | undefined) => {
+  if (!pubkey) return false;
+
+  const store = getStorage(pubkey);
+
+  return store.proxyThroughPrimal || false;
 }
