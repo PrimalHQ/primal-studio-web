@@ -5,40 +5,24 @@ import { translate } from '../../translations/translate';
 import styles from './Home.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import StudioChart from 'src/components/Chart/Chart';
-import { fetchHomeGraph, fetchHomeTotals, homeStore } from './Home.data';
+import { fetchHomeGraph, fetchHomeTotals, homeStore, setHomeStore } from './Home.data';
 import { StudioGraph } from 'src/primal_api/studio';
 import { accountStore } from 'src/stores/AccountStore';
 
-export type GraphSpan = {
-  name: string,
-  since: number,
-  until: number,
-  resolution: 'day' | 'month' | 'hour',
-}
-
-const defaultSpan: GraphSpan = {
-  name: '1m',
-  until: Math.floor((new Date()).getTime() / 1_000),
-  since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
-  resolution: 'day',
-};
 
 const Home: Component = () => {
 
-  const [graphKey, setGraphKey] = createSignal<keyof StudioGraph>('score')
-  const [graphSpan, setGraphSpan] = createSignal<GraphSpan>(defaultSpan)
-
   const onToggleKey = (key: keyof StudioGraph) => {
-    if (graphKey() === key) {
-      setGraphKey('score');
+    if (homeStore.graphKey === key) {
+      setHomeStore('graphKey', 'score');
       return;
     }
 
-    setGraphKey(key);
+    setHomeStore('graphKey', key);
   }
 
   createEffect(() => {
-    const { since, until, resolution } = graphSpan();
+    const { since, until, resolution } = homeStore.graphSpan;
 
     fetchHomeGraph(accountStore.pubkey, { since, until, resolution });
     fetchHomeTotals(accountStore.pubkey, { since, until });
@@ -53,79 +37,79 @@ const Home: Component = () => {
         <HeaderTitle title={translate('home', 'header')}>
           <div class={styles.graphSpans}>
             <button
-              class={`${graphSpan().name === '7d' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === '7d' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: '7d',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor((new Date()).getTime() / 1_000) - 7 * 24 * 60 * 60,
                 resolution: 'day',
-              })}
+              }))}
             >
               7D
             </button>
             <button
-              class={`${graphSpan().name === '2w' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === '2w' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: '2w',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor((new Date()).getTime() / 1_000) - 14 * 24 * 60 * 60,
                 resolution: 'day',
-              })}
+              }))}
             >
               2W
             </button>
             <button
-              class={`${graphSpan().name === '1m' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === '1m' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: '1m',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
                 resolution: 'day',
-              })}
+              }))}
             >
               1M
             </button>
             <button
-              class={`${graphSpan().name === '3m' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === '3m' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: '3m',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
                 resolution: 'day',
-              })}
+              }))}
             >
               3M
             </button>
             <button
-              class={`${graphSpan().name === 'ytd' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === 'ytd' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: 'ytd',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1_000),
                 resolution: 'month',
-              })}
+              }))}
             >
               YTD
             </button>
             <button
-              class={`${graphSpan().name === '1y' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === '1y' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: '1y',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: Math.floor((new Date()).getTime() / 1_000) - 365 * 24 * 60 * 60,
                 resolution: 'month',
-              })}
+              }))}
             >
               1Y
             </button>
             <button
-              class={`${graphSpan().name === 'all' ? styles.active : ''}`}
-              onClick={() => setGraphSpan({
+              class={`${homeStore.graphSpan.name === 'all' ? styles.active : ''}`}
+              onClick={() => setHomeStore('graphSpan', () => ({
                 name: 'all',
                 until: Math.floor((new Date()).getTime() / 1_000),
                 since: 0,
                 resolution: 'month',
-              })}
+              }))}
             >
               All
             </button>
@@ -143,15 +127,15 @@ const Home: Component = () => {
         <div class={styles.graphHolder}>
           <StudioChart
             data={homeStore.graph}
-            key={graphKey()}
-            span={graphSpan()}
+            key={homeStore.graphKey}
+            span={homeStore.graphSpan}
           />
         </div>
 
         <div class={styles.numbersHolder}>
           <div class={styles.variousStats}>
             <button
-              class={`${styles.statPod} ${graphKey() == 'replies' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'replies' ? styles.active : ''}`}
               onClick={() => onToggleKey('replies')}
             >
               <div class={styles.label}>Replies</div>
@@ -159,7 +143,7 @@ const Home: Component = () => {
             </button>
 
             <button
-              class={`${styles.statPod} ${graphKey() == 'reposts' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'reposts' ? styles.active : ''}`}
               onClick={() => onToggleKey('reposts')}
             >
               <div class={styles.label}>Reposts</div>
@@ -167,7 +151,7 @@ const Home: Component = () => {
             </button>
 
             <button
-              class={`${styles.statPod} ${graphKey() == 'reactions' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'reactions' ? styles.active : ''}`}
               onClick={() => onToggleKey('reactions')}
             >
               <div class={styles.label}>Reactions</div>
@@ -175,7 +159,7 @@ const Home: Component = () => {
             </button>
 
             <button
-              class={`${styles.statPod} ${graphKey() == 'bookmarks' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'bookmarks' ? styles.active : ''}`}
               onClick={() => onToggleKey('bookmarks')}
             >
               <div class={styles.label}>Bookmarks</div>
@@ -183,7 +167,7 @@ const Home: Component = () => {
             </button>
 
             <button
-              class={`${styles.statPod} ${graphKey() == 'quotes' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'quotes' ? styles.active : ''}`}
               onClick={() => onToggleKey('quotes')}
             >
               <div class={styles.label}>Quotes</div>
@@ -191,7 +175,7 @@ const Home: Component = () => {
             </button>
 
             <button
-              class={`${styles.statPod} ${graphKey() == 'mentions' ? styles.active : ''}`}
+              class={`${styles.statPod} ${homeStore.graphKey == 'mentions' ? styles.active : ''}`}
               onClick={() => onToggleKey('mentions')}
             >
               <div class={styles.label}>Mentions</div>
@@ -229,7 +213,7 @@ const Home: Component = () => {
               <div class={styles.zapNumbers}>
                 <div class={styles.value}>{homeStore.totals.zaps_sent - homeStore.totals.zaps_received}</div>
                 <div class={`${styles.valueMore} ${satsDiff() > 0 ? styles.positive : styles.negative}`}>
-                  {satsDiff() > 0 ? '+' : '-'} {satsDiff()}
+                  {satsDiff() > 0 ? '+' : '-'} {Math.abs(satsDiff())}
                   <span>sats</span>
                 </div>
               </div>

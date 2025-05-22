@@ -129,7 +129,7 @@ export const getHomeGraph = async (opts?: HomePayload) => {
   let payload: HomePayload = {
     resolution: 'day',
     until: today,
-    since: today - 30 * 24 * 60 * 60 ,
+    since: 0 ,
   };
 
   if (opts?.pubkey) {

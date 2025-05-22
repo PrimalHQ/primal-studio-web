@@ -70,19 +70,38 @@ export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
 //   'fetchHomeFeed',
 // );
 
+export type GraphSpan = {
+  name: string,
+  since: number,
+  until: number,
+  resolution: 'day' | 'month' | 'hour',
+}
+
+export const defaultSpan = (): GraphSpan => ({
+  name: '1m',
+  until: Math.floor((new Date()).getTime() / 1_000),
+  since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+  resolution: 'day',
+});
+
 export type HomeStore = {
   totals: StudioTotals,
   graph: StudioGraph[],
   notes: string[],
   articles: string[],
+  graphKey: keyof StudioGraph,
+  graphSpan: GraphSpan,
 }
 
-export const emptyHomeStore = () => ({
+export const emptyHomeStore = (): HomeStore => ({
   totals: emptyStudioTotals(),
   graph: [],
   notes: [],
   articles: [],
+  graphKey: 'score',
+  graphSpan: defaultSpan(),
 });
+
 
 export const [homeStore, setHomeStore] = createStore<HomeStore>(emptyHomeStore());
 
@@ -110,7 +129,10 @@ export const fetchHomeGraph = query(
 
 export default function preloadHome(pubkey: string | undefined) {
   if (!pubkey) return;
-  fetchHomeTotals(pubkey);
-  fetchHomeGraph(pubkey);
+
+  const { since, until, resolution } = homeStore.graphSpan;
+
+  fetchHomeTotals(pubkey, { since, until });
+  fetchHomeGraph(pubkey, { since, until, resolution });
   // fetchHomeFeed(pubkey);
 }
