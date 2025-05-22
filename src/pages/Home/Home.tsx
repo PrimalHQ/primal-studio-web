@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -10,7 +10,16 @@ import { StudioGraph } from 'src/primal_api/studio';
 import { accountStore } from 'src/stores/AccountStore';
 
 
+import DatePicker from "@rnwonder/solid-date-picker";
+import utils from "@rnwonder/solid-date-picker/utilities";
+import dayjs from 'dayjs';
+import objectSupport from 'dayjs/plugin/objectSupport';
+
 const Home: Component = () => {
+
+  onMount(() => {
+    dayjs.extend(objectSupport);
+  });
 
   const onToggleKey = (key: keyof StudioGraph) => {
     if (homeStore.graphKey === key) {
@@ -113,12 +122,53 @@ const Home: Component = () => {
             >
               All
             </button>
-            <button
-              class={styles.compact}
-              onClick={() => {}}
-            >
-              <div class={styles.calendarIcon}></div>
-            </button>
+
+            <div class={styles.datePicker}>
+              <DatePicker
+                type="range"
+                onChange={(data) => {
+                  if (data.type !== 'range') return;
+
+                  if (data.startDate && data.endDate) {
+                    // @ts-ignore
+                    const sd = dayjs({ year: data.startDate.year || 0, month: data.startDate.month || 0, day: data.startDate.day });
+                    // @ts-ignore
+                    const ed = dayjs({ year: data.endDate.year || 0, month: data.endDate.month || 0, day: data.endDate.day });
+
+                    const diffDays = ed.diff(sd, 'days');
+
+                    let resolution: 'day' | 'month' | 'hour' = 'day';
+
+                    if (diffDays < 4) {
+                      resolution = 'hour';
+                    }
+
+                    if (diffDays > 90) {
+                      resolution = 'month';
+                    }
+
+                    console.log('DIFF: ', ed.diff(sd, 'days'))
+
+                    setHomeStore('graphSpan', () => ({
+                      name: 'custom',
+                      since: sd.unix(),
+                      until: ed.unix(),
+                      resolution,
+                    }))
+                  }
+                }}
+                maxDate={utils().getToday()}
+                renderInput={({ showDate }) => (
+                  <button
+                  class={`${styles.compact} ${homeStore.graphSpan.name === 'custom' ? styles.active : ''}`}
+                    onClick={showDate}
+                  >
+                    <div class={styles.calendarIcon}></div>
+                  </button>
+                )}
+                shouldCloseOnSelect
+              />
+            </div>
           </div>
         </HeaderTitle>
       </Wormhole>

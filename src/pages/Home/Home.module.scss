@@ -210,3 +210,10 @@
   -webkit-mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
 }
+
+
+.datePicker {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
