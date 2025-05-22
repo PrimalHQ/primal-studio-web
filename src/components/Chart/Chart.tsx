@@ -1,5 +1,5 @@
 import { Component, onMount } from 'solid-js'
-import { Chart, Tooltip, Colors } from 'chart.js'
+import { Chart, Tooltip, LinearScale, Colors } from 'chart.js'
 import { Bar } from 'solid-chartjs'
 import { StudioGraph } from 'src/primal_api/studio'
 import { shortDate } from 'src/utils/date'
@@ -12,7 +12,7 @@ const StudioChart: Component<{
 }> = (props) => {
 
   onMount(() => {
-    Chart.register(Tooltip, Colors)
+    Chart.register(Tooltip, Colors, LinearScale)
   });
 
   const chartData = () => {
