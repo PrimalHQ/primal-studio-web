@@ -1,9 +1,9 @@
 import { Component, onMount } from 'solid-js'
-import { Chart, Title, Tooltip, Legend, Colors } from 'chart.js'
+import { Chart, Tooltip, Colors } from 'chart.js'
 import { Bar } from 'solid-chartjs'
 import { StudioGraph } from 'src/primal_api/studio'
 import { shortDate } from 'src/utils/date'
-import { GraphSpan } from 'src/pages/Home/Home'
+import { GraphSpan } from 'src/pages/Home/Home.data'
 
 const StudioChart: Component<{
   data: StudioGraph[],
