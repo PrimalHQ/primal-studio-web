@@ -378,7 +378,7 @@ const Home: Component = () => {
         <div class={styles.itemsHolder}>
           <div class={styles.feedHeader}>
             <div class={styles.label}>
-              Notes
+              Top notes for selected range
             </div>
           </div>
           <div class={styles.feedContent}>
@@ -410,7 +410,7 @@ const Home: Component = () => {
           <div class={styles.itemsHolder}>
           <div class={styles.feedHeader}>
             <div class={styles.label}>
-              Articles
+              Top articles for selected range
             </div>
           </div>
           <div class={styles.feedContent}>
