@@ -133,7 +133,8 @@ code {
 body::after{
   position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
   content:
-    url(./assets/images/branding.svg)
+    url(./assets/images/primal_studio_dark.svg)
+    url(./assets/images/primal_studio_light.svg)
     ;
 }
 

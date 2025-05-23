@@ -1,10 +1,12 @@
 import { A, RouteSectionProps, } from '@solidjs/router';
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
-import primalBranding from 'assets/images/branding.svg';
+import primalBrandingLight from 'assets/images/primal_studio_light.svg';
+import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
 
 import styles from './AppLayout.module.scss';
 import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
+import { settingsStore } from 'src/stores/SettingsStore';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -13,7 +15,12 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
       <aside class={styles.left}>
         <div class={styles.fixed}>
           <section id="branding" class={styles.branding}>
-            <img src={primalBranding} />
+            <Show
+              when={['sunrise', 'ice'].includes(settingsStore.theme)}
+              fallback={<img src={primalBrandingDark} />}
+            >
+              <img src={primalBrandingLight} />
+            </Show>
           </section>
 
           <nav>
