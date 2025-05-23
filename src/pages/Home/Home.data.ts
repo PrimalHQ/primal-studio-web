@@ -6,7 +6,7 @@ import { FeedRange, NostrEventContent } from "../../primal";
 import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { emptyStudioTotals, getHomeGraph, getHomeTotals, StudioGraph, StudioTotals } from "src/primal_api/studio";
+import { emptyStudioTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -106,7 +106,13 @@ export const emptyHomeStore = (): HomeStore => ({
 export const [homeStore, setHomeStore] = createStore<HomeStore>(emptyHomeStore());
 
 export const fetchHomeTotals = query(
-  async (pubkey: string, options?: { since?: number, until?: number }) => {
+  async (
+    pubkey: string,
+    options?: {
+      since?: number,
+      until?: number,
+    }
+  ) => {
 
     const r = await getHomeTotals({ pubkey, ...options });
     setHomeStore('totals', () => ({ ...r }))
@@ -117,7 +123,11 @@ export const fetchHomeTotals = query(
 export const fetchHomeGraph = query(
   async (
     pubkey: string,
-    options?: { since?: number, until?: number, resolution?: 'hour' | 'day' | 'month' }
+    options?: {
+      since?: number,
+      until?: number,
+      resolution?: 'hour' | 'day' | 'month',
+    }
   ) => {
 
     const r = await getHomeGraph({ pubkey, ...options });
@@ -127,6 +137,106 @@ export const fetchHomeGraph = query(
   'fetchHomeGraph',
 );
 
+export const fetchHomeNotes = query(
+  async (
+    pubkey: string,
+    options?: HomePayload,
+  ) => {
+    if (pageStore.homeNotes.isFetching) {
+      const pages = pageStore.notes.feedPages;
+
+      return pages[pages.length] ||
+        {
+          specification: '',
+          mainEvents: [],
+          auxEvents: [],
+          range: emptyFeedRange(),
+        };
+    }
+
+    updatePageStore('homeNotes', 'isFetching', () => true);
+
+    try {
+      const result = await getTopEvents({
+        pubkey,
+        kind: Kind.Text,
+        ...options,
+      });
+
+      let index = pageStore.homeNotes.feedPages.findIndex(fp => {
+        return fp.specification === result.specification &&
+          fp.range.since === result.range.since &&
+          fp.range.until === result.range.until;
+      })
+
+      if (index === -1) {
+        index = pageStore.homeNotes.feedPages.length;
+      }
+
+      batch(() => {
+        updatePageStore('homeNotes', 'feedPages', index, () => ({ ...result }));
+        updatePageStore('homeNotes', 'lastRange', () => ({ ...result.range }));
+        updatePageStore('homeNotes', 'isFetching', () => false);
+      });
+
+      return result;
+    } catch (e) {
+      return;
+    }
+  },
+  'fetchHomeNotes',
+);
+
+export const fetchHomeArticles = query(
+  async (
+    pubkey: string,
+    options?: HomePayload,
+  ) => {
+    if (pageStore.homeArticles.isFetching) {
+      const pages = pageStore.notes.feedPages;
+
+      return pages[pages.length] ||
+        {
+          specification: '',
+          mainEvents: [],
+          auxEvents: [],
+          range: emptyFeedRange(),
+        };
+    }
+
+    updatePageStore('homeArticles', 'isFetching', () => true);
+
+    try {
+      const result = await getTopEvents({
+        pubkey,
+        kind: Kind.LongForm,
+        ...options,
+      });
+
+      let index = pageStore.homeArticles.feedPages.findIndex(fp => {
+        return fp.specification === result.specification &&
+          fp.range.since === result.range.since &&
+          fp.range.until === result.range.until;
+      })
+
+      if (index === -1) {
+        index = pageStore.homeArticles.feedPages.length;
+      }
+
+      batch(() => {
+        updatePageStore('homeArticles', 'feedPages', index, () => ({ ...result }));
+        updatePageStore('homeArticles', 'lastRange', () => ({ ...result.range }));
+        updatePageStore('homeArticles', 'isFetching', () => false);
+      });
+
+      return result;
+    } catch (e){
+      return ;
+    }
+  },
+  'fetchHomeArticles',
+);
+
 export default function preloadHome(pubkey: string | undefined) {
   if (!pubkey) return;
 
@@ -134,5 +244,6 @@ export default function preloadHome(pubkey: string | undefined) {
 
   fetchHomeTotals(pubkey, { since, until });
   fetchHomeGraph(pubkey, { since, until, resolution });
-  // fetchHomeFeed(pubkey);
+  fetchHomeNotes(pubkey, { since, until, limit: 30, offset: 0 });
+  fetchHomeArticles(pubkey, { since, until, limit: 30, offset: 0 });
 }

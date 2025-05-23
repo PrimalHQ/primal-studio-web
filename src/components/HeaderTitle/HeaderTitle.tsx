@@ -6,7 +6,7 @@ import { A } from '@solidjs/router';
 const HeaderTitle: Component<{
   title: string,
   subTitle?: string,
-  children: JSXElement,
+  children?: JSXElement,
  }> = (props) => {
 
 

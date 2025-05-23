@@ -1,4 +1,4 @@
-import { FeedPaging, FeedRange, FeedResult, NostrEventContent } from "../primal";
+import { FeedPaging, FeedRange, FeedResult, MediaEvent, NostrEventContent } from "../primal";
 import { sendMessage, subsTo } from "../utils/socket";
 import { Kind } from "../constants";
 
@@ -92,31 +92,31 @@ export const fetchMegaFeed = (
             range,
           });
         },
-        onEvent: (_, content) => {
-          if (content.kind === Kind.FeedRange) {
-            range = JSON.parse(content.content || '{}') as FeedRange;
+        onEvent: (_, event) => {
+          if (event.kind === Kind.FeedRange) {
+            range = JSON.parse(event.content || '{}') as FeedRange;
             return;
           }
 
-          if (content.kind === kind) {
+          if (event.kind === kind) {
             // For metadata use pubkey instead of event id.
-            const id = kind === Kind.Metadata ? content.pubkey! : content.id;
+            const id = kind === Kind.Metadata ? event.pubkey! : event.id;
             mainEvents.push(id);
             return;
           }
 
-          if (content.kind === Kind.Repost) {
-            const reposted = JSON.parse(content.content || '{ id: "" }') as NostrEventContent;
+          if (event.kind === Kind.Repost) {
+            const reposted = JSON.parse(event.content || '{ id: "" }') as NostrEventContent;
 
             if (reposted.kind === kind) {
               // For metadata use pubkey instead of event id.
-              const id = kind === Kind.Metadata ? content.pubkey! : content.id;
+              const id = kind === Kind.Metadata ? event.pubkey! : event.id;
               mainEvents.push(id);
               return;
             }
           }
 
-          auxEvents.push(content.id);
+          auxEvents.push(event.id);
         }
       });
 

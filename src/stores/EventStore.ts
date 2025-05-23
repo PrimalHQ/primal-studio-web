@@ -5,6 +5,7 @@ import { fetchEvents } from "../primal_api/feeds";
 import { accountStore } from "./AccountStore";
 import { APP_ID } from "../App";
 import { openDB } from 'idb';
+import { addBlossomEvent, addMediaEvent } from "./MediaStore";
 
 
 export const eventStore = new ReactiveMap<string, NostrEventContent>();
@@ -28,6 +29,14 @@ export const addEventToStore = (event: NostrEventContent) => {
     key = ev.id;
   }
 
+  if (ev.kind === Kind.MediaInfo) {
+    addMediaEvent(ev);
+  }
+
+  if (ev.kind === Kind.Blossom) {
+    addBlossomEvent(ev);
+  }
+
   // updateEventStore(() => ({ [key]:  { ...ev } }));
   eventStore.set(key, ev);
 };
@@ -35,26 +44,27 @@ export const addEventToStore = (event: NostrEventContent) => {
 export const addEventsToStore = (events: NostrEventContent[]) => {
   // batch(() => {
     let i = 0;
-    let normalised: Record<string, NostrEventContent> = {};
+    // let normalised: Record<string, NostrEventContent> = {};
 
     for (i=0; i<events.length; i++) {
       let ev = { ...events[i] };
-      let key = ev.id;
+      addEventToStore(ev);
+      // let key = ev.id;
 
-      if (ev.kind === Kind.Metadata) {
-        key = ev.pubkey || ev.id;
-      }
+      // if (ev.kind === Kind.Metadata) {
+      //   key = ev.pubkey || ev.id;
+      // }
 
-      if (ev.kind === Kind.Mentions) {
-        const wrappedEvent = JSON.parse(ev.content || '') as NostrEventContent;
+      // if (ev.kind === Kind.Mentions) {
+      //   const wrappedEvent = JSON.parse(ev.content || '') as NostrEventContent;
 
-        ev = wrappedEvent;
-        key = ev.id;
-      }
+      //   ev = wrappedEvent;
+      //   key = ev.id;
+      // }
 
-      normalised[key] = ev;
+      // normalised[key] = ev;
 
-      eventStore.set(key, ev)
+      // eventStore.set(key, ev)
     }
 
     // updateEventStore(() => ({ ...normalised }));
@@ -146,7 +156,7 @@ export const getRecentEventsFromStore = (ids: string[]) => {
   return { foundEvents, missingEvents };
 }
 
-export const getEventsFromStore = async (ids: string[], index:number) => {
+export const getEventsFromStore = async (ids: string[], subId: string) => {
 
   let { foundEvents, missingEvents } = getRecentEventsFromStore(ids);
 
@@ -206,7 +216,7 @@ export const getEventsFromStore = async (ids: string[], index:number) => {
     const fetchedEvents = await fetchEvents(
       accountStore.pubkey,
       missingEvents,
-      `missing_${index}_${APP_ID}`,
+      `missing_${subId}_${APP_ID}`,
     )
 
     addEventsToStore(fetchedEvents);

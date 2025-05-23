@@ -83,7 +83,7 @@ const Notes: Component = () => {
   return (
     <>
       <Wormhole to="header">
-        <HeaderTitle title={translate('notes', 'header')}/>
+        <HeaderTitle title={translate('notes', 'header')} />
       </Wormhole>
       <h1>{translate('notes', 'title')}</h1>
 

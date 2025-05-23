@@ -28,9 +28,9 @@ const Paginator: Component<{
     <div>
       <div id={props.id} ref={trigger} class={props.isSmall ? styles.smallPaginator : styles.paginator}>
       </div>
-      <button class={styles.button} onClick={props.loadNextPage}>
+      {/* <button class={styles.button} onClick={props.loadNextPage}>
         Load more
-      </button>
+      </button> */}
     </div>
   )
 }

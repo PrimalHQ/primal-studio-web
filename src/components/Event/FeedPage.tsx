@@ -4,6 +4,7 @@ import {
   createReaction,
   createSignal,
   For,
+  JSXElement,
   on,
   onCleanup,
   onMount,
@@ -21,9 +22,13 @@ import {
 import { Kind } from '../../constants';
 import { FeedResult, NostrEventContent } from '../../primal';
 import { getEventsFromStore } from '../../stores/EventStore';
-import Event from './Event';
 
 import styles from './Event.module.scss';
+
+export type FeedEvent = {
+  event: NostrEventContent,
+  reposters: string[],
+};
 
 const FeedPage: Component<{
   page: FeedResult,
@@ -31,6 +36,8 @@ const FeedPage: Component<{
   isRenderEmpty?: boolean,
   observer?: IntersectionObserver,
   key: keyof PageStore,
+  twoColumns?: boolean,
+  eventComponent: (event: { event: NostrEventContent, reposters: string[]}) => JSXElement,
 }> = (props) => {
   const index = untrack(() => props.pageIndex)
   let pageHolder: HTMLDivElement | undefined;
@@ -81,18 +88,15 @@ const FeedPage: Component<{
     getEvents();
   }));
 
-  const [events, setEvents] = createSignal<{
-    event: NostrEventContent,
-    reposters: string[],
-  }[]>([]);
+  const [events, setEvents] = createSignal<FeedEvent[]>([]);
 
   const getEvents = async () => {
     const page = props.page;
     const ids = page.mainEvents;
 
-    const storedEvents = await getEventsFromStore(ids, index);
+    const storedEvents = await getEventsFromStore(ids, `${index}`);
 
-    let events: { event: NostrEventContent, reposters: string[]}[] = [];
+    let events: FeedEvent[] = [];
 
     for (let i=0; i<storedEvents.length; i++) {
       const ev = storedEvents[i];
@@ -110,11 +114,11 @@ const FeedPage: Component<{
           continue;
         }
 
-        events.push({ event: repostedEvent, reposters: [reposter]});
+        events.push({ event: repostedEvent, reposters: [reposter] });
         continue;
       }
 
-      events.push({ event: ev, reposters: []});
+      events.push({ event: ev, reposters: [] });
     }
 
     setEvents(() => events);
@@ -124,20 +128,14 @@ const FeedPage: Component<{
     <div
       ref={pageHolder}
       data-page-index={index}
-      class={styles.feedPage}
+      class={`${styles.feedPage} ${props.twoColumns ? styles.twoColumns : ''}`}
       style={props.isRenderEmpty || events().length === 0 ? `height: ${pageStore[props.key]?.pageInfo[index]?.height || 0}px;` : ''}
     >
       <Show
         when={!props.isRenderEmpty}
       >
         <For each={events()}>
-          {(e) => (
-            <Event
-              event={e.event}
-              reposters={e.reposters}
-              variant='feed'
-            />
-          )}
+          {(e) => props.eventComponent(e)}
         </For>
       </Show>
     </div>

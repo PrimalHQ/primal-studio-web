@@ -1,10 +1,21 @@
+export type NoteAST = {
+  type: string,
+  url?: string,
+  value?: string,
+  raw?: string,
+}
+
+export const youtubeRegex = /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(\?\S*)?(\s|$)/i;
+
+export const isYouTube = (url: string) => youtubeRegex.test(url);
+
 /**
  * Parses text into an Abstract Syntax Tree (AST)
  * Recognizes images, videos, YouTube videos, links, emojis, hashtags, and Nostr entities
  * @param {string} text - The text to parse
- * @returns {Array} - Array of AST nodes
+ * @returns {NoteAST[]} - Array of AST nodes
  */
-export function parseTextToAST(text: string) {
+export const parseTextToAST = (text: string): NoteAST[] => {
   if (!text || typeof text !== 'string') {
     return [];
   }
@@ -42,7 +53,7 @@ export function parseTextToAST(text: string) {
     }
 
     // 3. YouTube videos
-    const youtubeMatch = remaining.match(/https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(\?\S*)?(\s|$)/i);
+    const youtubeMatch = remaining.match(youtubeRegex);
     if (youtubeMatch && youtubeMatch.index === 0) {
       result.push({
         type: 'youtube',

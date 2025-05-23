@@ -21,6 +21,10 @@
   border-radius: 50%;
 }
 
+.avatarResponsive {
+  @include avatar;
+}
+
 .vvsAvatar {
   @include avatar;
   width: 36px;

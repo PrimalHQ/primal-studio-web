@@ -8,13 +8,15 @@ import { parseUserMetadata } from 'src/utils/profile';
 import defaultAvatar from '../../assets/images/default_avatar.svg';
 import { accountStore } from 'src/stores/AccountStore';
 
-const Avatar: Component<{ pubkey: string }> = (props) => {
+const Avatar: Component<{ pubkey: string, size?: number }> = (props) => {
 
   const [src, setSrc] = createSignal(defaultAvatar);
 
   createEffect(() => {
     getSrc();
   })
+
+  const size = () => props.size || 36;
 
   const getSrc = () => {
     const metadata = accountStore.metadata;
@@ -36,7 +38,11 @@ const Avatar: Component<{ pubkey: string }> = (props) => {
   }
 
   return (
-    <div class={styles.vvsAvatar} data-pubkey={props.pubkey}>
+    <div
+      class={styles.avatarResponsive}
+      data-pubkey={props.pubkey}
+      style={{ width: `${size()}px`, height: `${size()}px` }}
+    >
       <img src={src()} alt="avatar" onerror={imgError}/>
     </div>
   );

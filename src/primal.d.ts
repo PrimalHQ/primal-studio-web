@@ -27,6 +27,11 @@ export type NostrEventContent = {
   tags?: string[][],
 };
 
+export type NostrAuxEventContent = {
+  event_id: string,
+  [key: string]: any,
+};
+
 export type NostrEvent = [
   type: "EVENT",
   subkey: string,
@@ -64,6 +69,12 @@ export type FeedRange = {
   elements: string[],
 };
 
+export type AuxEvent = {
+  kind: number,
+  main_event_id: string,
+  id: string,
+}
+
 export type FeedResult = {
   specification: string,
   mainEvents: string[],
@@ -74,6 +85,25 @@ export type FeedResult = {
 export type EventsResult = {
   mainEvents: string[],
   auxEvents: string[],
+  mediaEvents: string[],
+}
+
+export type MediaSize = 'o' | 's' | 'm' | 'l';
+
+export type MediaVariant = {
+  s: MediaSize,
+  a: 0 | 1,
+  w: number,
+  h: number,
+  mt: string,
+  media_url: string,
+  dur?: number,
+}
+
+export type MediaEvent = {
+  event_id: string,
+  resources: { url: string, variants: MediaVariant[] }[],
+  thumbnails?: Record<string, string>,
 }
 
 export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification';

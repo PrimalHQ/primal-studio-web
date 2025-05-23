@@ -85,8 +85,6 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
         <section class={styles.central}>
           {props.children}
         </section>
-
-        <footer id="footer"></footer>
       </main>
     </div>
   );

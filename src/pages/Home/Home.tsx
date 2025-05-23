@@ -1,11 +1,11 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Home.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import StudioChart from 'src/components/Chart/Chart';
-import { fetchHomeGraph, fetchHomeTotals, homeStore, setHomeStore } from './Home.data';
+import { fetchHomeArticles, fetchHomeGraph, fetchHomeNotes, fetchHomeTotals, homeStore, setHomeStore } from './Home.data';
 import { StudioGraph } from 'src/primal_api/studio';
 import { accountStore } from 'src/stores/AccountStore';
 
@@ -14,6 +14,15 @@ import DatePicker from "@rnwonder/solid-date-picker";
 import utils from "@rnwonder/solid-date-picker/utilities";
 import dayjs from 'dayjs';
 import objectSupport from 'dayjs/plugin/objectSupport';
+import FeedPage from 'src/components/Event/FeedPage';
+import { clearPageStore, pageStore } from 'src/stores/PageStore';
+
+import Event from 'components/Event/Event';
+import Note from 'src/components/Event/Note';
+import NotePreview from 'src/components/Event/NotePreview';
+import Paginator from 'src/components/Paginator/Paginator';
+import { calculateOffset } from 'src/stores/EventStore';
+import ArticlePreview from 'src/components/Event/ArticlePreview';
 
 const Home: Component = () => {
 
@@ -30,15 +39,110 @@ const Home: Component = () => {
     setHomeStore('graphKey', key);
   }
 
+  let notesOffset = 0;
+  let articlesOffset = 0;
+
   createEffect(() => {
     const { since, until, resolution } = homeStore.graphSpan;
 
+    clearPageStore('homeNotes');
+    clearPageStore('homeArticles');
+
+    notesOffset = 0;
+    articlesOffset = 0;
+
     fetchHomeGraph(accountStore.pubkey, { since, until, resolution });
     fetchHomeTotals(accountStore.pubkey, { since, until });
+    fetchHomeNotes(accountStore.pubkey, { since, until, limit: 30, offset: 0 });
+    fetchHomeArticles(accountStore.pubkey, { since, until, limit: 30, offset: 0 });
   });
+
+  const loadNextNotesPage = () => {
+    if (pageStore.homeNotes.lastRange.since === 0) return;
+
+    const { since, until } = homeStore.graphSpan;
+
+    const feedRange = pageStore.homeNotes.lastRange;
+
+    notesOffset += feedRange.elements.length;
+
+    fetchHomeNotes(
+      accountStore.pubkey,
+      {
+        since,
+        until,
+        offset: notesOffset,
+        limit: 30,
+      },
+    );
+  };
+
+  const loadNextArticlesPage = () => {
+    if (pageStore.homeArticles.lastRange.since === 0) return;
+
+    const { since, until } = homeStore.graphSpan;
+
+    const feedRange = pageStore.homeArticles.lastRange;
+
+    articlesOffset += feedRange.elements.length;
+
+    fetchHomeArticles(
+      accountStore.pubkey,
+      {
+        since,
+        until,
+        offset: articlesOffset,
+        limit: 30,
+      },
+    );
+  };
+
 
   const satsDiff = () =>
     homeStore.totals.satszapped_received - homeStore.totals.satszapped_sent;
+
+
+  const notePages = () => pageStore.homeNotes.feedPages;
+  const articlePages = () => {
+    return pageStore.homeArticles.feedPages;
+  }
+
+  const shouldRenderEmpty = (index: number) => {
+    return !visiblePages().includes(index);
+  };
+
+  const [visiblePages, setVisiblePages] = createSignal<number[]>([]);
+
+  let observer: IntersectionObserver | undefined;
+  // let timeout = 0;
+
+
+  observer = new IntersectionObserver(entries => {
+    let i=0;
+
+    for (i=0; i<entries.length; i++) {
+      const entry = entries[i];
+
+      const target = entry.target;
+      const id = parseInt(target.getAttribute('data-page-index') || '0');
+
+      if (entry.isIntersecting) {
+        // clearTimeout(timeout);
+        // timeout = setTimeout(() => {
+          const min = id < 3 ? 0 : id - 3;
+          const max = id + 3;
+
+          let config: number[] = [];
+
+          for (let i=min; i<= max; i++) {
+            config.push(i);
+          }
+
+          setVisiblePages(() => [...config]);
+        // }, 300);
+      }
+    }
+  });
 
   return (
     <>
@@ -146,8 +250,6 @@ const Home: Component = () => {
                     if (diffDays > 90) {
                       resolution = 'month';
                     }
-
-                    console.log('DIFF: ', ed.diff(sd, 'days'))
 
                     setHomeStore('graphSpan', () => ({
                       name: 'custom',
@@ -270,6 +372,75 @@ const Home: Component = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div class={styles.feedHolder}>
+        <div class={styles.itemsHolder}>
+          <div class={styles.feedHeader}>
+            <div class={styles.label}>
+              Notes
+            </div>
+          </div>
+          <div class={styles.feedContent}>
+            <For each={notePages()}>
+              {(page, pageIndex) => (
+                <FeedPage
+                  page={page}
+                  isRenderEmpty={shouldRenderEmpty(pageIndex())}
+                  pageIndex={pageIndex()}
+                  observer={observer}
+                  key="homeNotes"
+                  twoColumns={articlePages().length === 0}
+                  eventComponent={(e) => (
+                    <NotePreview
+                      feedEvent={e}
+                      variant='feed'
+                    />
+                  )}
+                />
+              )}
+            </For>
+            <Paginator
+              loadNextPage={loadNextNotesPage}
+              isSmall={true}
+            />
+          </div>
+        </div>
+        <Show when={articlePages().length > 0}>
+          <div class={styles.itemsHolder}>
+          <div class={styles.feedHeader}>
+            <div class={styles.label}>
+              Articles
+            </div>
+          </div>
+          <div class={styles.feedContent}>
+            <For each={articlePages()}>
+              {(page, pageIndex) => (
+                <FeedPage
+                  page={page}
+                  isRenderEmpty={shouldRenderEmpty(pageIndex())}
+                  pageIndex={pageIndex()}
+                  observer={observer}
+                  key="homeArticles"
+                  twoColumns={articlePages().length === 0}
+                  eventComponent={(e) => (
+                    <ArticlePreview
+                      feedEvent={e}
+                      variant='feed'
+                    />
+                  )}
+                />
+              )}
+            </For>
+            <Paginator
+              loadNextPage={loadNextArticlesPage}
+              isSmall={true}
+            />
+          </div>
+
+          </div>
+
+        </Show>
       </div>
     </>
   );
