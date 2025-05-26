@@ -295,7 +295,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number, ident?:
         updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve(pageResolve(page));
+        resolve(pageResolve(page, `${payload.offset}`));
       },
       onNotice: () => {
         reject('failed_to_fetch_relays');

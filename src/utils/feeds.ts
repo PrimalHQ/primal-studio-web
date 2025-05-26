@@ -724,7 +724,7 @@ export const getContactsInPage = (page: EventFeedPage) => {
   })) as DMContact[];
 }
 
-export const pageResolve = (page: EventFeedPage): EventFeedResult => {
+export const pageResolve = (page: EventFeedPage, identifier = `${Math.ceil(Math.random() * 1_000_000)}`): EventFeedResult => {
 
   // If there are reposts that have empty content,
   // we need to add the content manualy
@@ -776,6 +776,7 @@ export const pageResolve = (page: EventFeedPage): EventFeedResult => {
     leaderboard,
     paging,
     page,
+    identifier,
   };
 }
 

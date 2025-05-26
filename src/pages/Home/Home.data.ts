@@ -170,7 +170,8 @@ export const fetchHomeNotes = query(
 
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
-          fp.paging.until === result.paging.until;
+          fp.paging.until === result.paging.until &&
+          fp.identifier === result.identifier;
       })
 
       if (index === -1) {

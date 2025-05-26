@@ -326,6 +326,7 @@ export type EventFeedResult = {
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
   leaderboard: LeaderboardInfo[],
+  identifier: string,
 };
 
 export type PrimalUser = {
