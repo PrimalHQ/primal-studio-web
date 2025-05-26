@@ -105,7 +105,7 @@ const MediaUploads: Component = () => {
       <div class={styles.settingsSection}>
 
         <div class={`${styles.bigCaption}`}>
-          {translate('settings.uploads', 'mediaServer')}
+          {translate('settings', 'uploads', 'mediaServer')}
         </div>
 
         <div class={`${styles.label} ${styles.blossomMainServer}`}>
@@ -119,7 +119,7 @@ const MediaUploads: Component = () => {
         </div>
 
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-          {translate('settings.uploads', 'switchServer')}
+          {translate('settings', 'uploads', 'switchServer')}
         </div>
 
         <div
@@ -129,7 +129,7 @@ const MediaUploads: Component = () => {
           <input
             ref={switchSeverInput}
             type="text"
-            placeholder={translate('settings.uploads', 'blossomServerUrl')}
+            placeholder={translate('settings', 'uploads', 'blossomServerUrl')}
             onChange={() => onSwitchServerInput()}
           />
           <button onClick={() => onSwitchServerInput()}>
@@ -148,13 +148,13 @@ const MediaUploads: Component = () => {
         <ButtonLink
           onClick={() => addBlossomServers(primalBlossom)}
         >
-          {translate('settings.uploads', 'restoreBlossomServer')}
+          {translate('settings', 'uploads', 'restoreBlossomServer')}
         </ButtonLink>
 
         <div style="height: 20px"></div>
 
         <div class={`${styles.bigCaption}`}>
-          {translate('settings.uploads', 'mediaMirrors')}
+          {translate('settings', 'uploads', 'mediaMirrors')}
         </div>
 
         <CheckBox
@@ -172,7 +172,7 @@ const MediaUploads: Component = () => {
         />
 
         <div class={styles.settingsDescription}>
-          {translate('settings.uploads', 'mediaMirrorsDescription')}
+          {translate('settings', 'uploads', 'mediaMirrorsDescription')}
         </div>
 
         <Show when={hasMirrors()}>
@@ -209,7 +209,7 @@ const MediaUploads: Component = () => {
           <div style="height: 20px"></div>
 
           <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-              {translate('settings.uploads', 'addMirror')}
+              {translate('settings', 'uploads', 'addMirror')}
           </div>
 
           <div
@@ -219,7 +219,7 @@ const MediaUploads: Component = () => {
             <input
               ref={addMirrorInput}
               type="text"
-              placeholder={translate('settings.uploads', 'blossomServerUrl')}
+              placeholder={translate('settings', 'uploads', 'blossomServerUrl')}
               onChange={() => onAddMirrorInput()}
             />
 
@@ -231,7 +231,7 @@ const MediaUploads: Component = () => {
           <div style="height: 20px"></div>
 
           <div class={`${styles.settingsCaptionDarker} ${styles.secondCaption}`}>
-            {translate('settings.uploads', 'suggestedMirrors')}
+            {translate('settings', 'uploads', 'suggestedMirrors')}
           </div>
 
           <For each={reommendedMirrors()}>

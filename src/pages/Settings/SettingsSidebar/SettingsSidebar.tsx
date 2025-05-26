@@ -18,7 +18,7 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
     <div id={props.id}>
       <div class={styles.headingConnectedRelays}>
         <div>
-          {translate('settings.sidebar', 'relays')}
+          {translate('settings', 'sidebar', 'relays')}
         </div>
       </div>
 
@@ -55,7 +55,7 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
       <div class={styles.headingCachingService}>
         <div>
-          {translate('settings.sidebar', 'cachingService')}
+          {translate('settings', 'sidebar', 'cachingService')}
         </div>
       </div>
 

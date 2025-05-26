@@ -36,7 +36,7 @@ const ConfirmDialog: Component<{
       setOpen={setOpen}
       title={
         <div class={styles.confirmDialogTitle}>
-          {props.title || translate('defaults.confirmDialog', 'title')}
+          {props.title || translate('defaults', 'confirmDialog', 'title')}
         </div>
       }
       triggerClass={'hidden'}
@@ -53,7 +53,7 @@ const ConfirmDialog: Component<{
             <ButtonPrimary
               onClick={props.onConfirm}
             >
-              {props.confirmLabel || translate('defaults.confirmDialog', 'confirm')}
+              {props.confirmLabel || translate('defaults', 'confirmDialog', 'confirm')}
             </ButtonPrimary>
           </Show>
 
@@ -62,7 +62,7 @@ const ConfirmDialog: Component<{
               onClick={props.onAbort}
               light={true}
             >
-              {props.abortLabel || translate('defaults.confirmDialog', 'abort')}
+              {props.abortLabel || translate('defaults', 'confirmDialog', 'abort')}
             </ButtonSecondary>
           </Show>
         </div>

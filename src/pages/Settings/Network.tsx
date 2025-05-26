@@ -88,15 +88,15 @@ const Network: Component = () => {
     <div class={styles.networkPage}>
       <div class={styles.settingsSection}>
         <div class={`${styles.bigCaption}`}>
-          {translate('settings.network', 'cachingService')}
+          {translate('settings', 'network', 'cachingService')}
         </div>
 
         <div class={styles.settingsCaption}>
           <div>
-            {translate('settings.network', 'connectedCachingService')}
+            {translate('settings', 'network', 'connectedCachingService')}
           </div>
           <HelpTip>
-            <span>{translate('settings.network', 'cahingPoolHelp')}</span>
+            <span>{translate('settings', 'network', 'cahingPoolHelp')}</span>
           </HelpTip>
         </div>
 
@@ -118,7 +118,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsSection}>
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-          {translate('settings.network', 'alternativeCachingService')}
+          {translate('settings', 'network', 'alternativeCachingService')}
         </div>
 
         <div
@@ -128,7 +128,7 @@ const Network: Component = () => {
           <input
             ref={cachingServiceInput}
             type="text"
-            placeholder={translate('settings.network', 'cachingServiceUrl')}
+            placeholder={translate('settings', 'network', 'cachingServiceUrl')}
             onChange={() => onCachingServiceInput()}
           />
           <button onClick={() => onCachingServiceInput()}>
@@ -138,7 +138,7 @@ const Network: Component = () => {
 
         <Show when={invalidCachingService()}>
           <div class={styles.invalidInput}>
-            {translate('settings.network', 'invalidRelayUrl')}
+            {translate('settings', 'network', 'invalidRelayUrl')}
           </div>
         </Show>
 
@@ -147,18 +147,18 @@ const Network: Component = () => {
         <ButtonLink
           onClick={() => changeCachingService()}
         >
-          {translate('settings.network', 'restoreCachingService')}
+          {translate('settings', 'network', 'restoreCachingService')}
         </ButtonLink>
       </div>
 
 
       <div class={styles.settingsSection}>
         <div class={styles.bigCaption}>
-          {translate('settings.network', 'relays')}
+          {translate('settings', 'network', 'relays')}
         </div>
 
         <div class={styles.settingsCaption}>
-          {translate('settings.network', 'myRelays')}
+          {translate('settings', 'network', 'myRelays')}
         </div>
 
         <Show
@@ -166,7 +166,7 @@ const Network: Component = () => {
           fallback={
             <div class={styles.settingsContentPaddingOnly}>
               <div class={styles.noMyRelays}>
-                {translate('settings.network', 'noMyRelays')}
+                {translate('settings', 'network', 'noMyRelays')}
               </div>
             </div>
           }
@@ -196,7 +196,7 @@ const Network: Component = () => {
                   </div>
 
                   <div class={styles.remove}>
-                    {translate('settings.network', 'removeRelay')}
+                    {translate('settings', 'network', 'removeRelay')}
                   </div>
                 </button>
               )}
@@ -219,10 +219,10 @@ const Network: Component = () => {
 
         <div class={styles.resetRelays}>
           <ButtonLink onClick={resetToDefaultRelays}>
-            {translate('settings.network', 'resetRelays')}
+            {translate('settings', 'network', 'resetRelays')}
           </ButtonLink>
           <HelpTip>
-            <span>{translate('settings.network', 'resetRelaysHelp')}</span>
+            <span>{translate('settings', 'network', 'resetRelaysHelp')}</span>
           </HelpTip>
         </div>
       </div>
@@ -230,7 +230,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsSection}>
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-          {translate('settings.network', 'customRelay')}
+          {translate('settings', 'network', 'customRelay')}
         </div>
 
         <div
@@ -240,7 +240,7 @@ const Network: Component = () => {
           <input
             ref={customRelayInput}
             type="text"
-            placeholder={translate('settings.network', 'relayUrl')}
+            placeholder={translate('settings', 'network', 'relayUrl')}
             onChange={() => onCustomRelayInput()}
           />
           <button onClick={() => onCustomRelayInput()}>
@@ -250,7 +250,7 @@ const Network: Component = () => {
 
         <Show when={invalidCustomRelay()}>
           <div class={styles.invalidInput}>
-            {translate('settings.network', 'invalidRelayUrl')}
+            {translate('settings', 'network', 'invalidRelayUrl')}
           </div>
         </Show>
       </div>
@@ -264,16 +264,16 @@ const Network: Component = () => {
             onChange={setProxyThroughPrimal}
             checked={relayStore.proxyThroughPrimal}
           />
-          <span>{translate('settings.network', 'proxyEvents')}</span>
+          <span>{translate('settings', 'network', 'proxyEvents')}</span>
           <HelpTip zIndex={1_000}>
             <span>
-              {translate('settings.network', 'proxyDescription')}
+              {translate('settings', 'network', 'proxyDescription')}
             </span>
           </HelpTip>
         </div>
 
         <div class={styles.settingsDescription}>
-          {translate('settings.network', 'proxyDescription')}
+          {translate('settings', 'network', 'proxyDescription')}
         </div>
       </div>
 
@@ -283,7 +283,7 @@ const Network: Component = () => {
       <ConfirmDialog
         open={confirmRemoveRelay().length > 0}
         description={translate(
-          'settings.network',
+          'settings', 'network',
           'removeRelayConfirm',
           { url: confirmRemoveRelay() },
         )}

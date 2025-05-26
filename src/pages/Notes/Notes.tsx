@@ -34,13 +34,13 @@ const Notes: Component = () => {
   });
 
   const loadNextPage = () => {
-    if (pageStore.notes.lastRange.since === 0) return;
+    // if (pageStore.notes.lastRange.since === 0) return;
 
-    const pageNotes = pageStore.notes.feedPages.at(-1)?.mainEvents || [];
-    const feedRange = pageStore.notes.lastRange;
-    const offset = calculateOffset(pageNotes, feedRange);
+    // const pageNotes = pageStore.notes.feedPages.at(-1)?.mainEvents || [];
+    // const feedRange = pageStore.notes.lastRange;
+    // const offset = calculateOffset(pageNotes, feedRange);
 
-    fetchNotesFeed(accountStore.pubkey || '', { feedRange, offset });
+    // fetchNotesFeed(accountStore.pubkey || '', { feedRange, offset });
   };
 
   const shouldRenderEmpty = (index: number) => {

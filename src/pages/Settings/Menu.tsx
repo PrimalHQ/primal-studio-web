@@ -13,19 +13,19 @@ const Menu: Component = () => {
     <div>
       <div class={styles.menuLinks}>
         <A href="/settings/appearance">
-          {translate('settings.menu', 'appearance')}
+          {translate('settings', 'menu', 'appearance')}
           <div class={styles.chevron}></div>
         </A>
 
         <Show when={accountStore.pubkey}>
           <A href="/settings/uploads">
-            {translate('settings.menu', 'uploads')}
+            {translate('settings', 'menu', 'uploads')}
             <div class={styles.chevron}></div>
           </A>
         </Show>
 
         <A href="/settings/network">
-          {translate('settings.menu', 'network')}
+          {translate('settings', 'menu', 'network')}
           <div class={styles.chevron}></div>
         </A>
       </div>

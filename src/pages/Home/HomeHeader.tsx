@@ -1,0 +1,149 @@
+
+import { Component } from 'solid-js';
+
+import styles from './Home.module.scss';
+import { homeStore, setHomeStore } from 'src/pages/Home/Home.data';
+import { StudioGraph } from 'src/primal_api/studio';
+import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
+import DatePicker from '@rnwonder/solid-date-picker';
+import utils from "@rnwonder/solid-date-picker/utilities";
+import { translate } from 'src/translations/translate';
+
+const HomeHeader: Component<{
+  id?: string,
+}> = (props) => {
+
+
+  return (
+
+    <HeaderTitle title={translate('home', 'header')}>
+      <div class={styles.graphSpans}>
+        <button
+          class={`${homeStore.graphSpan.name === '7d' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: '7d',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor((new Date()).getTime() / 1_000) - 7 * 24 * 60 * 60,
+            resolution: 'day',
+          }))}
+        >
+          7D
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === '2w' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: '2w',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor((new Date()).getTime() / 1_000) - 14 * 24 * 60 * 60,
+            resolution: 'day',
+          }))}
+        >
+          2W
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === '1m' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: '1m',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+            resolution: 'day',
+          }))}
+        >
+          1M
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === '3m' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: '3m',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
+            resolution: 'day',
+          }))}
+        >
+          3M
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === 'ytd' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: 'ytd',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1_000),
+            resolution: 'month',
+          }))}
+        >
+          YTD
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === '1y' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: '1y',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: Math.floor((new Date()).getTime() / 1_000) - 365 * 24 * 60 * 60,
+            resolution: 'month',
+          }))}
+        >
+          1Y
+        </button>
+        <button
+          class={`${homeStore.graphSpan.name === 'all' ? styles.active : ''}`}
+          onClick={() => setHomeStore('graphSpan', () => ({
+            name: 'all',
+            until: Math.floor((new Date()).getTime() / 1_000),
+            since: 0,
+            resolution: 'month',
+          }))}
+        >
+          All
+        </button>
+
+        <div class={styles.datePicker}>
+          <DatePicker
+            type="range"
+            onChange={(data) => {
+              if (data.type !== 'range') return;
+
+              if (data.startDate && data.endDate) {
+                // @ts-ignore
+                const sd = dayjs({ year: data.startDate.year || 0, month: data.startDate.month || 0, day: data.startDate.day });
+                // @ts-ignore
+                const ed = dayjs({ year: data.endDate.year || 0, month: data.endDate.month || 0, day: data.endDate.day });
+
+                const diffDays = ed.diff(sd, 'days');
+
+                let resolution: 'day' | 'month' | 'hour' = 'day';
+
+                if (diffDays < 4) {
+                  resolution = 'hour';
+                }
+
+                if (diffDays > 90) {
+                  resolution = 'month';
+                }
+
+                setHomeStore('graphSpan', () => ({
+                  name: 'custom',
+                  since: sd.unix(),
+                  until: ed.unix(),
+                  resolution,
+                }))
+              }
+            }}
+            maxDate={utils().getToday()}
+            renderInput={({ showDate }) => (
+              <button
+              class={`${styles.compact} ${homeStore.graphSpan.name === 'custom' ? styles.active : ''}`}
+                onClick={showDate}
+              >
+                <div class={styles.calendarIcon}></div>
+              </button>
+            )}
+            shouldCloseOnSelect
+          />
+        </div>
+      </div>
+    </HeaderTitle>
+  )
+
+}
+
+export default HomeHeader;
