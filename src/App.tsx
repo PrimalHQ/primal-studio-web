@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './App.module.scss';
 import { AppProvider } from './context/AppContext';
@@ -8,6 +8,7 @@ import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeContextMenu } from './stores/AppStore';
+import { accountStore } from './stores/AccountStore';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -32,7 +33,9 @@ const App: Component = () => {
     <div class={styles.App}>
       <AppProvider>
         <Toaster>
-          <AppRouter />
+          <Show when={accountStore.pubkey}>
+            <AppRouter />
+          </Show>
 
           <NoteContextMenu
             open={appStore.showNoteContextMenu}
