@@ -18,3 +18,13 @@ export const extractRelayConfigFromTags = (tags: string[][]) => {
 
   }, {});
 };
+
+
+export const selectRelayTags = (tags: string[][], limit = 2, onlyWritable = true) =>
+  tags.reduce((acc, t) =>
+    t[0] === 'r' &&
+    (onlyWritable ? t[3] !== 'read' : true) &&
+    (t[1].startsWith('wss://') ||
+    t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []
+  ).slice(0, limit);
+

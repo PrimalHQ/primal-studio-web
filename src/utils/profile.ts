@@ -1,8 +1,8 @@
 import { nip19 } from "nostr-tools";
 import { eventStore } from "../stores/EventStore";
-import { NostrEventContent, PrimalUser, UserMetadata, UserMetadataContent } from "../primal";
+import { NostrEventContent, PrimalUser, UserMetadata, UserMetadataContent, VanityProfiles } from "../primal";
 import { logError } from "./logger";
-import { Kind } from "src/constants";
+import { Kind, minKnownProfiles } from "src/constants";
 
 export const hexToNpub = (hex: string | undefined): string =>  {
 
@@ -13,6 +13,30 @@ export const hexToNpub = (hex: string | undefined): string =>  {
     return '';
   }
 
+}
+
+export const npubToHex = (npub: string): string =>  {
+  if (!npub.startsWith('npub1') && !npub.startsWith('nprofile1')) {
+    return npub;
+  }
+
+  try {
+    const decoded = nip19.decode(npub);
+
+    if (!decoded) {
+      return '';
+    }
+
+    const hex = typeof decoded.data === 'string' ?
+      decoded.data :
+      (decoded.data as nip19.ProfilePointer).pubkey;
+
+    return hex;
+
+  } catch (e) {
+    console.error('nip19 decode error');
+    return '';
+  }
 }
 
 export const truncateNpub = (npub: string) => {
@@ -80,3 +104,18 @@ export const trimVerification = (address: string | undefined) => {
 
   return address.split('@');
 }
+
+export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
+  try {
+    const name = vanityName.toLowerCase();
+    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+
+    const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
+
+    return await content.json();
+  } catch (e) {
+    logError('Failed to fetch known users: ', vanityName, e);
+
+    return { ...minKnownProfiles };
+  }
+};

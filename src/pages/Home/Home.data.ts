@@ -1,12 +1,14 @@
-import { query } from "@solidjs/router";
+import { Params, query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { APP_ID } from "../../App";
-import { emptyFeedRange, fetchMegaFeed } from "../../primal_api/feeds";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { FeedRange, NostrEventContent } from "../../primal";
+import { FeedRange, NostrEventContent, PrimalArticle, PrimalNote } from "../../primal";
 import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { emptyStudioTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
+import { emptyEventFeedPage, emptyFeedRange } from "src/utils/feeds";
+import { fetchKnownProfiles } from "src/utils/profile";
+import { accountStore } from "src/stores/AccountStore";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -87,8 +89,8 @@ export const defaultSpan = (): GraphSpan => ({
 export type HomeStore = {
   totals: StudioTotals,
   graph: StudioGraph[],
-  notes: string[],
-  articles: string[],
+  notes: PrimalNote[],
+  articles: PrimalArticle[],
   graphKey: keyof StudioGraph,
   graphSpan: GraphSpan,
 }
@@ -111,6 +113,7 @@ export const fetchHomeTotals = query(
     options?: {
       since?: number,
       until?: number,
+      pubkey?: string,
     }
   ) => {
 
@@ -126,6 +129,7 @@ export const fetchHomeGraph = query(
     options?: {
       since?: number,
       until?: number,
+      pubkey?: string,
       resolution?: 'hour' | 'day' | 'month',
     }
   ) => {
@@ -145,13 +149,7 @@ export const fetchHomeNotes = query(
     if (pageStore.homeNotes.isFetching) {
       const pages = pageStore.notes.feedPages;
 
-      return pages[pages.length] ||
-        {
-          specification: '',
-          mainEvents: [],
-          auxEvents: [],
-          range: emptyFeedRange(),
-        };
+      return pages[pages.length] || emptyEventFeedPage();
     }
 
     updatePageStore('homeNotes', 'isFetching', () => true);
@@ -160,13 +158,13 @@ export const fetchHomeNotes = query(
       const result = await getTopEvents({
         pubkey,
         kind: Kind.Text,
+        ident: `${Kind.Text}_${options?.offset || 0}`,
         ...options,
       });
 
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
-        return fp.specification === result.specification &&
-          fp.range.since === result.range.since &&
-          fp.range.until === result.range.until;
+        return fp.paging.since === result.paging.since &&
+          fp.paging.until === result.paging.until;
       })
 
       if (index === -1) {
@@ -175,7 +173,7 @@ export const fetchHomeNotes = query(
 
       batch(() => {
         updatePageStore('homeNotes', 'feedPages', index, () => ({ ...result }));
-        updatePageStore('homeNotes', 'lastRange', () => ({ ...result.range }));
+        updatePageStore('homeNotes', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeNotes', 'isFetching', () => false);
       });
 
@@ -193,15 +191,9 @@ export const fetchHomeArticles = query(
     options?: HomePayload,
   ) => {
     if (pageStore.homeArticles.isFetching) {
-      const pages = pageStore.notes.feedPages;
+      const pages = pageStore.homeArticles.feedPages;
 
-      return pages[pages.length] ||
-        {
-          specification: '',
-          mainEvents: [],
-          auxEvents: [],
-          range: emptyFeedRange(),
-        };
+      return pages[pages.length] || emptyEventFeedPage();
     }
 
     updatePageStore('homeArticles', 'isFetching', () => true);
@@ -210,13 +202,13 @@ export const fetchHomeArticles = query(
       const result = await getTopEvents({
         pubkey,
         kind: Kind.LongForm,
+        ident: `${Kind.LongForm}_${options?.offset || 0}`,
         ...options,
       });
 
       let index = pageStore.homeArticles.feedPages.findIndex(fp => {
-        return fp.specification === result.specification &&
-          fp.range.since === result.range.since &&
-          fp.range.until === result.range.until;
+        return fp.paging.since === result.paging.since &&
+          fp.paging.until === result.paging.until;
       })
 
       if (index === -1) {
@@ -225,7 +217,7 @@ export const fetchHomeArticles = query(
 
       batch(() => {
         updatePageStore('homeArticles', 'feedPages', index, () => ({ ...result }));
-        updatePageStore('homeArticles', 'lastRange', () => ({ ...result.range }));
+        updatePageStore('homeArticles', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeArticles', 'isFetching', () => false);
       });
 
@@ -237,13 +229,19 @@ export const fetchHomeArticles = query(
   'fetchHomeArticles',
 );
 
-export default function preloadHome(pubkey: string | undefined) {
-  if (!pubkey) return;
+export const preloadHome = (args: RoutePreloadFuncArgs) => {
+  let pk = args.params?.pubkey;
+
+  if (!pk) {
+    pk = accountStore.pubkey;
+  }
+
+  if (!pk) return;
 
   const { since, until, resolution } = homeStore.graphSpan;
 
-  fetchHomeTotals(pubkey, { since, until });
-  fetchHomeGraph(pubkey, { since, until, resolution });
-  fetchHomeNotes(pubkey, { since, until, limit: 30, offset: 0 });
-  fetchHomeArticles(pubkey, { since, until, limit: 30, offset: 0 });
+  fetchHomeTotals(pk, { since, until });
+  fetchHomeGraph(pk, { since, until, resolution });
+  fetchHomeNotes(pk, { since, until, limit: 30, offset: 0 });
+  fetchHomeArticles(pk, { since, until, limit: 30, offset: 0 });
 }

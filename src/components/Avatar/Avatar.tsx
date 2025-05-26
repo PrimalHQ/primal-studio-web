@@ -2,13 +2,17 @@ import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import { translate } from '../../translations/translate';
 
 import styles from './Avatar.module.scss';
-import { getEventFromStore } from 'src/stores/EventStore';
+import { eventStore, getEventFromStore } from 'src/stores/EventStore';
 import { parseUserMetadata } from 'src/utils/profile';
 
 import defaultAvatar from '../../assets/images/default_avatar.svg';
 import { accountStore } from 'src/stores/AccountStore';
+import { PrimalUser } from 'src/primal';
 
-const Avatar: Component<{ pubkey: string, size?: number }> = (props) => {
+const Avatar: Component<{
+  user?: PrimalUser,
+  size?: number
+}> = (props) => {
 
   const [src, setSrc] = createSignal(defaultAvatar);
 
@@ -18,14 +22,15 @@ const Avatar: Component<{ pubkey: string, size?: number }> = (props) => {
 
   const size = () => props.size || 36;
 
-  const getSrc = () => {
-    const metadata = accountStore.metadata;
 
-    const user = metadata && parseUserMetadata(metadata);
+  const getSrc = async () => {
+    if (props.user) {
+      const user = props.user;
+      const url = (user && user.picture) ? user.picture : defaultAvatar;
 
-    const url = (user && user.picture) ? user.picture : defaultAvatar;
-
-    setSrc(url);
+      setSrc(url);
+      return;
+    }
   }
 
   const imgError = (event: any) => {
@@ -40,7 +45,7 @@ const Avatar: Component<{ pubkey: string, size?: number }> = (props) => {
   return (
     <div
       class={styles.avatarResponsive}
-      data-pubkey={props.pubkey}
+      data-pubkey={props.user?.pubkey || ''}
       style={{ width: `${size()}px`, height: `${size()}px` }}
     >
       <img src={src()} alt="avatar" onerror={imgError}/>

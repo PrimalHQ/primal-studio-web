@@ -20,7 +20,7 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
         <A href={profileLink(accountStore.pubkey) || ''} class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
-              pubkey={accountStore.pubkey}
+              user={activeUser()}
             />
           </div>
           <div class={styles.userInfo}>

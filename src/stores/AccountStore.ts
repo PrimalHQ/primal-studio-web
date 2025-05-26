@@ -13,6 +13,8 @@ import { getReplacableEvent, triggerImportEvents } from "src/primal_api/events";
 import { areUrlsSame } from "src/utils/blossom";
 import { getDefaultBlossomServers } from "src/primal_api/settings";
 import { sendBlossomEvent } from "src/primal_api/relays";
+import { createEffect } from "solid-js";
+import { parseUserMetadata } from "src/utils/profile";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 

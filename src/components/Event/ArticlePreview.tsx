@@ -1,6 +1,6 @@
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -16,21 +16,20 @@ import { longDate } from 'src/utils/date';
 import missingImage from 'assets/images/missing_image.png';
 
 const ArticlePreview: Component<{
-  feedEvent: FeedEvent,
+  article: PrimalArticle,
   embedded?: boolean,
   variant?: EventDisplayVariant,
 }> = (props) => {
 
-  const article = () => props.feedEvent.event;
+  const article = () => props.article;
 
-  const published = () => ((article().tags || []).find(t => t[0] === 'published_at') || ['0'])[1];
+  const published = () => ((article()?.tags || []).find(t => t[0] === 'published_at') || ['0'])[1];
 
-  const image = () => ((article().tags || []).find(t => t[0] === 'image') || ['image', missingImage])[1];
+  const image = () => ((article()?.tags || []).find(t => t[0] === 'image') || ['image', missingImage])[1];
 
-  const title = () => ((article().tags || []).find(t => t[0] === 'title') || ['title', ''])[1];
+  const title = () => ((article()?.tags || []).find(t => t[0] === 'title') || ['title', ''])[1];
 
-  const author = () => user(props.feedEvent.event.pubkey);
-
+  const author = () => article()?.user;
 
   const user = (pubkey?: string) => ({
     pubkey: pubkey || '',
@@ -42,7 +41,7 @@ const ArticlePreview: Component<{
     const image = event.target;
 
     // list of user's blossom servers from kind 10_063
-    const userBlossoms = getUsersBlossomUrls(props.feedEvent.event.pubkey || '') || [];
+    const userBlossoms = getUsersBlossomUrls(props.article.pubkey || '') || [];
 
     // Image url from a Note
     const originalSrc = image.src || '';
@@ -102,13 +101,13 @@ const ArticlePreview: Component<{
   return (
     <a
       class={`${styles.notePreview}`}
-      data-event-id={props.feedEvent.event.id}
-      href={`/e/${props.feedEvent.event.id}`}
+      data-event-id={props.article.id}
+      href={`/e/${props.article.id}`}
     >
       <div class={styles.holder}>
         <div class={styles.userAvatar}>
           <Avatar
-            pubkey={author().pubkey}
+            user={author()}
             size={24}
           />
         </div>

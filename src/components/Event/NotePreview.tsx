@@ -1,6 +1,6 @@
 import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -16,7 +16,7 @@ import { longDate } from 'src/utils/date';
 import missingImage from 'assets/images/missing_image.png';
 
 const NotePreview: Component<{
-  feedEvent: FeedEvent,
+  note: PrimalNote,
   embedded?: boolean,
   variant?: EventDisplayVariant,
 }> = (props) => {
@@ -27,9 +27,9 @@ const NotePreview: Component<{
     parseNote();
   });
 
-  const note = () => props.feedEvent.event;
+  const note = () => props.note;
 
-  const author = () => user(props.feedEvent.event.pubkey);
+  const author = () => props.note.user;
 
   const user = (pubkey?: string) => ({
     pubkey: pubkey || '',
@@ -38,7 +38,7 @@ const NotePreview: Component<{
   });
 
   const parseNote = () => {
-    const note = props.feedEvent.event;
+    const note = props.note;
     let asts = parseTextToAST(note.content || '');
 
     setNoteAst(() => asts);
@@ -104,7 +104,7 @@ const NotePreview: Component<{
     const image = event.target;
 
     // list of user's blossom servers from kind 10_063
-    const userBlossoms = getUsersBlossomUrls(props.feedEvent.event.pubkey || '') || [];
+    const userBlossoms = getUsersBlossomUrls(props.note.pubkey || '') || [];
 
     // Image url from a Note
     const originalSrc = image.src || '';
@@ -170,23 +170,19 @@ const NotePreview: Component<{
   return (
     <a
       class={`${styles.notePreview}`}
-      data-event-id={props.feedEvent.event.id}
-      href={`/e/${props.feedEvent.event.id}`}
+      data-event-id={props.note.id}
+      href={`/e/${props.note.id}`}
     >
-      <Show when={props.feedEvent.reposters.length > 0}>
+      <Show when={props.note.repost?.user}>
         <div class={styles.reposters}>
-          <For each={props.feedEvent.reposters}>
-            {reposter =>
-              <div>repost: {user(reposter).name}</div>
-            }
-          </For>
+          <div>reposted by {props.note.repost?.user?.name}</div>
         </div>
       </Show>
 
       <div class={styles.holder}>
         <div class={styles.userAvatar}>
           <Avatar
-            pubkey={author().pubkey}
+            user={author()}
             size={24}
           />
         </div>

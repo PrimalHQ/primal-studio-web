@@ -20,7 +20,7 @@ import {
 } from '../../stores/PageStore';
 
 import { Kind } from '../../constants';
-import { FeedResult, NostrEventContent } from '../../primal';
+import { EventFeedResult, FeedResult, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
 import { getEventsFromStore } from '../../stores/EventStore';
 
 import styles from './Event.module.scss';
@@ -31,13 +31,13 @@ export type FeedEvent = {
 };
 
 const FeedPage: Component<{
-  page: FeedResult,
+  page: EventFeedResult,
   pageIndex: number,
   isRenderEmpty?: boolean,
   observer?: IntersectionObserver,
   key: keyof PageStore,
   twoColumns?: boolean,
-  eventComponent: (event: { event: NostrEventContent, reposters: string[]}) => JSXElement,
+  eventComponent: (event: string) => JSXElement,
 }> = (props) => {
   const index = untrack(() => props.pageIndex)
   let pageHolder: HTMLDivElement | undefined;
@@ -48,7 +48,7 @@ const FeedPage: Component<{
     setTimeout(() => {
       props.observer?.observe(pageHolder);
 
-      getEvents();
+      getEvents(true);
     }, 1);
   });
 
@@ -67,61 +67,31 @@ const FeedPage: Component<{
     updatePageStore(props.key, 'pageInfo', `${index}`, () => ({ height: rect.height }));
   });
 
-  const track = createReaction(() => {
-    if (props.isRenderEmpty) return;
+  // const track = createReaction(() => {
+  //   if (props.isRenderEmpty) return;
 
-    getEvents();
-  });
+  //   getEvents();
+  // });
 
-  const forget = async () => {
-    setEvents(() => []);
-    await forgetPage(props.key, index);
-    track(() => props.isRenderEmpty);
-  };
+  // const forget = async () => {
+  //   setEvents(() => []);
+  //   await forgetPage(props.key, index);
+  //   track(() => props.isRenderEmpty);
+  // };
 
-  createEffect(on(() => props.isRenderEmpty, (isEmpty) => {
-    if (isEmpty === true) {
-      forget();
-      return;
-    }
+  // createEffect(on(() => props.isRenderEmpty, (isEmpty) => {
+  //   if (isEmpty === true) {
+  //     forget();
+  //     return;
+  //   }
 
-    getEvents();
-  }));
+  //   getEvents();
+  // }));
 
-  const [events, setEvents] = createSignal<FeedEvent[]>([]);
+  const [events, setEvents] = createSignal<string[]>([]);
 
-  const getEvents = async () => {
-    const page = props.page;
-    const ids = page.mainEvents;
-
-    const storedEvents = await getEventsFromStore(ids, `${index}`);
-
-    let events: FeedEvent[] = [];
-
-    for (let i=0; i<storedEvents.length; i++) {
-      const ev = storedEvents[i];
-
-      if (!ev) continue;
-
-      if (ev.kind === Kind.Repost) {
-        const reposter = ev.pubkey || '';
-        const repostedEvent = JSON.parse(ev.content || '{ id: ""}') as NostrEventContent;
-
-        const listedIndex = events.findIndex(({ event }) => repostedEvent.id === event.id);
-
-        if (listedIndex > -1) {
-          events[listedIndex].reposters.push(reposter);
-          continue;
-        }
-
-        events.push({ event: repostedEvent, reposters: [reposter] });
-        continue;
-      }
-
-      events.push({ event: ev, reposters: [] });
-    }
-
-    setEvents(() => events);
+  const getEvents = async (init?: boolean) => {
+    setEvents(() => [ ...props.page.paging.elements ])
   };
 
   return (

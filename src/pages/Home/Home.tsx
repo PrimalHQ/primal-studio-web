@@ -9,7 +9,6 @@ import { fetchHomeArticles, fetchHomeGraph, fetchHomeNotes, fetchHomeTotals, hom
 import { StudioGraph } from 'src/primal_api/studio';
 import { accountStore } from 'src/stores/AccountStore';
 
-
 import DatePicker from "@rnwonder/solid-date-picker";
 import utils from "@rnwonder/solid-date-picker/utilities";
 import dayjs from 'dayjs';
@@ -17,14 +16,13 @@ import objectSupport from 'dayjs/plugin/objectSupport';
 import FeedPage from 'src/components/Event/FeedPage';
 import { clearPageStore, pageStore } from 'src/stores/PageStore';
 
-import Event from 'components/Event/Event';
-import Note from 'src/components/Event/Note';
 import NotePreview from 'src/components/Event/NotePreview';
 import Paginator from 'src/components/Paginator/Paginator';
-import { calculateOffset } from 'src/stores/EventStore';
 import ArticlePreview from 'src/components/Event/ArticlePreview';
+import { useParams } from '@solidjs/router';
 
 const Home: Component = () => {
+  const params = useParams();
 
   onMount(() => {
     dayjs.extend(objectSupport);
@@ -51,10 +49,12 @@ const Home: Component = () => {
     notesOffset = 0;
     articlesOffset = 0;
 
-    fetchHomeGraph(accountStore.pubkey, { since, until, resolution });
-    fetchHomeTotals(accountStore.pubkey, { since, until });
-    fetchHomeNotes(accountStore.pubkey, { since, until, limit: 30, offset: 0 });
-    fetchHomeArticles(accountStore.pubkey, { since, until, limit: 30, offset: 0 });
+    const pubkey = params.pubkey || accountStore.pubkey;
+
+    fetchHomeGraph(pubkey, { since, until, resolution });
+    fetchHomeTotals(pubkey, { since, until });
+    fetchHomeNotes(pubkey, { since, until, limit: 30, offset: 0 });
+    fetchHomeArticles(pubkey, { since, until, limit: 30, offset: 0 });
   });
 
   const loadNextNotesPage = () => {
@@ -67,12 +67,13 @@ const Home: Component = () => {
     notesOffset += feedRange.elements.length;
 
     fetchHomeNotes(
-      accountStore.pubkey,
+      params.pubkey || accountStore.pubkey,
       {
         since,
         until,
         offset: notesOffset,
         limit: 30,
+        pubkey: params.pubkey,
       },
     );
   };
@@ -87,7 +88,7 @@ const Home: Component = () => {
     articlesOffset += feedRange.elements.length;
 
     fetchHomeArticles(
-      accountStore.pubkey,
+      params.pubkey || accountStore.pubkey,
       {
         since,
         until,
@@ -103,21 +104,18 @@ const Home: Component = () => {
 
 
   const notePages = () => pageStore.homeNotes.feedPages;
-  const articlePages = () => {
-    return pageStore.homeArticles.feedPages;
-  }
+  const articlePages = () => pageStore.homeArticles.feedPages;
 
-  const shouldRenderEmpty = (index: number) => {
-    return !visiblePages().includes(index);
+  const [visibleNotesPages, setVisibleNotesPages] = createSignal<number[]>([]);
+
+  const shouldRenderEmptyNotes = (index: number) => {
+    return !visibleNotesPages().includes(index);
   };
 
-  const [visiblePages, setVisiblePages] = createSignal<number[]>([]);
-
-  let observer: IntersectionObserver | undefined;
+  let notesPageObserver: IntersectionObserver | undefined;
   // let timeout = 0;
 
-
-  observer = new IntersectionObserver(entries => {
+  notesPageObserver = new IntersectionObserver(entries => {
     let i=0;
 
     for (i=0; i<entries.length; i++) {
@@ -138,11 +136,50 @@ const Home: Component = () => {
             config.push(i);
           }
 
-          setVisiblePages(() => [...config]);
+          setVisibleNotesPages(() => [...config]);
         // }, 300);
       }
     }
   });
+
+
+  const [visibleArticlesPages, setVisibleArticlesPages] = createSignal<number[]>([]);
+
+  const shouldRenderEmptyArticles = (index: number) => {
+    return !visibleArticlesPages().includes(index);
+  };
+
+  let articlesPageObserver: IntersectionObserver | undefined;
+  // let timeout = 0;
+
+  articlesPageObserver = new IntersectionObserver(entries => {
+    let i=0;
+
+    for (i=0; i<entries.length; i++) {
+      const entry = entries[i];
+
+      const target = entry.target;
+      const id = parseInt(target.getAttribute('data-page-index') || '0');
+
+      if (entry.isIntersecting) {
+        // clearTimeout(timeout);
+        // timeout = setTimeout(() => {
+          const min = id < 3 ? 0 : id - 3;
+          const max = id + 3;
+
+          let config: number[] = [];
+
+          for (let i=min; i<= max; i++) {
+            config.push(i);
+          }
+
+          setVisibleArticlesPages(() => [...config]);
+        // }, 300);
+      }
+    }
+  });
+
+
 
   return (
     <>
@@ -386,14 +423,14 @@ const Home: Component = () => {
               {(page, pageIndex) => (
                 <FeedPage
                   page={page}
-                  isRenderEmpty={shouldRenderEmpty(pageIndex())}
+                  isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
                   pageIndex={pageIndex()}
-                  observer={observer}
+                  observer={notesPageObserver}
                   key="homeNotes"
                   twoColumns={articlePages().length === 0}
                   eventComponent={(e) => (
                     <NotePreview
-                      feedEvent={e}
+                      note={page.notes.find(n => n.id === e)!}
                       variant='feed'
                     />
                   )}
@@ -418,16 +455,18 @@ const Home: Component = () => {
               {(page, pageIndex) => (
                 <FeedPage
                   page={page}
-                  isRenderEmpty={shouldRenderEmpty(pageIndex())}
+                  isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
                   pageIndex={pageIndex()}
-                  observer={observer}
+                  observer={articlesPageObserver}
                   key="homeArticles"
                   twoColumns={articlePages().length === 0}
                   eventComponent={(e) => (
-                    <ArticlePreview
-                      feedEvent={e}
-                      variant='feed'
-                    />
+                    <Show when={page.reads.find(a => a.id === e)}>
+                      <ArticlePreview
+                        article={page.reads.find(a => a.id === e)!}
+                        variant='feed'
+                      />
+                    </Show>
                   )}
                 />
               )}

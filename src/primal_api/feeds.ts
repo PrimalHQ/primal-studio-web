@@ -1,14 +1,14 @@
-import { FeedPaging, FeedRange, FeedResult, MediaEvent, NostrEventContent } from "../primal";
+import {
+  FeedPaging,
+  FeedRange,
+  FeedResult,
+  NostrEventContent,
+} from "../primal";
+
 import { sendMessage, subsTo } from "../utils/socket";
 import { Kind } from "../constants";
+import { emptyFeedRange } from "src/utils/feeds";
 
-
-export const emptyFeedRange = () => ({
-  since: 0,
-  until: 0,
-  order_by: 'created_at',
-  elements: [],
-}) as FeedRange;
 
 export const getMegaFeed = (
   user_pubkey: string | undefined,
@@ -153,3 +153,5 @@ export const fetchEvents = (
 
     });
 };
+
+

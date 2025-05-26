@@ -23,6 +23,7 @@ export type NostrEventContent = {
   pubkey?: string,
   content?: string,
   created_at?: number,
+  sig?: string,
   id: string,
   tags?: string[][],
 };
@@ -185,6 +186,141 @@ export type UserStats = {
   },
 };
 
+export type EventStats = {
+  event_id: string,
+  likes: number,
+  mentions: number,
+  reposts: number,
+  replies: number,
+  zaps: number,
+  satszapped: number,
+  score: number,
+  score24h: number,
+  bookmarks: number,
+};
+
+export type NoteActions = {
+  event_id: string,
+  liked: boolean,
+  replied: boolean,
+  reposted: boolean,
+  zapped: boolean,
+};
+
+export type TopicStats = Record<string, number>;
+
+export type TopZap = {
+  id: string,
+  amount: number,
+  pubkey: string,
+  message: string,
+  eventId: string,
+}
+
+export type FollowerIncrease = {
+  increase: number,
+  ratio: number,
+  count: number,
+}
+
+export type SenderMessageCount = {
+  cnt: number,
+  latest_at: number,
+  latest_event_id: string,
+}
+
+export type CohortInfo = {
+  cohort_1: string,
+  cohort_2: string,
+  tier: string,
+  expires_on: number,
+  edited_shoutout?: string,
+  legend_since?: number,
+  premium_since?: number,
+};
+
+export type LegendCustomizationStyle = '' |
+  'GOLD' |
+  'AQUA' |
+  'SILVER' |
+  'PURPLE' |
+  'PURPLEHAZE' |
+  'TEAL' |
+  'BROWN' |
+  'BLUE' |
+  'SUNFIRE';
+
+export type LegendCustomizationConfig = {
+  style: LegendCustomizationStyle,
+  custom_badge: boolean,
+  avatar_glow: boolean,
+  in_leaderboard: boolean,
+  current_shoutout?: string,
+  edited_shoutout?: string,
+};
+
+export type LeaderboardInfo = {
+  index: number,
+  pubkey: string,
+  donated_btc: number,
+  last_donation: number,
+  premium_since: number,
+}
+
+export type EventFeedPage = {
+  users: {
+    [pubkey: string]: NostrEventContent,
+  },
+  eventIds: string[],
+  notes: NostrEventContent[],
+  reads: NostrEventContent[],
+  drafts: NostrEventContent[],
+  mentions: NostrEventContent[],
+  noteStats: Record<string, EventStats>,
+  zaps: NostrEventContent[],
+  topicStats: TopicStats,
+  noteActions: Record<string, NoteActions>,
+  relayHints: Record<string, string>,
+  topZaps: Record<string, TopZap[]>,
+  since: number,
+  until: number,
+  sortBy: string,
+  elements: string[],
+  userStats: Record<string, UserStats>,
+  userFollowerCounts: Record<string, number>,
+  userFollowerIncrease: Record<string, FollowerIncrease>,
+  wordCount: Record<string, number>,
+  dmContacts: Record<string, SenderMessageCount>,
+  encryptedMessages: NostrEventContent[],
+  memberCohortInfo: Record<string, CohortInfo>,
+  legendCustomization: Record<string, LegendCustomizationConfig>,
+  leaderboard: LeaderboardInfo[],
+};
+
+export type PaginationInfo = {
+  since: number,
+  until: number,
+  sortBy: string,
+  elements: string[],
+};
+
+export type EventFeedResult = {
+  eventIds: string[],
+  users: PrimalUser[],
+  notes: PrimalNote[],
+  reads: PrimalArticle[],
+  drafts: PrimalDraft[],
+  zaps: PrimalZap[],
+  topicStats: [string, number][],
+  paging: PaginationInfo,
+  page: EventFeedPage,
+  dmContacts: DMContact[],
+  encryptedMessages: NostrEventContent[],
+  legendCustomization: Record<string, LegendCustomizationConfig>,
+  memberCohortInfo: Record<string, CohortInfo>,
+  leaderboard: LeaderboardInfo[],
+};
+
 export type PrimalUser = {
   id: string,
   pubkey: string,
@@ -201,8 +337,83 @@ export type PrimalUser = {
   website: string,
   tags: string[][],
   userStats?: UserStats,
-  event: NostrEventContent,
+  event?: NostrEventContent,
 };
+
+export type PrimalNote = {
+  user: PrimalUser,
+  repost?: PrimalRepost,
+  event?: NostrEventContent,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedUsers?: Record<string, PrimalUser>,
+  mentionedArticles?: Record<string, PrimalNote>,
+  mentionedZaps?: Record<string, PrimalZap>,
+  mentionedHighlights?: Record<string, any>,
+  replyTo?: string,
+  id: string,
+  pubkey: string,
+  sig?: string,
+  kind: number,
+  nId: string,
+  nIdShort: string,
+  tags: string[][],
+  topZaps: TopZap[],
+  content: string,
+  relayHints?: Record<string, string>,
+  stats: EventStats,
+  actions: NoteActions,
+  wordCount?: number,
+  created_at: number,
+};
+
+export type PrimalArticle = PrimalNote & {
+  title: string,
+  summary: string,
+  image: string,
+  keywords: string[],
+  published_at: number,
+  coordinate: string,
+  client?: string,
+};
+
+export type PrimalDraft = {
+  id: string,
+  kind: number,
+  content: string,
+  plain: string,
+  client: string,
+  pubkey: string,
+  created_at: number,
+  event?: NostrEventContent,
+  noteId: string,
+}
+
+export type PrimalZap = {
+  sender?: PrimalUser | string,
+  reciver?: PrimalUser | string,
+  created_at?: number,
+  amount: number,
+  message: string,
+  id: string,
+  zappedId?: string,
+  zappedKind?: number,
+};
+
+export type PrimalRepost = {
+  user?: PrimalUser,
+  note?: PrimalNote,
+};
+
+export type PrimalHighlight = {
+  user?: PrimalUser,
+  event?: NostrEventContent,
+};
+
+export type DMContact = {
+  pubkey: string,
+  user: PrimalUser,
+  dmInfo: SenderMessageCount,
+}
 
 export type UserMetadataContent = {
   name?: string,
@@ -229,3 +440,5 @@ export type SendNoteResult = {
   reasons?: string[],
   note?: NostrRelaySignedEvent,
 };
+
+export type VanityProfiles = { names: Record<string, string> };

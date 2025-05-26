@@ -1,9 +1,10 @@
 import { APP_ID } from "src/App";
-import { Kind, WEEK } from "src/constants";
+import { Kind } from "src/constants";
 import { signEvent } from "src/utils/nostrApi";
 import { primalAPI, sendMessage } from "src/utils/socket";
-import { emptyFeedRange } from "./feeds";
-import { AuxEvent, FeedRange, FeedResult, MediaEvent, NostrAuxEventContent, NostrEventContent } from "src/primal";
+import { EventFeedResult, FeedRange, FeedResult, NostrEventContent } from "src/primal";
+import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
+import { fetchKnownProfiles, npubToHex } from "src/utils/profile";
 
 export type StudioTotals = {
   bookmarks: number,
@@ -69,7 +70,14 @@ export const getHomeTotals = async (opts?: HomePayload) => {
   };
 
   if (opts?.pubkey) {
-    payload.pubkey = opts.pubkey;
+    let pk = npubToHex(opts.pubkey);
+    const vanityName = await fetchKnownProfiles(pk);
+
+    if (vanityName.names[pk]) {
+      pk = vanityName.names[pk];
+    }
+
+    payload.pubkey = pk;
   }
 
   if ((opts?.until || 0) > 0) {
@@ -137,7 +145,14 @@ export const getHomeGraph = async (opts?: HomePayload) => {
   };
 
   if (opts?.pubkey) {
-    payload.pubkey = opts.pubkey;
+    let pk = npubToHex(opts.pubkey);
+    const vanityName = await fetchKnownProfiles(pk);
+
+    if (vanityName.names[pk]) {
+      pk = vanityName.names[pk];
+    }
+
+    payload.pubkey = pk;
   }
 
   if ((opts?.until || 0) > 0) {
@@ -195,10 +210,10 @@ export const getHomeGraph = async (opts?: HomePayload) => {
   })
 };
 
-export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
+export const getTopEvents = async (opts?: HomePayload & { kind?: number, ident?: string }) => {
   const kind: number = opts?.kind || Kind.Text;
 
-  const subId = `home_events_${kind}_${APP_ID}`;
+  const subId = `home_events_${opts?.ident || ''}_${APP_ID}`;
 
   const today = Math.floor((new Date()).getTime() / 1_000)
 
@@ -211,7 +226,14 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
   };
 
   if (opts?.pubkey) {
-    payload.pubkey = opts.pubkey;
+    let pk = npubToHex(opts.pubkey);
+    const vanityName = await fetchKnownProfiles(pk);
+
+    if (vanityName.names[pk]) {
+      pk = vanityName.names[pk];
+    }
+
+    payload.pubkey = pk;
   }
 
   if ((opts?.until || 0) > 0) {
@@ -250,14 +272,9 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
 
   const signedNote = await signEvent(event);
 
-  return new Promise<FeedResult>((resolve, reject) => {
+  return new Promise<EventFeedResult>((resolve, reject) => {
 
-    let range = emptyFeedRange();
-    let mainEvents: string[] = [];
-    let auxEvents: string[] = [];
-
-    let users: string[] = [];
-    let mentions: string[] = [];
+    let page = { ...emptyEventFeedPage() };
 
     primalAPI({
       subId,
@@ -274,51 +291,10 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
         ]))
       },
       onEvent: (event) => {
-        if (event.kind === Kind.FeedRange) {
-          range = JSON.parse(event.content || '{}') as FeedRange;
-
-          return;
-        }
-
-        if (event.kind === kind) {
-          const id = event.id;
-          mainEvents.push(id);
-          return;
-        }
-
-        if (event.kind === Kind.Repost) {
-          const reposted = JSON.parse(event.content || '{ id: "" }') as NostrEventContent;
-
-          if (reposted.kind === kind) {
-            const id = event.id;
-            mainEvents.push(id);
-          }
-          return;
-        }
-
-        auxEvents.push(event.id);
-
-        if (event.kind === Kind.Metadata) {
-          event.pubkey && users.push(event.pubkey);
-          return;
-        }
-
-        if (event.kind === Kind.Mentions) {
-          const wrappedEvent = JSON.parse(event.content || '') as NostrEventContent;
-
-          wrappedEvent.id && mentions.push(wrappedEvent.id);
-
-          return;
-        }
-
+        updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve({
-          specification: 'top_notes',
-          mainEvents,
-          auxEvents,
-          range,
-        });
+        resolve(pageResolve(page));
       },
       onNotice: () => {
         reject('failed_to_fetch_relays');
