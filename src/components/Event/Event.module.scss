@@ -123,15 +123,28 @@
         }
 
         .text {
-          display: flex;
-          flex-wrap: wrap;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          line-clamp: 2;
+          -webkit-box-orient: vertical;
           overflow: hidden;
-          color: var(--text-secondary);
           text-overflow: ellipsis;
-          white-space: nowrap;
+          line-height: 1.4;
+          max-height: calc(1.4em * 3); /* Fallback for browsers that don't support line-clamp */
+          word-break: break-all;
+
+          // display: flex;
+          // flex-wrap: wrap;
+          // overflow: hidden;
+
+          color: var(--text-secondary);
+          // text-overflow: ellipsis;
+          // white-space: nowrap;
           font-size: 12px;
           font-weight: 400;
           line-height: 16px;
+
+
         }
       }
     }

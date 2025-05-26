@@ -162,10 +162,10 @@ export const fetchHomeNotes = query(
 
     try {
       const result = await getTopEvents({
+        ...options,
         pubkey,
         kind: Kind.Text,
         ident: `${Kind.Text}_${options?.offset || 0}`,
-        ...options,
       });
 
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
@@ -206,10 +206,10 @@ export const fetchHomeArticles = query(
 
     try {
       const result = await getTopEvents({
+        ...options,
         pubkey,
         kind: Kind.LongForm,
         ident: `${Kind.LongForm}_${options?.offset || 0}`,
-        ...options,
       });
 
       let index = pageStore.homeArticles.feedPages.findIndex(fp => {
