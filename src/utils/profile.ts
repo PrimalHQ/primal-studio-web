@@ -108,7 +108,7 @@ export const trimVerification = (address: string | undefined) => {
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
-    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+    const origin = 'https://primal.net';
 
     const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
 
