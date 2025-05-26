@@ -243,6 +243,16 @@ const Home: Component = () => {
     },
   ]
 
+  const noArticles = () => {
+    const pages = articlePages();
+
+    if (pages.length < 1) return true;
+
+    const reads = pages[0].reads;
+
+    return reads.length < 1;
+  }
+
 
   return (
     <>
@@ -285,7 +295,7 @@ const Home: Component = () => {
                   pageIndex={pageIndex()}
                   observer={notesPageObserver}
                   key="homeNotes"
-                  twoColumns={articlePages().length === 0}
+                  twoColumns={noArticles()}
                   eventComponent={(e) => (
                     <NotePreview
                       note={page.notes.find(n => n.id === e)!}
@@ -301,7 +311,7 @@ const Home: Component = () => {
             />
           </div>
         </div>
-        <Show when={articlePages().length > 0}>
+        <Show when={!noArticles()}>
           <div class={styles.itemsHolder}>
           <div class={styles.feedHeader}>
             <div class={styles.label}>

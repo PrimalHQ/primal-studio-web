@@ -225,6 +225,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number, ident?:
     offset: 0,
   };
 
+
   if (opts?.pubkey) {
     let pk = npubToHex(opts.pubkey);
     const vanityName = await fetchKnownProfiles(pk);
