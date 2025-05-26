@@ -1,4 +1,5 @@
-import { NostrRelayEvent, NostrRelaySignedEvent, SendNoteResult } from "src/primal";
+import { Kind } from "src/constants";
+import { NostrEventContent, NostrRelayEvent, NostrRelaySignedEvent, SendNoteResult } from "src/primal";
 import { relayStore } from "src/stores/RelayStore";
 import { logError, logInfo } from "src/utils/logger";
 import { signEvent } from "src/utils/nostrApi";
@@ -206,3 +207,28 @@ export const sendEvent = async (
     // return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
 }
+
+export const sendDeleteEvent = async (
+  pubkey: string,
+  eventId: string,
+  kind: number,
+): Promise<SendNoteResult> => {
+  const isCoordinate = eventId.split(':').length === 3;
+
+  const tagLabel = isCoordinate ? 'a' : 'e';
+
+  const ev: NostrRelayEvent & { pubkey: string } = {
+    kind: Kind.EventDeletion,
+    pubkey,
+    tags: [
+      [tagLabel, eventId],
+      ["k", `${kind}`],
+    ],
+    content: "Deleted by the author",
+    created_at: Math.floor((new Date()).getTime() / 1_000),
+  };
+
+  const response = await sendEvent(ev);
+
+  return response;
+};

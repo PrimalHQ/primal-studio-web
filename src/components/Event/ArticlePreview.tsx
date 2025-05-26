@@ -14,6 +14,8 @@ import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
 import missingImage from 'assets/images/missing_image.png';
+import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
+import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 
 const ArticlePreview: Component<{
   article: PrimalArticle,
@@ -98,13 +100,64 @@ const ArticlePreview: Component<{
     return <img class={styles.image} src={src} onerror={onImgError} />;
   }
 
+  let contextMenu: HTMLDivElement | undefined;
+
+  const openReactionModal = (openOn = 'likes') =>  {
+    // app?.actions.openReactionModal(props.article.naddr, {
+    //   likes: reactionsState.likes,
+    //   zaps: reactionsState.zapCount,
+    //   reposts: reactionsState.reposts,
+    //   quotes: reactionsState.quoteCount,
+    //   openOn,
+    // });
+  };
+
+  const onContextMenuTrigger = () => {
+    openNoteContextMenu(
+      article(),
+      contextMenu?.getBoundingClientRect(),
+      openReactionModal,
+      () => {
+
+      },
+    );
+  };
+
+  const openInPrimal = () => {
+    let link = `e/${article()?.nId}`;
+
+    if (article().nId.startsWith('naddr')) {
+      const vanityName = appStore.verifiedUsers[article().pubkey];
+
+      if (vanityName) {
+        const decoded = nip19.decode(article().nId);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
+      }
+    }
+
+    return `https://primal.net/${link}`;
+  };
+
+  let noteDiv: HTMLAnchorElement | undefined;
+
   return (
     <a
       class={`${styles.notePreview}`}
       data-event-id={props.article.id}
-      href={`/e/${props.article.id}`}
+      href={openInPrimal()}
+      target='_blank'
     >
       <div class={styles.holder}>
+        <div class={styles.contextMenuTrigger}>
+          <NoteContextTrigger
+            ref={contextMenu}
+            onClick={onContextMenuTrigger}
+          />
+        </div>
+
         <div class={styles.userAvatar}>
           <Avatar
             user={author()}

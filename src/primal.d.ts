@@ -267,6 +267,12 @@ export type LeaderboardInfo = {
   premium_since: number,
 }
 
+export type StudioNoteStats = {
+  satszapped: number,
+  score: number,
+  sentiment: 'positive' | 'negative' | 'neutral',
+}
+
 export type EventFeedPage = {
   users: {
     [pubkey: string]: NostrEventContent,
@@ -295,6 +301,7 @@ export type EventFeedPage = {
   memberCohortInfo: Record<string, CohortInfo>,
   legendCustomization: Record<string, LegendCustomizationConfig>,
   leaderboard: LeaderboardInfo[],
+  studioNoteStats: Record<string, StudioNoteStats>,
 };
 
 export type PaginationInfo = {
@@ -361,6 +368,7 @@ export type PrimalNote = {
   content: string,
   relayHints?: Record<string, string>,
   stats: EventStats,
+  studioStats: StudioNoteStats,
   actions: NoteActions,
   wordCount?: number,
   created_at: number,

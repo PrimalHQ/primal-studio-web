@@ -1,11 +1,11 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, on, onMount, Show } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Home.module.scss';
 import StudioChart from 'src/components/Chart/Chart';
-import { fetchHomeArticles, fetchHomeGraph, fetchHomeNotes, fetchHomeTotals, homeStore, setHomeStore } from './Home.data';
-import { StudioGraph } from 'src/primal_api/studio';
+import { FeedCriteria, fetchHomeArticles, fetchHomeGraph, fetchHomeNotes, fetchHomeTotals, GraphSpan, homeStore, setHomeStore } from './Home.data';
+import { HomePayload, StudioGraph } from 'src/primal_api/studio';
 import { accountStore } from 'src/stores/AccountStore';
 
 import dayjs from 'dayjs';
@@ -19,6 +19,7 @@ import ArticlePreview from 'src/components/Event/ArticlePreview';
 import { useParams } from '@solidjs/router';
 import HomeHeader from './HomeHeader';
 import HomeStats from './HomeStats';
+import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
 
 const Home: Component = () => {
   const params = useParams();
@@ -39,22 +40,68 @@ const Home: Component = () => {
   let notesOffset = 0;
   let articlesOffset = 0;
 
-  createEffect(() => {
-    const { since, until, resolution } = homeStore.graphSpan;
+
+  const resetNoteLists = (pubkey: string, span: Partial<HomePayload>) => {
+
+    const { since, until } = span;
 
     clearPageStore('homeNotes');
-    clearPageStore('homeArticles');
 
     notesOffset = 0;
+
+    fetchHomeNotes(
+      pubkey,
+      { since, until, limit: 30, offset: 0, criteria: homeStore.noteSort },
+    );
+  }
+
+  const resetArticleLists = (pubkey: string, span: Partial<HomePayload>) => {
+
+    const { since, until } = span;
+
+    clearPageStore('homeArticles');
+
     articlesOffset = 0;
+
+    fetchHomeArticles(
+      pubkey,
+      { since, until, limit: 30, offset: 0, criteria: homeStore.noteSort },
+    );
+  }
+
+  createEffect(on(
+    () => [homeStore.graphSpan.since, homeStore.graphSpan.until, homeStore.graphSpan.resolution],
+    (changes) => {
+      // When graph span changes
+
+      const since = changes[0] as number;
+      const until = changes[1] as number;
+      const resolution = changes[2] as 'day' | 'month' | 'hour';
+
+      const pubkey = params.pubkey || accountStore.pubkey;
+
+      fetchHomeGraph(pubkey, { since, until, resolution });
+      fetchHomeTotals(pubkey, { since, until });
+
+      resetNoteLists(pubkey, { since, until });
+      resetArticleLists(pubkey, { since, until });
+    }));
+
+  createEffect(on(() => homeStore.noteSort, (criteria) => {
+    const { since, until } = homeStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    fetchHomeGraph(pubkey, { since, until, resolution });
-    fetchHomeTotals(pubkey, { since, until });
-    fetchHomeNotes(pubkey, { since, until, limit: 30, offset: 0 });
-    fetchHomeArticles(pubkey, { since, until, limit: 30, offset: 0 });
-  });
+    resetNoteLists(pubkey, { since, until, criteria });
+  }));
+
+  createEffect(on(() => homeStore.articleSort, (criteria) => {
+    const { since, until } = homeStore.graphSpan;
+
+    const pubkey = params.pubkey || accountStore.pubkey;
+
+    resetArticleLists(pubkey, { since, until, criteria });
+  }));
 
   const loadNextNotesPage = () => {
     if (pageStore.homeNotes.lastRange.since === 0) return;
@@ -173,6 +220,28 @@ const Home: Component = () => {
     }
   });
 
+  const sortOptions: SelectOption[] = [
+    {
+      value: 'score',
+      label: 'Content Score',
+    },
+    {
+      value: 'satszapped',
+      label: 'Sats Zapped',
+    },
+    {
+      value: 'sentiment',
+      label: 'Sentiment',
+    },
+    {
+      value: 'latest',
+      label: 'Latest',
+    },
+    {
+      value: 'oldest',
+      label: 'Oldest',
+    },
+  ]
 
 
   return (
@@ -200,6 +269,12 @@ const Home: Component = () => {
             <div class={styles.label}>
               {translate('home', 'topNotes')}
             </div>
+            <SelectBox
+              prefix="Sort by:"
+              value={sortOptions.find(o => o.value === homeStore.noteSort) || sortOptions[0]}
+              options={sortOptions}
+              onChange={(option) => setHomeStore('noteSort', (option?.value || 'score') as FeedCriteria)}
+            />
           </div>
           <div class={styles.feedContent}>
             <For each={notePages()}>
@@ -232,6 +307,12 @@ const Home: Component = () => {
             <div class={styles.label}>
               {translate('home', 'topArticles')}
             </div>
+            <SelectBox
+              prefix="Sort by:"
+              value={sortOptions.find(o => o.value === homeStore.articleSort) || sortOptions[0]}
+              options={sortOptions}
+              onChange={(option) => setHomeStore('articleSort', (option?.value || 'score') as FeedCriteria)}
+            />
           </div>
           <div class={styles.feedContent}>
             <For each={articlePages()}>

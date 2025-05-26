@@ -86,11 +86,15 @@ export const defaultSpan = (): GraphSpan => ({
   resolution: 'day',
 });
 
+export type FeedCriteria = 'score' | 'sentiment' | 'oldest' | 'latest';
+
 export type HomeStore = {
   totals: StudioTotals,
   graph: StudioGraph[],
   notes: PrimalNote[],
+  noteSort: FeedCriteria,
   articles: PrimalArticle[],
+  articleSort: FeedCriteria,
   graphKey: keyof StudioGraph,
   graphSpan: GraphSpan,
 }
@@ -99,7 +103,9 @@ export const emptyHomeStore = (): HomeStore => ({
   totals: emptyStudioTotals(),
   graph: [],
   notes: [],
+  noteSort: 'score',
   articles: [],
+  articleSort: 'score',
   graphKey: 'score',
   graphSpan: defaultSpan(),
 });

@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
 import { EventDisplayVariant, NostrEventContent, PrimalNote } from '../../primal';
 
@@ -14,6 +14,9 @@ import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
 import missingImage from 'assets/images/missing_image.png';
+import { humanizeNumber } from 'src/utils/ui';
+import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
+import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 
 const NotePreview: Component<{
   note: PrimalNote,
@@ -23,13 +26,13 @@ const NotePreview: Component<{
 
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
 
-  onMount(() => {
+  createEffect(() => {
     parseNote();
   });
 
   const note = () => props.note;
 
-  const author = () => props.note.user;
+  const author = () => props.note?.user;
 
   const user = (pubkey?: string) => ({
     pubkey: pubkey || '',
@@ -39,7 +42,7 @@ const NotePreview: Component<{
 
   const parseNote = () => {
     const note = props.note;
-    let asts = parseTextToAST(note.content || '');
+    let asts = parseTextToAST(note?.content || '');
 
     setNoteAst(() => asts);
   };
@@ -167,13 +170,65 @@ const NotePreview: Component<{
     return <>{ast.value || ''}</>
   }
 
+  let contextMenu: HTMLDivElement | undefined;
+
+  const openReactionModal = (openOn = 'likes') =>  {
+    // app?.actions.openReactionModal(props.article.naddr, {
+    //   likes: reactionsState.likes,
+    //   zaps: reactionsState.zapCount,
+    //   reposts: reactionsState.reposts,
+    //   quotes: reactionsState.quoteCount,
+    //   openOn,
+    // });
+  };
+
+  const onContextMenuTrigger = () => {
+    openNoteContextMenu(
+      note(),
+      contextMenu?.getBoundingClientRect(),
+      openReactionModal,
+      () => {
+
+      },
+    );
+  }
+
+  const openInPrimal = () => {
+    let link = `e/${note()?.nId}`;
+
+    if (note()?.nId.startsWith('naddr')) {
+      const vanityName = appStore.verifiedUsers[note()?.pubkey];
+
+      if (vanityName) {
+        const decoded = nip19.decode(note()?.nId);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
+      }
+    }
+
+    return `https://primal.net/${link}`;
+  };
+
+  let np: HTMLAnchorElement | undefined;
+
   return (
     <a
       class={`${styles.notePreview}`}
-      data-event-id={props.note.id}
-      href={`/e/${props.note.id}`}
+      data-event-id={props.note?.id}
+      href={openInPrimal()}
+      target='_blank'
+      ref={np}
     >
-      <Show when={props.note.repost?.user}>
+      <div class={styles.contextMenuTrigger}>
+        <NoteContextTrigger
+          ref={contextMenu}
+          onClick={onContextMenuTrigger}
+        />
+      </div>
+
+      <Show when={props.note?.repost?.user}>
         <div class={styles.reposters}>
           <div>reposted by {props.note.repost?.user?.name}</div>
         </div>
@@ -189,11 +244,11 @@ const NotePreview: Component<{
         <div class={styles.noteInfo}>
           <div class={styles.header}>
             <div class={styles.userName}>
-              {author().name}
+              {author()?.name}
             </div>
             <div class={styles.separator}>•</div>
             <div class={styles.noteDate}>
-             {longDate(note().created_at)}
+             {longDate(note()?.created_at)}
             </div>
           </div>
           <div class={styles.content}>
@@ -210,16 +265,31 @@ const NotePreview: Component<{
         </div>
 
         <div class={styles.noteStats}>
-          <div class={styles.stat}>
-            <div class={styles.number}>316</div>
-            <div class={styles.unit}>Score</div>
-          </div>
-          <div class={styles.stat}>
-            <div class={styles.number}>
-              <div class={styles.sentimentPositive}></div>
+
+          <Show when={note()?.studioStats?.satszapped}>
+            <div class={styles.stat}>
+              <div class={styles.number}>
+                {humanizeNumber(Math.ceil(note()?.studioStats?.satszapped))}
+              </div>
+              <div class={styles.unit}>Sats</div>
             </div>
-            <div class={styles.unit}>Sentiment</div>
-          </div>
+          </Show>
+
+          <Show when={note()?.studioStats?.score}>
+            <div class={styles.stat}>
+              <div class={styles.number}>{humanizeNumber(Math.ceil(note()?.studioStats?.score))}</div>
+              <div class={styles.unit}>Score</div>
+            </div>
+          </Show>
+
+          <Show when={note()?.studioStats?.sentiment}>
+            <div class={styles.stat}>
+              <div class={styles.number}>
+                <div class={styles[`sentiment_${note()?.studioStats?.sentiment}`]}></div>
+              </div>
+              <div class={styles.unit}>Sentiment</div>
+            </div>
+          </Show>
         </div>
       </div>
     </a>

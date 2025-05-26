@@ -84,6 +84,7 @@ export enum Kind  {
   LegendLeaderboard=10_000_170,
   PremiumLeaderboard=10_000_171,
   ArticlesStats=10_000_174,
+  StudioNoteStats=10_000_905,
 
   WALLET_OPERATION = 10_000_300,
   WALLET_NWC_ACTIVE = 10_000_802,

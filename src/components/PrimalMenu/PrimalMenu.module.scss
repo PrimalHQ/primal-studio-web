@@ -1,0 +1,117 @@
+@keyframes inTop {
+  from {
+    visibility: visible;
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+@keyframes outTop {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes inBottom {
+  0% {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+@keyframes outBottom {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.contextMenuOptions {
+  position: absolute;
+  top: 18px;
+  right: 0px;
+  padding: 8px;
+  background-color: var(--background-input);
+  border: none;
+  border-radius: 8px;
+  z-index: 35;
+  width: max-content;
+  overflow: hidden;
+  height: fit-content;
+  opacity: 0;
+  visibility: hidden;
+
+  &.noteFooter {
+    top: 26px;
+    left: unset;
+    /* right: 52px; */
+    right: 0;
+  }
+  &.profile {
+    top: 46px;
+    left: 4px;
+    right: unset;
+  }
+
+  &.noteContext {
+    top: 18px;
+    left: unset;
+    right: -4px;
+  }
+
+  animation: outTop 150ms ease-in forwards;
+}
+
+.contextMenuOptions[data-open="true"] {
+  animation: inTop 150ms ease-out forwards;
+}
+
+.contextMenuOptionsUp {
+  position: absolute;
+  bottom: 18px;
+  right: 0px;
+  padding: 8px;
+  background-color: var(--background-input);
+  border: none;
+  border-radius: 8px;
+  z-index: var(--z-index-header);
+  width: max-content;
+  height: fit-content;
+  opacity: 0;
+
+  &.noteFooter {
+    bottom: 28px;
+    left: unset;
+    /* right: 52px; */
+    right: 0;
+  }
+  &.profile {
+    bottom: 46px;
+    left: 4px;
+    right: unset;
+  }
+  &.noteContext {
+    bottom: 42px;
+    left: unset;
+    right: -4px;
+  }
+  animation: outBottom 150ms ease-in forwards;
+}
+
+.contextMenuOptionsUp[data-open="true"] {
+  animation: inBottom 150ms ease-out forwards;
+}

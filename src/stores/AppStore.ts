@@ -1,18 +1,26 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
+import { NoteContextMenuInfo } from "src/components/NoteContextMenu/NoteContexMenu";
+import { PrimalArticle, PrimalNote } from "src/primal";
 import { reset } from "src/utils/socket";
 
-export type AppContextStore = {
+export type AppStore = {
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
+  verifiedUsers: Record<string, string>,
+  showNoteContextMenu: boolean,
+  noteContextMenuInfo: NoteContextMenuInfo | undefined,
 };
 
-export const emptyAppStore = (): AppContextStore => ({
+export const emptyAppStore = (): AppStore => ({
   isInactive: false,
   appState: 'woke',
+  verifiedUsers: {},
+  showNoteContextMenu: false,
+  noteContextMenuInfo: undefined,
 });
 
 
-export const [appStore, updateAppStore] = createStore<AppContextStore>(emptyAppStore());
+export const [appStore, updateAppStore] = createStore<AppStore>(emptyAppStore());
 
 
 export const profileLink = (pubkey: string | undefined) => {
@@ -40,8 +48,6 @@ export const profileLink = (pubkey: string | undefined) => {
 
 }
 
-
-
 export const changeCachingService = (url?: string) => {
   if (!url) {
     localStorage.removeItem('cacheServer');
@@ -52,3 +58,29 @@ export const changeCachingService = (url?: string) => {
 
   reset();
 };
+
+export const openNoteContextMenu = (
+  note: PrimalNote | PrimalArticle,
+  position: DOMRect | undefined,
+  openReactions: () => void,
+  onDelete: (id: string) => void,
+) => {
+  updateAppStore('noteContextMenuInfo', reconcile({
+    note,
+    position,
+    openReactions,
+    onDelete,
+  }))
+  updateAppStore('showNoteContextMenu', () => true);
+};
+
+export const closeContextMenu = () => {
+  updateAppStore('showNoteContextMenu', () => false);
+};
+
+export const addVerifiedUsers = (newVU: Record<string, string>) => {
+  updateAppStore('verifiedUsers', (vu) => ({
+    ...vu,
+    ...newVU,
+  }))
+}

@@ -250,3 +250,9 @@ export const getRecomendedBlossomServers = async () => {
 
   updateAccountStore('recomendedBlossomServers', () => [ ...list ]);
 };
+
+
+export const activeUser = () => {
+  if (!accountStore.metadata) return;
+  return parseUserMetadata(accountStore.metadata);
+}

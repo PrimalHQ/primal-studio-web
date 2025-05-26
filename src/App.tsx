@@ -5,6 +5,9 @@ import { AppProvider } from './context/AppContext';
 import { PrimalWindow } from './primal';
 import AppRouter from './Router';
 import { connect, disconnect } from './utils/socket';
+import Toaster from './context/ToastContext/ToastContext';
+import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
+import { appStore, closeContextMenu } from './stores/AppStore';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -28,7 +31,15 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <AppProvider>
-        <AppRouter />
+        <Toaster>
+          <AppRouter />
+
+          <NoteContextMenu
+            open={appStore.showNoteContextMenu}
+            onClose={closeContextMenu}
+            data={appStore.noteContextMenuInfo}
+          />
+        </Toaster>
       </AppProvider>
     </div>
   );

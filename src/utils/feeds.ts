@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import { Kind } from "src/constants";
-import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult } from "src/primal";
+import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult, LeaderboardInfo, PaginationInfo } from "src/primal";
 import { parseLinkPreviews } from "src/stores/LinkPreviewStore";
 import { logError } from "./logger";
 import { hexToNpub } from "./profile";
@@ -52,6 +52,19 @@ export const emptyFeedRange = () => ({
 }) as FeedRange;
 
 
+export const emptyStats = () => ({
+  pubkey: '',
+  follows_count: 0,
+  followers_count: 0,
+  note_count: 0,
+  reply_count: 0,
+  time_joined: 0,
+  total_zap_count: 0,
+  total_satszapped: 0,
+  relay_count: 0,
+  media_count: 0,
+});
+
 export const emptyEventFeedPage: () => EventFeedPage = () => ({
   eventIds: [],
   users: {},
@@ -78,6 +91,7 @@ export const emptyEventFeedPage: () => EventFeedPage = () => ({
   legendCustomization: {},
   memberCohortInfo: {},
   leaderboard: [],
+  studioNoteStats: {},
 });
 
 export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
@@ -411,6 +425,7 @@ export const getNoteInPage = (
   const author = getUserInPage(page, note.pubkey!);
   const stat = page.noteStats[note.id];
   const topZaps = page.topZaps[note.id] || [];
+  const studioStats = page.studioNoteStats[note.id];
 
   const tags = note.tags || [];
   const replyTo = extractReplyToFromTags(tags);
@@ -438,6 +453,7 @@ export const getNoteInPage = (
   return {
     user: author,
     stats: { ...stat },
+    studioStats: { ...studioStats },
 
     created_at: note.created_at || 0,
     sig: note.sig,
@@ -503,6 +519,7 @@ export const getArticleInPage = (
   const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
   const author = getUserInPage(page, read.pubkey!);
   const stat = page.noteStats[read.id];
+  const studioStats = page.studioNoteStats[read.id];
   const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
   const wordCount = (page.wordCount || {})[read.id] || 0;
   const tags = read.tags || [];
@@ -553,6 +570,7 @@ export const getArticleInPage = (
     wordCount,
     actions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
     stats: { ...stat },
+    studioStats: { ...studioStats },
     relayHints: page.relayHints,
   };
 
@@ -724,11 +742,18 @@ export const pageResolve = (page: EventFeedPage): EventFeedResult => {
     })
   }
 
-  const users = getUsersInPage(page);
-  const notes = getNotesInPage(page);
-  const reads = getArticlesInPage(page);
-  const drafts = getDraftsInPage(page);
-  const zaps = getZapsInPage(page);
+  const paging: PaginationInfo = {
+    since: page.since,
+    until: page.until,
+    sortBy: page.sortBy,
+    elements: [ ...page.elements ],
+  }
+
+  const users = filterAndSortUsers(getUsersInPage(page), paging, page);
+  const notes = filterAndSortNotes(getNotesInPage(page), paging);
+  const reads = filterAndSortReads(getArticlesInPage(page), paging);
+  const drafts = filterAndSortDrafts(getDraftsInPage(page), paging);
+  const zaps = filterAndSortZaps(getZapsInPage(page), paging);
   const topicStats = getTopicStatsInPage(page);
   const dmContacts = getContactsInPage(page);
   const encryptedMessages = [...page.encryptedMessages];
@@ -749,12 +774,7 @@ export const pageResolve = (page: EventFeedPage): EventFeedResult => {
     legendCustomization,
     memberCohortInfo,
     leaderboard,
-    paging: {
-      since: page.since,
-      until: page.until,
-      sortBy: page.sortBy,
-      elements: page.elements,
-    },
+    paging,
     page,
   };
 }
@@ -979,5 +999,91 @@ export const updateFeedPage = (page: EventFeedPage, content: NostrEventContent) 
     return;
   }
 
+  if ([Kind.StudioNoteStats].includes(content.kind)) {
+    page.studioNoteStats = JSON.parse(content.content || '{}');
+  }
+
+  // if ([Kind.MediaInfo, Kind.EventZapInfo, Kind.Blossom, Kind.VerifiedUsersDict, Kind.RelayHint].includes(content.kind)) return;
+
+  // console.log('EVENT: ', content.kind, JSON.parse(content.content || '{}'));
+
 };
 
+
+export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalNote[]>(
+    (acc, id) => {
+      let note = notes.find(n => [n.id, n.repost?.note?.id].includes(id));
+
+      return note ? [ ...acc, { ...note } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalArticle[]>(
+    (acc, id) => {
+      const read = reads.find(n => n.id === id);
+
+      return read ? [ ...acc, { ...read } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalDraft[]>(
+    (acc, id) => {
+      const read = drafts.find(n => n.id === id);
+
+      return read ? [ ...acc, { ...read } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalZap[]>(
+    (acc, id) => {
+      const zap = zaps.find(n => n.id === id);
+
+      return zap ? [ ...acc, { ...zap } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, page: EventFeedPage) => {
+  return paging.elements.reduce<PrimalUser[]>((acc, pk) => {
+
+    let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
+
+    // If we encounter a user without a metadata event
+    // construct a user object for them
+    if (!f) {
+      f = emptyUser(pk);
+      const stats = { ...emptyStats() };
+
+      f.userStats = {
+        ...stats,
+        followers_increase: page.userFollowerIncrease[pk],
+        followers_count: page.userFollowerCounts[pk],
+      };
+    }
+
+    return f ? [...acc, {...f}] : acc;
+  } , []);
+}
+
+
+export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: PaginationInfo) => {
+  return paging.elements.reduce<LeaderboardInfo[]>(
+    (acc, id) => {
+      let leader = lb.find(n => n.pubkey === id);
+
+      return leader ? [ ...acc, { ...leader } ] : acc;
+    },
+    [],
+  );
+}

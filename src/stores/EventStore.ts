@@ -6,6 +6,7 @@ import { accountStore } from "./AccountStore";
 import { APP_ID } from "../App";
 import { openDB } from 'idb';
 import { addBlossomEvent, addMediaEvent } from "./MediaStore";
+import { addVerifiedUsers } from "./AppStore";
 
 
 export const eventStore = new ReactiveMap<string, NostrEventContent>();
@@ -35,6 +36,11 @@ export const addEventToStore = (event: NostrEventContent) => {
 
   if (ev.kind === Kind.Blossom) {
     addBlossomEvent(ev);
+  }
+
+  if (ev.kind === Kind.VerifiedUsersDict) {
+    const verifiedUsers: Record<string, string> = JSON.parse(ev.content || '{}');
+    addVerifiedUsers(verifiedUsers);
   }
 
   // updateEventStore(() => ({ [key]:  { ...ev } }));

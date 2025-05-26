@@ -3,16 +3,11 @@ import { A } from '@solidjs/router';
 
 import styles from './ProfileWidget.module.scss';
 import { parseUserMetadata, trimVerification, userName } from 'src/utils/profile';
-import { accountStore } from 'src/stores/AccountStore';
+import { accountStore, activeUser } from 'src/stores/AccountStore';
 import { profileLink } from 'src/stores/AppStore';
 import Avatar from '../Avatar/Avatar';
 
 const ProfileWidget: Component<{ id?: string }> = (props) => {
-
-  const activeUser = () => {
-    if (!accountStore.metadata) return;
-    return parseUserMetadata(accountStore.metadata);
-  }
 
   return (
     <div id={props.id}>

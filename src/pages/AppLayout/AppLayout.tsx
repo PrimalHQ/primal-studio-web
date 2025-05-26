@@ -7,6 +7,8 @@ import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
 import styles from './AppLayout.module.scss';
 import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 import { settingsStore } from 'src/stores/SettingsStore';
+import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
+import { appStore, closeContextMenu } from 'src/stores/AppStore';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -92,7 +94,9 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
         <section class={styles.central}>
           {props.children}
         </section>
+
       </main>
+
     </div>
   );
 }
