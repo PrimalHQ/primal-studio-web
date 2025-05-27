@@ -59,7 +59,7 @@ const NotePreview: Component<{
       // case 'youtube':
       //   return renderImage(ast);
       // case 'link':
-      //   return renderImage(ast);
+      //   return renderText(ast);
       // case 'emoji':
       //   return renderImage(ast);
       // case 'hashtag':
@@ -159,7 +159,7 @@ const NotePreview: Component<{
   };
 
   const renderImage = (ast: NoteAST) => {
-    const url = ast?.url || '';
+    const url = ast?.value || '';
 
     const src = getMediaUrl(url, 's') || url;
 

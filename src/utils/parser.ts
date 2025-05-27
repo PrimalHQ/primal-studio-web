@@ -1,7 +1,6 @@
 export type NoteAST = {
   type: string,
-  url?: string,
-  value?: string,
+  value: string,
   raw?: string,
 }
 
@@ -35,7 +34,7 @@ export const parseTextToAST = (text: string): NoteAST[] => {
     if (imageMatch && imageMatch.index === 0) {
       result.push({
         type: 'image',
-        url: imageMatch[0].trim(),
+        value: imageMatch[0].trim(),
       });
       remaining = remaining.slice(imageMatch[0].length);
       continue;
@@ -46,7 +45,7 @@ export const parseTextToAST = (text: string): NoteAST[] => {
     if (videoMatch && videoMatch.index === 0) {
       result.push({
         type: 'video',
-        url: videoMatch[0].trim(),
+        value: videoMatch[0].trim(),
       });
       remaining = remaining.slice(videoMatch[0].length);
       continue;
@@ -57,7 +56,7 @@ export const parseTextToAST = (text: string): NoteAST[] => {
     if (youtubeMatch && youtubeMatch.index === 0) {
       result.push({
         type: 'youtube',
-        url: youtubeMatch[0].trim(),
+        value: youtubeMatch[0].trim(),
       });
       remaining = remaining.slice(youtubeMatch[0].length);
       continue;
@@ -68,7 +67,7 @@ export const parseTextToAST = (text: string): NoteAST[] => {
     if (urlMatch && urlMatch.index === 0) {
       result.push({
         type: 'link',
-        url: urlMatch[0].trim(),
+        value: urlMatch[0].trim(),
       });
       remaining = remaining.slice(urlMatch[0].length);
       continue;
