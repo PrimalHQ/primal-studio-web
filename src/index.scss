@@ -2,26 +2,16 @@
 
 /* Default theme */
 :root[data-theme="dark"],
-:root[data-theme="sunset"],
+:root[data-theme="studio_dark"],
 :root:not([data-theme="dark"]),
-:root:not([data-theme="sunset"]),
-:root:not([data-theme="sunrise"]),
-:root:not([data-theme="midinght"]),
-:root:not([data-theme="ice"]) {
-  @include palette.sunset_wave;
+:root:not([data-theme="studio_light"])
+{
+  @include palette.studio_dark;
 }
 
 :root[data-theme="light"],
-:root[data-theme="sunrise"] {
-  @include palette.sunrise_wave;
-}
-
-:root[data-theme="midnight"] {
-  @include palette.midnight_wave;
-}
-
-:root[data-theme="ice"] {
-  @include palette.ice_wave;
+:root[data-theme="studio_light"] {
+  @include palette.studio_light;
 }
 
 :root {
@@ -110,7 +100,7 @@
 /* Automatically enabled if user has Dark mode enabled */
 @media only screen and (prefers-color-scheme: dark) {
   :root {
-    @include palette.sunset_wave;
+    @include palette.studio_dark;
   }
 }
 

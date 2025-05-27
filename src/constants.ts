@@ -1,4 +1,4 @@
-export const THEMES = ['sunset', 'sunrise', 'midnight', 'ice'];
+export const THEMES = ['studio_dark', 'studio_light'];
 
 
 export enum Kind  {

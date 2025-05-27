@@ -117,12 +117,12 @@ export const storeTheme = (pubkey: string | undefined, theme: PrimalTheme) => {
 
 export const readTheme = (pubkey: string | undefined) => {
   if (!pubkey) {
-    return 'sunrise' as PrimalTheme;
+    return 'studio_light' as PrimalTheme;
   }
 
   const store = getStorage(pubkey);
 
-  return (store.theme || 'sunrise') as PrimalTheme;
+  return (store.theme || 'studio_light') as PrimalTheme;
 }
 
 
@@ -139,12 +139,12 @@ export const storeChooserTheme = (pubkey: string | undefined, theme: PrimalTheme
 
 export const readChooserTheme = (pubkey: string | undefined) => {
   if (!pubkey) {
-    return 'sunrise' as PrimalTheme;
+    return 'studio_light' as PrimalTheme;
   }
 
   const store = getStorage(pubkey);
 
-  return (store.chooserTheme || 'sunrise') as PrimalTheme;
+  return (store.chooserTheme || 'studio_light') as PrimalTheme;
 }
 
 export const storeSystemDarkMode = (pubkey: string | undefined, flag: boolean) => {

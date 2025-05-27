@@ -27,8 +27,8 @@ export type SettingsStore = {
 
 export const [settingsStore, updateSettingsStore] = createStore<SettingsStore>({
   useSystemTheme: false,
-  theme: 'sunrise',
-  chooserTheme: 'sunrise',
+  theme: 'studio_light',
+  chooserTheme: 'studio_light',
   settingsObject: {},
   defaultSettingsObject: {},
 });
@@ -112,10 +112,6 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
   }
 
   const settingsSubId = `load_settings_${APP_ID}`;
-  const settingsHomeSubId = `load_home_settings_${APP_ID}`;
-  const settingsReadsSubId = `load_reads_settings_${APP_ID}`;
-  const settingsNWCSubId = `load_nwc_settings_${APP_ID}`;
-
 
   primalAPI( {
     subId: settingsSubId,
@@ -127,7 +123,7 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
 
       updateSettingsStore('settingsObject',   () => ({ ...settings }));
 
-      setTheme(settings.theme || 'sunrise', true);
+      setTheme(settings.studio_theme || 'studio_light', true);
 
       setProxyThroughPrimal(settings.proxyThroughPrimal || false, true);
 
@@ -139,7 +135,7 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
 }
 
 export const resolveTheme = () => {
-  const storedTheme = (localStorage.getItem('theme') || 'sunrise') as PrimalTheme;
+  const storedTheme = (localStorage.getItem('theme') || 'studio_light') as PrimalTheme;
   const pubkey = localStorage.getItem('pubkey') || undefined;
   const useSystemDarkMode = readSystemDarkMode(pubkey);
 
@@ -162,11 +158,7 @@ export const resolveDarkMode = (useSystemDarkMode: boolean, currentTheme = setti
   }
 
   runColorMode((isDark) => {
-    if (['sunrise', 'sunset'].includes(currentTheme)) {
-      setTheme(isDark ? 'sunset' : 'sunrise', true);
-    } else {
-      setTheme(isDark ? 'midnight' : 'ice', true);
-    }
+    setTheme(isDark ? 'studio_dark' : 'studio_light', true);
   }, () => {
     currentTheme && setTheme(currentTheme, true);
   });
@@ -177,7 +169,7 @@ export const saveSettings = (setts?: Record<string, any>) => {
 
   let settings = unwrap(settingsStore.settingsObject);
 
-  settings.theme = settingsStore.theme;
+  settings.studio_theme = settingsStore.theme;
 
   if (setts) {
     settings = {

@@ -18,7 +18,7 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
         <div class={styles.fixed}>
           <section id="branding" class={styles.branding}>
             <Show
-              when={['sunrise', 'ice'].includes(settingsStore.theme)}
+              when={['studio_light'].includes(settingsStore.theme)}
               fallback={<img src={primalBrandingDark} />}
             >
               <img src={primalBrandingLight} />

@@ -4,8 +4,7 @@ import styles from './ThemeChooser.module.scss';
 import check from 'assets/icons/check.svg';
 import { PrimalTheme } from 'src/primal';
 
-import logoFire from 'assets/icons/logo_fire.svg';
-import logoIce from 'assets/icons/logo_ice.svg';
+import logoGold from 'assets/icons/logo_gold.svg';
 
 
 const ThemeOption: Component<{
@@ -20,13 +19,11 @@ const ThemeOption: Component<{
   };
 
   const logos = {
-    sunrise: logoFire,
-    sunset: logoFire,
-    midnight: logoIce,
-    ice: logoIce,
+    studio_light: logoGold,
+    studio_dark: logoGold,
   }
 
-  const isDark = () => ['sunset', 'midnight'].includes(props.theme);
+  const isDark = () => ['studio_dark'].includes(props.theme);
 
   const uncheckedTheme = () => {
     return isDark() ? styles.themeUncheckedDark : styles.themeUncheckedLight;
@@ -46,7 +43,7 @@ const ThemeOption: Component<{
             <div class={styles.themeChecked}><img src={check} /></div>
           </Show>
         </button>
-        <p>{props.theme}</p>
+        <p>{props.theme.replaceAll('_', ' ')}</p>
       </div>
   );
 }

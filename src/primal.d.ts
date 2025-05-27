@@ -440,7 +440,7 @@ export type UserMetadataContent = {
   location?: string,
 }
 
-export type PrimalTheme = 'sunrise' | 'sunset' | 'midnight' | 'ice';
+export type PrimalTheme = 'studio_light' | 'studio_dark';
 
 export type NostrRelaySettings = Record<string, { read: boolean, write: boolean }>;
 
