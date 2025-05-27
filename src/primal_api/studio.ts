@@ -6,6 +6,7 @@ import { EventFeedResult, FeedRange, FeedResult, NostrEventContent } from "src/p
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { fetchKnownProfiles, npubToHex } from "src/utils/profile";
 import { v4 as uuidv4 } from 'uuid';
+import { userSignedEvent } from "src/utils/primalNostr";
 
 export type StudioTotals = {
   bookmarks: number,
@@ -301,9 +302,207 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
         resolve(pageResolve(page, { offset: payload.offset }));
       },
       onNotice: () => {
-        reject('failed_to_fetch_relays');
+        reject('failed_to_fetch_top_events');
       }
     }
     )
   })
 };
+
+export type SettingsList = { pubkey?: string, kind?: 'notes' | 'articles', rss_feed_url?: string}[];
+
+export const getSettingsList = async (
+  listType: 'inbox_permissions' | 'content_imports',
+) => {
+
+  const subId = `get_settings_${listType}_${APP_ID}`;
+
+  let payload: { kind?: 'notes' | 'articles' } = {};
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `settings_${listType}_list`,
+      ...payload
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<SettingsList>((resolve, reject) => {
+
+    let list: string[] = [];
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        list = JSON.parse(event.content || '[]');
+      },
+      onEose: () => {
+        resolve(list as SettingsList);
+      },
+      onNotice: () => {
+        reject(`failed_to_fetch_settings_${listType}_list`);
+      }
+    });
+  });
+}
+
+export const addToSettingsList = async (
+  listType: 'inbox_permissions' | 'content_imports',
+  item: string,
+  kind?: 'notes' | 'articles',
+) => {
+  if (!kind && listType === 'content_imports') {
+    kind = 'notes';
+  }
+
+  const subId = `add_settings_${listType}_${kind || ''}_${APP_ID}`;
+
+  let payload: {
+    kind?: 'notes' | 'articles',
+    pubkey?: string,
+    rss_feed_url?: string,
+  } = {};
+
+  if (kind) {
+    payload.kind = kind;
+  }
+
+  if (listType === 'inbox_permissions') {
+    payload.pubkey = item;
+  }
+
+  if (listType === 'content_imports') {
+    payload.rss_feed_url = item;
+  }
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `settings_${listType}_add`,
+      ...payload
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<string[]>((resolve, reject) => {
+
+    let list: string[] = [];
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        list = JSON.parse(event.content || '[]');
+      },
+      onEose: () => {
+        resolve(list);
+      },
+      onNotice: () => {
+        reject(`failed_to_add_settings_${listType}_list`);
+      }
+    });
+  });
+}
+
+
+export const removeFromSettingsList = async (
+  listType: 'inbox_permissions' | 'content_imports',
+  item: string,
+  kind?: 'notes' | 'articles',
+) => {
+  if (!kind && listType === 'content_imports') {
+    kind = 'notes';
+  }
+
+  const subId = `add_settings_${listType}_${kind || ''}_${APP_ID}`;
+
+  let payload: {
+    kind?: 'notes' | 'articles',
+    pubkey?: string,
+    rss_feed_url?: string,
+  } = {};
+
+  if (kind) {
+    payload.kind = kind;
+  }
+
+  if (listType === 'inbox_permissions') {
+    payload.pubkey = item;
+  }
+
+  if (listType === 'content_imports') {
+    payload.rss_feed_url = item;
+  }
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `settings_${listType}_remove`,
+      ...payload
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<string[]>((resolve, reject) => {
+
+    let list: string[] = [];
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        list = JSON.parse(event.content || '[]');
+      },
+      onEose: () => {
+        resolve(list);
+      },
+      onNotice: () => {
+        reject(`failed_to_add_settings_${listType}_list`);
+      }
+    });
+  });
+}

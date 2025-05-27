@@ -1,10 +1,44 @@
-import { sendMessage } from "src/utils/socket";
+import { APP_ID } from "src/App";
+import { Kind } from "src/constants";
+import { NostrEventContent, PrimalUser } from "src/primal";
+import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
+import { primalAPI, sendMessage } from "src/utils/socket";
 
-export const getUserProfiles = (pubkeys: string[], subid: string) => {
+export const getUserMetadata = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: ["user_infos", { pubkeys }]},
   ]));
+}
+
+export const getUsers = (pubkeys: string[]) => {
+  return new Promise<PrimalUser[]>((resolve, reject) => {
+    const subId = `user_profiles_${APP_ID}`;
+
+    let page = { ...emptyEventFeedPage() };
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: ["user_infos", { pubkeys }]},
+        ]));
+      },
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        const { users } = pageResolve(page);
+
+        resolve(users);
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_users');
+      }
+    });
+  });
 }
 

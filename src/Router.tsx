@@ -19,6 +19,8 @@ const AppRouter: Component = () => {
   const SettingsAppearance = lazy(() => import('./pages/Settings/Appearance'));
   const SettingsMediaUploads = lazy(() => import('./pages/Settings/MediaUploads'));
   const SettingsNetwork = lazy(() => import('./pages/Settings/Network'));
+  const SettingsImports = lazy(() => import('./pages/Settings/Imports'));
+  const SettingsPermissions= lazy(() => import('./pages/Settings/Permissions'));
 
   const Account = lazy(() => import('./pages/Account/Account'));
   const Thread = lazy(() => import('./pages/Thread/Thread'));
@@ -42,6 +44,8 @@ const AppRouter: Component = () => {
         <Route path="/appearance" component={SettingsAppearance} />
         <Route path="/uploads" component={SettingsMediaUploads} />
         <Route path="/network" component={SettingsNetwork} />
+        <Route path="/imports" component={SettingsImports} />
+        <Route path="/permissions" component={SettingsPermissions} />
       </Route>
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />

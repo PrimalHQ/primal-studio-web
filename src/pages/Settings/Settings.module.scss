@@ -150,6 +150,139 @@
 }
 
 
+.permissionsPage {
+  margin-inline: 0px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .inboxUsers {
+    width: 100%;
+    .inboxUserCard {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      width: calc(100% - 40px);
+      border-bottom: 1px solid var(--devider);
+
+      &:first-child {
+        border-top: 1px solid var(--devider);
+      }
+
+      .right {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-grow: 1;
+
+        .userInfo {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          gap: 4px;
+
+          .userName {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 16px;
+          }
+
+          .nip05 {
+            color: var(--text-tertiary);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 14px;
+          }
+        }
+      }
+
+
+      .remove, .add {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 72px;
+        border: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        height: 28px;
+        border-radius: 14px;
+        color: var(--text-secondary);
+        background-color: var(--background-input);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 14px;
+        transition: color 0s linear;
+      }
+    }
+  }
+}
+
+.importsPage {
+  margin-inline: 0px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+
+  .urlList {
+    width: 100%;
+    .urlItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      width: calc(100% - 40px);
+      border-bottom: 1px solid var(--devider);
+
+      &:first-child {
+        border-top: 1px solid var(--devider);
+      }
+
+      .urlLabel {
+        color: var(--accent);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 16px;
+      }
+
+      .remove, .add {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 72px;
+        border: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        height: 28px;
+        border-radius: 14px;
+        color: var(--text-secondary);
+        background-color: var(--background-input);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 14px;
+        transition: color 0s linear;
+      }
+    }
+  }
+}
+
+
 .bigCaption {
   color: var(--text-primary);
   font-size: 20px;
@@ -186,6 +319,42 @@
   align-items: center;
 }
 
+.settingsCaptionLight {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+
+  margin-bottom: 20px;
+  margin-inline: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  .desc {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+
+.settingsRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsRowPadded {
+  display: flex;
+  padding-inline: 20px;
+  width: calc(100% - 40px);
+  align-items: center;
+  gap: 12px;
+}
+
 .settingsDescription {
   color: var(--text-tertiary);
   font-size: 14px;
@@ -203,6 +372,24 @@
   padding-top: 28px;
   padding-inline: 20px;
   border-top: 1px solid var(--devider);
+
+  &.noBorder {
+    border-top: none;;
+  }
+}
+
+.settingsSectionFull {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 28px;
+  padding-inline: 0px;
+  border-top: 1px solid var(--devider);
+
+  &.noBorder {
+    border-top: none;;
+  }
 }
 
 .relayList {
@@ -356,7 +543,7 @@
 
 }
 
-.relayInput {
+.settingsInput {
   position: relative;
   width: 100%;
   display: flex;
@@ -372,7 +559,7 @@
     font-style: normal;
     font-weight: 600;
     line-height: 20px;
-    padding-inline: 40px;
+    padding-inline: 20px;
     height: 36px;
     border: none;
     border-radius: 18px;
@@ -425,6 +612,14 @@
         background-color: var(--text-primary);
       }
     }
+  }
+
+  .webIcon ~ input {
+    padding-left: 40px;
+  }
+
+  button + input {
+    padding-right: 40px;
   }
 }
 
@@ -546,3 +741,4 @@
   -webkit-mask: url(../../assets/icons/connect.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/connect.svg) no-repeat 0 / 100%;
 }
+

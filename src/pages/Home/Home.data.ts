@@ -6,7 +6,7 @@ import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { emptyStudioTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
-import { emptyEventFeedPage, emptyFeedRange } from "src/utils/feeds";
+import { emptyEventFeedPage, emptyFeedRange, filterAndSortPageResults } from "src/utils/feeds";
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
@@ -179,7 +179,7 @@ export const fetchHomeNotes = query(
       }
 
       batch(() => {
-        updatePageStore('homeNotes', 'feedPages', index, () => ({ ...result }));
+        updatePageStore('homeNotes', 'feedPages', index, () => ({ ...filterAndSortPageResults(result) }));
         updatePageStore('homeNotes', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeNotes', 'isFetching', () => false);
       });
@@ -222,7 +222,7 @@ export const fetchHomeArticles = query(
       }
 
       batch(() => {
-        updatePageStore('homeArticles', 'feedPages', index, () => ({ ...result }));
+        updatePageStore('homeArticles', 'feedPages', index, () => ({ ...filterAndSortPageResults(result) }));
         updatePageStore('homeArticles', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeArticles', 'isFetching', () => false);
       });

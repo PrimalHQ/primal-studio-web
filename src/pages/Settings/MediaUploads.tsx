@@ -123,7 +123,7 @@ const MediaUploads: Component = () => {
         </div>
 
         <div
-          class={styles.relayInput}
+          class={styles.settingsInput}
         >
           <div class={styles.webIcon}></div>
           <input
@@ -213,7 +213,7 @@ const MediaUploads: Component = () => {
           </div>
 
           <div
-            class={styles.relayInput}
+            class={styles.settingsInput}
           >
             <div class={styles.webIcon}></div>
             <input

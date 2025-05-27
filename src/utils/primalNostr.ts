@@ -15,9 +15,10 @@ import {
 } from '../primal';
 import { readSecFromStorage } from './localStore';
 import { base64 } from '@scure/base';
-import { pinEncodeIVSeparator, pinEncodePrefix } from '../constants';
+import { Kind, pinEncodeIVSeparator, pinEncodePrefix } from '../constants';
 import { createSignal } from 'solid-js';
 import { logError } from './logger';
+import { signEvent } from './nostrApi';
 
 
 export const [currentPin, setCurrentPin] = createSignal('');
@@ -157,3 +158,24 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     signEvent,
   };
 };
+
+
+export const userSignedEvent = async (content: string, opts?: {
+  kind?: Kind,
+  tags?: string[][],
+  created_at?: number,
+}) => {
+  try {
+    const event = {
+      kind: opts?.kind || Kind.Settings,
+      tags: opts?.tags || [],
+      created_at: opts?.created_at || Math.floor((new Date()).getTime() / 1000),
+      content,
+    };
+
+    return await signEvent(event);
+
+  } catch (e) {
+    return;
+  }
+}

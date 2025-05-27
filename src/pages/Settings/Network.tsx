@@ -122,7 +122,7 @@ const Network: Component = () => {
         </div>
 
         <div
-          class={styles.relayInput}
+          class={styles.settingsInput}
         >
           <div class={styles.webIcon}></div>
           <input
@@ -234,7 +234,7 @@ const Network: Component = () => {
         </div>
 
         <div
-          class={styles.relayInput}
+          class={styles.settingsInput}
         >
           <div class={styles.webIcon}></div>
           <input

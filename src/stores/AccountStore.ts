@@ -7,7 +7,7 @@ import { Kind, pinEncodePrefix } from "../constants";
 import { getPublicKey, nip19 } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
 import { primalAPI } from "src/utils/socket";
-import { getUserProfiles } from "src/primal_api/profile";
+import { getUserMetadata } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
 import { getReplacableEvent, triggerImportEvents } from "src/primal_api/events";
 import { areUrlsSame } from "src/utils/blossom";
@@ -162,7 +162,7 @@ export const updateAccountProfile = (pubkey: string) => {
 
   primalAPI({
     subId,
-    action: () => getUserProfiles([pubkey], subId),
+    action: () => getUserMetadata([pubkey], subId),
     onEvent: (content: NostrEventContent) => {
       if (content.kind !== Kind.Metadata) return;
 

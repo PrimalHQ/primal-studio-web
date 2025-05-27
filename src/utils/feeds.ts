@@ -724,7 +724,12 @@ export const getContactsInPage = (page: EventFeedPage) => {
   })) as DMContact[];
 }
 
-export const pageResolve = (page: EventFeedPage, opts?: { offset?: number }): EventFeedResult => {
+export const pageResolve = (
+  page: EventFeedPage,
+  opts?: {
+    offset?: number,
+  }): EventFeedResult => {
+
   const identifier = uuidv4();
 
   // If there are reposts that have empty content,
@@ -751,11 +756,11 @@ export const pageResolve = (page: EventFeedPage, opts?: { offset?: number }): Ev
     offset: opts?.offset || 0,
   }
 
-  const users = filterAndSortUsers(getUsersInPage(page), paging, page);
-  const notes = filterAndSortNotes(getNotesInPage(page), paging);
-  const reads = filterAndSortReads(getArticlesInPage(page), paging);
-  const drafts = filterAndSortDrafts(getDraftsInPage(page), paging);
-  const zaps = filterAndSortZaps(getZapsInPage(page), paging);
+  const users = getUsersInPage(page);
+  const notes = getNotesInPage(page);
+  const reads = getArticlesInPage(page);
+  const drafts = getDraftsInPage(page);
+  const zaps = getZapsInPage(page);
   const topicStats = getTopicStatsInPage(page);
   const dmContacts = getContactsInPage(page);
   const encryptedMessages = [...page.encryptedMessages];
@@ -796,6 +801,7 @@ export const updateFeedPage = (page: EventFeedPage, content: NostrEventContent) 
     page.until = feedRange.until;
     page.sortBy = feedRange.order_by;
     page.elements = [...feedRange.elements];
+
     return;
   }
 
@@ -1011,6 +1017,17 @@ export const updateFeedPage = (page: EventFeedPage, content: NostrEventContent) 
   // console.log('EVENT: ', content.kind, JSON.parse(content.content || '{}'));
 
 };
+
+export const filterAndSortPageResults = (result: EventFeedResult) => {
+  return {
+    ...result,
+    users: filterAndSortUsers(result.users, result.paging, result.page),
+    notes: filterAndSortNotes(result.notes, result.paging),
+    reads: filterAndSortReads(result.reads, result.paging),
+    drafts: filterAndSortDrafts(result.drafts, result.paging),
+    zaps:filterAndSortZaps(result.zaps, result.paging),
+  }
+}
 
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {

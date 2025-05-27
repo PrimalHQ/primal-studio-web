@@ -23,7 +23,7 @@ import { accountStore, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomS
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
-import { loadDefaults, loadSettings, loadStoredSettings } from "src/stores/SettingsStore";
+import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings } from "src/stores/SettingsStore";
 import { updateRelays } from "src/stores/RelayStore";
 
 
@@ -144,6 +144,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
     loadSettings(accountStore.pubkey);
     updateRelays();
     fetchBlossomServers(pubkey);
+    loadInboxPermissionSettings();
+    loadContentImportSettings();
   }));
 
   // Handle main socket reconnection -------------------------------------------

@@ -1,5 +1,5 @@
 import { createStore, unwrap } from "solid-js/store";
-import { NostrEventContent, NostrWindow, PrimalTheme } from "../primal";
+import { NostrEventContent, NostrWindow, PrimalTheme, PrimalUser } from "../primal";
 import { logError, logInfo } from "../utils/logger";
 import { readProxyThroughPrimal, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, readSystemDarkMode, readTheme, storeChooserTheme, storeSystemDarkMode, storeTheme } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
@@ -7,15 +7,17 @@ import { Kind, pinEncodePrefix } from "../constants";
 import { getPublicKey, nip19 } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
 import { primalAPI } from "src/utils/socket";
-import { getUserProfiles } from "src/primal_api/profile";
+import { getUserMetadata } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
 import { getDefaultSettings, getSettings, isValidTheme, sendSettings } from "src/primal_api/settings";
 import { runColorMode } from "src/utils/ui";
 import { accountStore } from "./AccountStore";
 import { createEffect } from "solid-js";
 import { setProxyThroughPrimal } from "./RelayStore";
+import { getSettingsList } from "src/primal_api/studio";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+export const PRIMAL_STUDIO = '529f0119a5e6f8bc2aedaf799055f3eda5cfd02b858854e67e4307aba44a3db1';
 
 export type SettingsStore = {
   theme: PrimalTheme,
@@ -23,6 +25,11 @@ export type SettingsStore = {
   useSystemTheme: boolean,
   settingsObject: any,
   defaultSettingsObject: any,
+  inboxUsers: string[],
+  importUrls: {
+    notes: string[],
+    articles: string[],
+  }
 }
 
 export const [settingsStore, updateSettingsStore] = createStore<SettingsStore>({
@@ -31,8 +38,12 @@ export const [settingsStore, updateSettingsStore] = createStore<SettingsStore>({
   chooserTheme: 'studio_light',
   settingsObject: {},
   defaultSettingsObject: {},
+  inboxUsers: [PRIMAL_STUDIO],
+  importUrls: {
+    notes: [],
+    articles: [],
+  }
 });
-
 
 createEffect(() => {
   const html: HTMLElement | null = document.querySelector('html');
@@ -132,6 +143,38 @@ export const loadSettings = (pubkey: string | undefined, then?: () => void) => {
   })
 
   // getRecomendedBlossomServers();
+}
+
+export const loadInboxPermissionSettings = async (then?: () => void) => {
+
+  const list = await getSettingsList('inbox_permissions');
+
+  updateSettingsStore(
+    'inboxUsers',
+    () => [
+      ...list.reduce<string[]>((acc, i) =>
+        i.pubkey ? [...acc, i.pubkey] : acc ,[]
+      )
+    ],
+  );
+}
+
+export const loadContentImportSettings = async (then?: () => void) => {
+  const urls = await getSettingsList('content_imports');
+
+  let results = urls.reduce<Record<'notes' | 'articles', string[]>>(
+    (acc, url) => {
+      if (!url.kind || !url.rss_feed_url) return acc;
+
+      acc[url.kind].push(url.rss_feed_url);
+
+      return { ...acc };
+    },
+    { notes: [], articles: [] },
+  );
+
+
+  updateSettingsStore('importUrls', () => ({ ...results }));
 }
 
 export const resolveTheme = () => {

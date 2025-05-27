@@ -9,6 +9,8 @@ export default {
     appearance: 'Appearance',
     uploads: 'Media Uploads',
     network: 'Network',
+    permissions: 'Inbox Permissions',
+    imports: 'Content Imports',
   },
   uploads: {
     mediaServer: 'Media Server',
@@ -39,5 +41,16 @@ export default {
     relayUrl: 'wss://relay.url',
     proxyEvents: 'Use Enhanced Privacy',
     proxyDescription: 'When enabled, your IP address will be visible to the caching service, but not to relays. Your content will be published to your specified relays using the caching service as a proxy.',
+  },
+  permissions: {
+    subCaption: 'Manage Nostr accounts that are permitted to propose new content:',
+    addUserPlaceholder: 'Add new Nostr account...',
+  },
+  imports: {
+    noteCaption: 'Notes',
+    noteDescription: 'Manage RSS feeds that propose new notes',
+    articleCaption: 'Articles',
+    articleDescription: 'Manage RSS feeds that propose new articles',
+    addUrlPlaceholder: 'Add new RSS feed URL...',
   }
 }

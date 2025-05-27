@@ -24,6 +24,16 @@ const Menu: Component = () => {
           </A>
         </Show>
 
+        <A href="/settings/imports">
+          {translate('settings', 'menu', 'imports')}
+          <div class={styles.chevron}></div>
+        </A>
+
+        <A href="/settings/permissions">
+          {translate('settings', 'menu', 'permissions')}
+          <div class={styles.chevron}></div>
+        </A>
+
         <A href="/settings/network">
           {translate('settings', 'menu', 'network')}
           <div class={styles.chevron}></div>
