@@ -60,9 +60,14 @@ export const emptyStore = (): PageStore => ({
     isFetching: false,
     scrollTop: 0,
   },
+
 });
 
 export const [pageStore, updatePageStore] = createStore<PageStore>(emptyStore());
+
+export const removeEventFromPage = (pageKey: keyof PageStore, pageIdentifier: string, eventId: string) => {
+
+}
 
 export const forgetPage = async (page: keyof PageStore, index: number) => {
   const pg = pageStore[page].feedPages[index];

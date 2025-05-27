@@ -5,6 +5,7 @@ import { primalAPI, sendMessage } from "src/utils/socket";
 import { EventFeedResult, FeedRange, FeedResult, NostrEventContent } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { fetchKnownProfiles, npubToHex } from "src/utils/profile";
+import { v4 as uuidv4 } from 'uuid';
 
 export type StudioTotals = {
   bookmarks: number,
@@ -210,10 +211,12 @@ export const getHomeGraph = async (opts?: HomePayload) => {
   })
 };
 
-export const getTopEvents = async (opts?: HomePayload & { kind?: number, ident?: string }) => {
+export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
   const kind: number = opts?.kind || Kind.Text;
 
-  const subId = `home_events_${opts?.ident || ''}_${APP_ID}`;
+  const identifier = uuidv4();
+
+  const subId = `home_events_${identifier}_${APP_ID}`;
 
   const today = Math.floor((new Date()).getTime() / 1_000)
 
@@ -295,7 +298,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number, ident?:
         updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve(pageResolve(page, `${payload.offset}`));
+        resolve(pageResolve(page));
       },
       onNotice: () => {
         reject('failed_to_fetch_relays');

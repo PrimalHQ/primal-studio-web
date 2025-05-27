@@ -13,9 +13,10 @@ import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
-import missingImage from 'assets/images/missing_image.png';
+import missingImage from 'assets/images/missing_image.svg';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
+import { humanizeNumber } from 'src/utils/ui';
 
 const ArticlePreview: Component<{
   article: PrimalArticle,
@@ -141,8 +142,6 @@ const ArticlePreview: Component<{
     return `https://primal.net/${link}`;
   };
 
-  let noteDiv: HTMLAnchorElement | undefined;
-
   return (
     <a
       class={`${styles.notePreview}`}
@@ -187,12 +186,20 @@ const ArticlePreview: Component<{
 
         <div class={styles.noteStats}>
           <div class={styles.stat}>
-            <div class={styles.number}>316</div>
+            <div class={styles.number}>
+              {humanizeNumber(Math.ceil(article()?.studioStats?.satszapped || 0))}
+            </div>
+            <div class={styles.unit}>Sats</div>
+          </div>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>{humanizeNumber(Math.ceil(article()?.studioStats?.score || 0))}</div>
             <div class={styles.unit}>Score</div>
           </div>
+
           <div class={styles.stat}>
             <div class={styles.number}>
-              <div class={styles.sentimentPositive}></div>
+              <div class={styles[`sentiment_${article()?.studioStats?.sentiment || 'neutral'}`]}></div>
             </div>
             <div class={styles.unit}>Sentiment</div>
           </div>

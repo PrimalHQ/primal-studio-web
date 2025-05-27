@@ -6,7 +6,7 @@ import { logError } from "./logger";
 import { hexToNpub } from "./profile";
 import { parseBolt11 } from "./zaps";
 import { nip19 } from "./nTools";
-
+import { v4 as uuidv4 } from 'uuid';
 
 export const noActions = (id: string) => ({
   event_id: id,
@@ -519,7 +519,7 @@ export const getArticleInPage = (
   const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
   const author = getUserInPage(page, read.pubkey!);
   const stat = page.noteStats[read.id];
-  const studioStats = page.studioNoteStats[read.id];
+  const studioStats = page.studioNoteStats[coordinate];
   const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
   const wordCount = (page.wordCount || {})[read.id] || 0;
   const tags = read.tags || [];
@@ -724,7 +724,7 @@ export const getContactsInPage = (page: EventFeedPage) => {
   })) as DMContact[];
 }
 
-export const pageResolve = (page: EventFeedPage, identifier = `${Math.ceil(Math.random() * 1_000_000)}`): EventFeedResult => {
+export const pageResolve = (page: EventFeedPage, identifier = uuidv4()): EventFeedResult => {
 
   // If there are reposts that have empty content,
   // we need to add the content manualy

@@ -26,6 +26,7 @@ export type AccountStore = {
   metadata: NostrEventContent | undefined,
   blossomServers: string[],
   recomendedBlossomServers: string[],
+  accountIsReady: boolean,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -34,6 +35,7 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   metadata: undefined,
   blossomServers: [],
   recomendedBlossomServers: [],
+  accountIsReady: false,
 });
 
 let extensionAttempt = 0;
@@ -41,6 +43,7 @@ let extensionAttempt = 0;
 const logout = () => {
   updateAccountStore('sec', () => undefined);
   updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
+  updateAccountStore('accountIsReady', () => false);
   localStorage.removeItem('pubkey');
   localStorage.removeItem('primalSec');
 };
@@ -62,6 +65,7 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     if (pubkey !== accountStore.pubkey || force) {
       updateAccountStore('pubkey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
+      updateAccountStore('accountIsReady', () => true);
     }
 
     // Read profile from storage
@@ -142,6 +146,8 @@ export const fetchNostrKey = async () => {
 
     // Fetch it anyway, maybe there is an update
     updateAccountProfile(key);
+
+    updateAccountStore('accountIsReady', () => true);
   } catch (e: any) {
     updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
     localStorage.removeItem('pubkey');

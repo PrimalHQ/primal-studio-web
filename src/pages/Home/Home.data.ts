@@ -165,7 +165,6 @@ export const fetchHomeNotes = query(
         ...options,
         pubkey,
         kind: Kind.Text,
-        ident: `${Kind.Text}_${options?.offset || 0}`,
       });
 
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
@@ -210,7 +209,6 @@ export const fetchHomeArticles = query(
         ...options,
         pubkey,
         kind: Kind.LongForm,
-        ident: `${Kind.LongForm}_${options?.offset || 0}`,
       });
 
       let index = pageStore.homeArticles.feedPages.findIndex(fp => {

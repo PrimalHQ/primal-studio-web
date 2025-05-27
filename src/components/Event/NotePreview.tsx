@@ -13,12 +13,14 @@ import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
-import missingImage from 'assets/images/missing_image.png';
+import missingImage from 'assets/images/missing_image.svg';
 import { humanizeNumber } from 'src/utils/ui';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
+import { logError } from 'src/utils/logger';
 
 const NotePreview: Component<{
+  id: string | undefined,
   note: PrimalNote,
   embedded?: boolean,
   variant?: EventDisplayVariant,
@@ -27,7 +29,11 @@ const NotePreview: Component<{
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
 
   createEffect(() => {
-    parseNote();
+    if (props.note) {
+      parseNote(props.note);
+    } else {
+      logError('Missing Note: ', props.id)
+    }
   });
 
   const note = () => props.note;
@@ -40,9 +46,8 @@ const NotePreview: Component<{
     metadata: eventStore.get(pubkey || ''),
   });
 
-  const parseNote = () => {
-    const note = props.note;
-    let asts = parseTextToAST(note?.content || '');
+  const parseNote = (note: PrimalNote) => {
+    let asts = parseTextToAST(note.content || '');
 
     setNoteAst(() => asts);
   };
@@ -266,30 +271,24 @@ const NotePreview: Component<{
 
         <div class={styles.noteStats}>
 
-          <Show when={note()?.studioStats?.satszapped}>
-            <div class={styles.stat}>
-              <div class={styles.number}>
-                {humanizeNumber(Math.ceil(note()?.studioStats?.satszapped))}
-              </div>
-              <div class={styles.unit}>Sats</div>
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              {humanizeNumber(Math.ceil(note()?.studioStats?.satszapped || 0))}
             </div>
-          </Show>
+            <div class={styles.unit}>Sats</div>
+          </div>
 
-          <Show when={note()?.studioStats?.score}>
-            <div class={styles.stat}>
-              <div class={styles.number}>{humanizeNumber(Math.ceil(note()?.studioStats?.score))}</div>
-              <div class={styles.unit}>Score</div>
-            </div>
-          </Show>
+          <div class={styles.stat}>
+            <div class={styles.number}>{humanizeNumber(Math.ceil(note()?.studioStats?.score || 0))}</div>
+            <div class={styles.unit}>Score</div>
+          </div>
 
-          <Show when={note()?.studioStats?.sentiment}>
-            <div class={styles.stat}>
-              <div class={styles.number}>
-                <div class={styles[`sentiment_${note()?.studioStats?.sentiment}`]}></div>
-              </div>
-              <div class={styles.unit}>Sentiment</div>
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              <div class={styles[`sentiment_${note()?.studioStats?.sentiment || 'neutral'}`]}></div>
             </div>
-          </Show>
+            <div class={styles.unit}>Sentiment</div>
+          </div>
         </div>
       </div>
     </a>

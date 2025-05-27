@@ -1,4 +1,10 @@
 import { type ReactiveMap } from '@solid-primitives/map';
+import { PageStore } from './stores/PageStore';
+import { AccountStore } from './stores/AccountStore';
+import { MediaStore } from './stores/MediaStore';
+import { AppStore } from './stores/AppStore';
+import { RelayStore } from './stores/RelayStore';
+import { SettingsStore } from './stores/SettingsStore';
 
 export type EventRegistry = Record<string, NostrEventContent>;
 
@@ -14,6 +20,12 @@ export type PrimalWindow = Window & typeof globalThis & {
   onPrimalCacheServerMessageReceived?: (url: string, data: any) => void,
   onPrimalCacheServerMessageSent?: (url: string, data: any) => void,
   eventStore: EventStore,
+  pageStore: PageStore,
+  accountStore: AccountStore,
+  mediaStore: MediaStore,
+  appStore: AppStore,
+  relayStore: RelayStore,
+  settingsStore: SettingsStore,
 };
 
 export type NostrEventType = "EVENT" | "EOSE" | "NOTICE";

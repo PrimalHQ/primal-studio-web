@@ -298,6 +298,7 @@ const Home: Component = () => {
                   twoColumns={noArticles()}
                   eventComponent={(e) => (
                     <NotePreview
+                      id={e}
                       note={page.notes.find(n => n.id === e)!}
                       variant='feed'
                     />
