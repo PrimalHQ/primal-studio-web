@@ -71,7 +71,8 @@ const Home: Component = () => {
 
   createEffect(on(
     () => [homeStore.graphSpan.since, homeStore.graphSpan.until, homeStore.graphSpan.resolution],
-    (changes) => {
+    (changes, prev) => {
+      if (!prev) return;
       // When graph span changes
 
       const since = changes[0] as number;
@@ -87,7 +88,8 @@ const Home: Component = () => {
       resetArticleLists(pubkey, { since, until });
     }));
 
-  createEffect(on(() => homeStore.noteSort, (criteria) => {
+  createEffect(on(() => homeStore.noteSort, (criteria, prev) => {
+    if (!prev) return;
     const { since, until } = homeStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;
@@ -95,7 +97,8 @@ const Home: Component = () => {
     resetNoteLists(pubkey, { since, until, criteria });
   }));
 
-  createEffect(on(() => homeStore.articleSort, (criteria) => {
+  createEffect(on(() => homeStore.articleSort, (criteria, prev) => {
+    if (!prev) return;
     const { since, until } = homeStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;

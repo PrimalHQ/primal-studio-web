@@ -16,8 +16,10 @@ const HeaderTitle: Component<{
         when={props.subTitle}
         fallback={<>{props.title}</>}
       >
-        <A class={styles.linkBack} href="/settings">{props.title}</A>
-        : {props.subTitle}
+        <div>
+          <A class={styles.linkBack} href="/settings">{props.title}</A>
+          : {props.subTitle}
+        </div>
       </Show>
       <div>
         {props.children}

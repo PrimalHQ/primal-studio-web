@@ -214,7 +214,7 @@ export const getHomeGraph = async (opts?: HomePayload) => {
 export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
   const kind: number = opts?.kind || Kind.Text;
 
-  const identifier = uuidv4();
+  const identifier = `${kind}_${uuidv4()}`;
 
   const subId = `home_events_${identifier}_${APP_ID}`;
 
@@ -298,7 +298,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
         updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve(pageResolve(page));
+        resolve(pageResolve(page, { offset: payload.offset }));
       },
       onNotice: () => {
         reject('failed_to_fetch_relays');

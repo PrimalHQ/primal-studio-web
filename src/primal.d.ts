@@ -320,6 +320,7 @@ export type PaginationInfo = {
   since: number,
   until: number,
   sortBy: string,
+  offset: number,
   elements: string[],
 };
 

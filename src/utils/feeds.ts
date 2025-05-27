@@ -724,7 +724,8 @@ export const getContactsInPage = (page: EventFeedPage) => {
   })) as DMContact[];
 }
 
-export const pageResolve = (page: EventFeedPage, identifier = uuidv4()): EventFeedResult => {
+export const pageResolve = (page: EventFeedPage, opts?: { offset?: number }): EventFeedResult => {
+  const identifier = uuidv4();
 
   // If there are reposts that have empty content,
   // we need to add the content manualy
@@ -747,6 +748,7 @@ export const pageResolve = (page: EventFeedPage, identifier = uuidv4()): EventFe
     until: page.until,
     sortBy: page.sortBy,
     elements: [ ...page.elements ],
+    offset: opts?.offset || 0,
   }
 
   const users = filterAndSortUsers(getUsersInPage(page), paging, page);

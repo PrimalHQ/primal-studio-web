@@ -9,6 +9,7 @@ import { emptyStudioTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePaylo
 import { emptyEventFeedPage, emptyFeedRange } from "src/utils/feeds";
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
+import { logInfo } from "src/utils/logger";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -170,7 +171,7 @@ export const fetchHomeNotes = query(
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
           fp.paging.until === result.paging.until &&
-          fp.identifier === result.identifier;
+          fp.paging.offset === result.paging.offset;
       })
 
       if (index === -1) {
@@ -244,6 +245,13 @@ export const preloadHome = (args: RoutePreloadFuncArgs) => {
   if (!pk) return;
 
   const { since, until, resolution } = homeStore.graphSpan;
+
+  if (
+    pageStore.homeArticles.feedPages.length > 0 ||
+    pageStore.homeNotes.feedPages.length > 0
+  ) return;
+
+  logInfo('Preload');
 
   fetchHomeTotals(pk, { since, until });
   fetchHomeGraph(pk, { since, until, resolution });

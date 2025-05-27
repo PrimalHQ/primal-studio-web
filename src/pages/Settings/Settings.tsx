@@ -16,7 +16,7 @@ const Settings: Component<{ children?: JSXElement }> = (props) => {
   const subTitle = () => {
     const keys = loc.pathname.split('/');
 
-    return translate('settings.menu', keys[keys.length-1]);
+    return translate('settings', 'menu', keys[keys.length-1]);
   }
 
   return (
