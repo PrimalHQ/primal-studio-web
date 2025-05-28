@@ -121,7 +121,7 @@ const SearchUser: Component<{
     }
 
 
-    if (['Enter', 'Space', 'Comma', 'Tab'].includes(e.code)) {
+    if (['Enter', 'Tab'].includes(e.code)) {
       const sel = document.getElementById(`mention_suggested_user_${highlightedUser()}`);
 
       sel && sel.click();

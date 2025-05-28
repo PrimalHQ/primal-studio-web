@@ -39,7 +39,7 @@
     margin-left: 12px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     max-width: calc(var(--search-input-width) * 0.5);
   }
 
@@ -51,6 +51,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: left;
 
 
     &.darkTitle {
