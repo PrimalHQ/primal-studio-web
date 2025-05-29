@@ -55,8 +55,7 @@ export const deleteArticle = (id: string) => {
 
 };
 
-export const fetchHomeTotals = query(
-  async (
+export const fetchHomeTotals = async (
     pubkey: string,
     options?: {
       since?: number,
@@ -67,12 +66,9 @@ export const fetchHomeTotals = query(
 
     const r = await getHomeTotals({ pubkey, ...options });
     setHomeStore('totals', () => ({ ...r }))
-  },
-  'fetchHomeTotals',
-);
+  };
 
-export const fetchHomeGraph = query(
-  async (
+export const fetchHomeGraph = async (
     pubkey: string,
     options?: {
       since?: number,
@@ -85,12 +81,9 @@ export const fetchHomeGraph = query(
     const r = await getHomeGraph({ pubkey, ...options });
 
     setHomeStore('graph', () => [...r])
-  },
-  'fetchHomeGraph',
-);
+  };
 
-export const fetchHomeNotes = query(
-  async (
+export const fetchHomeNotes = async (
     pubkey: string,
     options?: HomePayload,
   ) => {
@@ -131,12 +124,9 @@ export const fetchHomeNotes = query(
     } catch (e) {
       return;
     }
-  },
-  'fetchHomeNotes',
-);
+  };
 
-export const fetchHomeArticles = query(
-  async (
+export const fetchHomeArticles = async (
     pubkey: string,
     options?: HomePayload,
   ) => {
@@ -177,9 +167,7 @@ export const fetchHomeArticles = query(
     } catch (e){
       return ;
     }
-  },
-  'fetchHomeArticles',
-);
+  };
 
 export const preloadHome = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;
@@ -197,10 +185,13 @@ export const preloadHome = (args: RoutePreloadFuncArgs) => {
     pageStore.homeNotes.feedPages.length > 0
   ) return;
 
-  logInfo('Preload');
+  query(fetchHomeTotals, 'fetchHomeTotals')(pk, { since, until });
+  query(fetchHomeGraph, 'fetchHomeGraph')(pk, { since, until, resolution });
+  query(fetchHomeNotes, 'fetchHomeNotes')(pk, { since, until, limit: 30, offset: 0 });
+  query(fetchHomeArticles, 'fetchHomeArticles')(pk, { since, until, limit: 30, offset: 0 });
 
-  fetchHomeTotals(pk, { since, until });
-  fetchHomeGraph(pk, { since, until, resolution });
-  fetchHomeNotes(pk, { since, until, limit: 30, offset: 0 });
-  fetchHomeArticles(pk, { since, until, limit: 30, offset: 0 });
+  // fetchHomeTotals(pk, { since, until });
+  // fetchHomeGraph(pk, { since, until, resolution });
+  // fetchHomeNotes(pk, { since, until, limit: 30, offset: 0 });
+  // fetchHomeArticles(pk, { since, until, limit: 30, offset: 0 });
 }

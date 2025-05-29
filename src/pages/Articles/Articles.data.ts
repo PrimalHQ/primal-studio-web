@@ -36,8 +36,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
 
 export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
 
-export const fetchArticles = query(
-  async (
+export const fetchArticles = async (
     pubkey: string,
     options?: HomePayload,
   ) => {
@@ -78,9 +77,7 @@ export const fetchArticles = query(
     } catch (e){
       return ;
     }
-  },
-  'fetchArticles',
-);
+  };
 
 export const preloadArticles = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;
@@ -97,5 +94,6 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
     pageStore.articles.feedPages.length > 0
   ) return;
 
-  fetchArticles(pk, { since, until, limit: 30, offset: 0 });
+  query(fetchArticles, 'fetchArticles')(pk, { since, until, limit: 30, offset: 0 });
+  // fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }
