@@ -36,8 +36,6 @@ const Articles: Component = () => {
 
   let articlesPageObserver: IntersectionObserver | undefined;
 
-  let articlesOffset = 0;
-
   articlesPageObserver = new IntersectionObserver(entries => {
     let i=0;
 
@@ -67,16 +65,14 @@ const Articles: Component = () => {
 
     const { since, until } = articlesStore.graphSpan;
 
-    const feedRange = pageStore.articles.lastRange;
-
-    articlesOffset += feedRange.elements.length;
+    let offset = articlesStore.offset;
 
     fetchArticles(
       params.pubkey || accountStore.pubkey,
       {
         since,
         until,
-        offset: articlesOffset,
+        offset,
         limit: 30,
         criteria: articlesStore.criteria,
       },
@@ -88,12 +84,17 @@ const Articles: Component = () => {
     const { since, until } = span;
 
     clearPageStore('articles');
-
-    articlesOffset = 0;
+    setArticlesStore('offset', () => 0)
 
     fetchArticles(
       pubkey,
-      { since, until, limit: 30, offset: 0, criteria: articlesStore.criteria },
+      {
+        since,
+        until,
+        limit: 30,
+        offset: 0,
+        criteria: articlesStore.criteria,
+      },
     );
   }
 

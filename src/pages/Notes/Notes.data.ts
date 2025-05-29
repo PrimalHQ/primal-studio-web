@@ -19,6 +19,7 @@ export type NotesStore = {
   graphSpan: GraphSpan,
   tab: FeedEventState,
   showReplies: boolean,
+  offset: number,
 }
 
 export const emptyNotesStore = (): NotesStore => ({
@@ -27,6 +28,7 @@ export const emptyNotesStore = (): NotesStore => ({
   graphSpan: defaultSpan(),
   tab: 'published',
   showReplies: false,
+  offset: 0,
 });
 
 export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
@@ -44,8 +46,8 @@ export const fetchNotes = async (
   updatePageStore('notes', 'isFetching', () => true);
 
   const state: FeedEventState = options?.state === 'published' && notesStore.showReplies ?
-    'published-replied' :
-    (options?.state || notesStore.tab);
+  'published-replied' :
+  (options?.state || notesStore.tab);
 
   try {
     let result = await getFeedEvents({
@@ -54,6 +56,8 @@ export const fetchNotes = async (
       kind: 'notes',
       state,
     });
+
+    setNotesStore('offset', (offset) => offset + result.paging.elements.length);
 
     let index = pageStore.notes.feedPages.findIndex(fp => {
       return fp.paging.since === result.paging.since &&

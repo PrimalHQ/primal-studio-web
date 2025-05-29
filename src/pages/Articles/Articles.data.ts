@@ -25,6 +25,7 @@ export type ArticlesStore = {
   criteria: FeedCriteria,
   graphSpan: GraphSpan,
   tab: FeedEventState,
+  offset: number,
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -32,6 +33,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
   criteria: 'score',
   graphSpan: defaultSpan(),
   tab: 'published',
+  offset: 0,
 });
 
 export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
@@ -56,9 +58,12 @@ export const fetchArticles = async (
         state: articlesStore.tab,
       });
 
+      setArticlesStore('offset', (offset) => offset + result.paging.elements.length);
+
       let index = pageStore.articles.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
-          fp.paging.until === result.paging.until;
+          fp.paging.until === result.paging.until &&
+          fp.paging.offset === result.paging.offset;
       })
 
       if (index === -1) {

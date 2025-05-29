@@ -38,8 +38,6 @@ const Notes: Component = () => {
 
   let notesPageObserver: IntersectionObserver | undefined;
 
-  let notesOffset = 0;
-
   notesPageObserver = new IntersectionObserver(entries => {
     let i=0;
 
@@ -69,16 +67,14 @@ const Notes: Component = () => {
 
     const { since, until } = notesStore.graphSpan;
 
-    const feedRange = pageStore.notes.lastRange;
-
-    notesOffset += feedRange.elements.length;
+    let offset = notesStore.offset;
 
     fetchNotes(
       params.pubkey || accountStore.pubkey,
       {
         since,
         until,
-        offset: notesOffset,
+        offset,
         limit: 30,
         criteria: notesStore.criteria,
         state: notesStore.tab,
@@ -92,8 +88,7 @@ const Notes: Component = () => {
     const { since, until, criteria, state, showReplies } = span;
 
     clearPageStore('notes');
-
-    notesOffset = 0;
+    setNotesStore('offset', () => 0)
 
     fetchNotes(
       pubkey,

@@ -38,21 +38,22 @@ const Home: Component = () => {
     setHomeStore('graphKey', key);
   }
 
-  let notesOffset = 0;
-  let articlesOffset = 0;
-
-
   const resetNoteLists = (pubkey: string, span: Partial<HomePayload>) => {
 
     const { since, until } = span;
 
     clearPageStore('homeNotes');
-
-    notesOffset = 0;
+    setHomeStore('noteOffset', () => 0)
 
     fetchHomeNotes(
       pubkey,
-      { since, until, limit: 30, offset: 0, criteria: homeStore.noteSort },
+      {
+        since,
+        until,
+        limit: 30,
+        offset: 0,
+        criteria: homeStore.noteSort,
+      },
     );
   }
 
@@ -61,12 +62,17 @@ const Home: Component = () => {
     const { since, until } = span;
 
     clearPageStore('homeArticles');
-
-    articlesOffset = 0;
+    setHomeStore('articleOffset', () => 0)
 
     fetchHomeArticles(
       pubkey,
-      { since, until, limit: 30, offset: 0, criteria: homeStore.noteSort },
+      {
+        since,
+        until,
+        limit: 30,
+        offset: 0,
+        criteria: homeStore.noteSort,
+      },
     );
   }
 
@@ -114,16 +120,14 @@ const Home: Component = () => {
 
     const { since, until } = homeStore.graphSpan;
 
-    const feedRange = pageStore.homeNotes.lastRange;
-
-    notesOffset += feedRange.elements.length;
+    let offset = homeStore.noteOffset;
 
     fetchHomeNotes(
       params.pubkey || accountStore.pubkey,
       {
         since,
         until,
-        offset: notesOffset,
+        offset,
         limit: 30,
         pubkey: params.pubkey,
         criteria: homeStore.noteSort,
@@ -136,16 +140,14 @@ const Home: Component = () => {
 
     const { since, until } = homeStore.graphSpan;
 
-    const feedRange = pageStore.homeArticles.lastRange;
-
-    articlesOffset += feedRange.elements.length;
+    let offset = homeStore.articleOffset;
 
     fetchHomeArticles(
       params.pubkey || accountStore.pubkey,
       {
         since,
         until,
-        offset: articlesOffset,
+        offset,
         limit: 30,
         criteria: homeStore.articleSort,
       },

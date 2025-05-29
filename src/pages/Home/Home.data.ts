@@ -32,8 +32,10 @@ export type HomeStore = {
   graph: StudioGraph[],
   notes: PrimalNote[],
   noteSort: FeedCriteria,
+  noteOffset: number,
   articles: PrimalArticle[],
   articleSort: FeedCriteria,
+  articleOffset: number,
   graphKey: keyof StudioGraph,
   graphSpan: GraphSpan,
 }
@@ -43,17 +45,15 @@ export const emptyHomeStore = (): HomeStore => ({
   graph: [],
   notes: [],
   noteSort: 'score',
+  noteOffset: 0,
   articles: [],
   articleSort: 'score',
+  articleOffset: 0,
   graphKey: 'score',
   graphSpan: defaultSpan(),
 });
 
 export const [homeStore, setHomeStore] = createStore<HomeStore>(emptyHomeStore());
-
-export const deleteArticle = (id: string) => {
-
-};
 
 export const fetchHomeTotals = async (
     pubkey: string,
@@ -102,6 +102,8 @@ export const fetchHomeNotes = async (
         kind: Kind.Text,
       });
 
+      setHomeStore('noteOffset', (offset) => offset + result.paging.elements.length);
+
       let index = pageStore.homeNotes.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
           fp.paging.until === result.paging.until &&
@@ -144,6 +146,8 @@ export const fetchHomeArticles = async (
         pubkey,
         kind: Kind.LongForm,
       });
+
+      setHomeStore('articleOffset', (offset) => offset + result.paging.elements.length);
 
       let index = pageStore.homeArticles.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
