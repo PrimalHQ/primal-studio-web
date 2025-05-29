@@ -1,10 +1,10 @@
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../utils/nTools';
 import { eventStore } from '../../stores/EventStore';
 import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
 import { FeedEvent } from './FeedPage';
@@ -14,14 +14,16 @@ import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
 import missingImage from 'assets/images/missing_image.svg';
-import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
-import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
+import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
+import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import { logError } from 'src/utils/logger';
 
-const NotePreview: Component<{
+const NoteHomePreview: Component<{
   id: string | undefined,
   note: PrimalNote,
+  embedded?: boolean,
+  variant?: EventDisplayVariant,
 }> = (props) => {
 
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
@@ -217,37 +219,80 @@ const NotePreview: Component<{
   let np: HTMLAnchorElement | undefined;
 
   return (
-    <div class={styles.eventHolder}>
-      <div class={styles.userAvatar}>
-        <Avatar
-          user={author()}
-          size={24}
+    <a
+      class={`${styles.notePreview}`}
+      data-event-id={props.note?.id}
+      href={openInPrimal()}
+      target='_blank'
+      ref={np}
+    >
+      <div class={styles.contextMenuTrigger}>
+        <NoteContextTrigger
+          ref={contextMenu}
+          onClick={onContextMenuTrigger}
         />
       </div>
-      <div class={styles.noteInfo}>
-        <div class={styles.header}>
-          <div class={styles.userName}>
-            {author()?.name}
+
+      <Show when={props.note?.repost?.user}>
+        <div class={styles.reposters}>
+          <div>reposted by {props.note.repost?.user?.name}</div>
+        </div>
+      </Show>
+
+      <div class={styles.holder}>
+        <div class={styles.userAvatar}>
+          <Avatar
+            user={author()}
+            size={24}
+          />
+        </div>
+        <div class={styles.noteInfo}>
+          <div class={styles.header}>
+            <div class={styles.userName}>
+              {author()?.name}
+            </div>
+            <div class={styles.separator}>•</div>
+            <div class={styles.noteDate}>
+             {longDate(note()?.created_at)}
+            </div>
           </div>
-          <div class={styles.separator}>•</div>
-          <div class={styles.noteDate}>
-            {longDate(note()?.created_at)}
+          <div class={styles.content}>
+            <Show when={images.length > 0}>
+              {renderImage(images[0])}
+            </Show>
+
+            <div class={styles.text}>
+              <For each={noteAst()}>
+                {ast => renderAst(ast)}
+              </For>
+            </div>
           </div>
         </div>
-        <div class={styles.content}>
-          <Show when={images.length > 0}>
-            {renderImage(images[0])}
-          </Show>
 
-          <div class={styles.text}>
-            <For each={noteAst()}>
-              {ast => renderAst(ast)}
-            </For>
+        <div class={styles.noteStats}>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              {humanizeNumber(Math.ceil(note()?.studioStats?.satszapped || 0))}
+            </div>
+            <div class={styles.unit}>Sats</div>
+          </div>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>{humanizeNumber(Math.ceil(note()?.studioStats?.score || 0))}</div>
+            <div class={styles.unit}>Score</div>
+          </div>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              <div class={styles[`sentiment_${note()?.studioStats?.sentiment || 'neutral'}`]}></div>
+            </div>
+            <div class={styles.unit}>Sentiment</div>
           </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
-export default NotePreview;
+export default NoteHomePreview;

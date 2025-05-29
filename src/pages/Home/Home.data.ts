@@ -6,72 +6,10 @@ import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { emptyStudioTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
-import { emptyEventFeedPage, emptyFeedRange, filterAndSortPageResults } from "src/utils/feeds";
+import { emptyEventFeedPage, emptyFeedRange, filterAndSortNotes, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
-
-
-export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
-  return paging.elements.reduce<string[]>(
-    (acc, id) => notes.includes(id) ? [...acc, id] : acc,
-    [],
-  );
-}
-
-// export const fetchHomeFeed = query(
-//   async (pubkey: string, options?: { feedRange?: FeedRange, offset?: number }) => {
-//     const range = options?.feedRange || emptyFeedRange();
-
-//     if (pageStore.home.isFetching) {
-//       const pages = pageStore.home.feedPages;
-
-//       return pages[pages.length] ||
-//         {
-//           specification: '',
-//           mainEvents: [],
-//           auxEvents: [],
-//           range: emptyFeedRange(),
-//         };
-//     }
-
-//     const page = {
-//       limit: FEED_LIMIT,
-//       until: range.since,
-//       offset: options?.offset || 0,
-//     };
-
-//     updatePageStore('home', 'isFetching', () => true);
-
-//     const result = await fetchMegaFeed(
-//       pubkey,
-//       Kind.Text,
-//       "{\"id\":\"latest\",\"kind\":\"notes\"}",
-//       `home_feed_${APP_ID}`,
-//       page,
-//     );
-
-//     let index = pageStore.home.feedPages.findIndex(fp => {
-//       return fp.specification === result.specification &&
-//         fp.range.since === result.range.since &&
-//         fp.range.until === result.range.until;
-//     })
-
-//     if (index === -1) {
-//       index = pageStore.home.feedPages.length;
-//     }
-
-//     batch(() => {
-//       updatePageStore('home', 'feedPages', index, () => ({ ...result }));
-
-//       updatePageStore('home', 'lastRange', () => ({ ...result.range }));
-//       updatePageStore('home', 'isFetching', () => false);
-//     });
-
-//     return result;
-//   },
-//   'fetchHomeFeed',
-// );
 
 export type GraphSpan = {
   name: string,
@@ -162,7 +100,7 @@ export const fetchHomeNotes = query(
     updatePageStore('homeNotes', 'isFetching', () => true);
 
     try {
-      const result = await getTopEvents({
+      let result = await getTopEvents({
         ...options,
         pubkey,
         kind: Kind.Text,
@@ -178,8 +116,10 @@ export const fetchHomeNotes = query(
         index = pageStore.homeNotes.feedPages.length;
       }
 
+      result.notes = filterAndSortNotes(result.notes, result.paging);
+
       batch(() => {
-        updatePageStore('homeNotes', 'feedPages', index, () => ({ ...filterAndSortPageResults(result) }));
+        updatePageStore('homeNotes', 'feedPages', index, () => ({ ...result }));
         updatePageStore('homeNotes', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeNotes', 'isFetching', () => false);
       });
@@ -206,7 +146,7 @@ export const fetchHomeArticles = query(
     updatePageStore('homeArticles', 'isFetching', () => true);
 
     try {
-      const result = await getTopEvents({
+      let result = await getTopEvents({
         ...options,
         pubkey,
         kind: Kind.LongForm,
@@ -221,8 +161,10 @@ export const fetchHomeArticles = query(
         index = pageStore.homeArticles.feedPages.length;
       }
 
+      result.reads = filterAndSortReads(result.reads, result.paging);
+
       batch(() => {
-        updatePageStore('homeArticles', 'feedPages', index, () => ({ ...filterAndSortPageResults(result) }));
+        updatePageStore('homeArticles', 'feedPages', index, () => ({ ...result }));
         updatePageStore('homeArticles', 'lastRange', () => ({ ...result.paging }));
         updatePageStore('homeArticles', 'isFetching', () => false);
       });

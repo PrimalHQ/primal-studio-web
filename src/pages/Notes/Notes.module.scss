@@ -1,7 +1,69 @@
-.feed {
-  position: relative;
+.feedHolder {
+  max-width: 100%;
+  margin-inline: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 0px;
-  width: 640px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+
+  .itemsHolder {
+    min-width: calc(50% - 10px);
+    flex-grow: 1;
+
+    .feedHeader {
+      height: 48px;
+      margin-block: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .label {
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+    }
+
+    .feedContent {
+      height: calc(100dvh - 136px);
+
+      overflow: hidden;
+
+      &:hover {
+        width: calc(100% + 8px);
+        overflow-y: scroll;
+      }
+    }
+  }
+}
+
+.activeTab {
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+
+}
+
+.inactiveTab {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.showRepliesCheck {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.additionalSettings {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }

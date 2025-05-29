@@ -1,3 +1,5 @@
+import { SelectOption } from "./components/SelectBox/SelectBox";
+
 export const THEMES = ['studio_dark', 'studio_light'];
 
 
@@ -133,3 +135,26 @@ export const minKnownProfiles: {"names": Record<string,string>} = {
     "jack": "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2",
   }
 };
+
+export const headerSortOptions: SelectOption[] = [
+  {
+    value: 'score',
+    label: 'Content Score',
+  },
+  {
+    value: 'satszapped',
+    label: 'Sats Zapped',
+  },
+  {
+    value: 'sentiment',
+    label: 'Sentiment',
+  },
+  {
+    value: 'latest',
+    label: 'Latest',
+  },
+  {
+    value: 'oldest',
+    label: 'Oldest',
+  },
+]

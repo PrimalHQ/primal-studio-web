@@ -18,8 +18,10 @@ import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
 
-const ArticlePreview: Component<{
+const ArticleHomePreview: Component<{
   article: PrimalArticle,
+  embedded?: boolean,
+  variant?: EventDisplayVariant,
 }> = (props) => {
 
   const article = () => props.article;
@@ -31,6 +33,12 @@ const ArticlePreview: Component<{
   const title = () => ((article()?.tags || []).find(t => t[0] === 'title') || ['title', ''])[1];
 
   const author = () => article()?.user;
+
+  const user = (pubkey?: string) => ({
+    pubkey: pubkey || '',
+    name: userName(pubkey),
+    metadata: eventStore.get(pubkey || ''),
+  });
 
   const onImgError = async (event: any) => {
     const image = event.target;
@@ -93,36 +101,112 @@ const ArticlePreview: Component<{
     return <img class={styles.image} src={src} onerror={onImgError} />;
   }
 
-  return (
-    <div class={styles.eventHolder}>
-      <div class={styles.userAvatar}>
-        <Avatar
-          user={author()}
-          size={24}
-        />
-      </div>
-      <div class={styles.noteInfo}>
-        <div class={styles.header}>
-          <div class={styles.userName}>
-            {author().name}
-          </div>
-          <div class={styles.separator}>•</div>
-          <div class={styles.noteDate}>
-            {longDate(parseInt(published()))}
-          </div>
-        </div>
-        <div class={styles.content}>
-          <Show when={image().length > 0}>
-            {renderImage(image())}
-          </Show>
+  let contextMenu: HTMLDivElement | undefined;
 
-          <div class={styles.title}>
-            {title()}
+  const openReactionModal = (openOn = 'likes') =>  {
+    // app?.actions.openReactionModal(props.article.naddr, {
+    //   likes: reactionsState.likes,
+    //   zaps: reactionsState.zapCount,
+    //   reposts: reactionsState.reposts,
+    //   quotes: reactionsState.quoteCount,
+    //   openOn,
+    // });
+  };
+
+  const onContextMenuTrigger = () => {
+    openNoteContextMenu(
+      article(),
+      contextMenu?.getBoundingClientRect(),
+      openReactionModal,
+      () => {
+
+      },
+    );
+  };
+
+  const openInPrimal = () => {
+    let link = `e/${article()?.nId}`;
+
+    if (article().nId.startsWith('naddr')) {
+      const vanityName = appStore.verifiedUsers[article().pubkey];
+
+      if (vanityName) {
+        const decoded = nip19.decode(article().nId);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
+      }
+    }
+
+    return `https://primal.net/${link}`;
+  };
+
+  return (
+    <a
+      class={`${styles.notePreview}`}
+      data-event-id={props.article.id}
+      href={openInPrimal()}
+      target='_blank'
+    >
+      <div class={styles.holder}>
+        <div class={styles.contextMenuTrigger}>
+          <NoteContextTrigger
+            ref={contextMenu}
+            onClick={onContextMenuTrigger}
+          />
+        </div>
+
+        <div class={styles.userAvatar}>
+          <Avatar
+            user={author()}
+            size={24}
+          />
+        </div>
+        <div class={styles.noteInfo}>
+          <div class={styles.header}>
+            <div class={styles.userName}>
+              {author().name}
+            </div>
+            <div class={styles.separator}>•</div>
+            <div class={styles.noteDate}>
+             {longDate(parseInt(published()))}
+            </div>
+          </div>
+          <div class={styles.content}>
+            <Show when={image().length > 0}>
+              {renderImage(image())}
+            </Show>
+
+            <div class={styles.title}>
+              {title()}
+            </div>
+          </div>
+        </div>
+
+        <div class={styles.noteStats}>
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              {humanizeNumber(Math.ceil(article()?.studioStats?.satszapped || 0))}
+            </div>
+            <div class={styles.unit}>Sats</div>
+          </div>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>{humanizeNumber(Math.ceil(article()?.studioStats?.score || 0))}</div>
+            <div class={styles.unit}>Score</div>
+          </div>
+
+          <div class={styles.stat}>
+            <div class={styles.number}>
+              <div class={styles[`sentiment_${article()?.studioStats?.sentiment || 'neutral'}`]}></div>
+            </div>
+            <div class={styles.unit}>Sentiment</div>
           </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
-export default ArticlePreview;
+export default ArticleHomePreview;

@@ -6,71 +6,72 @@ import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { emptyStudioTotals, FeedEventState, getFeedEvents, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
-import { emptyEventFeedPage, emptyFeedRange, filterAndSortNotes, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
+import { emptyEventFeedPage, emptyFeedRange, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
 import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
 
 
-export type NotesStore = {
-  notes: PrimalArticle[],
+export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
+  return paging.elements.reduce<string[]>(
+    (acc, id) => notes.includes(id) ? [...acc, id] : acc,
+    [],
+  );
+}
+
+export type ArticlesStore = {
+  articles: PrimalArticle[],
   criteria: FeedCriteria,
   graphSpan: GraphSpan,
   tab: FeedEventState,
-  showReplies: boolean,
 }
 
-export const emptyNotesStore = (): NotesStore => ({
-  notes: [],
+export const emptyHomeStore = (): ArticlesStore => ({
+  articles: [],
   criteria: 'score',
   graphSpan: defaultSpan(),
   tab: 'published',
-  showReplies: false,
 });
 
-export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
+export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
 
-export const fetchNotes = query(
+export const fetchArticles = query(
   async (
     pubkey: string,
-    options?: HomePayload & { showReplies?: boolean },
+    options?: HomePayload,
   ) => {
-    if (pageStore.notes.isFetching) {
-      const pages = pageStore.notes.feedPages;
+    if (pageStore.articles.isFetching) {
+      const pages = pageStore.articles.feedPages;
 
       return pages[pages.length] || emptyEventFeedPage();
     }
 
-    updatePageStore('notes', 'isFetching', () => true);
-
-    const state: FeedEventState = options?.state === 'published' && notesStore.showReplies ?
-      'published-replied' :
-      (options?.state || notesStore.tab);
+    updatePageStore('articles', 'isFetching', () => true);
 
     try {
       let result = await getFeedEvents({
         ...options,
         pubkey,
-        kind: 'notes',
-        state,
+        kind: 'articles',
+        state: articlesStore.tab,
       });
 
-      let index = pageStore.notes.feedPages.findIndex(fp => {
+      let index = pageStore.articles.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
           fp.paging.until === result.paging.until;
       })
 
       if (index === -1) {
-        index = pageStore.notes.feedPages.length;
+        index = pageStore.articles.feedPages.length;
       }
 
-      result.notes = filterAndSortNotes(result.notes, result.paging);
+      result.reads = filterAndSortReads(result.reads, result.paging);
 
       batch(() => {
-        updatePageStore('notes', 'feedPages', index, () => ({ ...result }));
-        updatePageStore('notes', 'lastRange', () => ({ ...result.paging }));
-        updatePageStore('notes', 'isFetching', () => false);
+        updatePageStore('articles', 'feedPages', index, () => ({ ...result }));
+        updatePageStore('articles', 'lastRange', () => ({ ...result.paging }));
+        updatePageStore('articles', 'isFetching', () => false);
       });
 
       return result;
@@ -78,11 +79,10 @@ export const fetchNotes = query(
       return ;
     }
   },
-  'fetchNotes',
+  'fetchArticles',
 );
 
-
-export const preloadNotes = (args: RoutePreloadFuncArgs) => {
+export const preloadArticles = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;
 
   if (!pk) {
@@ -91,11 +91,11 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
 
   if (!pk) return;
 
-  const { since, until } = notesStore.graphSpan;
+  const { since, until, resolution } = articlesStore.graphSpan;
 
   if (
-    pageStore.notes.feedPages.length > 0
+    pageStore.articles.feedPages.length > 0
   ) return;
 
-  fetchNotes(pk, { since, until, limit: 30, offset: 0 });
+  fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }

@@ -2,8 +2,9 @@ import { Component, lazy } from 'solid-js';
 import { Router, Route, RoutePreloadFunc } from "@solidjs/router";
 
 import { accountStore } from './stores/AccountStore';
-import preloadNotes from './pages/Notes/Notes.data';
+import { preloadNotes } from './pages/Notes/Notes.data';
 import { preloadHome } from './pages/Home/Home.data';
+import { preloadArticles } from './pages/Articles/Articles.data';
 
 const AppRouter: Component = () => {
 
@@ -30,13 +31,14 @@ const AppRouter: Component = () => {
 
 
   const homePreload: RoutePreloadFunc = (args) => preloadHome(args);
-  const notesPreload = () => preloadNotes(accountStore.pubkey);
+  const articlesPreload: RoutePreloadFunc = (args) => preloadArticles(args);
+  const notesPreload: RoutePreloadFunc = (args) => preloadNotes(args);
 
   return (
     <Router root={AppLayout} preload={true}>
       <Route path="/:pubkey?" component={Home} preload={homePreload} />
       <Route path="/notes" component={Notes} preload={notesPreload}/>
-      <Route path="/articles" component={Articles} />
+      <Route path="/articles/:pubkey?" component={Articles} preload={articlesPreload} />
       <Route path="/media" component={Media} />
       <Route path="/account" component={Account} />
       <Route path="/settings" component={Settings}>

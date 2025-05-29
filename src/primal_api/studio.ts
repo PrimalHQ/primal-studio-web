@@ -49,6 +49,8 @@ export const emptyStudioTotals = () => ({
   zaps_sent: 0,
 });
 
+export type FeedEventState = 'published' | 'published-replied';
+
 export type HomePayload = {
   pubkey?: string,
   since?: number,
@@ -57,6 +59,7 @@ export type HomePayload = {
   offset?: number,
   resolution?: 'hour' | 'day' | 'month',
   criteria?: 'score' | 'sentiment' | 'oldest' | 'latest',
+  state?: FeedEventState,
 };
 
 export const getHomeTotals = async (opts?: HomePayload) => {
@@ -309,6 +312,107 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
   })
 };
 
+export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'articles' }) => {
+  const kind = opts?.kind || 'notes';
+
+  const identifier = `${kind}_${opts?.state || ''}_${uuidv4()}`;
+
+  const subId = `feed_${identifier}_${APP_ID}`;
+
+  const today = Math.floor((new Date()).getTime() / 1_000)
+
+  let payload: HomePayload & { kind: 'notes' | 'articles' }= {
+    until: today,
+    since: 0,
+    limit: 10,
+    criteria: 'score',
+    offset: 0,
+    state: "published",
+    kind,
+  };
+
+  if (opts?.pubkey) {
+    let pk = npubToHex(opts.pubkey);
+    const vanityName = await fetchKnownProfiles(pk);
+
+    if (vanityName.names[pk]) {
+      pk = vanityName.names[pk];
+    }
+
+    payload.pubkey = pk;
+  }
+
+  if ((opts?.until || 0) > 0) {
+    payload.until = opts!.until;
+  }
+
+  if ((opts?.since || 0) > 0) {
+    payload.since = opts!.since;
+  }
+
+  if ((opts?.limit || 0) > 0) {
+    payload.limit = opts!.limit;
+  }
+
+  if (opts?.criteria) {
+    payload.criteria = opts.criteria;
+  }
+
+  if (opts?.offset) {
+    payload.offset = opts.offset;
+  }
+
+  if (opts?.state) {
+    payload.state = opts.state;
+  }
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'feed',
+      ...payload,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<EventFeedResult>((resolve, reject) => {
+
+    let page = { ...emptyEventFeedPage() };
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        resolve(pageResolve(page, { offset: payload.offset }));
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_top_events');
+      }
+    }
+    )
+  })
+};
+
+
+// Settings --------------------------------------------
+
 export type SettingsList = { pubkey?: string, kind?: 'notes' | 'articles', rss_feed_url?: string}[];
 
 export const getSettingsList = async (
@@ -433,7 +537,6 @@ export const addToSettingsList = async (
     });
   });
 }
-
 
 export const removeFromSettingsList = async (
   listType: 'inbox_permissions' | 'content_imports',

@@ -13,13 +13,14 @@ import objectSupport from 'dayjs/plugin/objectSupport';
 import FeedPage from 'src/components/Event/FeedPage';
 import { clearPageStore, pageStore } from 'src/stores/PageStore';
 
-import NotePreview from 'src/components/Event/NotePreview';
+import NoteHomePreview from 'src/components/Event/NoteHomePreview';
 import Paginator from 'src/components/Paginator/Paginator';
-import ArticlePreview from 'src/components/Event/ArticlePreview';
+import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
 import { useParams } from '@solidjs/router';
-import HomeHeader from './HomeHeader';
 import HomeStats from './HomeStats';
 import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
+import PageHeader from 'src/components/PageHeader/PageHeader';
+import { headerSortOptions } from 'src/constants';
 
 const Home: Component = () => {
   const params = useParams();
@@ -79,6 +80,8 @@ const Home: Component = () => {
       const until = changes[1] as number;
       const resolution = changes[2] as 'day' | 'month' | 'hour';
 
+      if (since === prev[0] && until === prev[1] && resolution === prev[2]) return;
+
       const pubkey = params.pubkey || accountStore.pubkey;
 
       fetchHomeGraph(pubkey, { since, until, resolution });
@@ -89,7 +92,7 @@ const Home: Component = () => {
     }));
 
   createEffect(on(() => homeStore.noteSort, (criteria, prev) => {
-    if (!prev) return;
+    if (!prev || criteria === prev) return;
     const { since, until } = homeStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;
@@ -98,7 +101,7 @@ const Home: Component = () => {
   }));
 
   createEffect(on(() => homeStore.articleSort, (criteria, prev) => {
-    if (!prev) return;
+    if (!prev || criteria === prev) return;
     const { since, until } = homeStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;
@@ -123,6 +126,7 @@ const Home: Component = () => {
         offset: notesOffset,
         limit: 30,
         pubkey: params.pubkey,
+        criteria: homeStore.noteSort,
       },
     );
   };
@@ -143,6 +147,7 @@ const Home: Component = () => {
         until,
         offset: articlesOffset,
         limit: 30,
+        criteria: homeStore.articleSort,
       },
     );
   };
@@ -223,28 +228,6 @@ const Home: Component = () => {
     }
   });
 
-  const sortOptions: SelectOption[] = [
-    {
-      value: 'score',
-      label: 'Content Score',
-    },
-    {
-      value: 'satszapped',
-      label: 'Sats Zapped',
-    },
-    {
-      value: 'sentiment',
-      label: 'Sentiment',
-    },
-    {
-      value: 'latest',
-      label: 'Latest',
-    },
-    {
-      value: 'oldest',
-      label: 'Oldest',
-    },
-  ]
 
   const noArticles = () => {
     const pages = articlePages();
@@ -260,7 +243,13 @@ const Home: Component = () => {
   return (
     <>
       <Wormhole to="header">
-        <HomeHeader />
+        <PageHeader
+          title={translate('home', 'header')}
+          selection={homeStore.graphSpan.name}
+          onSpanSelect={(span: GraphSpan) => {
+            setHomeStore('graphSpan', () => ({ ...span }))
+          }}
+        />
       </Wormhole>
 
       <div class={styles.statHolder}>
@@ -284,8 +273,8 @@ const Home: Component = () => {
             </div>
             <SelectBox
               prefix="Sort by:"
-              value={sortOptions.find(o => o.value === homeStore.noteSort) || sortOptions[0]}
-              options={sortOptions}
+              value={headerSortOptions.find(o => o.value === homeStore.noteSort) || headerSortOptions[0]}
+              options={headerSortOptions}
               onChange={(option) => setHomeStore('noteSort', (option?.value || 'score') as FeedCriteria)}
             />
           </div>
@@ -300,7 +289,7 @@ const Home: Component = () => {
                   key="homeNotes"
                   twoColumns={noArticles()}
                   eventComponent={(e) => (
-                    <NotePreview
+                    <NoteHomePreview
                       id={e}
                       note={page.notes.find(n => n.id === e)!}
                       variant='feed'
@@ -323,8 +312,8 @@ const Home: Component = () => {
             </div>
             <SelectBox
               prefix="Sort by:"
-              value={sortOptions.find(o => o.value === homeStore.articleSort) || sortOptions[0]}
-              options={sortOptions}
+              value={headerSortOptions.find(o => o.value === homeStore.articleSort) || headerSortOptions[0]}
+              options={headerSortOptions}
               onChange={(option) => setHomeStore('articleSort', (option?.value || 'score') as FeedCriteria)}
             />
           </div>
@@ -340,7 +329,7 @@ const Home: Component = () => {
                   twoColumns={articlePages().length === 0}
                   eventComponent={(e) => (
                     <Show when={page.reads.find(a => a.id === e)}>
-                      <ArticlePreview
+                      <ArticleHomePreview
                         article={page.reads.find(a => a.id === e)!}
                         variant='feed'
                       />

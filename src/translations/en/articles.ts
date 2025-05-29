@@ -1,4 +1,11 @@
 export default {
   title: 'Articles Page',
-  header: 'Articles'
+  header: 'Articles',
+  tabs: {
+    published: 'Published',
+    scheduled: 'Scheduled',
+    inbox: 'Inbox',
+    sent: 'Sent',
+    drafts: 'Drafts',
+  }
 }

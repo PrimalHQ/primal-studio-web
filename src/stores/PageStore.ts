@@ -8,59 +8,36 @@ export type PageInfo = {
   height: number,
 }
 
-export type PageStore = {
-  homeNotes: {
-    feedPages: EventFeedResult[],
-    lastRange: FeedRange,
-    isFetching: boolean,
-    mainEventKey: keyof EventFeedResult,
-    pageInfo: Record<string,  PageInfo>,
-    scrollTop: number,
-  },
-  homeArticles: {
-    feedPages: EventFeedResult[],
-    lastRange: FeedRange,
-    isFetching: boolean,
-    mainEventKey: keyof EventFeedResult,
-    pageInfo: Record<string,  PageInfo>,
-    scrollTop: number,
-  },
-  notes: {
-    feedPages: EventFeedResult[],
-    lastRange: FeedRange,
-    isFetching: boolean,
-    mainEventKey: keyof EventFeedResult,
-    pageInfo: Record<string,  PageInfo>,
-    scrollTop: number,
-  },
+export type PageConfig = {
+  feedPages: EventFeedResult[],
+  lastRange: FeedRange,
+  isFetching: boolean,
+  mainEventKey: keyof EventFeedResult,
+  pageInfo: Record<string,  PageInfo>,
+  scrollTop: number,
 }
 
-export const emptyStore = (): PageStore => ({
-  homeNotes: {
-    feedPages: [],
-    lastRange: emptyFeedRange(),
-    pageInfo: {},
-    mainEventKey: 'notes',
-    isFetching: false,
-    scrollTop: 0,
-  },
-  homeArticles: {
-    feedPages: [],
-    lastRange: emptyFeedRange(),
-    pageInfo: {},
-    mainEventKey: 'reads',
-    isFetching: false,
-    scrollTop: 0,
-  },
-  notes: {
-    feedPages: [],
-    lastRange: emptyFeedRange(),
-    pageInfo: {},
-    mainEventKey: 'notes',
-    isFetching: false,
-    scrollTop: 0,
-  },
+export type PageStore = {
+  homeNotes: PageConfig,
+  homeArticles: PageConfig,
+  notes: PageConfig,
+  articles: PageConfig,
+}
 
+export const emptyPageConfig = (mainEventKey: keyof EventFeedResult) => ({
+  feedPages: [],
+  lastRange: emptyFeedRange(),
+  pageInfo: {},
+  mainEventKey,
+  isFetching: false,
+  scrollTop: 0,
+});
+
+export const emptyStore = (): PageStore => ({
+  homeNotes: emptyPageConfig('notes'),
+  homeArticles: emptyPageConfig('reads'),
+  notes: emptyPageConfig('notes'),
+  articles: emptyPageConfig('reads'),
 });
 
 export const [pageStore, updatePageStore] = createStore<PageStore>(emptyStore());

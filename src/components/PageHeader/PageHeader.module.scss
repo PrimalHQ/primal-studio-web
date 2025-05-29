@@ -1,0 +1,61 @@
+
+.graphSpans {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    border: none;
+    outline: none;
+    background: none;
+
+    display: flex;
+    padding: 6px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    border-radius: 99px;
+    border: 1px solid var(--subtile-devider);
+
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+
+    cursor: pointer;
+
+    &.compact {
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    &.active, &:hover {
+      color: var(--background-site);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 20px;
+      background: var(--text-primary);
+
+      .calendarIcon {
+        background-color: var(--background-site);
+      }
+    }
+  }
+}
+
+.calendarIcon {
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-secondary);
+  margin-inline: 8px;
+  -webkit-mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/calendar.svg) no-repeat 0 / 100%;
+}
+
+.datePicker {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}

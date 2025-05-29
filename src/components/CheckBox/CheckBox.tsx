@@ -1,5 +1,5 @@
 import { Checkbox } from '@kobalte/core/checkbox';
-import { Component, JSXElement, Match, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, JSXElement, Match, on, Switch } from 'solid-js';
 
 import styles from './CheckBox.module.scss';
 
@@ -13,11 +13,20 @@ const CheckBox: Component<{
   disabled?: boolean,
 }> = (props) => {
 
+  const [isChecked, setIsChecked] = createSignal(false);
+
+  createEffect(on(() => props.checked, (checked, prev) => {
+    if (checked === prev) return;
+
+    setIsChecked(checked || false);
+  }))
+
   return (
     <Checkbox
       class={styles.checkbox}
-      checked={props.checked}
+      checked={isChecked()}
       onChange={props.onChange}
+      disabled={props.disabled}
     >
       <Checkbox.Input class={styles.input} />
       <Checkbox.Control class={styles.control}>
