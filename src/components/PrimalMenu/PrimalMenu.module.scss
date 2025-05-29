@@ -46,7 +46,7 @@
   right: 0px;
   padding: 8px;
   background-color: var(--background-input);
-  border: none;
+  border: 1px solid var(--subtile-devider);
   border-radius: 8px;
   z-index: 35;
   width: max-content;
@@ -86,7 +86,7 @@
   right: 0px;
   padding: 8px;
   background-color: var(--background-input);
-  border: none;
+  border: 1px solid var(--subtile-devider);
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;

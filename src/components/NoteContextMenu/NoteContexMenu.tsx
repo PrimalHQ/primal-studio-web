@@ -35,6 +35,7 @@ const NoteContextMenu: Component<{
   data: NoteContextMenuInfo | undefined,
   open: boolean,
   onClose: () => void,
+  onDelete?: (eventId: string) => void,
   id?: string,
 }> = (props) => {
 
@@ -169,7 +170,7 @@ const NoteContextMenu: Component<{
 
     triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
-    // props.data.onDelete && props.data.onDelete(noteToDelete.noteId);
+    props.data.onDelete && props.data.onDelete(noteToDelete.id);
     props.onClose();
   };
 

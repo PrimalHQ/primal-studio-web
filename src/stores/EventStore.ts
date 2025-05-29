@@ -77,6 +77,25 @@ export const addEventsToStore = (events: NostrEventContent[]) => {
   // });
 }
 
+export const removeEventFromEventStore = async (id: string) => {
+  eventStore.delete(id);
+
+  let db = await openDB('store', 1, {
+    upgrade(database, oldVersion, newVersion, transaction, event) {
+      if (oldVersion === 0) {
+        database.createObjectStore('events', { keyPath: 'id' });
+      }
+    },
+  });
+
+  let transaction = db.transaction('events', 'readwrite');
+  let eventsDb = transaction.objectStore('events');
+
+  eventsDb.delete(id);
+
+  await transaction.done;
+}
+
 export const getEventFromStore = async (id: string) => {
   // let event = eventStore[id];
   let event = eventStore.get(id);
@@ -111,6 +130,7 @@ export const getEventFromStore = async (id: string) => {
   return fetchedEvents.find(e => e.id === id);
 
 };
+
 
 export const calculateOffset = (ids: string[], range: FeedRange) => {
   let offset = 0;

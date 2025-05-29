@@ -173,49 +173,6 @@ const NotePreview: Component<{
     return <>{ast.value || ''}</>
   }
 
-  let contextMenu: HTMLDivElement | undefined;
-
-  const openReactionModal = (openOn = 'likes') =>  {
-    // app?.actions.openReactionModal(props.article.naddr, {
-    //   likes: reactionsState.likes,
-    //   zaps: reactionsState.zapCount,
-    //   reposts: reactionsState.reposts,
-    //   quotes: reactionsState.quoteCount,
-    //   openOn,
-    // });
-  };
-
-  const onContextMenuTrigger = () => {
-    openNoteContextMenu(
-      note(),
-      contextMenu?.getBoundingClientRect(),
-      openReactionModal,
-      () => {
-
-      },
-    );
-  }
-
-  const openInPrimal = () => {
-    let link = `e/${note()?.nId}`;
-
-    if (note()?.nId.startsWith('naddr')) {
-      const vanityName = appStore.verifiedUsers[note()?.pubkey];
-
-      if (vanityName) {
-        const decoded = nip19.decode(note()?.nId);
-
-        const data = decoded.data as nip19.AddressPointer;
-
-        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
-      }
-    }
-
-    return `https://primal.net/${link}`;
-  };
-
-  let np: HTMLAnchorElement | undefined;
-
   return (
     <div class={styles.eventHolder}>
       <div class={styles.userAvatar}>

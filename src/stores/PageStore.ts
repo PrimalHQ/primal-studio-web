@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { EventFeedResult, FeedRange } from "../primal";
-import { eventStore } from "./EventStore";
+import { eventStore, removeEventFromEventStore } from "./EventStore";
 import { openDB } from 'idb';
 import { emptyFeedRange } from "src/utils/feeds";
 
@@ -42,8 +42,47 @@ export const emptyStore = (): PageStore => ({
 
 export const [pageStore, updatePageStore] = createStore<PageStore>(emptyStore());
 
-export const removeEventFromPage = (pageKey: keyof PageStore, pageIdentifier: string, eventId: string) => {
+export const removeEventFromPageStore = (
+  eventId: string,
+) => {
+  const keys = Object.keys(pageStore) as (keyof PageStore)[];
 
+  keys.forEach(key => {
+    const pageIndex = pageStore[key].feedPages.findIndex(e => e.eventIds.includes(eventId));
+
+    if (pageIndex < 0) return;
+
+    const eventKey = pageStore[key].mainEventKey;
+
+    if (!['notes', 'reads', 'users', 'drafts', 'zaps'].includes(eventKey))
+      return;
+
+    updatePageStore(key, 'feedPages', (pages) => {
+      let newPages = [...pages];
+      let page = newPages[pageIndex];
+
+      newPages[pageIndex] = {
+        ...page,
+        // @ts-ignore
+        [eventKey]: page[eventKey].filter(ev => ev.id !== eventId),
+      }
+
+      return newPages;
+    })
+
+  //   updatePageStore(key, 'feedPages', pageIndex, (result) => {
+  //     if (!['notes', 'reads', 'users', 'drafts', 'zaps'].includes(eventKey)) return {};
+
+  //     const eventIds = result.eventIds.filter(id => id !== eventId);
+  //     // @ts-ignore
+  //     const events = result[eventKey].filter(ev => ev.id !== eventId);
+
+  //     return ({ eventIds, [eventKey]: events })});
+
+  })
+
+
+  removeEventFromEventStore(eventId);
 }
 
 export const forgetPage = async (page: keyof PageStore, index: number) => {

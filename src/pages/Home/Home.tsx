@@ -11,7 +11,7 @@ import { accountStore } from 'src/stores/AccountStore';
 import dayjs from 'dayjs';
 import objectSupport from 'dayjs/plugin/objectSupport';
 import FeedPage from 'src/components/Event/FeedPage';
-import { clearPageStore, pageStore } from 'src/stores/PageStore';
+import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/PageStore';
 
 import NoteHomePreview from 'src/components/Event/NoteHomePreview';
 import Paginator from 'src/components/Paginator/Paginator';
@@ -293,6 +293,9 @@ const Home: Component = () => {
                       id={e}
                       note={page.notes.find(n => n.id === e)!}
                       variant='feed'
+                      onDelete={(id: string) => {
+                        removeEventFromPageStore(id)
+                      }}
                     />
                   )}
                 />
@@ -332,6 +335,9 @@ const Home: Component = () => {
                       <ArticleHomePreview
                         article={page.reads.find(a => a.id === e)!}
                         variant='feed'
+                        onDelete={(id: string) => {
+                          removeEventFromPageStore(id)
+                        }}
                       />
                     </Show>
                   )}

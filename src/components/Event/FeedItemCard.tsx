@@ -22,6 +22,7 @@ const FeedItemCard: Component<{
   children?: JSXElement,
   onClick?: () => void,
   event: PrimalNote | PrimalArticle,
+  onDelete?: (id: string) => void,
 }> = (props) => {
 
   let contextMenu: HTMLDivElement | undefined;
@@ -42,7 +43,7 @@ const FeedItemCard: Component<{
       contextMenu?.getBoundingClientRect(),
       openReactionModal,
       () => {
-
+        props.onDelete && props.onDelete(props.event.id)
       },
     );
   };

@@ -49,8 +49,11 @@ export const emptyHomeStore = (): HomeStore => ({
   graphSpan: defaultSpan(),
 });
 
-
 export const [homeStore, setHomeStore] = createStore<HomeStore>(emptyHomeStore());
+
+export const deleteArticle = (id: string) => {
+
+};
 
 export const fetchHomeTotals = query(
   async (
@@ -154,7 +157,8 @@ export const fetchHomeArticles = query(
 
       let index = pageStore.homeArticles.feedPages.findIndex(fp => {
         return fp.paging.since === result.paging.since &&
-          fp.paging.until === result.paging.until;
+          fp.paging.until === result.paging.until &&
+          fp.paging.offset === result.paging.offset;
       })
 
       if (index === -1) {

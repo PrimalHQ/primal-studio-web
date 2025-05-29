@@ -24,6 +24,7 @@ const NoteHomePreview: Component<{
   note: PrimalNote,
   embedded?: boolean,
   variant?: EventDisplayVariant,
+  onDelete?: (id: string) => void,
 }> = (props) => {
 
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
@@ -193,7 +194,7 @@ const NoteHomePreview: Component<{
       contextMenu?.getBoundingClientRect(),
       openReactionModal,
       () => {
-
+        props.onDelete && props.onDelete(note()?.id)
       },
     );
   }

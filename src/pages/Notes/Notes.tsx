@@ -8,7 +8,7 @@ import PageHeader from 'src/components/PageHeader/PageHeader';
 import { FeedCriteria, GraphSpan } from '../Home/Home.data';
 import SelectBox from 'src/components/SelectBox/SelectBox';
 import { headerSortOptions } from 'src/constants';
-import { clearPageStore, pageStore } from 'src/stores/PageStore';
+import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/PageStore';
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
 import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
@@ -232,6 +232,9 @@ const Notes: Component = () => {
                       <FeedItemCard
                         onClick={() => {openInPrimal(note!)}}
                         event={note!}
+                        onDelete={(id: string) => {
+                          removeEventFromPageStore(id)
+                        }}
                       >
                         <NotePreview
                           id={e}
