@@ -123,6 +123,16 @@ const Articles: Component = () => {
     resetArticleLists(pubkey, { since, until, criteria });
   }));
 
+  createEffect(on(() => articlesStore.tab, (state, prev) => {
+    if (!prev || state === prev) return;
+
+    const { since, until } = articlesStore.graphSpan;
+
+    const pubkey = params.pubkey || accountStore.pubkey;
+
+    resetArticleLists(pubkey, { since, until, state });
+  }));
+
 
   const openInPrimal = (article: PrimalArticle) => {
     let link = `e/${article?.nId}`;
@@ -148,6 +158,7 @@ const Articles: Component = () => {
         <PageHeader
           title={translate('articles', 'header')}
           selection={articlesStore.graphSpan.name}
+          hideSpans={!['published'].includes(articlesStore.tab)}
           onSpanSelect={(span: GraphSpan) => {
             setArticlesStore('graphSpan', () => ({ ...span }))
           }}

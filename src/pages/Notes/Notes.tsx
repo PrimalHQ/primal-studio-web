@@ -163,6 +163,7 @@ const Notes: Component = () => {
         <PageHeader
           title={translate('notes', 'header')}
           selection={notesStore.graphSpan.name}
+          hideSpans={!['published', 'published-replied'].includes(notesStore.tab)}
           onSpanSelect={(span: GraphSpan) => {
             setNotesStore('graphSpan', () => ({ ...span }))
           }}

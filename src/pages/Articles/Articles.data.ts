@@ -50,12 +50,24 @@ export const fetchArticles = async (
 
     updatePageStore('articles', 'isFetching', () => true);
 
+    const state = options?.state || articlesStore.tab;
+
+    let since = options?.since || articlesStore.graphSpan.since;
+    let until = options?.until || articlesStore.graphSpan.until;
+
+    if (!['published'].includes(state)) {
+      since = 0;
+      until = 0;
+    }
+
     try {
       let result = await getFeedEvents({
         ...options,
         pubkey,
         kind: 'articles',
-        state: articlesStore.tab,
+        state,
+        since,
+        until,
       });
 
       setArticlesStore('offset', (offset) => offset + result.paging.elements.length);

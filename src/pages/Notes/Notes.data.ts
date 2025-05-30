@@ -49,12 +49,22 @@ export const fetchNotes = async (
   'published-replied' :
   (options?.state || notesStore.tab);
 
+  let since = options?.since || notesStore.graphSpan.since;
+  let until = options?.until || notesStore.graphSpan.until;
+
+  if (!['published', 'published-replied'].includes(state)) {
+    since = 0;
+    until = 0;
+  }
+
   try {
     let result = await getFeedEvents({
       ...options,
       pubkey,
       kind: 'notes',
       state,
+      since,
+      until,
     });
 
     setNotesStore('offset', (offset) => offset + result.paging.elements.length);
