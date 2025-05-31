@@ -1,0 +1,257 @@
+@mixin statIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-tertiary-2);
+
+  &.large {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@mixin typeDiv {
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+
+  &.large {
+    font-size: 16px;
+  }
+}
+
+.contextButton {
+  width: 48px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .contextIcon {
+    width: 16px;
+    height: 14px;
+    background-color: var(--text-secondary-2);
+    -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+    mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+  }
+
+  &:hover {
+    .contextIcon {
+      background-color: var(--text-primary);
+    }
+  }
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 145px 145px 145px 145px auto;
+  position: relative;
+  width: 100%;
+
+  .bookmarkFoot {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 20px;
+  }
+
+  &.xwide {
+    grid-template-columns: 145px 145px 145px 145px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.wide {
+    grid-template-columns: 138px 138px 138px 138px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.short {
+    grid-template-columns: 133px 133px 133px 133px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.compact {
+    grid-template-columns: 138px 138px 138px 138px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.very_short {
+    grid-template-columns: 123px 123px 123px 123px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.notif {
+    grid-template-columns: 137px 137px 137px 129px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.normal {
+    width: 100%;
+  }
+
+  .context {
+    background: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  &.phoneView {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .stat{
+      min-width: 0px;
+      padding-right: 12px;
+      margin-right: 0;
+    }
+
+    .context {
+      display: none;
+    }
+  }
+}
+
+.stat {
+  align-items: center;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+  background-color: unset;
+  width: fit-content;
+  position: relative;
+  // padding-right: 48px;
+
+  .likeType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .replyType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .repostType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .zapType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
+      mask: url(../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
+    }
+  }
+
+  .bookmarkType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  .statNumber {
+    text-align: left;
+    color: var(--text-tertiary-2);
+    padding-left: 7px;
+  }
+}
+
+.largeZapLottie {
+  width: 435px;
+  height: 58px;
+  position: absolute;
+  z-index: 20;
+  // background-color: red;
+}
+
+.mediumZapLottie {
+  width: 353px;
+  height: 46px;
+  position: absolute;
+  z-index: 20;
+}
+
+
+@media only screen and (max-width: 720px) {
+  .footer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .stat{
+      min-width: 0px;
+      padding-right: 12px;
+      margin-right: 0;
+    }
+
+    .context {
+      display: none;
+    }
+  }
+
+}

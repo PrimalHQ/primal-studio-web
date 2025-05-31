@@ -7,7 +7,7 @@ import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { createStore } from 'solid-js/store';
 import { PrimalUser } from 'src/primal';
 import SearchOption from './SearchOptions';
-import { findUserByNpub, findUsers } from 'src/stores/SearchStore';
+import { findUserByNpub2, findUsers2 } from 'src/stores/SearchStore';
 import { userName } from 'src/utils/profile';
 import { nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
@@ -134,14 +134,14 @@ const SearchUser: Component<{
   };
 
   const filterUsers = async (term: string) => {
-    const users = await findUsers(term);
+    const users = await findUsers2(term);
     setSuggestions(() => [...users])
     setSuggestedTerm(() => term);
   }
 
   const onInput = async (value: string) => {
     if (value.startsWith('npub') || value.startsWith('nprofile')) {
-      const users = await findUserByNpub(value);
+      const users = await findUserByNpub2(value);
 
       setSuggestions(() => [...users])
       return;

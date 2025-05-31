@@ -97,3 +97,20 @@ export const previousWord = (input: HTMLInputElement) => {
 
   return words.length > 0 ? words[words.length - 1] : '';
 }
+
+export const getLang = () => {
+  if (navigator.languages !== undefined)
+    return navigator.languages[0];
+  return navigator.language;
+}
+
+export const sha256 = async (file: File) => {
+  const obj = await file.arrayBuffer();
+  return crypto.subtle.digest('SHA-256', obj).then((hashBuffer) => {
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((bytes) => bytes.toString(16).padStart(2, '0'))
+      .join('');
+    return hashHex;
+  });
+}

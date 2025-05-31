@@ -158,3 +158,5 @@ export const headerSortOptions: SelectOption[] = [
     label: 'Oldest',
   },
 ]
+
+export const wordsPerMinute = 238;

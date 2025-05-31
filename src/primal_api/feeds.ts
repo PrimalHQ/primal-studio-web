@@ -1,13 +1,14 @@
 import {
+  EventFeedResult,
   FeedPaging,
   FeedRange,
   FeedResult,
   NostrEventContent,
 } from "../primal";
 
-import { sendMessage, subsTo } from "../utils/socket";
+import { primalAPI, sendMessage, subsTo } from "../utils/socket";
 import { Kind } from "../constants";
-import { emptyFeedRange } from "src/utils/feeds";
+import { emptyEventFeedPage, emptyFeedRange, pageResolve, updateFeedPage } from "src/utils/feeds";
 
 
 export const getMegaFeed = (
@@ -72,64 +73,34 @@ export const getEvents = (
 
 export const fetchMegaFeed = (
   pubkey: string | undefined,
-  kind: number,
   specification: string,
   subId: string,
   paging?: FeedPaging,
 ) => {
-    return new Promise<FeedResult>((resolve) => {
-      let range = emptyFeedRange();
-      let mainEvents: string[] = [];
-      let auxEvents: string[] = [];
+  return new Promise<EventFeedResult>((resolve, reject) => {
 
-      const unsub = subsTo(subId, {
-        onEose: () => {
-          unsub();
-          resolve({
-            specification,
-            mainEvents,
-            auxEvents,
-            range,
-          });
-        },
-        onEvent: (_, event) => {
-          if (event.kind === Kind.FeedRange) {
-            range = JSON.parse(event.content || '{}') as FeedRange;
-            return;
-          }
+    let page = { ...emptyEventFeedPage() };
 
-          if (event.kind === kind) {
-            // For metadata use pubkey instead of event id.
-            const id = kind === Kind.Metadata ? event.pubkey! : event.id;
-            mainEvents.push(id);
-            return;
-          }
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+    const offset = paging?.offset || 0;
 
-          if (event.kind === Kind.Repost) {
-            const reposted = JSON.parse(event.content || '{ id: "" }') as NostrEventContent;
-
-            if (reposted.kind === kind) {
-              // For metadata use pubkey instead of event id.
-              const id = kind === Kind.Metadata ? event.pubkey! : event.id;
-              mainEvents.push(id);
-              return;
-            }
-          }
-
-          auxEvents.push(event.id);
-        }
-      });
-
-      const until = paging?.until || 0;
-      const since = paging?.since || 0;
-      const limit = paging?.limit || 0;
-      const offset = paging?.offset || 0;
-
-      getMegaFeed(pubkey, specification, subId, until, limit, since, offset);
-
+    primalAPI({
+      subId,
+      action: () => getMegaFeed(pubkey, specification, subId, until, limit, since, offset),
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        resolve(pageResolve(page));
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_mega_feed');
+      }
     });
+  });
 };
-
 
 export const fetchEvents = (
   pubkey: string | undefined,

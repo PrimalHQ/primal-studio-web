@@ -13,7 +13,7 @@ import { logError } from 'src/utils/logger';
 import { addToSettingsList, removeFromSettingsList } from 'src/primal_api/studio';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import SearchOption from 'src/components/Search/SearchOptions';
-import { findUserByNpub, findUsers, searchStore } from 'src/stores/SearchStore';
+import { findUserByNpub2, findUsers2, searchStore } from 'src/stores/SearchStore';
 import { debounce, nip05Verification } from 'src/utils/ui';
 import DOMPurify from "dompurify";
 

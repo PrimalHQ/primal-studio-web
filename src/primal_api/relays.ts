@@ -100,3 +100,10 @@ export const sendBlossomEvent = async (list: string[]) => {
   return await sendEvent(event);
 }
 
+export const getUsersRelayInfo = (pubkeys: string[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_user_relays_2", { pubkeys }]},
+  ]));
+}

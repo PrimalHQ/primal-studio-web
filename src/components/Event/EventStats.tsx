@@ -1,9 +1,7 @@
-import { Component, createSignal, For, JSX, Match, onMount, Show, Switch } from 'solid-js';
-import { Kind } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
+import { Component } from 'solid-js';
+import { PrimalArticle, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
-import Note from './Note';
 import { humanizeNumber } from 'src/utils/ui';
 
 

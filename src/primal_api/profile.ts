@@ -20,13 +20,7 @@ export const getUsers = (pubkeys: string[]) => {
 
     primalAPI({
       subId,
-      action: () => {
-        sendMessage(JSON.stringify([
-          "REQ",
-          subId,
-          {cache: ["user_infos", { pubkeys }]},
-        ]));
-      },
+      action: () => getUserInfos(pubkeys, subId),
       onEvent: (event) => {
         updateFeedPage(page, event);
       },
@@ -42,3 +36,10 @@ export const getUsers = (pubkeys: string[]) => {
   });
 }
 
+export const getUserInfos = (pubkeys: string[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_infos", { pubkeys }]},
+  ]));
+}

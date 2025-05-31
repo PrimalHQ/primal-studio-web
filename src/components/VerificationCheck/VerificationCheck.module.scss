@@ -1,0 +1,110 @@
+
+.verifiedIcon {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
+}
+
+.verificationIcon {
+  width: 15px;
+  height: 15px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline: 4px;
+}
+
+.verificationIconL {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline: 4px;
+}
+
+.verifiedIconPrimal {
+  width: 100%;
+  height: 100%;
+
+  background: var(--accent);
+  -webkit-mask: url(../../assets/icons/purple_check.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/purple_check.svg) 0 / 100% no-repeat;
+  // background-image: url(../../assets/icons/purple_check.svg);
+  // background-size: contain;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .checkIcon {
+    width: 50%;
+    height: 50%;
+
+    background-color: var(--text-primary-button);
+    -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+    mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+
+  }
+
+  &.legend_GOLD {
+    background: var(--legend-gold);
+  }
+  &.legend_AQUA {
+    background: var(--legend-aqua);
+  }
+  &.legend_SILVER {
+    background: var(--legend-silver);
+  }
+  &.legend_PURPLE {
+    background: var(--legend-purple);
+  }
+  &.legend_PURPLEHAZE {
+    background: var(--legend-purplehaze);
+  }
+  &.legend_TEAL {
+    background: var(--legend-teal);
+  }
+  &.legend_BROWN {
+    background: var(--legend-brown);
+  }
+  &.legend_BLUE {
+    background: var(--legend-blue);
+  }
+  &.legend_SUNFIRE {
+    background: var(--legend-sunfire);
+  }
+}
+
+.whiteCheck {
+  width: 11px;
+  height: 11px;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+}
+
+.whiteCheckL {
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+}
+
+.verificationFailed {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+}

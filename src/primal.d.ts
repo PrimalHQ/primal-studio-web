@@ -101,6 +101,8 @@ export type EventsResult = {
   mediaEvents: string[],
 }
 
+export type EventCoordinate = { pubkey: string, identifier: string, kind: number };
+
 export type MediaSize = 'o' | 's' | 'm' | 'l';
 
 export type MediaVariant = {
@@ -119,7 +121,7 @@ export type MediaEvent = {
   thumbnails?: Record<string, string>,
 }
 
-export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification';
+export type EventDisplayVariant = 'feed' | 'thread' | 'primary' | 'preview' | 'notification' | 'suggestion';
 
 export type UserMetadata = {
   id: string,
@@ -464,3 +466,27 @@ export type SendNoteResult = {
 };
 
 export type VanityProfiles = { names: Record<string, string> };
+
+
+export type NoteReactionsState = {
+  bookmarks?: number,
+  likes: number,
+  liked: boolean,
+  reposts: number,
+  reposted: boolean,
+  replies: number,
+  replied: boolean,
+  zapCount: number,
+  satsZapped: number,
+  zappedAmount: number,
+  zapped: boolean,
+  zappedNow: boolean,
+  isZapping: boolean,
+  showZapAnim: boolean,
+  hideZapIcon: boolean,
+  moreZapsAvailable: boolean,
+  isRepostMenuVisible: boolean,
+  topZaps: TopZap[],
+  topZapsFeed: TopZap[],
+  quoteCount: number,
+};

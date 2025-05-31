@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import { Kind } from "src/constants";
-import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult, LeaderboardInfo, PaginationInfo } from "src/primal";
+import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult, LeaderboardInfo, PaginationInfo, UserStats } from "src/primal";
 import { parseLinkPreviews } from "src/stores/LinkPreviewStore";
 import { logError } from "./logger";
 import { hexToNpub } from "./profile";
@@ -94,7 +94,13 @@ export const emptyEventFeedPage: () => EventFeedPage = () => ({
   studioNoteStats: {},
 });
 
-export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
+export const emptyPaging = (): PaginationInfo => ({
+  since: 0,
+  until: 0,
+  sortBy: 'created_at',
+  offset: 0,
+  elements: [],
+});
 
 export const emptyEventFeedResults = () => ({
   users: [],
@@ -318,6 +324,38 @@ export const getUsersInPage = (page: EventFeedPage) => {
 
   return users;
 };
+
+export const convertToUser = (user: NostrEventContent, pubkey: string, stats?: Record<string, UserStats>) => {
+  if (!user) return emptyUser(pubkey);
+
+  let userMeta: any = {};
+
+  try {
+    userMeta = JSON.parse(user.content || '{}');
+  } catch (e) {
+    logError('Error in user meta JSON: ', e);
+    userMeta = {};
+  }
+
+  return {
+    id: user.id,
+    pubkey: user.pubkey,
+    npub: hexToNpub(user.pubkey),
+    name: (userMeta.name || '') as string,
+    about: (userMeta.about || '') as string,
+    picture: (userMeta.picture || '') as string,
+    nip05: (userMeta.nip05 || '') as string,
+    banner: (userMeta.banner || '') as string,
+    displayName: (userMeta.display_name || '') as string,
+    location: (userMeta.location || '') as string,
+    lud06: (userMeta.lud06 || '') as string,
+    lud16: (userMeta.lud16 || '') as string,
+    website: (userMeta.website || '') as string,
+    tags: user.tags,
+    userStats: stats && user.pubkey ? { ...stats[user.pubkey] } : undefined,
+  } as PrimalUser;
+}
+
 
 export const getUserInPage = (page: EventFeedPage, pubkey: string) => {
   const user = page.users[pubkey];

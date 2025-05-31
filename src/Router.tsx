@@ -26,6 +26,7 @@ const AppRouter: Component = () => {
   const Account = lazy(() => import('./pages/Account/Account'));
   const Thread = lazy(() => import('./pages/Thread/Thread'));
   const Profile = lazy(() => import('./pages/Profile/Profile'));
+  const ArticleEditorPage = lazy(() => import('./pages/ArticleEditorPage/ArticleEditorPage'));
 
   const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -49,6 +50,7 @@ const AppRouter: Component = () => {
         <Route path="/imports" component={SettingsImports} />
         <Route path="/permissions" component={SettingsPermissions} />
       </Route>
+      <Route path="/edit/article" component={ArticleEditorPage} />
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />
       <Route path="/*" component={NotFound} />

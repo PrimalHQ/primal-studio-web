@@ -18,6 +18,10 @@ import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
 
+export const renderArticlePreview = (config: any) => {
+  return (<div>ARTICLE</div> as HTMLDivElement).innerHTML;
+}
+
 const ArticlePreview: Component<{
   article: PrimalArticle,
 }> = (props) => {

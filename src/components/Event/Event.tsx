@@ -3,7 +3,6 @@ import { Kind } from '../../constants';
 import { EventDisplayVariant, NostrEventContent } from '../../primal';
 
 import styles from './Event.module.scss';
-import Note from './Note';
 
 
 const Event: Component<{
@@ -19,11 +18,7 @@ const Event: Component<{
   return (
     <Switch fallback={renderMissingEvent()}>
       <Match when={props.event.kind === Kind.Text}>
-        <Note
-          event={props.event}
-          reposters={props.reposters}
-          variant={props.variant}
-        />
+        EVENT
       </Match>
     </Switch>
   );

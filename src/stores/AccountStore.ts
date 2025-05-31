@@ -6,7 +6,7 @@ import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
-import { primalAPI } from "src/utils/socket";
+import { primalAPI, subTo } from "src/utils/socket";
 import { getUserMetadata } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
 import { getReplacableEvent, triggerImportEvents } from "src/primal_api/events";
@@ -15,10 +15,23 @@ import { getDefaultBlossomServers } from "src/primal_api/settings";
 import { sendBlossomEvent } from "src/primal_api/relays";
 import { createEffect } from "solid-js";
 import { parseUserMetadata } from "src/utils/profile";
+import { getMembershipStatus } from "src/primal_api/membership";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
 export const primalBlossom = 'https://blossom.primal.net';
+
+export type MembershipStatus = {
+  pubkey?: string,
+  tier?: string,
+  name?: string,
+  rename?: string,
+  nostr_address?: string,
+  lightning_address?: string,
+  primal_vip_profile?: string,
+  used_storage?: number,
+  expires_on?: number,
+};
 
 export type AccountStore = {
   pubkey: string;
@@ -27,6 +40,7 @@ export type AccountStore = {
   blossomServers: string[],
   recomendedBlossomServers: string[],
   accountIsReady: boolean,
+  membershipStatus: MembershipStatus,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -36,6 +50,7 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   blossomServers: [],
   recomendedBlossomServers: [],
   accountIsReady: false,
+  membershipStatus: {},
 });
 
 let extensionAttempt = 0;
@@ -65,6 +80,7 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     if (pubkey !== accountStore.pubkey || force) {
       updateAccountStore('pubkey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
+      checkMembershipStatus();
       updateAccountStore('accountIsReady', () => true);
     }
 
@@ -262,3 +278,47 @@ export const activeUser = () => {
   if (!accountStore.metadata) return;
   return parseUserMetadata(accountStore.metadata);
 }
+
+
+  const openMembershipSocket = (onOpen: (memSocket: WebSocket) => void) => {
+    const membershipSocket = new WebSocket('wss://wallet.primal.net/v1');
+
+    membershipSocket.addEventListener('close', () => {
+      logInfo('MEMBERSHIP SOCKET CLOSED');
+    });
+
+    membershipSocket.addEventListener('open', () => {
+      logInfo('MEMBERSHIP SOCKET OPENED');
+      onOpen(membershipSocket);
+    });
+  }
+
+export const checkMembershipStatus = () => {
+  openMembershipSocket((memSocket) => {
+    if (!memSocket || memSocket.readyState !== WebSocket.OPEN) return;
+
+    const subId = `ps_${APP_ID}`;
+
+    let gotEvent = false;
+
+    const unsub = subTo(memSocket, subId, (type, _, content) => {
+      if (type === 'EVENT') {
+        const status: MembershipStatus = JSON.parse(content?.content || '{}');
+
+        gotEvent = true;
+        updateAccountStore('membershipStatus', () => ({ ...status }));
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+        memSocket?.close();
+
+        if (!gotEvent) {
+          updateAccountStore('membershipStatus', () => ({ tier: 'none' }));
+        }
+      }
+    });
+
+    getMembershipStatus(accountStore.pubkey, subId, memSocket);
+  });
+};

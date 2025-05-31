@@ -405,8 +405,7 @@ export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'art
       onNotice: () => {
         reject('failed_to_fetch_top_events');
       }
-    }
-    )
+    })
   })
 };
 
