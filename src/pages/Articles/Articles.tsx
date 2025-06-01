@@ -25,12 +25,16 @@ import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
 import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
+import { createStore } from 'solid-js/store';
+import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 
 const Articles: Component = () => {
   const params = useParams();
 
   const articlePages = () => pageStore.articles.feedPages;
   const [visibleArticlesPages, setVisibleArticlesPages] = createSignal<number[]>([]);
+
+  const [selected, setSelected] = createStore<string[]>([]);
 
   const shouldRenderEmptyArticles = (index: number) => {
     return !visibleArticlesPages().includes(index);
@@ -189,7 +193,19 @@ const Articles: Component = () => {
             onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
           />
         </div>
-        <div class={styles.bulkControls}></div>
+        <Show when={['sent', 'inbox'].includes(articlesStore.tab)}>
+          <div class={styles.bulkControls}>
+            <button
+              class={styles.bulkControlButton}
+            >
+              Select All
+            </button>
+            <Show when={['inbox'].includes(articlesStore.tab)}>
+              <button class={styles.bulkControlButton}>Approve Selected</button>
+            </Show>
+            <button class={styles.bulkControlButton}>Delete All</button>
+          </div>
+        </Show>
         <div class={styles.feedContent}>
           <For each={articlePages()}>
             {(page, pageIndex) => (
@@ -207,7 +223,7 @@ const Articles: Component = () => {
                     return (
                       <Show when={draft}>
                         <FeedItemCard
-                          onClick={() => {openInPrimal(draft!)}}
+                          onClick={() => {}}
                           event={draft!}
                           hideContextMenu={!['published'].includes(articlesStore.tab)}
                           onDelete={(id: string) => {
@@ -221,6 +237,15 @@ const Articles: Component = () => {
                               removeEventFromPageStore(id)
                             }}
                             type='sent'
+                            checked={selected.includes(draft?.id || '-')}
+                            onCheck={(id, v) => {
+                              if (v && !selected.includes(id)) {
+                                setSelected(selected.length, () => id);
+                              }
+                              else if (!v) {
+                                setSelected((sel) => sel.filter(s => s !== id))
+                              }
+                            }}
                           />
                         </FeedItemCard>
                       </Show>
@@ -233,7 +258,7 @@ const Articles: Component = () => {
                     return (
                       <Show when={draft}>
                         <FeedItemCard
-                          onClick={() => {openInPrimal(draft!)}}
+                          onClick={() => {}}
                           event={draft!}
                           hideContextMenu={!['published'].includes(articlesStore.tab)}
                           onDelete={(id: string) => {
@@ -247,6 +272,15 @@ const Articles: Component = () => {
                               removeEventFromPageStore(id)
                             }}
                             type='inbox'
+                            checked={selected.includes(draft?.id || '-')}
+                            onCheck={(id, v) => {
+                              if (v && !selected.includes(id)) {
+                                setSelected(selected.length, () => id);
+                              }
+                              else if (!v) {
+                                setSelected((sel) => sel.filter(s => s !== id))
+                              }
+                            }}
                           />
                         </FeedItemCard>
                       </Show>
@@ -272,6 +306,33 @@ const Articles: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
+                  if (articlesStore.tab === 'scheduled') {
+
+                  const article = page.reads.find(a => a.id === e);
+
+                    return (
+                      <Show when={article}>
+                        <FeedItemCard
+                          onClick={() => {}}
+                          event={article!}
+                          hideContextMenu={true}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <ArticlePreview
+                            article={article!}
+                            hideTime={true}
+                          />
+                          <ScheduledInfo
+                            event={article!}
+                            onEdit={ () => {}}
                           />
                         </FeedItemCard>
                       </Show>

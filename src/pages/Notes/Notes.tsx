@@ -26,6 +26,8 @@ import { fetchNotes, notesStore, setNotesStore } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import DraftPreview from 'src/components/Event/DraftPreview';
+import ProposalPreview from 'src/components/Event/ProposalPreview';
+import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -211,6 +213,21 @@ const Notes: Component = () => {
             />
           </div>
         </div>
+
+        <Show when={['sent', 'inbox'].includes(notesStore.tab)}>
+          <div class={styles.bulkControls}>
+            <button
+              class={styles.bulkControlButton}
+            >
+              Select All
+            </button>
+            <Show when={['inbox'].includes(notesStore.tab)}>
+              <button class={styles.bulkControlButton}>Approve Selected</button>
+            </Show>
+            <button class={styles.bulkControlButton}>Delete All</button>
+          </div>
+        </Show>
+
         <div class={styles.feedContent}>
           <For each={notePages()}>
             {(page, pageIndex) => (
@@ -298,6 +315,34 @@ const Notes: Component = () => {
                       </Show>
                     );
                   }
+
+                  if (notesStore.tab === 'scheduled') {
+
+                  const note = page.reads.find(a => a.id === e);
+
+                    return (
+                      <Show when={note}>
+                        <FeedItemCard
+                          onClick={() => {}}
+                          event={note!}
+                          hideContextMenu={true}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <NotePreview
+                            id={e}
+                            note={note!}
+                            hideTime={true}
+                          />
+                          <ScheduledInfo
+                            event={note!}
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
                   const note = page.notes.find(a => a.id === e);
 
                   return (

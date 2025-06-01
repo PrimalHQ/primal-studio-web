@@ -61,6 +61,11 @@ export const fetchArticles = async (
       until = 0;
     }
 
+    if (['scheduled'].includes(state)) {
+      since = 0;
+      until = Number.MAX_SAFE_INTEGER;
+    }
+
     try {
       let result = await getFeedEvents({
         ...options,

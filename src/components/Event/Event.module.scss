@@ -84,7 +84,7 @@
 }
 
 
-.eventHolder {
+.eventHolder, .eventProposalHolder {
   display: flex;
   gap: 10px;
   width: 100%;
@@ -207,6 +207,9 @@
   }
 }
 
+.eventProposalHolder {
+  align-items: center;
+}
 
 .eventStats {
   display: flex;
@@ -643,7 +646,7 @@
         font-weight: 400;
         line-height: 14px;
         text-align: left;
-        width: 70px;
+        width: 72px;
         margin-right: 4px;
       }
 
@@ -706,3 +709,60 @@
   box-shadow: none;
   background: none;
 }
+
+.scheduledInfo {
+  display: flex;
+  align-items: center;
+  min-width: 50%;
+  gap: 8px;
+
+  .editSection {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    padding-right: 40px;
+  }
+
+  .calendarIconBig {
+    width: 32px;
+    height: 32px;
+
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+    mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+
+  }
+
+  .publishInfo {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+      text-align: left;
+    }
+
+    .publishTime {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .time {
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px;
+        text-align: left;
+      }
+
+      .draftAction {
+        border-left: 1px solid var(--subtile-devider);
+        padding-inline: 6px;
+      }
+    }
+  }
+}
+

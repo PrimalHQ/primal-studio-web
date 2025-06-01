@@ -351,6 +351,8 @@ export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'art
     payload.until = opts!.until;
   }
 
+  // payload.until = 1749412301
+
   if ((opts?.since || 0) > 0) {
     payload.since = opts!.since;
   }
@@ -611,5 +613,49 @@ export const removeFromSettingsList = async (
         reject(`failed_to_add_settings_${listType}_list`);
       }
     });
+  });
+}
+
+export const importScheduled = async (draft: any) => {
+  // {"op":"import_scheduled", "event": {...}}
+
+  const subId = `import_scheduled_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'import_scheduled',
+      event: draft,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<boolean>((resolve, reject) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+      },
+      onEose: () => {
+        resolve(true);
+      },
+      onNotice: () => {
+        resolve(false);
+      }
+    })
   });
 }

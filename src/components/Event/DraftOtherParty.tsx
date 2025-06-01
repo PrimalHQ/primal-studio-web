@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
 import { PrimalDraft } from '../../primal';
 
 import styles from './Event.module.scss';
@@ -41,7 +41,12 @@ const DraftOtherParty: Component<{
         />
         <div class={styles.proposalInfo}>
           <div class={styles.partyDetails}>
-            <div class={styles.label}>Proposed to:</div>
+            <Show
+              when={props.type === 'sent'}
+              fallback={<div class={styles.label}>Proposed by:</div>}
+            >
+              <div class={styles.label}>Proposed to:</div>
+            </Show>
             <div class={styles.userName}>{userName(otherParty()?.pubkey)}</div>
             <VerificationCheck user={otherParty()} />
             <div class={styles.nip05}>{nip05Verification(otherParty())}</div>

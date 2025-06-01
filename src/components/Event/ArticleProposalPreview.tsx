@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalDraft } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -17,14 +17,14 @@ import missingImage from 'assets/images/missing_image.svg';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
+import CheckBox from '../CheckBox/CheckBox';
 
-export const renderArticlePreview = (config: any) => {
-  return (<div>ARTICLE</div> as HTMLDivElement).innerHTML;
-}
 
-const ArticlePreview: Component<{
+const ArticleProposalPreview: Component<{
+  draft:PrimalDraft,
   article: PrimalArticle,
-  hideTime?: boolean,
+  checked?: boolean,
+  onCheck?: (id: string, checked: boolean) => void,
 }> = (props) => {
 
   const article = () => props.article;
@@ -99,32 +99,17 @@ const ArticlePreview: Component<{
   }
 
   return (
-    <div class={styles.eventHolder}>
-      <div class={styles.userAvatar}>
-        <Avatar
-          user={author()}
-          size={24}
+    <div class={styles.eventProposalHolder}>
+      <div class={styles.proposalCheckbox}>
+        <CheckBox
+          checked={props.checked}
+          onChange={(v) => props.onCheck && props.onCheck(props.draft.id, v)}
+          label=""
         />
       </div>
       <div class={styles.noteInfo}>
-        <div class={styles.header}>
-          <div class={styles.userName}>
-            {userName(author().pubkey)}
-          </div>
-          <Show when={!props.hideTime}>
-            <div class={styles.separator}>•</div>
-            <div class={styles.noteDate}>
-              {longDate(parseInt(`${published() || article()?.created_at || 0}`))}
-            </div>
-          </Show>
-        </div>
         <div class={styles.content}>
-          <Show
-            when={image().length > 0}
-            fallback={
-              <img class={styles.image} src={author().picture} onerror={onImgError} />
-            }
-          >
+          <Show when={image().length > 0}>
             {renderImage(image())}
           </Show>
 
@@ -137,4 +122,4 @@ const ArticlePreview: Component<{
   );
 }
 
-export default ArticlePreview;
+export default ArticleProposalPreview;

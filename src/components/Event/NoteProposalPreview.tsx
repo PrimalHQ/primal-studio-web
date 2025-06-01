@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -18,11 +18,15 @@ import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
 import { logError } from 'src/utils/logger';
+import CheckBox from '../CheckBox/CheckBox';
 
-const NotePreview: Component<{
+const NotePorposalPreview: Component<{
   id: string | undefined,
+  draft: PrimalDraft,
   note: PrimalNote,
   hideTime?: boolean,
+  checked?: boolean,
+  onCheck?: (id: string, checked: boolean) => void,
 }> = (props) => {
 
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
@@ -175,17 +179,18 @@ const NotePreview: Component<{
   }
 
   return (
-    <div class={styles.eventHolder}>
-      <div class={styles.userAvatar}>
-        <Avatar
-          user={author()}
-          size={24}
+    <div class={styles.eventProposalHolder}>
+      <div class={styles.proposalCheckbox}>
+        <CheckBox
+          checked={props.checked}
+          onChange={(v) => props.onCheck && props.onCheck(props.draft.id, v)}
+          label=""
         />
       </div>
       <div class={styles.noteInfo}>
         <div class={styles.header}>
           <div class={styles.userName}>
-            {userName(author().pubkey)}
+            {author()?.name}
           </div>
           <Show when={!props.hideTime}>
             <div class={styles.separator}>•</div>
@@ -195,12 +200,7 @@ const NotePreview: Component<{
           </Show>
         </div>
         <div class={styles.content}>
-          <Show
-            when={images.length > 0}
-            fallback={
-              <img class={styles.image} src={author().picture} onerror={onImgError} />
-            }
-          >
+          <Show when={images.length > 0}>
             {renderImage(images[0])}
           </Show>
 
@@ -215,4 +215,4 @@ const NotePreview: Component<{
   );
 }
 
-export default NotePreview;
+export default NotePorposalPreview;
