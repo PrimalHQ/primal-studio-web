@@ -189,6 +189,7 @@ const Articles: Component = () => {
             onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
           />
         </div>
+        <div class={styles.bulkControls}></div>
         <div class={styles.feedContent}>
           <For each={articlePages()}>
             {(page, pageIndex) => (
@@ -202,8 +203,6 @@ const Articles: Component = () => {
                 eventComponent={(e) => {
                   if (articlesStore.tab === 'sent') {
                     const draft = page.drafts.find(a => a.id === e);
-
-                    console.log('DRAFT: ', draft)
 
                     return (
                       <Show when={draft}>
@@ -230,8 +229,6 @@ const Articles: Component = () => {
 
                   if (articlesStore.tab === 'inbox') {
                     const draft = page.drafts.find(a => a.id === e);
-
-                    console.log('DRAFT: ', draft)
 
                     return (
                       <Show when={draft}>

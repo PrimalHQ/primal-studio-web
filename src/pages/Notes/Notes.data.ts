@@ -79,7 +79,7 @@ export const fetchNotes = async (
       index = pageStore.notes.feedPages.length;
     }
 
-    if (notesStore.tab === 'drafts') {
+    if (['drafts', 'sent', 'inbox'].includes(notesStore.tab)) {
       result.drafts = await parseDraftContent(result.drafts);
     } else {
       result.notes = filterAndSortNotes(result.notes, result.paging);

@@ -222,6 +222,58 @@ const Notes: Component = () => {
                 key="notes"
                 twoColumns={notePages().length === 0}
                 eventComponent={(e) => {
+                  if (notesStore.tab === 'sent') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {openInPrimal(draft!)}}
+                          event={draft!}
+                          hideContextMenu={!['published'].includes(notesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <ProposalPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                            type='sent'
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
+                  if (notesStore.tab === 'inbox') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {openInPrimal(draft!)}}
+                          event={draft!}
+                          hideContextMenu={!['published'].includes(notesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <ProposalPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                            type='inbox'
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
                   if (notesStore.tab === 'drafts') {
                     const draft = page.drafts.find(a => a.id === e);
 
