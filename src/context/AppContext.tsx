@@ -151,7 +151,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
       fetchBlossomServers(pubkey);
       loadInboxPermissionSettings();
       loadContentImportSettings();
-    }, 0)
+    }, 100)
   }));
 
   // Handle main socket reconnection -------------------------------------------
