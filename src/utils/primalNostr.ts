@@ -3,6 +3,7 @@ import {
   getPublicKey,
   nip04,
   nip19,
+  nip44,
   finalizeEvent,
   verifyEvent,
   generateNsec,
@@ -136,6 +137,27 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
       return await nip04.decrypt(sec, pubkey, message);
     };
 
+
+  const encrypt44: (pubkey: string, message: string) => Promise<string> =
+    async (pubkey, message) => {
+      const sec = await getSec();
+      if (!sec) throw('encrypt-no-nsec');
+
+      const key = nip44.getConversationKey(sec, pubkey);
+
+      return nip44.v2.encrypt(message, key);
+    };
+
+  const decrypt44: (pubkey: string, message: string) => Promise<string> =
+    async (pubkey, message) => {
+      const sec = await getSec();
+      if (!sec) throw('decrypt-no-nsec');
+
+      const key = nip44.getConversationKey(sec, pubkey);
+
+      return nip44.v2.decrypt(message, key);
+    };
+
   const signEvent = async (event: NostrRelayEvent) => {
     const sec = await getSec();
     if (!sec) throw('sign-no-nsec');
@@ -154,6 +176,10 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     nip04: {
       encrypt,
       decrypt,
+    },
+    nip44: {
+      encrypt: encrypt44,
+      decrypt: decrypt44,
     },
     signEvent,
   };

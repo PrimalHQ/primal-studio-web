@@ -3,20 +3,20 @@ import { Component, createEffect, createSignal } from 'solid-js';
 import styles from './NoteContext.module.scss';
 import ConfirmDialog from '../Dialogs/ConfirmDialog';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { PrimalNote, PrimalArticle } from 'src/primal';
+import { PrimalNote, PrimalArticle, PrimalDraft } from 'src/primal';
 import account from 'src/translations/en/account';
 import { accountStore, activeUser } from 'src/stores/AccountStore';
-import { appStore } from 'src/stores/AppStore';
+import { appStore, openConfirmDialog } from 'src/stores/AppStore';
 import { nip19 } from 'src/utils/nTools';
 import { getEventFromStore } from 'src/stores/EventStore';
 import { Kind } from 'src/constants';
 import { sendDeleteEvent } from 'src/primal_api/nostr';
-import { triggerImportEvents } from 'src/primal_api/events';
+import { doRequestDelete, triggerImportEvents } from 'src/primal_api/events';
 import { APP_ID } from 'src/App';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 export type NoteContextMenuInfo = {
-  note: PrimalNote | PrimalArticle,
+  note: PrimalNote | PrimalArticle | PrimalDraft,
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
@@ -148,31 +148,31 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess('Note raw data copied');
   };
 
-  const doRequestDelete = async () => {
-    const user = activeUser();
-    const noteToDelete = note();
+  // const doRequestDelete = async () => {
+  //   const user = activeUser();
+  //   const noteToDelete = note();
 
-    if (!props.data || !user || !noteToDelete) return;
+  //   if (!props.data || !user || !noteToDelete) return;
 
-    const kind = noteToDelete.kind;
+  //   const kind = noteToDelete.kind;
 
-    const id = kind === Kind.LongForm ?
-      (noteToDelete as PrimalArticle).coordinate :
-      noteToDelete.id;
+  //   const id = kind === Kind.LongForm ?
+  //     (noteToDelete as PrimalArticle).coordinate :
+  //     noteToDelete.id;
 
-    const { success, note: deleteEvent } = await sendDeleteEvent(
-      user.pubkey,
-      id,
-      noteToDelete.kind,
-    );
+  //   const { success, note: deleteEvent } = await sendDeleteEvent(
+  //     user.pubkey,
+  //     id,
+  //     noteToDelete.kind,
+  //   );
 
-    if (!success || !deleteEvent) return;
+  //   if (!success || !deleteEvent) return;
 
-    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
+  //   triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
-    props.data.onDelete && props.data.onDelete(noteToDelete.id);
-    props.onClose();
-  };
+  //   props.data.onDelete && props.data.onDelete(noteToDelete.id);
+  //   props.onClose();
+  // };
 
   const onClickOutside = (e: MouseEvent) => {
     if (
@@ -256,7 +256,22 @@ const NoteContextMenu: Component<{
       {
         label: "Request Delete",
         action: () => {
-          setConfirmRequestDelete(true);
+          openConfirmDialog({
+            title: "Delete note?",
+            description: "This will issue a “request delete” command to the relays where the note was published. Do you want to continue?",
+            onConfirm: async () => {
+              const n = note();
+              if (!n) return;
+
+              const isDeleted = await doRequestDelete(accountStore.pubkey, n.id, n.kind);
+
+              if (!isDeleted) return;
+
+              props.data?.onDelete && props.data?.onDelete(n.id);
+
+            },
+            onAbort: () => {},
+          });
           props.onClose();
         },
         icon: 'delete',
@@ -273,18 +288,6 @@ const NoteContextMenu: Component<{
 
   return (
     <div class={styles.contextMenu} ref={context}>
-
-      <ConfirmDialog
-        open={confirmRequestDelete()}
-        title="Delete note?"
-        description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
-        onConfirm={() => {
-          doRequestDelete();
-          setConfirmRequestDelete(false);
-        }}
-        onAbort={() => setConfirmRequestDelete(false)}
-      />
-
       <PrimalMenu
         id={`note_context_${note()?.id}`}
         items={noteContext()}

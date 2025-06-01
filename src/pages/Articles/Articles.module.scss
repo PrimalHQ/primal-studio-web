@@ -26,7 +26,8 @@
     }
 
     .feedContent {
-      height: calc(100dvh - 136px);
+      margin-block: 16px;
+      height: calc(100dvh - 168px);
 
       overflow: hidden;
 

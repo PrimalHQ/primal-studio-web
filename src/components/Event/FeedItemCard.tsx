@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -20,8 +20,9 @@ import { humanizeNumber } from 'src/utils/ui';
 
 const FeedItemCard: Component<{
   children?: JSXElement,
+  event: PrimalNote | PrimalArticle | PrimalDraft,
+  hideContextMenu?: boolean,
   onClick?: () => void,
-  event: PrimalNote | PrimalArticle,
   onDelete?: (id: string) => void,
 }> = (props) => {
 
@@ -54,12 +55,14 @@ const FeedItemCard: Component<{
       data-event-id={props.event.id}
       onClick={props.onClick}
     >
-      <div class={styles.contextMenuTrigger}>
-        <NoteContextTrigger
-          ref={contextMenu}
-          onClick={onContextMenuTrigger}
-        />
-      </div>
+      <Show when={!props.hideContextMenu}>
+        <div class={styles.contextMenuTrigger}>
+          <NoteContextTrigger
+            ref={contextMenu}
+            onClick={onContextMenuTrigger}
+          />
+        </div>
+      </Show>
       {props.children}
     </button>
   );

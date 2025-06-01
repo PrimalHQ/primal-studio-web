@@ -1,8 +1,10 @@
 import { APP_ID } from "src/App";
+import { Kind } from "src/constants";
 import { EventCoordinate, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { decodeIdentifier } from "src/utils/kyes";
 import { primalAPI, sendMessage, subsTo } from "src/utils/socket";
+import { sendDeleteEvent } from "./nostr";
 
 export const getReplacableEvent = (pubkey: string, kind: number, subId: string) => {
   sendMessage(JSON.stringify([
@@ -135,4 +137,23 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
       }
     });
   });
+};
+
+export const doRequestDelete = async (pubkey: string | undefined, id: string, kind: Kind) => {
+
+  if (!pubkey || !id) return false;
+
+  if (kind === Kind.LongForm && !id.includes(':')) return false;
+
+  const { success, note: deleteEvent } = await sendDeleteEvent(
+    pubkey,
+    id,
+    kind,
+  );
+
+  if (!success || !deleteEvent) return false;
+
+  triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
+
+  return true;
 };

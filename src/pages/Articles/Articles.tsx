@@ -19,10 +19,11 @@ import { FeedEventState, HomePayload } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import ArticlePreview from 'src/components/Event/ArticlePreview';
-import { PrimalArticle } from 'src/primal';
+import { PrimalArticle, PrimalDraft } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
+import DraftPreview from 'src/components/Event/DraftPreview';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -134,7 +135,7 @@ const Articles: Component = () => {
   }));
 
 
-  const openInPrimal = (article: PrimalArticle) => {
+  const openInPrimal = (article: PrimalArticle | PrimalDraft) => {
     let link = `e/${article?.nId}`;
 
     if (article.nId.startsWith('naddr')) {
@@ -195,9 +196,34 @@ const Articles: Component = () => {
                 isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
                 pageIndex={pageIndex()}
                 observer={articlesPageObserver}
-                key="homeArticles"
+                key="articles"
                 twoColumns={articlePages().length === 0}
                 eventComponent={(e) => {
+                  if (articlesStore.tab === 'drafts') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {openInPrimal(draft!)}}
+                          event={draft!}
+                          hideContextMenu={!['published'].includes(articlesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <DraftPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
                   const article = page.reads.find(a => a.id === e);
 
                   return (

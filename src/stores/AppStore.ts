@@ -1,6 +1,7 @@
 import { createStore, reconcile } from "solid-js/store";
+import { ConfirmDialogInfo } from "src/components/Dialogs/ConfirmDialog";
 import { NoteContextMenuInfo } from "src/components/NoteContextMenu/NoteContexMenu";
-import { PrimalArticle, PrimalNote } from "src/primal";
+import { PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { reset } from "src/utils/socket";
 
 export type AppStore = {
@@ -9,6 +10,8 @@ export type AppStore = {
   verifiedUsers: Record<string, string>,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showConfirmDialog: boolean,
+  confirmDialogInfo: ConfirmDialogInfo | undefined,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -17,6 +20,8 @@ export const emptyAppStore = (): AppStore => ({
   verifiedUsers: {},
   showNoteContextMenu: false,
   noteContextMenuInfo: undefined,
+  showConfirmDialog: false,
+  confirmDialogInfo: undefined,
 });
 
 
@@ -60,7 +65,7 @@ export const changeCachingService = (url?: string) => {
 };
 
 export const openNoteContextMenu = (
-  note: PrimalNote | PrimalArticle,
+  note: PrimalNote | PrimalArticle | PrimalDraft,
   position: DOMRect | undefined,
   openReactions: () => void,
   onDelete: (id: string) => void,
@@ -76,6 +81,15 @@ export const openNoteContextMenu = (
 
 export const closeContextMenu = () => {
   updateAppStore('showNoteContextMenu', () => false);
+};
+
+export const openConfirmDialog = (config: ConfirmDialogInfo) => {
+  updateAppStore('confirmDialogInfo', reconcile({ ...config }));
+  updateAppStore('showConfirmDialog', () => true);
+};
+
+export const closeConfirmDialog = () => {
+  updateAppStore('showConfirmDialog', () => false);
 };
 
 export const addVerifiedUsers = (newVU: Record<string, string>) => {

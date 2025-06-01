@@ -11,6 +11,7 @@ import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
 import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
+import { parseDraftContent } from "src/utils/drafts";
 
 
 export type NotesStore = {
@@ -78,7 +79,12 @@ export const fetchNotes = async (
       index = pageStore.notes.feedPages.length;
     }
 
-    result.notes = filterAndSortNotes(result.notes, result.paging);
+    if (notesStore.tab === 'drafts') {
+      result.drafts = await parseDraftContent(accountStore.pubkey, result.drafts);
+    } else {
+      result.notes = filterAndSortNotes(result.notes, result.paging);
+    }
+
 
     batch(() => {
       updatePageStore('notes', 'feedPages', index, () => ({ ...result }));

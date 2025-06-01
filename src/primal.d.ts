@@ -168,6 +168,10 @@ export type NostrExtension = {
     encrypt: (pubkey: string, message: string) => Promise<string>,
     decrypt: (pubkey: string, message: string) => Promise<string>,
   },
+  nip44: {
+    encrypt: (pubkey: string, message: string) => Promise<string>,
+    decrypt: (pubkey: string, message: string) => Promise<string>,
+  },
 };
 
 export type WebLnExtension = {
@@ -403,13 +407,18 @@ export type PrimalArticle = PrimalNote & {
 export type PrimalDraft = {
   id: string,
   kind: number,
+  contentKind: number,
   content: string,
   plain: string,
   client: string,
   pubkey: string,
   created_at: number,
+  tags: string[][],
+  draftedEvent?: NostrEventContent,
   event?: NostrEventContent,
-  noteId: string,
+  nId: string,
+  nIdShort: string,
+  user: PrimalUser,
 }
 
 export type PrimalZap = {

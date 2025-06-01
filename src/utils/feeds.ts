@@ -39,6 +39,7 @@ export const encodeCoordinate = (event: NostrEventContent, forceKind?: Kind) => 
   const kind = forceKind || event.kind;
 
   const coordinate =  `${kind}:${pubkey}:${identifier}`;
+
   const naddr = nip19.naddrEncode({ kind, pubkey, identifier });
 
   return { coordinate, naddr };
@@ -652,15 +653,30 @@ export const getDraftsInPage = (page: EventFeedPage) => {
   for (i=0;i<page.drafts.length;i++) {
     const draft = page.drafts[i];
 
+    const nId = nip19.neventEncode({
+      id: draft.id,
+      kind: Kind.Draft,
+      author: draft.pubkey,
+    });
+
+    const nIdShort = nip19.neventEncode({
+      id: draft.id,
+    });
+    const author = getUserInPage(page, draft.pubkey!);
+
     const newDraft: PrimalDraft = {
       id: draft.id,
-      noteId: `ndraft${draft.id}`,
+      nId,
+      nIdShort,
       kind: draft.kind,
+      contentKind: parseInt((draft.tags?.find(t => t[0] === 'k') || ['k', '1'])[1]),
       content: draft.content || '',
       plain: '',
       client: ((draft.tags || []).find(t => t[0] === 'client') || ['cilent', 'unknown'])[1],
       pubkey: draft.pubkey || '',
       created_at: draft.created_at || 0,
+      tags: draft.tags || [],
+      user: author,
       event: { ...draft },
     }
 

@@ -49,7 +49,12 @@ export const emptyStudioTotals = () => ({
   zaps_sent: 0,
 });
 
-export type FeedEventState = 'published' | 'published-replied';
+export type FeedEventState = 'published' |
+  'published-replied' |
+  'scheduled' |
+  'inbox' |
+  'sent' |
+  'drafts';
 
 export type HomePayload = {
   pubkey?: string,

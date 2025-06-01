@@ -6,28 +6,29 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Dialog from './Dialog';
 import { translate } from 'src/translations/translate';
 
-const ConfirmDialog: Component<{
-  id?: string,
-  open?: boolean,
-  setOpen?: (v: boolean) => void,
+export type ConfirmDialogInfo = {
   title?: string,
   description?: string,
   confirmLabel?: string,
   abortLabel?: string
   onConfirm?: () => void,
   onAbort?: () => void,
+};
+
+const ConfirmDialog: Component<ConfirmDialogInfo & {
+  id?: string,
+  open?: boolean,
+  setOpen?: (v: boolean) => void,
 }> = (props) => {
 
   const setOpen = (isOpen: boolean) => {
+    props.setOpen && props.setOpen(isOpen);
+
     if (props.onAbort && !isOpen) {
       props.onAbort();
       return;
     }
 
-    if (props.setOpen) {
-      props.setOpen(isOpen);
-      return;
-    }
   }
 
   return (
@@ -51,7 +52,10 @@ const ConfirmDialog: Component<{
         <div class={styles.confirmDialogActions}>
           <Show when={props.onConfirm}>
             <ButtonPrimary
-              onClick={props.onConfirm}
+              onClick={() => {
+                props.setOpen && props.setOpen(false);
+                props.onConfirm && props.onConfirm();
+              }}
             >
               {props.confirmLabel || translate('defaults', 'confirmDialog', 'confirm')}
             </ButtonPrimary>
@@ -59,7 +63,7 @@ const ConfirmDialog: Component<{
 
           <Show when={props.onAbort}>
             <ButtonSecondary
-              onClick={props.onAbort}
+              onClick={() => setOpen(false)}
               light={true}
             >
               {props.abortLabel || translate('defaults', 'confirmDialog', 'abort')}

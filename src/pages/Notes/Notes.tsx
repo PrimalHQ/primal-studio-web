@@ -18,13 +18,14 @@ import { FeedEventState, HomePayload } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import ArticlePreview from 'src/components/Event/ArticlePreview';
-import { PrimalArticle, PrimalNote } from 'src/primal';
+import { PrimalArticle, PrimalDraft, PrimalNote } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
 import { fetchNotes, notesStore, setNotesStore } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
+import DraftPreview from 'src/components/Event/DraftPreview';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -151,7 +152,7 @@ const Notes: Component = () => {
   }));
 
 
-  const openInPrimal = (note: PrimalNote) => {
+  const openInPrimal = (note: PrimalNote | PrimalDraft) => {
     let link = `e/${note?.nId}`;
 
     return window.open(`https://primal.net/${link}`, '_blank')?.focus();
@@ -218,9 +219,33 @@ const Notes: Component = () => {
                 isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
                 pageIndex={pageIndex()}
                 observer={notesPageObserver}
-                key="homeArticles"
+                key="notes"
                 twoColumns={notePages().length === 0}
                 eventComponent={(e) => {
+                  if (notesStore.tab === 'drafts') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {}}
+                          event={draft!}
+                          hideContextMenu={!['published', 'published-replied'].includes(notesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <DraftPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
                   const note = page.notes.find(a => a.id === e);
 
                   return (

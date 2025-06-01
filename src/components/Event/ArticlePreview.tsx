@@ -108,7 +108,7 @@ const ArticlePreview: Component<{
       <div class={styles.noteInfo}>
         <div class={styles.header}>
           <div class={styles.userName}>
-            {author().name}
+            {author()?.name}
           </div>
           <div class={styles.separator}>•</div>
           <div class={styles.noteDate}>

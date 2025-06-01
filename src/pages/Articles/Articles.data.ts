@@ -11,6 +11,7 @@ import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
 import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
+import { parseDraftContent } from "src/utils/drafts";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -82,7 +83,11 @@ export const fetchArticles = async (
         index = pageStore.articles.feedPages.length;
       }
 
-      result.reads = filterAndSortReads(result.reads, result.paging);
+      if (articlesStore.tab === 'drafts') {
+        result.drafts = await parseDraftContent(accountStore.pubkey, result.drafts);
+      } else {
+        result.reads = filterAndSortReads(result.reads, result.paging);
+      }
 
       batch(() => {
         updatePageStore('articles', 'feedPages', index, () => ({ ...result }));
