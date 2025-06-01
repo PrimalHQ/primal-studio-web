@@ -5,16 +5,20 @@ import { emptyMentions, encodeCoordinate, extractReplyToFromTags, extractRepostI
 import { Kind } from "src/constants";
 import DOMPurify from 'dompurify';
 import { nip19 } from "./nTools";
+import { accountStore } from "src/stores/AccountStore";
 
-export const parseDraftContent = async (pubkey: string | undefined, drafts: PrimalDraft[]) => {
-  if (!pubkey) return drafts;
-
-
+export const parseDraftContent = async (drafts: PrimalDraft[]) => {
   let parsedDrafts: PrimalDraft[] = [];
 
   try {
     for (let i=0; i<drafts.length; i++) {
       let draft = { ...drafts[i] };
+
+      const pubkey = accountStore.pubkey === draft.sender.pubkey ?
+        draft.receiver.pubkey :
+        draft.sender.pubkey;
+
+      console.log('DECODE: ', pubkey, draft)
 
       const decryptedContent = await decrypt44(pubkey, draft.content);
 
@@ -46,7 +50,7 @@ export const parseDraftedEvent = (
 
   if ([Kind.LongForm].includes(draft.contentKind)) {
     // const { coordinate, naddr } = encodeCoordinate(event, Kind.LongForm);
-    const author = draft.user;
+    const sender = draft.sender;
     const tags = event.tags || [];
     const coordinate = '';
     const naddr = '';
@@ -74,7 +78,7 @@ export const parseDraftedEvent = (
       tags,
       created_at: event.created_at || 0,
       content: DOMPurify.sanitize(event.content || ''),
-      user: author,
+      user: sender,
       topZaps: [],
       nId: naddr,
       nIdShort: naddr,
@@ -140,7 +144,7 @@ export const parseDraftedEvent = (
     // If this is a repost, parse it for the originsl note.
     const note = event;
 
-    const author = draft.user;
+    const author = draft.sender;
 
     const tags = note.tags || [];
     const replyTo = extractReplyToFromTags(tags);
@@ -166,50 +170,50 @@ export const parseDraftedEvent = (
     };
 
     return {
-        user: author,
-        stats: {
-          event_id: "",
-          likes: 0,
-          mentions: 0,
-          reposts: 0,
-          replies: 0,
-          zaps: 0,
-          satszapped: 0,
-          score: 0,
-          score24h: 0,
-          bookmarks: 0
-        },
-        studioStats: {
-          satszapped: 0,
-          score: 0,
-          sentiment: "neutral"
-        },
+      user: author,
+      stats: {
+        event_id: "",
+        likes: 0,
+        mentions: 0,
+        reposts: 0,
+        replies: 0,
+        zaps: 0,
+        satszapped: 0,
+        score: 0,
+        score24h: 0,
+        bookmarks: 0
+      },
+      studioStats: {
+        satszapped: 0,
+        score: 0,
+        sentiment: "neutral"
+      },
 
-        created_at: note.created_at || 0,
-        sig: note.sig,
-        kind: note.kind,
+      created_at: note.created_at || 0,
+      sig: note.sig,
+      kind: note.kind,
 
-        nId: nip19.neventEncode(eventPointer),
-        nIdShort: nip19.neventEncode(eventPointerShort),
-        actions: noActions(note.id),
-        relayHints: {},
+      nId: nip19.neventEncode(eventPointer),
+      nIdShort: nip19.neventEncode(eventPointerShort),
+      actions: noActions(note.id),
+      relayHints: {},
 
-        event: { ...note },
+      event: { ...note },
 
-        mentionedNotes,
-        mentionedUsers,
-        mentionedHighlights,
-        mentionedArticles,
-        mentionedZaps,
+      mentionedNotes,
+      mentionedUsers,
+      mentionedHighlights,
+      mentionedArticles,
+      mentionedZaps,
 
-        replyTo: replyTo && replyTo[1],
-        tags: note.tags || [],
-        id: note.id,
+      replyTo: replyTo && replyTo[1],
+      tags: note.tags || [],
+      id: note.id,
 
-        pubkey: note.pubkey || '',
-        topZaps: [],
-        content: DOMPurify.sanitize(note.content || ''),
-      } as PrimalNote;
+      pubkey: note.pubkey || '',
+      topZaps: [],
+      content: DOMPurify.sanitize(note.content || ''),
+    } as PrimalNote;
   }
 
   return;

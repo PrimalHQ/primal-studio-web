@@ -83,8 +83,8 @@ export const fetchArticles = async (
         index = pageStore.articles.feedPages.length;
       }
 
-      if (articlesStore.tab === 'drafts') {
-        result.drafts = await parseDraftContent(accountStore.pubkey, result.drafts);
+      if (['drafts', 'sent', 'inbox'].includes(articlesStore.tab)) {
+        result.drafts = await parseDraftContent(result.drafts);
       } else {
         result.reads = filterAndSortReads(result.reads, result.paging);
       }

@@ -618,3 +618,91 @@
     }
   }
 }
+
+.draftOtherParty {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 50%;
+
+  .partyInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .proposalInfo {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+
+      .label {
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 14px;
+        text-align: left;
+        width: 70px;
+        margin-right: 4px;
+      }
+
+      .partyDetails {
+        display: flex;
+        // gap: 4px;
+
+        .userName {
+          color: var(--text-primary);
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 14px;
+        }
+
+        .nip05 {
+          color: var(--text-tertiary);
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 14px;
+        }
+      }
+
+      .publishInfo {
+        display: flex;
+        // gap: 4px;
+
+        .date {
+          color: var(--text-primary);
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 14px;
+        }
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+
+    .separator {
+      width: 0;
+      height: 16px;
+      border-left: 1px solid var(--subtile-devider);
+    }
+  }
+}
+
+.draftAction {
+  color: var(--accent-links);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: none;
+}

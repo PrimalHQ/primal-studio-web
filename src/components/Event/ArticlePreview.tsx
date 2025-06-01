@@ -28,7 +28,7 @@ const ArticlePreview: Component<{
 
   const article = () => props.article;
 
-  const published = () => ((article()?.tags || []).find(t => t[0] === 'published_at') || ['0'])[1];
+  const published = () => ((article()?.tags || []).find(t => t[0] === 'published_at') || ['published_at', 0])[1];
 
   const image = () => ((article()?.tags || []).find(t => t[0] === 'image') || ['image', missingImage])[1];
 
@@ -112,7 +112,7 @@ const ArticlePreview: Component<{
           </div>
           <div class={styles.separator}>•</div>
           <div class={styles.noteDate}>
-            {longDate(parseInt(published()))}
+            {longDate(parseInt(`${published() || article()?.created_at || 0}`))}
           </div>
         </div>
         <div class={styles.content}>

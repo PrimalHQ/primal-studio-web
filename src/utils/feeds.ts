@@ -662,7 +662,13 @@ export const getDraftsInPage = (page: EventFeedPage) => {
     const nIdShort = nip19.neventEncode({
       id: draft.id,
     });
-    const author = getUserInPage(page, draft.pubkey!);
+    const sender = getUserInPage(page, draft.pubkey!);
+
+    const receiverPubkey = (draft.tags?.find(t => t[0] === 'p') || ['p', ''])[1];
+
+    const receiver = receiverPubkey.length > 0 ?
+      getUserInPage(page, receiverPubkey) :
+      { ...sender };
 
     const newDraft: PrimalDraft = {
       id: draft.id,
@@ -676,7 +682,8 @@ export const getDraftsInPage = (page: EventFeedPage) => {
       pubkey: draft.pubkey || '',
       created_at: draft.created_at || 0,
       tags: draft.tags || [],
-      user: author,
+      sender,
+      receiver: receiver || sender,
       event: { ...draft },
     }
 

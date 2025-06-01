@@ -24,6 +24,7 @@ import { nip19 } from 'src/utils/nTools';
 import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
 import DraftPreview from 'src/components/Event/DraftPreview';
+import ProposalPreview from 'src/components/Event/ProposalPreview';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -199,6 +200,62 @@ const Articles: Component = () => {
                 key="articles"
                 twoColumns={articlePages().length === 0}
                 eventComponent={(e) => {
+                  if (articlesStore.tab === 'sent') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    console.log('DRAFT: ', draft)
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {openInPrimal(draft!)}}
+                          event={draft!}
+                          hideContextMenu={!['published'].includes(articlesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <ProposalPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                            type='sent'
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
+                  if (articlesStore.tab === 'inbox') {
+                    const draft = page.drafts.find(a => a.id === e);
+
+                    console.log('DRAFT: ', draft)
+
+                    return (
+                      <Show when={draft}>
+                        <FeedItemCard
+                          onClick={() => {openInPrimal(draft!)}}
+                          event={draft!}
+                          hideContextMenu={!['published'].includes(articlesStore.tab)}
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        >
+                          <ProposalPreview
+                            draft={draft!}
+                            onEdit={() => {openInPrimal(draft!)}}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                            type='inbox'
+                          />
+                        </FeedItemCard>
+                      </Show>
+                    );
+                  }
+
                   if (articlesStore.tab === 'drafts') {
                     const draft = page.drafts.find(a => a.id === e);
 

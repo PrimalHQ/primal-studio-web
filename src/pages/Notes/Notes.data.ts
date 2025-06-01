@@ -80,7 +80,7 @@ export const fetchNotes = async (
     }
 
     if (notesStore.tab === 'drafts') {
-      result.drafts = await parseDraftContent(accountStore.pubkey, result.drafts);
+      result.drafts = await parseDraftContent(result.drafts);
     } else {
       result.notes = filterAndSortNotes(result.notes, result.paging);
     }

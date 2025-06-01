@@ -418,7 +418,8 @@ export type PrimalDraft = {
   event?: NostrEventContent,
   nId: string,
   nIdShort: string,
-  user: PrimalUser,
+  sender: PrimalUser,
+  receiver: PrimalUser,
 }
 
 export type PrimalZap = {
