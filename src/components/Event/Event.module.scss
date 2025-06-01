@@ -719,8 +719,13 @@
   .editSection {
     display: flex;
     align-items: flex-end;
-    height: 100%;
+    height: 32px;
     padding-right: 40px;
+
+    .draftAction {
+      border-left: 1px solid var(--subtile-devider);
+      padding-inline: 6px;
+    }
   }
 
   .calendarIconBig {

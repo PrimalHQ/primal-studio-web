@@ -337,6 +337,7 @@ const Notes: Component = () => {
                           />
                           <ScheduledInfo
                             event={note!}
+                            kind='notes'
                           />
                         </FeedItemCard>
                       </Show>

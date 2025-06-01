@@ -333,6 +333,7 @@ const Articles: Component = () => {
                           <ScheduledInfo
                             event={article!}
                             onEdit={ () => {}}
+                            kind='articles'
                           />
                         </FeedItemCard>
                       </Show>

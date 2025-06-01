@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import { PrimalArticle, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
@@ -7,13 +7,21 @@ import { longDate } from 'src/utils/date';
 
 const ScheduledInfo: Component<{
   event: PrimalNote | PrimalArticle,
+  kind: 'notes' | 'articles'
   onEdit?: () => void,
 }> = (props) => {
 
   return (
     <div class={styles.scheduledInfo}>
       <div class={styles.editSection}>
-        <button class={styles.draftAction}>Edit</button>
+        <Show
+          when={props.kind === 'notes'}
+          fallback={
+            <button class={styles.draftAction}>Edit Article</button>
+          }
+        >
+          <button class={styles.draftAction}>Edit Note</button>
+        </Show>
       </div>
       <div class={styles.calendarIconBig}></div>
       <div class={styles.publishInfo}>
