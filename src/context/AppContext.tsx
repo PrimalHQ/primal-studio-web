@@ -23,7 +23,7 @@ import { accountStore, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomS
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
-import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings } from "src/stores/SettingsStore";
+import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings, settingsStore } from "src/stores/SettingsStore";
 import { updateRelays } from "src/stores/RelayStore";
 
 
@@ -70,6 +70,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   let wakingTimeout = 0;
 
+  createEffect(() => {
+    const html: HTMLElement | null = document.querySelector('html');
+    html?.setAttribute('data-theme', settingsStore.theme);
+  });
   createEffect(() => {
     if (appStore.isInactive) {
       updateAppStore('appState', () => 'sleep');
@@ -141,11 +145,13 @@ export const AppProvider = (props: { children: JSXElement }) => {
   createEffect(on(() => accountStore.pubkey, (pubkey, prev) => {
     if (!pubkey || pubkey.length === 0 || pubkey === prev) return;
 
-    loadSettings(accountStore.pubkey);
-    updateRelays();
-    fetchBlossomServers(pubkey);
-    loadInboxPermissionSettings();
-    loadContentImportSettings();
+    setTimeout(() => {
+      loadSettings(accountStore.pubkey);
+      updateRelays();
+      fetchBlossomServers(pubkey);
+      loadInboxPermissionSettings();
+      loadContentImportSettings();
+    }, 0)
   }));
 
   // Handle main socket reconnection -------------------------------------------
