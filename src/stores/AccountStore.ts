@@ -13,7 +13,6 @@ import { getReplacableEvent, triggerImportEvents } from "src/primal_api/events";
 import { areUrlsSame } from "src/utils/blossom";
 import { getDefaultBlossomServers } from "src/primal_api/settings";
 import { sendBlossomEvent } from "src/primal_api/relays";
-import { createEffect } from "solid-js";
 import { parseUserMetadata } from "src/utils/profile";
 import { getMembershipStatus } from "src/primal_api/membership";
 

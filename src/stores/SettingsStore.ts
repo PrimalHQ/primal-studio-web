@@ -45,12 +45,6 @@ export const [settingsStore, updateSettingsStore] = createStore<SettingsStore>({
   }
 });
 
-createEffect(() => {
-  const html: HTMLElement | null = document.querySelector('html');
-  html?.setAttribute('data-theme', settingsStore.theme);
-});
-
-
 export const chooseTheme = (theme: PrimalTheme) => {
   updateSettingsStore('chooserTheme', theme);
   updateSettingsStore('useSystemTheme', false);
