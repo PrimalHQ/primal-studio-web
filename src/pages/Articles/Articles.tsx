@@ -12,7 +12,7 @@ import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
 import { accountStore } from 'src/stores/AccountStore';
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import { FeedEventState, HomePayload } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
@@ -28,6 +28,7 @@ import { humanizeNumber } from 'src/utils/ui';
 
 const Articles: Component = () => {
   const params = useParams();
+  const navigate = useNavigate();
 
   const articlePages = () => pageStore.articles.feedPages;
   const [visibleArticlesPages, setVisibleArticlesPages] = createSignal<number[]>([]);
@@ -248,9 +249,14 @@ const Articles: Component = () => {
                         >
                           <ProposalPreview
                             draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                            onEdit={() => {
+                              navigate(`/edit/article/${draft!.id}`);
+                            }}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
+                            }}
+                            onView={() => {
+                              navigate(`/view/draft/${draft!.id}`);
                             }}
                             type='sent'
                             checked={articlesStore.selected.includes(draft?.id || '-')}
@@ -276,7 +282,9 @@ const Articles: Component = () => {
                         >
                           <ProposalPreview
                             draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                            onEdit={() => {
+                              navigate(`/edit/article/${draft!.id}`);
+                            }}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
@@ -295,7 +303,7 @@ const Articles: Component = () => {
                     return (
                       <Show when={draft}>
                         <FeedItemCard
-                          onClick={() => {openInPrimal(draft!)}}
+                          onClick={() => {}}
                           event={draft!}
                           hideContextMenu={!['published'].includes(articlesStore.tab)}
                           onDelete={(id: string) => {
@@ -304,7 +312,9 @@ const Articles: Component = () => {
                         >
                           <DraftPreview
                             draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                            onEdit={() => {
+                              navigate(`/edit/article/${draft!.id}`);
+                            }}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}

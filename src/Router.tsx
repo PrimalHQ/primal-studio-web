@@ -50,7 +50,8 @@ const AppRouter: Component = () => {
         <Route path="/imports" component={SettingsImports} />
         <Route path="/permissions" component={SettingsPermissions} />
       </Route>
-      <Route path="/edit/article" component={ArticleEditorPage} />
+      <Route path="/edit/article/:id?" component={ArticleEditorPage} />
+      <Route path="/view/draft/:id?" component={ArticleEditorPage} />
       <Route path="/e/:id" component={Thread} />
       <Route path="/p/:id" component={Profile} />
       <Route path="/*" component={NotFound} />

@@ -7,16 +7,23 @@ import { isIPhone } from '@kobalte/utils';
 import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import { createStore } from 'solid-js/store';
-import { BeforeLeaveEventArgs, useBeforeLeave, useParams } from '@solidjs/router';
-import { fetchArticles } from 'src/primal_api/events';
+import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
+import { fetchArticles, fetchDrafts, triggerImportEvents } from 'src/primal_api/events';
 import { accountStore, activeUser } from 'src/stores/AccountStore';
 import PageTitle from 'src/components/PageTitle/PageTitle';
 import ArticleEditor, { ArticleEdit, emptyArticleEdit } from 'src/components/ArticleEditor/ArticleEditor';
-import ReadsPublishDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishDialog';
-import ReadsPublishSuccessDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishSuccessDialog';
 import ReadsLeaveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsLeaveDialog';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import { longDate } from 'src/utils/date';
+import { sendArticle, sendDeleteEvent, sendDraft } from 'src/primal_api/nostr';
+import { Kind, wordsPerMinute } from 'src/constants';
+import { APP_ID } from 'src/App';
+import { decrypt44 } from 'src/utils/nostrApi';
+import { nip19 } from 'src/utils/nTools';
+import { relayStore } from 'src/stores/RelayStore';
+import { referencesToTags } from 'src/utils/feeds';
+import ReadsPublishDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishDialog';
+import ReadsPublishSuccessDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishSuccessDialog';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -38,6 +45,7 @@ export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyRe
 const ReadsEditor: Component = () => {
   const toast = useToastContext();
   const params = useParams();
+  const navigate = useNavigate();
 
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
@@ -198,179 +206,141 @@ const ReadsEditor: Component = () => {
   }
 
   const loadArticle = async () => {
-    // const id = params.id;
+    let id = params.id;
 
-    // if (!id || !account?.publicKey) return;
+    if (!id || !accountStore.pubkey) return;
 
-    // if (id.startsWith('naddr1')) {
-    //   const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
+    if (id.startsWith('naddr1')) {
+      const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
 
-    //   const r = reads[0];
-    //   if(!r) return
+      const r = reads[0];
+      if(!r) return
 
-    //   setIdentifier(() => (r.msg.tags.find(t => t[0] === 'd') || ['d', ''])[1])
+      setIdentifier(() => (r.tags.find(t => t[0] === 'd') || ['d', ''])[1])
 
-    //   setArticle(() => ({
-    //     title: r.title,
-    //     image: r.image,
-    //     summary: r.summary,
-    //     content: r.content,
-    //     keywords: [ ...r.keywords ],
-    //   }));
+      setArticle(() => ({
+        title: r.title,
+        image: r.image,
+        summary: r.summary,
+        content: r.content,
+        keywords: [ ...r.keywords ],
+      }));
 
-    //   setMarkdownContent(r.content);
+      setMarkdownContent(r.content);
 
-    //   setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: r.published }));
+      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: r.published_at }));
 
-    //   return;
-    // }
+      return;
+    }
 
-    // if (id.startsWith(`ndraft1`)) {
-    //   const eid = id.split('ndraft1')[1];
+    if (id.startsWith(`nevent`)) {
+      const decoded = nip19.decode(id);
 
-    //   const events = await fetchDrafts(account?.publicKey, [eid], `drafts_edit+${APP_ID}`);
+      if (decoded.type === 'nevent') {
+        id = decoded.data.id
+      }
 
-    //   let draft = events[0];
+    }
 
-    //   if (!draft) return;
+    if (id) {
+      // const eid = id.split('ndraft1')[1];
 
-    //   const rJson = await decrypt44(account?.publicKey, draft.content);
+      const events = await fetchDrafts(accountStore.pubkey, [id], `drafts_edit_${APP_ID}`);
 
-    //   const r = JSON.parse(rJson);
+      let draft = events[0];
 
-    //   const tgs: string[][] = (r.tags || []);
-    //   const tags = tgs.
-    //     reduce<string[]>((acc, t) => {
-    //       if (t[0] === 't' && t[1].length > 0) {
-    //         return [...acc, t[1]]
-    //       }
+      if (!draft) return;
 
-    //       return [...acc];
-    //     }, []);
+      const pubkey = accountStore.pubkey === draft.sender.pubkey ?
+        draft.receiver.pubkey :
+        draft.sender.pubkey;
 
-    //   setArticle(() => ({
-    //     title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
-    //     summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
-    //     image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
-    //     tags,
-    //     content: r.content || '',
-    //     msg: { ...r },
-    //   }));
+      const rJson = await decrypt44(pubkey, draft.content);
 
-    //   setMarkdownContent(r.content);
+      const r = JSON.parse(rJson);
 
-    //   setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: draft.created_at, draftId: draft.id }));
+      const tgs: string[][] = (r.tags || []);
+      const keywords = tgs.
+        reduce<string[]>((acc, t) => {
+          if (t[0] === 't' && t[1].length > 0) {
+            return [...acc, t[1]]
+          }
 
-    //   return;
-    // }
+          return [...acc];
+        }, []);
+
+      setArticle(() => ({
+        title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
+        summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
+        image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
+        keywords,
+        content: r.content || '',
+        tags: [...tgs],
+      }));
+
+      setMarkdownContent(r.content);
+
+      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: draft.created_at, draftId: draft.id }));
+
+      return;
+    }
 
   }
 
   const postArticle = async (promote: boolean) => {
-    // const user = activeUser();
+    const user = activeUser();
 
-    // if (!account || !account.hasPublicKey() || !user) {
-    //   return;
-    // }
+    if (!user) return;
 
-    // if (!account.sec || account.sec.length === 0) {
-    //   const sec = readSecFromStorage();
-    //   if (sec) {
-    //     account.actions.setShowPin(sec);
-    //     return;
-    //   }
-    // }
+    const content = markdownContent();
 
-    // // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    // //   toast?.sendWarning(
-    // //     intl.formatMessage(tToast.noRelaysConnected),
-    // //   );
-    // //   return;
-    // // }
+    let relayHints = {}
+    let tags: string[][] = referencesToTags(content, relayHints);;
 
-    // const content = markdownContent();
+    const relayTags = relayStore.all.map(r => ['r', r.url]);
 
+    tags = [...tags, ...relayTags];
 
-    // let relayHints = {}
-    // let tags: string[][] = referencesToTags(content, relayHints);;
+    tags.push(['client', 'Primal']);
 
-    // const relayTags = account.relays.map(r => {
-    //   let t = ['r', r.url];
+    let articleToPost = {
+      ...article,
+      content,
+    };
 
-    //   const settings = account.relaySettings[r.url];
-    //   if (settings && settings.read && !settings.write) {
-    //     t = [...t, 'read'];
-    //   }
-    //   if (settings && !settings.read && settings.write) {
-    //     t = [...t, 'write'];
-    //   }
+    if (!accordionSection().includes('hero_image')) {
+      articleToPost.image = '';
+    }
 
-    //   return t;
-    // });
+    tags = [
+      ["title", articleToPost.title],
+      ["summary", articleToPost.summary],
+      ["image", articleToPost.image],
+      ["d", generateIdentifier()],
+      ...articleToPost.keywords.map(t => ['t', t]),
+      ...tags,
+    ];
 
-    // tags = [...tags, ...relayTags];
+    setIsPublishing(true);
 
-    // tags.push(['client', 'Primal']);
+    const { success, note } = await sendArticle(articleToPost, tags);
 
-    // let articleToPost = {
-    //   ...article,
-    //   content,
-    // };
+    if (success && note) {
 
-    // if (!accordionSection().includes('hero_image')) {
-    //   articleToPost.image = '';
-    // }
+      const lastDraft = lastSaved.draftId;
 
-    // tags = [
-    //   ["title", articleToPost.title],
-    //   ["summary", articleToPost.summary],
-    //   ["image", articleToPost.image],
-    //   ["d", generateIdentifier()],
-    //   ...articleToPost.keywords.map(t => ['t', t]),
-    //   ...tags,
-    // ];
+      if (lastDraft.length > 0) {
+        sendDeleteEvent(
+          user.pubkey,
+          lastDraft,
+          Kind.Draft,
+        );
+      }
 
-    // setIsPublishing(true);
+      setShowPublishSucess(() => true);
 
-    // const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
-
-    // if (success && note) {
-
-    //   const importId = `import_article_${APP_ID}`;
-    //   const lastDraft = lastSaved.draftId;
-
-    //   const unsub = subsTo(importId, {
-    //     onEose: () => {
-    //       unsub();
-    //       if (note) {
-    //         toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-    //         setArticle(() => emptyArticleEdit());
-    //         if (promote) {
-    //           setTimeout(() => {
-    //             quoteArticle(note);
-    //           }, 1_000);
-    //         }
-    //         setShowPublishSucess(() => true);
-    //       }
-    //     }
-    //   });
-
-    //   importEvents([note], importId);
-
-
-    //   if (lastDraft.length > 0) {
-    //     sendDeleteEvent(
-    //       user.pubkey,
-    //       lastDraft,
-    //       Kind.Draft,
-    //       account.activeRelays,
-    //       account.relaySettings,
-    //       account.proxyThroughPrimal,
-    //     );
-    //   }
-
-    //   return;
-    // }
+      return;
+    }
   }
 
   const quoteArticle = (postedEvent: NostrRelaySignedEvent) => {
@@ -454,53 +424,111 @@ const ReadsEditor: Component = () => {
   });
 
   const saveDraft = async () => {
-    // const user = account?.activeUser;
-    // if (!user) return;
+    const user = activeUser();
+    if (!user) return;
 
-    // const lastDraft = lastSaved.draftId;
+    const lastDraft = lastSaved.draftId;
 
-    // const { success, note } = await sendDraft(
-    //   user,
-    //   article,
-    //   markdownContent(),
-    //   account.activeRelays,
-    //   account.relaySettings,
-    //   account.proxyThroughPrimal,
-    // );
+    const { success, note } = await sendDraft(
+      user,
+      article,
+      markdownContent(),
+    );
 
-    // console.log('DRAFT: ', note)
+    if (success && note) {
+      toast?.sendSuccess('Draft saved');
 
-    // if (success && note) {
-    //   toast?.sendSuccess('Draft saved');
-    //   triggerImportEvents([note], `draft_import_${APP_ID}`);
+      setLastSaved(() => ({
+        ...article,
+        draft: { ...note },
+        mdContent: markdownContent(),
+        time: note.created_at,
+        draftId: note.id,
+      }));
 
-    //   setLastSaved(() => ({
-    //     ...article,
-    //     draft: { ...note },
-    //     mdContent: markdownContent(),
-    //     time: note.created_at,
-    //     draftId: note.id,
-    //   }));
-
-    //   if (lastDraft.length > 0) {
-    //     const delResponse = await sendDeleteEvent(
-    //       user.pubkey,
-    //       lastDraft,
-    //       Kind.Draft,
-    //       account.activeRelays,
-    //       account.relaySettings,
-    //       account.proxyThroughPrimal,
-    //     );
-
-    //     if (delResponse.success && delResponse.note) {
-    //       triggerImportEvents([delResponse.note], `del_last_draft_import_${APP_ID}`);
-    //     }
-    //   }
-    // }
-    // else {
-    //   toast?.sendWarning('Draft saving failed');
-    // }
+      if (lastDraft.length > 0) {
+        sendDeleteEvent(
+          user.pubkey,
+          lastDraft,
+          Kind.Draft,
+        );
+      }
+    }
+    else {
+      toast?.sendWarning('Draft saving failed');
+    }
   };
+
+
+  const genereatePreviewArticle = (): PrimalArticle | undefined => {
+    const pubkey = accountStore.pubkey || '';
+    const user = activeUser();
+    if (!pubkey || !user) return;
+
+    const content = markdownContent();
+
+    let relayHints = {}
+    let tags: string[][] = referencesToTags(content, relayHints);;
+
+    const relayTags = relayStore.all.map(r => ['r', r.url])
+
+    tags = [...tags, ...relayTags];
+
+    tags.push(['clent', 'Primal']);
+
+    const now = Math.floor((new Date()).getTime() / 1_000);
+    const identifier = generateIdentifier();
+    const coordinate = `${Kind.LongForm}:${pubkey}:${identifier}`;
+    const naddr = nip19.naddrEncode({
+      kind: Kind.LongForm,
+      pubkey,
+      identifier,
+    });
+    const id = 'preview_article';
+
+    const previewArticle: PrimalArticle = {
+      ...article,
+      image: accordionSection().includes('hero_image') ? article.image : '',
+      content,
+      user,
+      published_at: now,
+      created_at: now,
+      topZaps: [],
+      id,
+      pubkey,
+      nId: naddr,
+      nIdShort: naddr,
+      kind: Kind.LongForm,
+      coordinate,
+      wordCount: Math.ceil(content.split(' ').length / wordsPerMinute),
+      actions: { event_id: id, liked: false, replied: false, reposted: false, zapped: false },
+      stats: {
+        likes: 0,
+        mentions: 0,
+        replies: 0,
+        reposts: 0,
+        bookmarks: 0,
+        zaps: 0,
+        score: 0,
+        score24h: 0,
+        satszapped: 0,
+        event_id: id,
+      },
+      studioStats: {
+        satszapped: 0,
+        score: 0,
+        sentiment: 'neutral',
+      },
+      client: 'Primal',
+      mentionedNotes: readMentions.notes,
+      mentionedArticles: readMentions.reads,
+      mentionedUsers: readMentions.users,
+      // mentionedZaps: Record<string, PrimalZap>,
+      // mentionedHighlights: Record<string, any>,
+    };
+
+    return previewArticle;
+  }
 
   return (
     <div class={styles.editorPage}>
@@ -772,21 +800,21 @@ const ReadsEditor: Component = () => {
           </div>
 
 
-          {/* <ReadsPublishDialog
+          <ReadsPublishDialog
             article={genereatePreviewArticle()}
-            articleEdit={article}
+            articleData={article}
             open={showPublishArticle()}
             setOpen={setShowPublishArticle}
             onPublish={postArticle}
-          /> */}
+          />
 
-          {/* <ReadsPublishSuccessDialog
+          <ReadsPublishSuccessDialog
             open={showPublishSucess()}
             onClose={() => {
               setShowPublishSucess(false);
-              navigate(`/myarticles`);
+              navigate(`/articles`);
             }}
-          /> */}
+          />
 
           <ReadsLeaveDialog
             open={showleavePage() !== undefined}
@@ -814,3 +842,4 @@ const ReadsEditor: Component = () => {
 }
 
 export default ReadsEditor;
+

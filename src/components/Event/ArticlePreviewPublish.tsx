@@ -1,19 +1,13 @@
-// import { A } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 
-import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
-import defaultAvatarLight from '../../assets/images/reads_image_light.png';
-
-import styles from './ArticlePreview.module.scss';
-import { nip19 } from 'nostr-tools';
+import styles from './Event.module.scss';
 import { NoteReactionsState, PrimalArticle } from 'src/primal';
 import { getMediaUrl } from 'src/stores/MediaStore';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
-import { appStore, profileLink } from 'src/stores/AppStore';
 import { wordsPerMinute } from 'src/constants';
 import ArticleFooter from './ArticleFooter';
 

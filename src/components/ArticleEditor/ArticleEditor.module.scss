@@ -547,6 +547,10 @@
     justify-content: flex-start;
     gap: 16px;
 
+    &.noHeroImage {
+      min-height: 0;
+    }
+
     .uploadImageHolder {
       width: 100%;
       background-color: var(--background-sheet);
@@ -998,6 +1002,7 @@
       margin-bottom: 20px;
       overflow: hidden;
       border-radius: 12px;
+      max-width: 100%;
       max-height: 598px;
       object-fit: cover;
     }

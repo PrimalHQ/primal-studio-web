@@ -14,8 +14,8 @@ const ReadsPublishDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
-  article: PrimalArticle,
-  articleData: ArticleEdit,
+  article: PrimalArticle | undefined,
+  articleData: ArticleEdit | undefined,
   onPublish: (promote: boolean) => void,
 }> = (props) => {
 
@@ -42,11 +42,11 @@ const ReadsPublishDialog: Component<{
         </Show>
 
         <div class={styles.previewHolder}>
-          <ArticlePreviewPublish
-            article={props.article}
+          {/* <ArticlePreviewPublish
+            article={props.article!}
             hideContext={true}
             hideFooter={true}
-          />
+          /> */}
         </div>
 
         {/* <CheckBox2

@@ -16,12 +16,7 @@ const Avatar: Component<{
 
   const [src, setSrc] = createSignal(defaultAvatar);
 
-  createEffect(() => {
-    getSrc();
-  })
-
   const size = () => props.size || 36;
-
 
   const getSrc = async () => {
     if (props.user) {
@@ -41,6 +36,10 @@ const Avatar: Component<{
 
     return true;
   }
+
+  createEffect(() => {
+    getSrc();
+  });
 
   return (
     <div

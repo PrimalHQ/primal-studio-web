@@ -16,6 +16,7 @@ import { nip05Verification } from 'src/utils/ui';
 const DraftOtherParty: Component<{
   draft: PrimalDraft,
   onEdit?: () => void,
+  onView?: () => void,
   onDelete?: (id: string) => void,
   type: 'sent' | 'inbox',
 }> = (props) => {
@@ -59,13 +60,28 @@ const DraftOtherParty: Component<{
       </div>
       <Switch>
         <Match when={props.type === 'sent'}>
-          <button class={styles.draftAction}>View</button>
+          <button
+            class={styles.draftAction}
+            onClick={props.onView}
+          >
+            View
+          </button>
         </Match>
         <Match when={props.type === 'inbox'}>
           <div class={styles.actions}>
-            <button class={styles.draftAction}>Edit</button>
+            <button
+              class={styles.draftAction}
+              onClick={props.onEdit}
+            >
+              Edit
+            </button>
             <div class={styles.separator}></div>
-            <button class={styles.draftAction}>Approve</button>
+            <button
+              class={styles.draftAction}
+              onClick={props.onView}
+            >
+              Approve
+            </button>
           </div>
         </Match>
       </Switch>

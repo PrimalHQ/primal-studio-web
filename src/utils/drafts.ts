@@ -1,7 +1,7 @@
 import { PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { decrypt44 } from "./nostrApi";
 import { logError } from "./logger";
-import { emptyMentions, encodeCoordinate, extractReplyToFromTags, extractRepostInfo, noActions, parseRepost } from "./feeds";
+import { emptyMentions, extractReplyToFromTags, noActions } from "./feeds";
 import { Kind } from "src/constants";
 import DOMPurify from 'dompurify';
 import { nip19 } from "./nTools";
@@ -17,8 +17,6 @@ export const parseDraftContent = async (drafts: PrimalDraft[]) => {
       const pubkey = accountStore.pubkey === draft.sender.pubkey ?
         draft.receiver.pubkey :
         draft.sender.pubkey;
-
-      console.log('DECODE: ', pubkey, draft)
 
       const decryptedContent = await decrypt44(pubkey, draft.content);
 

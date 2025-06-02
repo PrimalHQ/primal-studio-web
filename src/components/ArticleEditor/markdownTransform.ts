@@ -202,10 +202,10 @@ const processMarkdownForNostr = async (html: string): Promise<string> => {
 
       const el = renderEmbeddedNote({
         note: note,
-        mentionedUsers: note.mentionedUsers,
-        includeEmbeds: true,
-        hideFooter: true,
-        noLinks: "links",
+        // mentionedUsers: note.mentionedUsers,
+        // includeEmbeds: true,
+        // hideFooter: true,
+        // noLinks: "links",
       })
 
       const mention = document.createElement('div');

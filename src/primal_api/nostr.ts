@@ -1,10 +1,14 @@
 import { Kind } from "src/constants";
-import { NostrEventContent, NostrRelayEvent, NostrRelaySignedEvent, SendNoteResult } from "src/primal";
+import { NostrEventContent, NostrRelayEvent, NostrRelaySignedEvent, PrimalUser, SendNoteResult } from "src/primal";
 import { relayStore } from "src/stores/RelayStore";
 import { logError, logInfo } from "src/utils/logger";
-import { signEvent } from "src/utils/nostrApi";
+import { encrypt44, signEvent } from "src/utils/nostrApi";
 import { Relay } from "src/utils/nTools";
 import { sendMessage, subsTo } from "src/utils/socket";
+import { triggerImportEvents } from "./events";
+import { APP_ID } from "src/App";
+import { ArticleEdit } from "src/components/ArticleEditor/ArticleEditor";
+import { generateArticleIdentifier } from "src/utils/kyes";
 
 export const proxyEvent = async (event: NostrRelayEvent) => {
   let signedNote: NostrRelaySignedEvent | undefined;
@@ -80,6 +84,37 @@ export const proxyEvent = async (event: NostrRelayEvent) => {
     return { success: false, reasons: [e], note: signedNote} as SendNoteResult;
   }
 }
+
+
+export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) => {
+  const time = Math.floor((new Date()).getTime() / 1000);
+
+  const articleTags = [...(articleData.tags || [])];
+
+  const pubTime = articleTags.find(t => t[0] === 'published_at')
+
+  let timeTags = pubTime ? [[...pubTime] ]: [["published_at", `${time}`]]
+
+  const event = {
+    content: articleData.content,
+    kind: Kind.LongForm,
+    tags: [
+      ...tags,
+      ...timeTags,
+    ],
+    created_at: time,
+  };
+
+  const response = await sendEvent(event);
+
+  if (response.success && response.note) {
+    triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
+  }
+
+  return response;
+}
+
+
 
 export const sendEvent = async (
   event: NostrRelayEvent,
@@ -229,6 +264,59 @@ export const sendDeleteEvent = async (
   };
 
   const response = await sendEvent(ev);
+
+  if (response.success && response.note) {
+    triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
+  }
+
+  return response;
+};
+
+export const sendDraft = async (
+  user: PrimalUser,
+  article: ArticleEdit,
+  mdContent: string,
+): Promise<SendNoteResult> => {
+  const pk = user.pubkey;
+  const identifier = generateArticleIdentifier(article.title);
+  const time = Math.floor((new Date()).getTime() / 1000);
+  const tags = article.tags.map((t) => ['t', t]);
+  const a = {
+    content: mdContent,
+    kind: Kind.LongForm,
+    tags: [
+      ["title", article.title],
+      ["summary", article.summary],
+      ["image", article.image],
+      ["d", identifier],
+      ['client', 'primal-web'],
+      ...tags,
+    ],
+    created_at: time,
+  };
+
+  const e = await encrypt44(pk, JSON.stringify(a));
+  // const d = await decrypt44(pk, e);
+
+  const draft = {
+    kind: Kind.Draft,
+    created_at: Math.floor((new Date()).getTime() / 1_000),
+    tags: [
+      ['d', identifier],
+      ['k', `${Kind.LongForm}`],
+      ['client', 'primal-web'],
+      // ["e", "<anchor event event id>", "<relay-url>"],
+      // ["a", "<anchor event address>", "<relay-url>"],
+    ],
+    content: e,
+    // other fields
+  }
+
+  const response = await sendEvent(draft);
+
+  if (response.success && response.note) {
+    triggerImportEvents([response.note], `draft_import_${APP_ID}`);
+  }
 
   return response;
 };

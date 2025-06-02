@@ -32,7 +32,7 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
 
   if (id.length === 0) return;
 
-  const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`);
+  const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`, true);
 
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
@@ -41,12 +41,12 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
 
     const el = renderEmbeddedNote({
       note: events[0],
-      mentionedUsers: events[0].mentionedUsers,
-      includeEmbeds: true,
-      hideFooter: true,
-      noLinks: "links",
-      noPlaceholders: true,
-      noLightbox: true,
+      // mentionedUsers: events[0].mentionedUsers,
+      // includeEmbeds: true,
+      // hideFooter: true,
+      // noLinks: "links",
+      // noPlaceholders: true,
+      // noLightbox: true,
     })
 
     mentions.forEach(mention => {

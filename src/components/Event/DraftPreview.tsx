@@ -41,8 +41,10 @@ const DraftPreview: Component<{
         <ArticlePreview
           article={event() as PrimalArticle}
         />
-        <DraftInfo draft={props.draft}
-
+        <DraftInfo
+          draft={props.draft}
+          onEdit={props.onEdit}
+          onDelete={props.onDelete}
         />
       </Match>
 

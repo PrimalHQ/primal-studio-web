@@ -1168,3 +1168,67 @@ export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: Paginati
     [],
   );
 }
+
+
+export const referencesToTags = (value: string, relayHints: Record<string, string>) => {
+  const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+  const regexMention =
+    /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1['qpzry9x8gf2tvdw0s3jn54khce6mua7l']+)\b|#\[(\d+)\]/g;
+  const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+
+  let refs: string[] = [];
+  let tags: string[][] = [];
+  let match;
+
+  // Parse hashtags to add to tags
+  while((match = regexHashtag.exec(value)) != null) {
+    tags.push(['t', match[0].trim().slice(1)]);
+  }
+
+  // Parse mentions to add to tags
+  while((match = regexMention.exec(value)) !== null) {
+    refs.push(match[0]);
+  }
+
+  refs.forEach((ref) => {
+    let id = `${ref}`;
+
+    const idStart = ref.search(mentionRegexNostrless);
+
+    if (idStart > 0) {
+      id = ref.slice(idStart);
+    }
+
+    const decoded = nip19.decode(id);
+
+    if (decoded.type === 'npub') {
+      tags.push(['p', decoded.data, '', 'mention'])
+      return;
+    }
+
+    if (decoded.type === 'nprofile') {
+      const relay = decoded.data.relays ? (decoded.data.relays[0] || '') : '';
+      tags.push(['p', decoded.data.pubkey, relay, 'mention']);
+      return;
+    }
+
+    if (decoded.type === 'note') {
+      tags.push(['e', decoded.data, relayHints ? (relayHints[decoded.data] || '') : '', 'mention']);
+      return;
+    }
+
+    if (decoded.type === 'nevent') {
+      const relay = decoded.data.relays ? (decoded.data.relays[0] || '') : '';
+      tags.push(['e', decoded.data.id, relay, 'mention']);
+      return;
+    }
+
+    if (decoded.type === 'naddr') {
+      const relay = decoded.data.relays ? (decoded.data.relays[0] || '') : '';
+      tags.push(['a', `${decoded.data.kind}:${decoded.data.pubkey}:${decoded.data.identifier}`, relay, 'mention']);
+      return;
+    }
+  });
+
+  return tags;
+};

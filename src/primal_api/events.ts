@@ -1,6 +1,6 @@
 import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
-import { EventCoordinate, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from "src/primal";
+import { EventCoordinate, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { decodeIdentifier } from "src/utils/kyes";
 import { primalAPI, sendMessage, subsTo } from "src/utils/socket";
@@ -117,14 +117,14 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
   });
 };
 
-export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {
+export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string, extendedResponse?: boolean) => {
   return new Promise<PrimalNote[]>((resolve, reject) => {
 
     let page = { ...emptyEventFeedPage() };
 
     primalAPI({
       subId,
-      action: () => getEvents(pubkey, noteIds, subId),
+      action: () => getEvents(pubkey, noteIds, subId, extendedResponse),
       onEvent: (event) => {
         updateFeedPage(page, event);
       },
@@ -136,6 +136,30 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
         reject('failed_to_fetch_notes');
       }
     });
+  });
+};
+
+
+export const fetchDrafts = (pubkey: string | undefined, ids: string[], subId: string) => {
+  return new Promise<PrimalDraft[]>((resolve, reject) => {
+    // if (!pubkey) reject('Missing pubkey');
+
+    let page = { ...emptyEventFeedPage() };
+
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        const feed = pageResolve(page);
+        resolve(feed.drafts);
+      }
+    });
+
+    getEvents(pubkey, [...ids], subId, true);
   });
 };
 
@@ -157,3 +181,5 @@ export const doRequestDelete = async (pubkey: string | undefined, id: string, ki
 
   return true;
 };
+
+

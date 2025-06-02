@@ -51,6 +51,7 @@ export type ArticleEdit = {
   summary: string,
   content: string,
   keywords: string[],
+  tags: string[][],
   // msg: NostrEventContent | undefined,
 }
 
@@ -60,6 +61,7 @@ export const emptyArticleEdit = (): ArticleEdit => ({
   summary: '',
   content: '',
   keywords: [],
+  tags: [],
   // msg: undefined,
 });
 
@@ -101,11 +103,18 @@ const ArticleEditor: Component<{
 
   let titleImageUpload: HTMLInputElement | undefined;
 
+  const [viewMode, setViewMode] = createSignal(false);
+
   createEffect(() => {
     const editor = editorTipTap();
     if (!editor) return;
 
-    setEditorContent(editor, props.article.content)
+    setEditorContent(editor, props.article.content);
+
+    if (location.pathname.includes('/view/draft')) {
+      editor.setEditable(false);
+      setViewMode(true);
+    }
   });
 
   let tiptapEditor: HTMLDivElement | undefined;
@@ -454,7 +463,7 @@ const ArticleEditor: Component<{
     <div class={styles.articleEditor}>
       <Show when={accordionSection().includes('metadata')}>
         <div class={styles.metadataWrapper} id="editor_metadata">
-          <div class={styles.metadata}>
+          <div class={`${styles.metadata} ${!accordionSection().includes('hero_image') ? styles.noHeroImage : ''}`}>
             <TextField
               class={styles.titleInput}
               value={props.article.title}
@@ -466,6 +475,7 @@ const ArticleEditor: Component<{
               onChange={(v) => {
                 props.setArticle('title', () => v);
               }}
+              readOnly={viewMode()}
             >
               <TextField.TextArea
                 rows={1}
@@ -501,7 +511,7 @@ const ArticleEditor: Component<{
                     <div
                       class={styles.uploadButton}
                     >
-                      <Show when={imageLoaded()}>
+                      <Show when={imageLoaded() && !viewMode()}>
                         <div
                           class={styles.uploadOverlay}
                           onClick={() => {
@@ -526,10 +536,14 @@ const ArticleEditor: Component<{
                       <input
                         id="upload-title-image"
                         type="file"
-                        onChange={() => onUploadTitleImage(titleImageUpload)}
+                        onChange={() => {
+                          if (viewMode()) return;
+                          onUploadTitleImage(titleImageUpload);
+                        }}
                         ref={titleImageUpload}
                         hidden={true}
                         accept="image/*"
+                        disabled={viewMode()}
                       />
                       <img
                         class={styles.titleImage}
@@ -547,10 +561,14 @@ const ArticleEditor: Component<{
                       <input
                         id="upload-avatar"
                         type="file"
-                        onChange={() => onUploadTitleImage(titleImageUpload)}
+                        onChange={() => {
+                          if (viewMode()) return;
+                          onUploadTitleImage(titleImageUpload);
+                        }}
                         ref={titleImageUpload}
                         hidden={true}
                         accept="image/*"
+                        disabled={viewMode()}
                       />
                       <label for="upload-avatar">
                         Add hero Image
@@ -636,6 +654,7 @@ const ArticleEditor: Component<{
                 class={styles.summaryInput}
                 value={props.article.summary}
                 onChange={v => props.setArticle('summary', () => v)}
+                readOnly={viewMode()}
               >
                 <TextField.TextArea
                   rows={1}
@@ -699,6 +718,7 @@ const ArticleEditor: Component<{
                   // @ts-ignore
                   e.target.value = '';
                 }}
+                readOnly={viewMode()}
               >
                 <TextField.Input
                   placeholder={props.article.keywords.length === 0 ? 'Enter tags (separated by commas)' : ''}
@@ -723,28 +743,30 @@ const ArticleEditor: Component<{
       </Show>
 
       <div class={styles.contentEditor}>
-        <ArticleEditorToolbar
-          editor={editorTipTap()}
-          textArea={editorPlainText}
-          onFileUpload={onUploadContent}
-          wysiwygMode={!editorMarkdown()}
-          fixed={props.fixedToolbar}
-          toggleEditorMode={() => {
-            setEditorMarkdown(v => !v);
-            const editor = editorTipTap();
-            if (!editor) return;
+        <Show when={!viewMode()}>
+          <ArticleEditorToolbar
+            editor={editorTipTap()}
+            textArea={editorPlainText}
+            onFileUpload={onUploadContent}
+            wysiwygMode={!editorMarkdown()}
+            fixed={props.fixedToolbar}
+            toggleEditorMode={() => {
+              setEditorMarkdown(v => !v);
+              const editor = editorTipTap();
+              if (!editor) return;
 
-            if (editorMarkdown()) {
-              props.setMarkdownContent(() => '');
-              const md = extendMarkdownEditor(editor).getMarkdown();
-              props.setMarkdownContent(() => md);
-            }
-            else {
-              const c = editorPlainText?.value || '';
-              extendMarkdownEditor(editor).setMarkdown(c);
-            }
-          }}
-        />
+              if (editorMarkdown()) {
+                props.setMarkdownContent(() => '');
+                const md = extendMarkdownEditor(editor).getMarkdown();
+                props.setMarkdownContent(() => md);
+              }
+              else {
+                const c = editorPlainText?.value || '';
+                extendMarkdownEditor(editor).setMarkdown(c);
+              }
+            }}
+          />
+        </Show>
 
         <div
           id="tiptapEditor"

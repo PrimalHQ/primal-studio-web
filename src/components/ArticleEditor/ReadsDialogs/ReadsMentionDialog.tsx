@@ -374,11 +374,9 @@ const ReadsMentionDialog: Component<{
             <Tabs.Content value="notes">
               <div class={styles.noteList}>
                 <Show
-                  when={searchStore.isFetchingContent}
+                  when={!searchStore.isFetchingContent}
                   fallback={
-                    <For each={Array.from({ length: 10 }, (_, i) => i)}>
-                      {() => (<NoteSuggestionSkeleton />)}
-                    </For>
+                    <>searching...</>
                   }
                 >
                   <For each={searchStore.notes.slice(0, 10)} >

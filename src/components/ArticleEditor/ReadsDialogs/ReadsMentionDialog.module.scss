@@ -58,8 +58,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../../assets/icons/big_success.svg) no-repeat center;
-  mask: url(../../assets/icons/big_success.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/big_success.svg) no-repeat center;
+  mask: url(../../../assets/icons/big_success.svg) no-repeat center;
 }
 
 .readsPublishSuccessDialog {
@@ -430,8 +430,8 @@ input.textInput {
   margin: 0;
   display: inline-block;
   background-color: var(--text-tertiary);
-  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
-  mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  mask: url(../../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
   cursor: pointer;
 }
 
@@ -448,8 +448,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-  mask: url(../../assets/icons/close.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/close.svg) no-repeat center;
+  mask: url(../../../assets/icons/close.svg) no-repeat center;
 }
 
 
@@ -581,8 +581,8 @@ input.textInput {
       display: inline-block;
       margin: 0px 0px;
       background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
+      -webkit-mask: url(../../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../../assets/icons/close.svg) no-repeat center;
     }
 
     .iconCheck {
@@ -591,8 +591,8 @@ input.textInput {
       display: inline-block;
       margin: 0px 0px;
       background-color: var(--success-bright);
-      -webkit-mask: url(../../assets/icons/check.svg) no-repeat center;
-      mask: url(../../assets/icons/check.svg) no-repeat center;
+      -webkit-mask: url(../../../assets/icons/check.svg) no-repeat center;
+      mask: url(../../../assets/icons/check.svg) no-repeat center;
     }
   }
   .progressTrack {

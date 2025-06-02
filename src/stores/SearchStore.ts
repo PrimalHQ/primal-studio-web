@@ -280,6 +280,7 @@ export const findContent = async (query: string, until = 0) => {
       }
     );
 
+
     const sortedNotes = filterAndSortNotes(notes, paging);
     const sortedReads = filterAndSortReads(reads, paging);
 
