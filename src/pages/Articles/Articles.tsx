@@ -3,16 +3,14 @@ import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Articles.module.scss';
-import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import PageHeader from 'src/components/PageHeader/PageHeader';
-import { articlesStore, fetchArticles, fetchFeedTotals, setArticlesStore } from './Articles.data';
+import { articlesStore, deleteSelected, fetchArticles, fetchFeedTotals, isAllSelected, setArticlesStore, toggleSelectAll, toggleSelected } from './Articles.data';
 import { FeedCriteria, GraphSpan } from '../Home/Home.data';
 import SelectBox from 'src/components/SelectBox/SelectBox';
 import { headerSortOptions } from 'src/constants';
 import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/PageStore';
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
-import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
 import { accountStore } from 'src/stores/AccountStore';
 import { useParams } from '@solidjs/router';
 import { FeedEventState, HomePayload } from 'src/primal_api/studio';
@@ -25,7 +23,6 @@ import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
 import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
-import { createStore } from 'solid-js/store';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
 
@@ -34,8 +31,6 @@ const Articles: Component = () => {
 
   const articlePages = () => pageStore.articles.feedPages;
   const [visibleArticlesPages, setVisibleArticlesPages] = createSignal<number[]>([]);
-
-  const [selected, setSelected] = createStore<string[]>([]);
 
   const shouldRenderEmptyArticles = (index: number) => {
     return !visibleArticlesPages().includes(index);
@@ -91,7 +86,8 @@ const Articles: Component = () => {
     const { since, until } = span;
 
     clearPageStore('articles');
-    setArticlesStore('offset', () => 0)
+    setArticlesStore('offset', () => 0);
+    setArticlesStore('selected', () => []);
 
     fetchFeedTotals(pubkey, { since, until, kind: 'articles' });
 
@@ -196,17 +192,34 @@ const Articles: Component = () => {
             onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
           />
         </div>
-        <Show when={['sent', 'inbox'].includes(articlesStore.tab)}>
+        <Show when={['sent', 'inbox'].includes(articlesStore.tab) && !pageStore.articles.isFetching}>
           <div class={styles.bulkControls}>
             <button
               class={styles.bulkControlButton}
+              onClick={toggleSelectAll}
             >
-              Select All
+              <Show
+                when={isAllSelected()}
+                fallback={<>Select All</>}
+              >
+                <>Deselect All</>
+              </Show>
             </button>
             <Show when={['inbox'].includes(articlesStore.tab)}>
-              <button class={styles.bulkControlButton}>Approve Selected</button>
+              <button
+                class={styles.bulkControlButton}
+                disabled={articlesStore.selected.length === 0}
+              >
+                Approve Selected
+              </button>
             </Show>
-            <button class={styles.bulkControlButton}>Delete All</button>
+            <button
+              class={styles.bulkControlButton}
+              disabled={articlesStore.selected.length === 0}
+              onClick={deleteSelected}
+            >
+              Delete Selected
+            </button>
           </div>
         </Show>
         <div class={styles.feedContent}>
@@ -240,15 +253,8 @@ const Articles: Component = () => {
                               removeEventFromPageStore(id)
                             }}
                             type='sent'
-                            checked={selected.includes(draft?.id || '-')}
-                            onCheck={(id, v) => {
-                              if (v && !selected.includes(id)) {
-                                setSelected(selected.length, () => id);
-                              }
-                              else if (!v) {
-                                setSelected((sel) => sel.filter(s => s !== id))
-                              }
-                            }}
+                            checked={articlesStore.selected.includes(draft?.id || '-')}
+                            onCheck={toggleSelected}
                           />
                         </FeedItemCard>
                       </Show>
@@ -275,15 +281,8 @@ const Articles: Component = () => {
                               removeEventFromPageStore(id)
                             }}
                             type='inbox'
-                            checked={selected.includes(draft?.id || '-')}
-                            onCheck={(id, v) => {
-                              if (v && !selected.includes(id)) {
-                                setSelected(selected.length, () => id);
-                              }
-                              else if (!v) {
-                                setSelected((sel) => sel.filter(s => s !== id))
-                              }
-                            }}
+                            checked={articlesStore.selected.includes(draft?.id || '-')}
+                            onCheck={toggleSelected}
                           />
                         </FeedItemCard>
                       </Show>

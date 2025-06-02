@@ -1,17 +1,16 @@
-import { Params, query, RoutePreloadFuncArgs } from "@solidjs/router";
-import { APP_ID } from "../../App";
+import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { FeedRange, NostrEventContent, PrimalArticle, PrimalNote } from "../../primal";
-import { FEED_LIMIT, Kind } from "../../constants";
+import { FeedRange, PrimalArticle } from "../../primal";
+import { Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { emptyStudioTotals, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
-import { emptyEventFeedPage, emptyFeedRange, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
-import { fetchKnownProfiles } from "src/utils/profile";
+import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
+import { emptyEventFeedPage, filterAndSortReads } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
-import { logInfo } from "src/utils/logger";
 import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
+import { doRequestDelete } from "src/primal_api/events";
+import { openConfirmDialog } from "src/stores/AppStore";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -27,6 +26,7 @@ export type ArticlesStore = {
   graphSpan: GraphSpan,
   tab: FeedEventState,
   offset: number,
+  selected: string[],
   feedTotals: FeedTotals,
 }
 
@@ -36,6 +36,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
   graphSpan: defaultSpan(),
   tab: 'published',
   offset: 0,
+  selected: [],
   feedTotals: {
     sent: 0,
     inbox: 0,
@@ -47,6 +48,53 @@ export const emptyHomeStore = (): ArticlesStore => ({
 });
 
 export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
+
+export const isAllSelected = () => {
+  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+
+  return eventIds.every(id => articlesStore.selected.includes(id));
+}
+
+export const toggleSelectAll = () => {
+  if (isAllSelected()) {
+    setArticlesStore('selected', () => []);
+    return;
+  }
+
+  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+
+  setArticlesStore('selected', () => [...eventIds]);
+}
+
+export const toggleSelected = (id: string, add: boolean) => {
+  if (add && !articlesStore.selected.includes(id)) {
+    setArticlesStore('selected', articlesStore.selected.length, () => id);
+  }
+  else if (!add) {
+    setArticlesStore('selected', (sel) => sel.filter(s => s !== id))
+  }
+}
+
+export const deleteSelected = async () => {
+  openConfirmDialog({
+    title: "Delete All?",
+    description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
+    onConfirm: async () => {
+      const selectedIds = articlesStore.selected;
+
+      let promisses: Promise<boolean>[] = []
+
+      for (let i=0; i<selectedIds.length;i++) {
+        const id = selectedIds[i];
+
+        promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+      }
+
+      await Promise.any(promisses);
+    },
+    onAbort: () => {},
+  });
+};
 
 export const fetchFeedTotals = async (
   pubkey: string,

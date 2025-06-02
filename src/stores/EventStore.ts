@@ -182,7 +182,7 @@ export const getRecentEventsFromStore = (ids: string[]) => {
   return { foundEvents, missingEvents };
 }
 
-export const getEventsFromStore = async (ids: string[], subId: string) => {
+export const getEventsFromStore = async (ids: string[], subId?: string) => {
 
   let { foundEvents, missingEvents } = getRecentEventsFromStore(ids);
 
@@ -242,7 +242,7 @@ export const getEventsFromStore = async (ids: string[], subId: string) => {
     const fetchedEvents = await fetchEvents(
       accountStore.pubkey,
       missingEvents,
-      `missing_${subId}_${APP_ID}`,
+      `missing_${subId || 'events'}_${APP_ID}`,
     )
 
     addEventsToStore(fetchedEvents);

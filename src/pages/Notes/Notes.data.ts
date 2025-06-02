@@ -8,6 +8,9 @@ import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
+import { openConfirmDialog } from "src/stores/AppStore";
+import { doRequestDelete } from "src/primal_api/events";
+import { Kind } from "src/constants";
 
 
 export type NotesStore = {
@@ -17,6 +20,7 @@ export type NotesStore = {
   tab: FeedEventState,
   showReplies: boolean,
   offset: number,
+  selected: string[],
   feedTotals: FeedTotals,
 }
 
@@ -27,6 +31,7 @@ export const emptyNotesStore = (): NotesStore => ({
   tab: 'published',
   showReplies: false,
   offset: 0,
+  selected: [],
   feedTotals: {
     sent: 0,
     inbox: 0,
@@ -38,6 +43,53 @@ export const emptyNotesStore = (): NotesStore => ({
 });
 
 export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
+
+export const isAllSelected = () => {
+  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+
+  return eventIds.every(id => notesStore.selected.includes(id));
+}
+
+export const toggleSelectAll = () => {
+  if (isAllSelected()) {
+    setNotesStore('selected', () => []);
+    return;
+  }
+
+  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+
+  setNotesStore('selected', () => [...eventIds]);
+}
+
+export const toggleSelected = (id: string, add: boolean) => {
+  if (add && !notesStore.selected.includes(id)) {
+    setNotesStore('selected', notesStore.selected.length, () => id);
+  }
+  else if (!add) {
+    setNotesStore('selected', (sel) => sel.filter(s => s !== id))
+  }
+}
+
+export const deleteSelected = async () => {
+  openConfirmDialog({
+    title: "Delete All?",
+    description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
+    onConfirm: async () => {
+      const selectedIds = notesStore.selected;
+
+      let promisses: Promise<boolean>[] = []
+
+      for (let i=0; i<selectedIds.length;i++) {
+        const id = selectedIds[i];
+
+        promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+      }
+
+      await Promise.any(promisses);
+    },
+    onAbort: () => {},
+  });
+};
 
 export const fetchFeedTotals = async (
   pubkey: string,

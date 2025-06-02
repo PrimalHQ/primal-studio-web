@@ -3,7 +3,6 @@ import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Notes.module.scss';
-import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import PageHeader from 'src/components/PageHeader/PageHeader';
 import { FeedCriteria, GraphSpan } from '../Home/Home.data';
 import SelectBox from 'src/components/SelectBox/SelectBox';
@@ -11,18 +10,14 @@ import { headerSortOptions } from 'src/constants';
 import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/PageStore';
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
-import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
 import { accountStore } from 'src/stores/AccountStore';
 import { useParams } from '@solidjs/router';
 import { FeedEventState, HomePayload } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
-import ArticlePreview from 'src/components/Event/ArticlePreview';
-import { PrimalArticle, PrimalDraft, PrimalNote } from 'src/primal';
-import { nip19 } from 'src/utils/nTools';
-import { appStore } from 'src/stores/AppStore';
+import { PrimalDraft, PrimalNote } from 'src/primal';
 import EventStats from 'src/components/Event/EventStats';
-import { fetchFeedTotals, fetchNotes, notesStore, setNotesStore } from './Notes.data';
+import { deleteSelected, fetchFeedTotals, fetchNotes, isAllSelected, notesStore, setNotesStore, toggleSelectAll } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import DraftPreview from 'src/components/Event/DraftPreview';
@@ -92,7 +87,8 @@ const Notes: Component = () => {
     const { since, until, criteria, state, showReplies } = span;
 
     clearPageStore('notes');
-    setNotesStore('offset', () => 0)
+    setNotesStore('offset', () => 0);
+    setNotesStore('selected', () => []);
 
     fetchFeedTotals(pubkey, { since, until, kind: 'notes' });
 
@@ -217,17 +213,34 @@ const Notes: Component = () => {
           </div>
         </div>
 
-        <Show when={['sent', 'inbox'].includes(notesStore.tab)}>
+        <Show when={['sent', 'inbox'].includes(notesStore.tab) && !pageStore.notes.isFetching}>
           <div class={styles.bulkControls}>
             <button
               class={styles.bulkControlButton}
+              onClick={toggleSelectAll}
             >
-              Select All
+              <Show
+                when={isAllSelected()}
+                fallback={<>Select All</>}
+              >
+                <>Deselect All</>
+              </Show>
             </button>
             <Show when={['inbox'].includes(notesStore.tab)}>
-              <button class={styles.bulkControlButton}>Approve Selected</button>
+              <button
+                class={styles.bulkControlButton}
+                disabled={notesStore.selected.length === 0}
+              >
+                Approve Selected
+              </button>
             </Show>
-            <button class={styles.bulkControlButton}>Delete All</button>
+            <button
+              class={styles.bulkControlButton}
+              disabled={notesStore.selected.length === 0}
+              onClick={deleteSelected}
+            >
+              Delete Selected
+            </button>
           </div>
         </Show>
 

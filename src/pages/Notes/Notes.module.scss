@@ -92,5 +92,9 @@
     &:last-child {
       border-right: none;
     }
+
+    &:disabled {
+      color: var(--text-tertiary-2);
+    }
   }
 }
