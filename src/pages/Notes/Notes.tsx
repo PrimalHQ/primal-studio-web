@@ -22,12 +22,13 @@ import { PrimalArticle, PrimalDraft, PrimalNote } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { appStore } from 'src/stores/AppStore';
 import EventStats from 'src/components/Event/EventStats';
-import { fetchNotes, notesStore, setNotesStore } from './Notes.data';
+import { fetchFeedTotals, fetchNotes, notesStore, setNotesStore } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
+import { humanizeNumber } from 'src/utils/ui';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -92,6 +93,8 @@ const Notes: Component = () => {
 
     clearPageStore('notes');
     setNotesStore('offset', () => 0)
+
+    fetchFeedTotals(pubkey, { since, until, kind: 'notes' });
 
     fetchNotes(
       pubkey,
@@ -183,7 +186,7 @@ const Notes: Component = () => {
             onChange={(tab: string) => setNotesStore('tab', tab as FeedEventState)}
             tabTriggerComponent={(tab: string) => (
               <div class={tab === notesStore.tab ? styles.activeTab : styles.inactiveTab}>
-                {translate('articles', 'tabs', tab)}
+                {translate('notes', 'tabs', tab)} ({humanizeNumber(notesStore.feedTotals[tab as FeedEventState])})
               </div>
             )}
           >

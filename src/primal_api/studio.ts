@@ -49,12 +49,15 @@ export const emptyStudioTotals = () => ({
   zaps_sent: 0,
 });
 
+
 export type FeedEventState = 'published' |
   'published-replied' |
   'scheduled' |
   'inbox' |
   'sent' |
   'drafts';
+
+export type FeedTotals = Record<FeedEventState, number>;
 
 export type HomePayload = {
   pubkey?: string,
@@ -65,6 +68,7 @@ export type HomePayload = {
   resolution?: 'hour' | 'day' | 'month',
   criteria?: 'score' | 'sentiment' | 'oldest' | 'latest',
   state?: FeedEventState,
+  kind?: number | 'notes' | 'articles',
 };
 
 export const getHomeTotals = async (opts?: HomePayload) => {
@@ -416,6 +420,92 @@ export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'art
   })
 };
 
+
+export const getFeedTotals = async (opts?: HomePayload) => {
+  let totals: FeedTotals = {
+    sent: 0,
+    inbox: 0,
+    drafts: 0,
+    published: 0,
+    scheduled: 0,
+    'published-replied': 0,
+  };
+
+  const today = Math.floor((new Date()).getTime() / 1_000)
+
+  const subId = `feed_totals_${APP_ID}`;
+
+  let payload: HomePayload = {
+    until: today,
+    since: 0,
+    kind: 'notes',
+  };
+
+  if (opts?.pubkey) {
+    let pk = npubToHex(opts.pubkey);
+    const vanityName = await fetchKnownProfiles(pk);
+
+    if (vanityName.names[pk]) {
+      pk = vanityName.names[pk];
+    }
+
+    payload.pubkey = pk;
+  }
+
+  if ((opts?.until || 0) > 0) {
+    // @ts-ignore
+    payload.until = opts.until;
+  }
+
+  if ((opts?.since || 0) > 0) {
+    // @ts-ignore
+    payload.since = opts.since
+  }
+
+  if (opts?.kind) {
+    payload.kind = opts.kind;
+  }
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: "feed_totals",
+      ...payload,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<FeedTotals>((resolve, reject) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        totals = JSON.parse(event.content || '[]');
+      },
+      onEose: () => {
+        resolve(totals);
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_feed_totals');
+      }
+    }
+    )
+  })
+};
 
 // Settings --------------------------------------------
 

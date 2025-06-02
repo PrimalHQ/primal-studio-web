@@ -83,7 +83,12 @@ const ReadsEditor: Component = () => {
     }
   }
 
-  const generateIdentifier = () => identifier().length > 0 ? identifier() : article.title.toLowerCase().split(' ').join('-')
+  const generateIdentifier = () => {
+    if (identifier().length > 0) return identifier();
+    let str = article.title.toLowerCase();
+
+    return str.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+  }
 
   // const genereatePreviewArticle = (): PrimalArticle | undefined => {
 

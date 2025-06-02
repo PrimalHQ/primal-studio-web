@@ -5,7 +5,7 @@ import { FeedRange, NostrEventContent, PrimalArticle, PrimalNote } from "../../p
 import { FEED_LIMIT, Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { emptyStudioTotals, FeedEventState, getFeedEvents, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
+import { emptyStudioTotals, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
 import { emptyEventFeedPage, emptyFeedRange, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
@@ -27,6 +27,7 @@ export type ArticlesStore = {
   graphSpan: GraphSpan,
   tab: FeedEventState,
   offset: number,
+  feedTotals: FeedTotals,
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -35,9 +36,31 @@ export const emptyHomeStore = (): ArticlesStore => ({
   graphSpan: defaultSpan(),
   tab: 'published',
   offset: 0,
+  feedTotals: {
+    sent: 0,
+    inbox: 0,
+    drafts: 0,
+    published: 0,
+    scheduled: 0,
+    'published-replied': 0,
+  },
 });
 
 export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
+
+export const fetchFeedTotals = async (
+  pubkey: string,
+  options?: {
+    since?: number,
+    until?: number,
+    kind: 'notes' | 'articles',
+  }
+) => {
+
+  const r = await getFeedTotals({ pubkey, ...options });
+
+  setArticlesStore('feedTotals', () => ({...r}))
+};
 
 export const fetchArticles = async (
     pubkey: string,
@@ -122,5 +145,6 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
   ) return;
 
   query(fetchArticles, 'fetchArticles')(pk, { since, until, limit: 30, offset: 0 });
+  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'articles' });
   // fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }

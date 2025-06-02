@@ -5,7 +5,7 @@ import { translate } from '../../translations/translate';
 import styles from './Articles.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import PageHeader from 'src/components/PageHeader/PageHeader';
-import { articlesStore, fetchArticles, setArticlesStore } from './Articles.data';
+import { articlesStore, fetchArticles, fetchFeedTotals, setArticlesStore } from './Articles.data';
 import { FeedCriteria, GraphSpan } from '../Home/Home.data';
 import SelectBox from 'src/components/SelectBox/SelectBox';
 import { headerSortOptions } from 'src/constants';
@@ -27,6 +27,7 @@ import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
 import { createStore } from 'solid-js/store';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
+import { humanizeNumber } from 'src/utils/ui';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -91,6 +92,8 @@ const Articles: Component = () => {
 
     clearPageStore('articles');
     setArticlesStore('offset', () => 0)
+
+    fetchFeedTotals(pubkey, { since, until, kind: 'articles' });
 
     fetchArticles(
       pubkey,
@@ -181,7 +184,7 @@ const Articles: Component = () => {
             onChange={(tab: string) => setArticlesStore('tab', tab as FeedEventState)}
             tabTriggerComponent={(tab: string) => (
               <div class={tab === articlesStore.tab ? styles.activeTab : styles.inactiveTab}>
-                {translate('articles', 'tabs', tab)}
+                {translate('articles', 'tabs', tab)} ({humanizeNumber(articlesStore.feedTotals[tab as FeedEventState])})
               </div>
             )}
           >

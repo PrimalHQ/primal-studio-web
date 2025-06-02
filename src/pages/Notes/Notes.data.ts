@@ -1,16 +1,12 @@
-import { Params, query, RoutePreloadFuncArgs } from "@solidjs/router";
-import { APP_ID } from "../../App";
+import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { FeedRange, NostrEventContent, PrimalArticle, PrimalNote } from "../../primal";
-import { FEED_LIMIT, Kind } from "../../constants";
+import { PrimalArticle } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { emptyStudioTotals, FeedEventState, getFeedEvents, getHomeGraph, getHomeTotals, getTopEvents, HomePayload, StudioGraph, StudioTotals } from "src/primal_api/studio";
-import { emptyEventFeedPage, emptyFeedRange, filterAndSortNotes, filterAndSortPageResults, filterAndSortReads } from "src/utils/feeds";
-import { fetchKnownProfiles } from "src/utils/profile";
+import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
+import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
-import { logInfo } from "src/utils/logger";
-import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
+import { defaultSpan, FeedCriteria, GraphSpan, } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
 
 
@@ -21,6 +17,7 @@ export type NotesStore = {
   tab: FeedEventState,
   showReplies: boolean,
   offset: number,
+  feedTotals: FeedTotals,
 }
 
 export const emptyNotesStore = (): NotesStore => ({
@@ -30,9 +27,31 @@ export const emptyNotesStore = (): NotesStore => ({
   tab: 'published',
   showReplies: false,
   offset: 0,
+  feedTotals: {
+    sent: 0,
+    inbox: 0,
+    drafts: 0,
+    published: 0,
+    scheduled: 0,
+    'published-replied': 0,
+  },
 });
 
 export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
+
+export const fetchFeedTotals = async (
+  pubkey: string,
+  options?: {
+    since?: number,
+    until?: number,
+    kind: 'notes' | 'articles',
+  }
+) => {
+
+  const r = await getFeedTotals({ pubkey, ...options });
+
+  setNotesStore('feedTotals', () => ({...r}))
+};
 
 export const fetchNotes = async (
   pubkey: string,
@@ -120,5 +139,6 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
   ) return;
 
   query(fetchNotes, 'fetchNotes')(pk, { since, until, limit: 30, offset: 0 });
+    query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'notes' });
   // fetchNotes(pk, { since, until, limit: 30, offset: 0 });
 }
