@@ -29,6 +29,7 @@ const InboxPreview: Component<{
         />
         <DraftOtherParty
           draft={props.draft}
+          event={event()!}
           onEdit={props.onEdit}
           onDelete={props.onDelete}
           onView={props.onView}
@@ -43,6 +44,7 @@ const InboxPreview: Component<{
         />
         <DraftOtherParty
           draft={props.draft}
+          event={event()!}
           onEdit={props.onEdit}
           onDelete={props.onDelete}
           onView={props.onView}

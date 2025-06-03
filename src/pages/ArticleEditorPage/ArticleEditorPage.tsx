@@ -27,6 +27,12 @@ import ReadsPublishSuccessDialog from 'src/components/ArticleEditor/ReadsDialogs
 import DatePicker from '@rnwonder/solid-date-picker';
 import utils from '@rnwonder/solid-date-picker/utilities';
 import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
+import { getScheduledEvents } from 'src/primal_api/studio';
+import ReadsProposeDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsProposeDialog';
+import Avatar from 'src/components/Avatar/Avatar';
+import { userName } from 'src/utils/profile';
+import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
+import { nip05Verification } from 'src/utils/ui';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -79,6 +85,10 @@ const ReadsEditor: Component = () => {
 
   const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
   const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
+  const [editScheduled, setEditScheduled] = createSignal(false);
+
+  const [showProposeDiaglog, setShowProposeDialog] = createSignal(false);
+  const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
 
   const updateTableOptions = (show: boolean, pos: Partial<DOMRect>) => {
     setShowTableOptions(show);
@@ -256,8 +266,44 @@ const ReadsEditor: Component = () => {
 
     }
 
+
     if (id) {
       // const eid = id.split('ndraft1')[1];
+
+      const { reads } = await getScheduledEvents([id]);
+
+      if (reads.length > 0) {
+
+        const r = reads[0];
+        if(!r) return
+
+        setIdentifier(() => (r.tags.find(t => t[0] === 'd') || ['d', ''])[1])
+
+        const pubTime = parseInt((r.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+
+        const now = Math.ceil((new Date()).getTime() / 1_000);
+
+        if (!isNaN(pubTime) && pubTime > now) {
+          setFuturePublishDate(pubTime)
+        }
+
+        setEditScheduled(true);
+
+        setArticle(() => ({
+          title: r.title,
+          image: r.image,
+          summary: r.summary,
+          content: r.content,
+          keywords: [ ...r.keywords ],
+          tags: [...r.tags],
+        }));
+
+        setMarkdownContent(r.content);
+
+        setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: r.published_at }));
+
+        return;
+      }
 
       const events = await fetchDrafts(accountStore.pubkey, [id], `drafts_edit_${APP_ID}`);
 
@@ -283,7 +329,7 @@ const ReadsEditor: Component = () => {
           return [...acc];
         }, []);
 
-      const pubTime = parseInt((r.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+      const pubTime = parseInt((r.tags.find((t: string[]) => t[0] === 'published_at') || ['published_at', '0'])[1]);
 
       const now = Math.ceil((new Date()).getTime() / 1_000);
       if (!isNaN(pubTime) && pubTime > now) {
@@ -308,10 +354,45 @@ const ReadsEditor: Component = () => {
 
   }
 
+  const proposeDraft = async () => {
+    const user = activeUser();
+    if (!user) return;
+
+    const lastDraft = lastSaved.draftId;
+
+    const { success, note } = await sendDraft(
+      proposedUser()!,
+      article,
+      markdownContent(),
+      futurePublishDate(),
+    );
+
+    if (success && note) {
+      toast?.sendSuccess('Proposal sent');
+
+      if (lastDraft.length > 0) {
+        sendDeleteEvent(
+          user.pubkey,
+          lastDraft,
+          Kind.Draft,
+        );
+      }
+    }
+    else {
+      toast?.sendWarning('Proposal sending failed');
+    }
+  };
+
   const publishArticle = async (promote: boolean) => {
+    if (proposedUser()) {
+      proposeDraft();
+      return;
+    }
+
     const user = activeUser();
 
     if (!user) return;
+
 
     const content = markdownContent();
 
@@ -347,7 +428,7 @@ const ReadsEditor: Component = () => {
     const pubDate = futurePublishDate();
 
     const { success, note } = pubDate ?
-     await scheduleArticle(articleToPost, tags, pubDate) :
+     await scheduleArticle(articleToPost, tags, pubDate, editScheduled() ? params.id : undefined) :
      await sendArticle(articleToPost, tags);
 
     if (success && note) {
@@ -748,6 +829,39 @@ const ReadsEditor: Component = () => {
                   </div>
                 </div>
               </Show>
+
+              <Show
+                when={proposedUser()}
+                fallback={
+                  <button
+                    class={styles.toolButton}
+                    onClick={() => setShowProposeDialog(true)}
+                  >
+                    Propose to a Nostr User
+                  </button>
+                }
+              >
+                <div class={styles.publishDateDisplay}>
+                  <Avatar user={proposedUser()!} size={32} />
+
+                  <div class={styles.dateInfo}>
+                    <div class={styles.label}>
+                      Proposed to:
+                    </div>
+                    <div class={styles.date}>
+                      <div>{userName(proposedUser()!.pubkey)}</div>
+                      <VerificationCheck user={proposedUser()} />
+                      <div>{nip05Verification(proposedUser())}</div>
+                      <button
+                        class={styles.linkButton}
+                        onClick={() => setShowProposeDialog(true)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Show>
             </div>
             <div class={styles.sidebarPublish}>
               <div class={styles.caption}>{'Save & Publish'}</div>
@@ -791,7 +905,12 @@ const ReadsEditor: Component = () => {
                 disabled={article.title.length === 0}
                 onClick={() => {setShowPublishArticle(true)}}
               >
-                Continue to Publish Article
+                <Show
+                  when={proposedUser()}
+                  fallback={<>Continue to Publish Article</>}
+                >
+                  <>Continue to Send Article</>
+                </Show>
               </button>
             </div>
 
@@ -858,6 +977,14 @@ const ReadsEditor: Component = () => {
             </Show>
           </div>
 
+          <ReadsProposeDialog
+            open={showProposeDiaglog()}
+            setOpen={setShowProposeDialog}
+            onAddUser={(user) => {
+              setProposedUser(user);
+              setShowProposeDialog(false);
+            }}
+          />
 
           <ReadsPublishDialog
             article={genereatePreviewArticle()}
@@ -866,6 +993,7 @@ const ReadsEditor: Component = () => {
             setOpen={setShowPublishArticle}
             onPublish={publishArticle}
             publishTime={futurePublishDate()}
+            proposedUser={proposedUser()}
           />
 
           <ReadsPublishSuccessDialog

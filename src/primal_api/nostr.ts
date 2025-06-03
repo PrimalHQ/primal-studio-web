@@ -9,7 +9,8 @@ import { triggerImportEvents } from "./events";
 import { APP_ID } from "src/App";
 import { ArticleEdit } from "src/components/ArticleEditor/ArticleEditor";
 import { generateArticleIdentifier } from "src/utils/kyes";
-import { importScheduled } from "./studio";
+import { importScheduled, replaceScheduled } from "./studio";
+import { accountStore } from "src/stores/AccountStore";
 
 export const proxyEvent = async (event: NostrRelayEvent) => {
   let signedNote: NostrRelaySignedEvent | undefined;
@@ -116,8 +117,13 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
 
 
 
-export const scheduleArticle = async (articleData: ArticleEdit, tags: string[][], pubTime: number) => {
-  const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
+export const scheduleArticle = async (
+  articleData: ArticleEdit,
+  tags: string[][],
+  pubTime: number,
+  replace_id?: string,
+) => {
+  // const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
 
   let timeTags = [["published_at", `${pubTime}`]]
 
@@ -133,7 +139,9 @@ export const scheduleArticle = async (articleData: ArticleEdit, tags: string[][]
 
   const signedEvent = await signEvent(event)
 
-  const response = await importScheduled(signedEvent);
+  const response = replace_id ?
+    await replaceScheduled(signedEvent, replace_id) :
+    await importScheduled(signedEvent);
 
   // if (response.success && response.note) {
   //   triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
@@ -304,11 +312,13 @@ export const sendDraft = async (
   user: PrimalUser,
   article: ArticleEdit,
   mdContent: string,
+  pubTime?: number,
 ): Promise<SendNoteResult> => {
   const pk = user.pubkey;
   const identifier = generateArticleIdentifier(article.title);
-  const time = Math.floor((new Date()).getTime() / 1000);
-  const tags = article.tags.map((t) => ['t', t]);
+  const time = pubTime || Math.floor((new Date()).getTime() / 1000);
+  const keywords = article.keywords.map((t) => ['t', t]);
+
   const a = {
     content: mdContent,
     kind: Kind.LongForm,
@@ -318,13 +328,21 @@ export const sendDraft = async (
       ["image", article.image],
       ["d", identifier],
       ['client', 'primal-web'],
-      ...tags,
+      ['published_at', `${time}`],
+      ...article.tags,
+      ...keywords,
     ],
     created_at: time,
   };
 
   const e = await encrypt44(pk, JSON.stringify(a));
   // const d = await decrypt44(pk, e);
+
+  let draftTags: string[][] = []
+
+  if (pk != accountStore.pubkey) {
+    draftTags.push(['p', pk])
+  }
 
   const draft = {
     kind: Kind.Draft,
@@ -333,6 +351,7 @@ export const sendDraft = async (
       ['d', identifier],
       ['k', `${Kind.LongForm}`],
       ['client', 'primal-web'],
+      ...draftTags,
       // ["e", "<anchor event event id>", "<relay-url>"],
       // ["a", "<anchor event address>", "<relay-url>"],
     ],

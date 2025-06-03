@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, createEffect, Match, Switch } from 'solid-js';
 import { Kind } from '../../constants';
 import { PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
@@ -18,7 +18,7 @@ const ProposalPreview: Component<{
   onCheck?: (id: string, checked: boolean) => void,
 }> = (props) => {
 
-  const event = () => parseDraftedEvent(props.draft)
+  const event = () => parseDraftedEvent(props.draft);
 
   return (
     <Switch>
@@ -35,6 +35,7 @@ const ProposalPreview: Component<{
         />
         <DraftOtherParty
           draft={props.draft}
+          event={event()!}
           onEdit={props.onEdit}
           onDelete={props.onDelete}
           onView={props.onView}
@@ -52,6 +53,7 @@ const ProposalPreview: Component<{
         />
         <DraftOtherParty
           draft={props.draft}
+          event={event()!}
           onEdit={props.onEdit}
           onView={props.onView}
           onDelete={props.onDelete}

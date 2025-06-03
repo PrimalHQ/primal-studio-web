@@ -749,3 +749,94 @@ export const importScheduled = async (draft: any) => {
     })
   });
 }
+
+export const replaceScheduled = async (draft: any, replace_id: string) => {
+  // {"op":"import_scheduled", "event": {...}}
+
+  const subId = `replace_scheduled_${replace_id}_${draft.id}_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'replace_scheduled',
+      old_event_id: replace_id,
+      event: draft,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<SendNoteResult>((resolve, reject) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+      },
+      onEose: () => {
+        resolve({ success: true, note: signedNote });
+      },
+      onNotice: () => {
+        resolve( {success: false, note: signedNote, reasons: ['failed_to_schedule']});
+      }
+    })
+  });
+}
+
+export const getScheduledEvents = async (ids: string[]) => {
+  const subId = `get_scheduled_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'get_scheduled',
+      event_ids: ids,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<EventFeedResult>((resolve, reject) => {
+
+    let page = { ...emptyEventFeedPage() };
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        resolve(pageResolve(page));
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_top_events');
+      }
+    })
+  })
+};

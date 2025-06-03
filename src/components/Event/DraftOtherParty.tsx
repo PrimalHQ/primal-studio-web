@@ -1,5 +1,5 @@
 import { Component, Match, Show, Switch } from 'solid-js';
-import { PrimalDraft } from '../../primal';
+import { PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { longDate } from 'src/utils/date';
@@ -15,6 +15,7 @@ import { nip05Verification } from 'src/utils/ui';
 
 const DraftOtherParty: Component<{
   draft: PrimalDraft,
+  event: PrimalNote | PrimalArticle,
   onEdit?: () => void,
   onView?: () => void,
   onDelete?: (id: string) => void,
@@ -31,7 +32,7 @@ const DraftOtherParty: Component<{
   }
 
   const publishOn = () =>
-    parseInt((props.draft.tags.find(t => t[0] === 'publish_at') || ['publish_at', '0'])[1]);
+    parseInt((props.event.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
 
   return (
     <div class={styles.draftOtherParty}>

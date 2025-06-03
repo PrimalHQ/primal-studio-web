@@ -345,7 +345,7 @@ const Articles: Component = () => {
                           <ScheduledInfo
                             event={article!}
                             onEdit={() => {
-                              navigate(`/edit/article/${article!.nId}`);
+                              navigate(`/edit/article/${article!.id}`);
                             }}
                             kind='articles'
                           />
