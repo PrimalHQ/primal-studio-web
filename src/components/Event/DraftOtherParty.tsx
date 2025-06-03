@@ -18,6 +18,7 @@ const DraftOtherParty: Component<{
   event: PrimalNote | PrimalArticle,
   onEdit?: () => void,
   onView?: () => void,
+  onApprove?: () => void,
   onDelete?: (id: string) => void,
   type: 'sent' | 'inbox',
 }> = (props) => {
@@ -33,6 +34,8 @@ const DraftOtherParty: Component<{
 
   const publishOn = () =>
     parseInt((props.event.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+
+  const today = () => Math.ceil((new Date()).getTime() / 1_000);
 
   return (
     <div class={styles.draftOtherParty}>
@@ -55,7 +58,7 @@ const DraftOtherParty: Component<{
           </div>
           <div class={styles.publishInfo}>
             <div class={styles.label}>To publish:</div>
-            <div class={styles.date}>{publishOn() > 0 ? longDate(publishOn()) : 'immediately'}</div>
+            <div class={styles.date}>{publishOn() > today() ? longDate(publishOn()) : 'immediately'}</div>
           </div>
         </div>
       </div>
@@ -79,7 +82,7 @@ const DraftOtherParty: Component<{
             <div class={styles.separator}></div>
             <button
               class={styles.draftAction}
-              onClick={props.onView}
+              onClick={props.onApprove}
             >
               Approve
             </button>

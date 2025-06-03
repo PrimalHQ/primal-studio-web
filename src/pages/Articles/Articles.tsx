@@ -25,6 +25,7 @@ import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
+import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -171,6 +172,15 @@ const Articles: Component = () => {
         />
       </Wormhole>
 
+      <ReadsApproveDialog
+        open={articlesStore.showApproveDialog}
+        setOpen={(v) => setArticlesStore('showApproveDialog', v)}
+        draft={articlesStore.approvedEvent}
+        onClose={() => {
+          setArticlesStore('approvedEvent', () => undefined);
+        }}
+      />
+
       <div class={styles.feedHolder}>
         <div class={styles.itemsHolder}>
         <div class={styles.feedHeader}>
@@ -287,6 +297,10 @@ const Articles: Component = () => {
                             }}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
+                            }}
+                            onApprove={() => {
+                              setArticlesStore('approvedEvent', draft);
+                              setArticlesStore('showApproveDialog', true);
                             }}
                             type='inbox'
                             checked={articlesStore.selected.includes(draft?.id || '-')}

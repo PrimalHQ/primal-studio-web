@@ -90,18 +90,19 @@ export const proxyEvent = async (event: NostrRelayEvent) => {
 export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
-  const articleTags = [...(articleData.tags || [])];
+  let articleTags = [...(articleData.tags || [])];
 
   const pubTime = articleTags.find(t => t[0] === 'published_at')
 
-  let timeTags = pubTime ? [[...pubTime] ]: [["published_at", `${time}`]]
-
+  if (!pubTime) {
+    articleTags.push(["published_at", `${time}`])
+  }
   const event = {
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
       ...tags,
-      ...timeTags,
+      ...articleTags,
     ],
     created_at: time,
   };
@@ -123,16 +124,23 @@ export const scheduleArticle = async (
   pubTime: number,
   replace_id?: string,
 ) => {
+  const hasPubTime = articleData.tags.find(t => t[0] === 'published_at');
+
   // const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
 
-  let timeTags = [["published_at", `${pubTime}`]]
+  if (!hasPubTime) {
+    articleData.tags.push(["published_at", `${pubTime}`])
+  } else {
+    articleData.tags = articleData.tags.map(
+      t => t[0] === 'published_at' ? ['published_at', `${pubTime}`] : t);
+  }
 
   const event = {
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
+      ...articleData.tags,
       ...tags,
-      ...timeTags,
     ],
     created_at: pubTime,
   };

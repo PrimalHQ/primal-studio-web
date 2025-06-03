@@ -360,9 +360,31 @@ const ReadsEditor: Component = () => {
 
     const lastDraft = lastSaved.draftId;
 
+    let tags: string[][] = referencesToTags(article.content, {});;
+
+    const relayTags = relayStore.all.map(r => ['r', r.url]);
+
+    tags = [...tags, ...relayTags];
+
+    // tags.push(['client', 'Primal']);
+
+    // tags = [
+    //   ...tags,
+    //   ["title", article.title],
+    //   ["summary", article.summary],
+    //   ["image", article.image],
+    //   ["d", generateIdentifier()],
+    //   ...article.keywords.map(t => ['t', t]),
+    // ];
+
+    const articleToSend  = {
+      ...article,
+      tags,
+    }
+
     const { success, note } = await sendDraft(
       proposedUser()!,
-      article,
+      articleToSend,
       markdownContent(),
       futurePublishDate(),
     );

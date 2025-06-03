@@ -14,6 +14,7 @@ const ProposalPreview: Component<{
   type: 'sent' | 'inbox',
   onEdit?: () => void,
   onView?: () => void,
+  onApprove?: () => void,
   onDelete?: (id: string) => void,
   onCheck?: (id: string, checked: boolean) => void,
 }> = (props) => {
@@ -39,6 +40,7 @@ const ProposalPreview: Component<{
           onEdit={props.onEdit}
           onDelete={props.onDelete}
           onView={props.onView}
+          onApprove={props.onApprove}
           type={props.type}
         />
       </Match>
@@ -56,6 +58,7 @@ const ProposalPreview: Component<{
           event={event()!}
           onEdit={props.onEdit}
           onView={props.onView}
+          onApprove={props.onApprove}
           onDelete={props.onDelete}
           type={props.type}
         />

@@ -795,6 +795,50 @@ export const replaceScheduled = async (draft: any, replace_id: string) => {
   });
 }
 
+export const deleteFromInbox = async (ids: string[]) => {
+  // {"op":"import_scheduled", "event": {...}}
+
+  const subId = `delete_from_inbox_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'delete_from_inbox',
+      event_ids: ids,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<SendNoteResult>((resolve, reject) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+      },
+      onEose: () => {
+        resolve({ success: true, note: signedNote });
+      },
+      onNotice: () => {
+        resolve( {success: false, note: signedNote, reasons: ['failed_to_schedule']});
+      }
+    })
+  });
+}
+
 export const getScheduledEvents = async (ids: string[]) => {
   const subId = `get_scheduled_${APP_ID}`;
 

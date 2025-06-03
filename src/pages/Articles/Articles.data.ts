@@ -1,6 +1,6 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { FeedRange, PrimalArticle } from "../../primal";
+import { FeedRange, PrimalArticle, PrimalDraft } from "../../primal";
 import { Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -28,6 +28,8 @@ export type ArticlesStore = {
   offset: number,
   selected: string[],
   feedTotals: FeedTotals,
+  showApproveDialog: boolean,
+  approvedEvent: PrimalDraft | undefined,
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -37,6 +39,8 @@ export const emptyHomeStore = (): ArticlesStore => ({
   tab: 'published',
   offset: 0,
   selected: [],
+  showApproveDialog: false,
+  approvedEvent: undefined,
   feedTotals: {
     sent: 0,
     inbox: 0,
@@ -77,7 +81,7 @@ export const toggleSelected = (id: string, add: boolean) => {
 
 export const deleteSelected = async () => {
   openConfirmDialog({
-    title: "Delete All?",
+    title: "Delete Selected?",
     description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
     onConfirm: async () => {
       const selectedIds = articlesStore.selected;
