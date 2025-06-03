@@ -2,7 +2,7 @@ import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
 import { signEvent } from "src/utils/nostrApi";
 import { primalAPI, sendMessage } from "src/utils/socket";
-import { EventFeedResult, FeedRange, FeedResult, NostrEventContent } from "src/primal";
+import { EventFeedResult, FeedRange, FeedResult, NostrEventContent, SendNoteResult } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { fetchKnownProfiles, npubToHex } from "src/utils/profile";
 import { v4 as uuidv4 } from 'uuid';
@@ -723,7 +723,7 @@ export const importScheduled = async (draft: any) => {
 
   const signedNote = await signEvent(event);
 
-  return new Promise<boolean>((resolve, reject) => {
+  return new Promise<SendNoteResult>((resolve, reject) => {
     primalAPI({
       subId,
       action: () => {
@@ -741,10 +741,10 @@ export const importScheduled = async (draft: any) => {
       onEvent: (event) => {
       },
       onEose: () => {
-        resolve(true);
+        resolve({ success: true, note: signedNote });
       },
       onNotice: () => {
-        resolve(false);
+        resolve( {success: false, note: signedNote, reasons: ['failed_to_schedule']});
       }
     })
   });

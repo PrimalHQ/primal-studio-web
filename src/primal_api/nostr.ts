@@ -9,6 +9,7 @@ import { triggerImportEvents } from "./events";
 import { APP_ID } from "src/App";
 import { ArticleEdit } from "src/components/ArticleEditor/ArticleEditor";
 import { generateArticleIdentifier } from "src/utils/kyes";
+import { importScheduled } from "./studio";
 
 export const proxyEvent = async (event: NostrRelayEvent) => {
   let signedNote: NostrRelaySignedEvent | undefined;
@@ -85,7 +86,6 @@ export const proxyEvent = async (event: NostrRelayEvent) => {
   }
 }
 
-
 export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
@@ -110,6 +110,34 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
   if (response.success && response.note) {
     triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
   }
+
+  return response;
+}
+
+
+
+export const scheduleArticle = async (articleData: ArticleEdit, tags: string[][], pubTime: number) => {
+  const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
+
+  let timeTags = [["published_at", `${pubTime}`]]
+
+  const event = {
+    content: articleData.content,
+    kind: Kind.LongForm,
+    tags: [
+      ...tags,
+      ...timeTags,
+    ],
+    created_at: pubTime,
+  };
+
+  const signedEvent = await signEvent(event)
+
+  const response = await importScheduled(signedEvent);
+
+  // if (response.success && response.note) {
+  //   triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
+  // }
 
   return response;
 }

@@ -15,7 +15,7 @@ import ArticleEditor, { ArticleEdit, emptyArticleEdit } from 'src/components/Art
 import ReadsLeaveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsLeaveDialog';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import { longDate } from 'src/utils/date';
-import { sendArticle, sendDeleteEvent, sendDraft } from 'src/primal_api/nostr';
+import { scheduleArticle, sendArticle, sendDeleteEvent, sendDraft } from 'src/primal_api/nostr';
 import { Kind, wordsPerMinute } from 'src/constants';
 import { APP_ID } from 'src/App';
 import { decrypt44 } from 'src/utils/nostrApi';
@@ -24,6 +24,9 @@ import { relayStore } from 'src/stores/RelayStore';
 import { referencesToTags } from 'src/utils/feeds';
 import ReadsPublishDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishDialog';
 import ReadsPublishSuccessDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishSuccessDialog';
+import DatePicker from '@rnwonder/solid-date-picker';
+import utils from '@rnwonder/solid-date-picker/utilities';
+import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -73,6 +76,9 @@ const ReadsEditor: Component = () => {
   const [editor, setEditor] = createSignal<Editor>();
   const [showTableOptions, setShowTableOptions] = createSignal<boolean>(false);
   const [tableOptionsPosition, setTableOptionsPosition] = createSignal<boolean>(false);
+
+  const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
+  const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
 
   const updateTableOptions = (show: boolean, pos: Partial<DOMRect>) => {
     setShowTableOptions(show);
@@ -218,12 +224,20 @@ const ReadsEditor: Component = () => {
 
       setIdentifier(() => (r.tags.find(t => t[0] === 'd') || ['d', ''])[1])
 
+      const pubTime = parseInt((r.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+
+      const now = Math.ceil((new Date()).getTime() / 1_000);
+      if (!isNaN(pubTime) && pubTime > now) {
+        setFuturePublishDate(pubTime)
+      }
+
       setArticle(() => ({
         title: r.title,
         image: r.image,
         summary: r.summary,
         content: r.content,
         keywords: [ ...r.keywords ],
+        tags: [...r.tags],
       }));
 
       setMarkdownContent(r.content);
@@ -269,6 +283,13 @@ const ReadsEditor: Component = () => {
           return [...acc];
         }, []);
 
+      const pubTime = parseInt((r.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+
+      const now = Math.ceil((new Date()).getTime() / 1_000);
+      if (!isNaN(pubTime) && pubTime > now) {
+        setFuturePublishDate(pubTime)
+      }
+
       setArticle(() => ({
         title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
         summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
@@ -287,7 +308,7 @@ const ReadsEditor: Component = () => {
 
   }
 
-  const postArticle = async (promote: boolean) => {
+  const publishArticle = async (promote: boolean) => {
     const user = activeUser();
 
     if (!user) return;
@@ -323,7 +344,11 @@ const ReadsEditor: Component = () => {
 
     setIsPublishing(true);
 
-    const { success, note } = await sendArticle(articleToPost, tags);
+    const pubDate = futurePublishDate();
+
+    const { success, note } = pubDate ?
+     await scheduleArticle(articleToPost, tags, pubDate) :
+     await sendArticle(articleToPost, tags);
 
     if (success && note) {
 
@@ -690,6 +715,40 @@ const ReadsEditor: Component = () => {
                 Feed Preview
               </button> */}
             </div>
+
+            <div class={styles.sidebarPublish}>
+              <div class={styles.caption}>{'Content & Publishing'}</div>
+
+              <Show
+                when={futurePublishDate()}
+                fallback={
+                  <button
+                    class={styles.toolButton}
+                    onClick={() => setShowPublishDateDialog(true)}
+                  >
+                    Schedule Publish Time
+                  </button>
+                }
+              >
+                <div class={styles.publishDateDisplay}>
+                  <div class={styles.calendarIconBig}></div>
+                  <div class={styles.dateInfo}>
+                    <div class={styles.label}>
+                      Scheduled to publish:
+                    </div>
+                    <div class={styles.date}>
+                      {longDate(futurePublishDate() || 0)}
+                      <button
+                        class={styles.linkButton}
+                        onClick={() => setShowPublishDateDialog(true)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Show>
+            </div>
             <div class={styles.sidebarPublish}>
               <div class={styles.caption}>{'Save & Publish'}</div>
               <Switch>
@@ -805,7 +864,8 @@ const ReadsEditor: Component = () => {
             articleData={article}
             open={showPublishArticle()}
             setOpen={setShowPublishArticle}
-            onPublish={postArticle}
+            onPublish={publishArticle}
+            publishTime={futurePublishDate()}
           />
 
           <ReadsPublishSuccessDialog
@@ -813,6 +873,15 @@ const ReadsEditor: Component = () => {
             onClose={() => {
               setShowPublishSucess(false);
               navigate(`/articles`);
+            }}
+          />
+
+          <ReadsPublishingDateDialog
+            open={showPublishDateDialog()}
+            setOpen={setShowPublishDateDialog}
+            onSetPublishDate={(timestamp) => {
+              setFuturePublishDate(timestamp);
+              setShowPublishDateDialog(false);
             }}
           />
 

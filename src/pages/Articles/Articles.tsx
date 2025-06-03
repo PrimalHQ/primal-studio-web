@@ -326,7 +326,7 @@ const Articles: Component = () => {
 
                   if (articlesStore.tab === 'scheduled') {
 
-                  const article = page.reads.find(a => a.id === e);
+                    const article = page.reads.find(a => a.id === e);
 
                     return (
                       <Show when={article}>
@@ -344,7 +344,9 @@ const Articles: Component = () => {
                           />
                           <ScheduledInfo
                             event={article!}
-                            onEdit={ () => {}}
+                            onEdit={() => {
+                              navigate(`/edit/article/${article!.nId}`);
+                            }}
                             kind='articles'
                           />
                         </FeedItemCard>

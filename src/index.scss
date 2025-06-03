@@ -185,6 +185,15 @@ button {
   cursor: pointer;
 }
 
+button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: none;
+}
+
 
 // DATE PICKER --------------------------------------
 
@@ -332,4 +341,89 @@ th.selectedCell, td.selectedCell {
 
 .linkish_editor {
   color: var(--accent-links) !important;
+}
+
+// DATE PICKER -----------------------------------
+
+@import '@rnwonder/solid-date-picker/dist/style.css';
+
+.date-picker-wrapper, .date-selector-wrapper {
+  background-color: var(--background-input);
+  color: var(--text-secondary);
+  padding-block: 12px;
+
+  &.rn-border-solid {
+    border: none;
+  }
+}
+
+.date-picker-top, .selector-picker-top {
+  padding-inline: 20px;
+  button {
+    width: fit-content;
+    color: var(--text-primary);
+    background: none;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+  }
+}
+
+.date-month-year-selector-area {
+  button {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+}
+
+.date-picker-weekday-name {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.date-picker-day-number-area {
+  button {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+    padding: 0;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+
+    &[data-day-hover="true"] {
+      background-color: var(--subtile-devider);
+    }
+    &[data-day-number-range-start-or-end="true"] {
+      background-color: var(--text-tertiary-2);
+    }
+    &[data-day-number-range-between="true"] {
+      background-color: var(--subtile-devider);
+    }
+
+    &:disabled {
+      color: var(--text-tertiary-2);
+    }
+  }
+}
+
+.date-full-size-selector-area {
+  button {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+
+    &[date-selector-option-selected="true"] {
+      background-color: var(--text-tertiary-2);
+    }
+  }
 }

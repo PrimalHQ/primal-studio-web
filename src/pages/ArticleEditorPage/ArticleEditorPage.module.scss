@@ -1236,3 +1236,53 @@ input.textInput {
   -webkit-mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px;
   mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px; */
 }
+
+.publishDateDisplay {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .dateInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .label {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+    }
+
+    .date {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 14px;
+
+      .linkButton {
+        color: var(--accent-links);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+
+        border-left: 1px solid var(--subtile-devider);
+        padding-left: 6px;
+      }
+    }
+  }
+}
+
+.calendarIconBig {
+  width: 32px;
+  height: 32px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+
+}

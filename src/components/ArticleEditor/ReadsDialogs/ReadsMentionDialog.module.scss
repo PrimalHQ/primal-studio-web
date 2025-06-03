@@ -621,3 +621,115 @@ input.textInput {
   overflow: hidden;
   width: 100%;
 }
+
+.dateDialog {
+  width: 548px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .broadLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 20px
+  }
+
+  .datetimeInput {
+    display: block;
+    // width: calc(100% - 48px);
+
+    input {
+      width: calc(100% - 32px);
+    }
+  }
+
+  .timeInputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    input {
+      width: 32px;
+      padding: 20px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px solid var(--subtile-devider);
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    // width: calc(100% - 48px);
+    margin-top: 8px;
+
+    >button {
+      width: fit-content;
+      padding-inline: 16px;
+    }
+  }
+}
+
+.colonIcon {
+  width: 5px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../../assets/icons/colon.svg) no-repeat center;
+  mask: url(../../../assets/icons/colon.svg) no-repeat center;
+}
+
+.publishDateDisplay {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .dateInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .label {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+    }
+
+    .date {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 14px;
+
+      .linkButton {
+        color: var(--accent-links);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+
+        border-left: 1px solid var(--subtile-devider);
+        padding-left: 6px;
+      }
+    }
+  }
+}
+
+.calendarIconBig {
+  width: 32px;
+  height: 32px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+  mask: url(../../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+
+}

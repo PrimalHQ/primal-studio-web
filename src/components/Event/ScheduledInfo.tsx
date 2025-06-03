@@ -17,10 +17,16 @@ const ScheduledInfo: Component<{
         <Show
           when={props.kind === 'notes'}
           fallback={
-            <button class={styles.draftAction}>Edit Article</button>
+            <button
+              class={styles.draftAction}
+              onClick={props.onEdit}
+            >
+              Edit Article
+            </button>
           }
         >
-          <button class={styles.draftAction}>Edit Note</button>
+          <button class={styles.draftAction}
+            onClick={props.onEdit}>Edit Note</button>
         </Show>
       </div>
       <div class={styles.calendarIconBig}></div>

@@ -8,6 +8,7 @@ import Dialog from 'src/components/Dialogs/Dialog';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
 import ArticlePreviewPublish from 'src/components/Event/ArticlePreviewPublish';
+import { longDate } from 'src/utils/date';
 
 
 const ReadsPublishDialog: Component<{
@@ -17,6 +18,7 @@ const ReadsPublishDialog: Component<{
   article: PrimalArticle | undefined,
   articleData: ArticleEdit | undefined,
   onPublish: (promote: boolean) => void,
+  publishTime?: number | undefined,
 }> = (props) => {
 
   const [promotion, setPromotion] = createSignal('');
@@ -49,6 +51,20 @@ const ReadsPublishDialog: Component<{
           /> */}
         </div>
 
+        <Show when={props.publishTime}>
+          <div class={styles.publishDateDisplay}>
+            <div class={styles.calendarIconBig}></div>
+            <div class={styles.dateInfo}>
+              <div class={styles.label}>
+                Scheduled to publish:
+              </div>
+              <div class={styles.date}>
+                {longDate(props.publishTime || 0)}
+              </div>
+            </div>
+          </div>
+        </Show>
+
         {/* <CheckBox2
           onChange={setShowPromotion}
           checked={showPromotion()}
@@ -67,7 +83,12 @@ const ReadsPublishDialog: Component<{
           <ButtonPrimary
             onClick={() => props.onPublish(showPromotion())}
           >
-            Publish
+            <Show
+              when={props.publishTime}
+              fallback={<>Publish</>}
+            >
+              <>Schedule for Publishing</>
+            </Show>
           </ButtonPrimary>
         </div>
       </div>
