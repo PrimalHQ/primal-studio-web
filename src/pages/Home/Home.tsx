@@ -13,7 +13,7 @@ import objectSupport from 'dayjs/plugin/objectSupport';
 import FeedPage from 'src/components/Event/FeedPage';
 import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/PageStore';
 
-import NoteHomePreview from 'src/components/Event/NoteHomePreview';
+import NoteHomePreview, { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
 import Paginator from 'src/components/Paginator/Paginator';
 import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
 import { useParams } from '@solidjs/router';
@@ -234,6 +234,8 @@ const Home: Component = () => {
   const noArticles = () => {
     const pages = articlePages();
 
+    if (pageStore.homeArticles.isFetching) return false;
+
     if (pages.length < 1) return true;
 
     const reads = pages[0].reads;
@@ -281,32 +283,45 @@ const Home: Component = () => {
             />
           </div>
           <div class={styles.feedContent}>
-            <For each={notePages()}>
-              {(page, pageIndex) => (
-                <FeedPage
-                  page={page}
-                  isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
-                  pageIndex={pageIndex()}
-                  observer={notesPageObserver}
-                  key="homeNotes"
-                  twoColumns={noArticles()}
-                  eventComponent={(e) => (
-                    <NoteHomePreview
-                      id={e}
-                      note={page.notes.find(n => n.id === e)!}
-                      variant='feed'
-                      onDelete={(id: string) => {
-                        removeEventFromPageStore(id)
-                      }}
-                    />
-                  )}
-                />
-              )}
-            </For>
-            <Paginator
-              loadNextPage={loadNextNotesPage}
-              isSmall={true}
-            />
+            <Show
+              when={notePages().length > 0 || !pageStore.homeNotes.isFetching}
+              fallback={
+                <div class={styles.emptyList}>
+                  <For each={Array(10)}>
+                    {() =>
+                      <NoteHomeSkeleton />
+                    }
+                  </For>
+                </div>
+              }
+            >
+              <For each={notePages()}>
+                {(page, pageIndex) => (
+                  <FeedPage
+                    page={page}
+                    isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
+                    pageIndex={pageIndex()}
+                    observer={notesPageObserver}
+                    key="homeNotes"
+                    twoColumns={noArticles()}
+                    eventComponent={(e) => (
+                      <NoteHomePreview
+                        id={e}
+                        note={page.notes.find(n => n.id === e)!}
+                        variant='feed'
+                        onDelete={(id: string) => {
+                          removeEventFromPageStore(id)
+                        }}
+                      />
+                    )}
+                  />
+                )}
+              </For>
+              <Paginator
+                loadNextPage={loadNextNotesPage}
+                isSmall={true}
+              />
+            </Show>
           </div>
         </div>
         <Show when={!noArticles()}>
@@ -323,33 +338,46 @@ const Home: Component = () => {
             />
           </div>
           <div class={styles.feedContent}>
-            <For each={articlePages()}>
-              {(page, pageIndex) => (
-                <FeedPage
-                  page={page}
-                  isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
-                  pageIndex={pageIndex()}
-                  observer={articlesPageObserver}
-                  key="homeArticles"
-                  twoColumns={articlePages().length === 0}
-                  eventComponent={(e) => (
-                    <Show when={page.reads.find(a => a.id === e)}>
-                      <ArticleHomePreview
-                        article={page.reads.find(a => a.id === e)!}
-                        variant='feed'
-                        onDelete={(id: string) => {
-                          removeEventFromPageStore(id)
-                        }}
-                      />
-                    </Show>
-                  )}
-                />
-              )}
-            </For>
-            <Paginator
-              loadNextPage={loadNextArticlesPage}
-              isSmall={true}
-            />
+            <Show
+              when={articlePages().length > 0 || !pageStore.homeArticles.isFetching}
+              fallback={
+                <div class={styles.emptyList}>
+                  <For each={Array(10)}>
+                    {() =>
+                      <NoteHomeSkeleton />
+                    }
+                  </For>
+                </div>
+              }
+            >
+              <For each={articlePages()}>
+                {(page, pageIndex) => (
+                  <FeedPage
+                    page={page}
+                    isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
+                    pageIndex={pageIndex()}
+                    observer={articlesPageObserver}
+                    key="homeArticles"
+                    twoColumns={articlePages().length === 0}
+                    eventComponent={(e) => (
+                      <Show when={page.reads.find(a => a.id === e)}>
+                        <ArticleHomePreview
+                          article={page.reads.find(a => a.id === e)!}
+                          variant='feed'
+                          onDelete={(id: string) => {
+                            removeEventFromPageStore(id)
+                          }}
+                        />
+                      </Show>
+                    )}
+                  />
+                )}
+              </For>
+              <Paginator
+                loadNextPage={loadNextArticlesPage}
+                isSmall={true}
+              />
+            </Show>
           </div>
 
           </div>

@@ -19,6 +19,12 @@ import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import { logError } from 'src/utils/logger';
 
+export const NoteHomeSkeleton: Component = () => {
+  return <div class={styles.noteSkeleton}>
+  </div>
+}
+
+
 const NoteHomePreview: Component<{
   id: string | undefined,
   note: PrimalNote,
