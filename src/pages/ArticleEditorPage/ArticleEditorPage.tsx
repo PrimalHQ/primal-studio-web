@@ -875,10 +875,10 @@ const ReadsEditor: Component = () => {
                     <div class={styles.label}>
                       Proposed to:
                     </div>
-                    <div class={styles.date}>
-                      <div>{userName(proposedUser()!.pubkey)}</div>
+                    <div class={styles.userInfo}>
+                      <div class={styles.userName}>{userName(proposedUser()!.pubkey)}</div>
                       <VerificationCheck user={proposedUser()} />
-                      <div>{nip05Verification(proposedUser())}</div>
+                      <div class={styles.nip05}>{nip05Verification(proposedUser())}</div>
                       <button
                         class={styles.linkButton}
                         onClick={() => setShowProposeDialog(true)}

@@ -21,6 +21,7 @@ import Dialog from 'src/components/Dialogs/Dialog';
 import ArticlePreviewSuggestion, { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
+import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 
 
 
@@ -240,7 +241,8 @@ const ReadsProposeDialog: Component<{
   };
 
   const selectUser = (user: PrimalUser) => {
-    setSelectedUser(user)
+    setSelectedUser(user);
+    props.onAddUser(selectedUser())
     // resetQuery();
   }
 
@@ -313,14 +315,18 @@ const ReadsProposeDialog: Component<{
           >
             Remove User
           </ButtonSecondary>
-          <ButtonPrimary
-            onClick={() => {
-              props.onAddUser(selectedUser())
-            }}
-            disabled={selectedUser() === undefined}
-          >
-            Set {selectedUser() ? userName(selectedUser()!.pubkey) : 'User'}
-          </ButtonPrimary>
+
+          <Show when={selectedUser()}>
+            <div class={styles.publishDateDisplay}>
+              <Avatar user={selectedUser()!} size={32} />
+              <div class={styles.dateInfo}>
+                <div class={styles.userInfoCol}>
+                  <div class={styles.userName}>{userName(selectedUser()!.pubkey)}</div>
+                  <div class={styles.nip05}>{nip05Verification(selectedUser())}</div>
+                </div>
+              </div>
+            </div>
+          </Show>
 
         </div>
       </div>

@@ -76,10 +76,10 @@ const ReadsPublishDialog: Component<{
                 <div class={styles.label}>
                   Proposed to:
                 </div>
-                <div class={styles.date}>
-                  <div>{userName(props.proposedUser!.pubkey)}</div>
+                <div class={styles.userInfo}>
+                  <div class={styles.userName}>{userName(props.proposedUser!.pubkey)}</div>
                   <VerificationCheck user={props.proposedUser} />
-                  <div>{nip05Verification(props.proposedUser)}</div>
+                  <div class={styles.nip05}>{nip05Verification(props.proposedUser)}</div>
                 </div>
               </div>
             </div>

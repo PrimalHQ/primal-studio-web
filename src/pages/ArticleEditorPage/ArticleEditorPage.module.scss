@@ -1264,7 +1264,7 @@ input.textInput {
       line-height: 14px;
     }
 
-    .date {
+    .date, .userInfo {
       display: flex;
       align-items: center;
       gap: 6px;
@@ -1283,6 +1283,24 @@ input.textInput {
         border-left: 1px solid var(--subtile-devider);
         padding-left: 6px;
       }
+
+      .userName {
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 14px;
+      }
+
+      .nip05 {
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 14px;
+      }
+    }
+
+    .userInfo {
+      gap: 0;
     }
   }
 }
