@@ -361,3 +361,49 @@ export const calculateReadsOffset = (reads: PrimalArticle[], paging: PaginationI
 export const removeEvent = (id: string, kind: 'reads' | 'notes') => {
   updateSearchStore(kind, (drs) => drs.filter(d => d.id !== id));
 }
+
+
+export const fetchUserSearch = (pubkey: string | undefined, subId: string, query: string, limit = 10) => {
+  return new Promise<PrimalUser[]>((resolve, reject) => {
+
+    let users: PrimalUser[] = [];
+    let scores: Record<string, number> = {};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+
+        if (content.kind === Kind.Metadata) {
+          users.push(convertToUser(content, content.pubkey!));
+          return;
+        }
+
+        if (content.kind === Kind.UserScore) {
+          scores = JSON.parse(content.content!);
+          return;
+        }
+      },
+      onEose: () => {
+        unsub();
+
+        const sorted = users.sort((a, b) => {
+          const aScore = scores[a.pubkey];
+          const bScore = scores[b.pubkey];
+
+          return bScore - aScore;
+        });
+
+        users = sorted.slice(0, 10);
+
+        resolve(users);
+      },
+    });
+
+    searchUsers(pubkey, subId, query);
+  });
+};
+
+
+export const fetchRecomendedUsersAsync = async (profiles?: PrimalUser[]) => {
+  return await getUsers(recomendedUsers);
+};

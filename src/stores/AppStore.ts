@@ -12,6 +12,7 @@ export type AppStore = {
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
   showConfirmDialog: boolean,
   confirmDialogInfo: ConfirmDialogInfo | undefined,
+  showNewNoteEditor: boolean,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -22,6 +23,7 @@ export const emptyAppStore = (): AppStore => ({
   noteContextMenuInfo: undefined,
   showConfirmDialog: false,
   confirmDialogInfo: undefined,
+  showNewNoteEditor: false,
 });
 
 

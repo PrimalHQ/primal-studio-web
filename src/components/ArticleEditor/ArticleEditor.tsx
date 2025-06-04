@@ -24,7 +24,6 @@ import { AutoScrollExtension } from "./AutoScrollTipTapExtension";
 import { NAddrExtension } from "./nAddrMention";
 import { NProfileExtension } from "./nProfileMention";
 import { NEventExtension } from "./nEventMention";
-import { accountStore, activeUser } from "src/stores/AccountStore";
 import { TextField } from "@kobalte/core/text-field";
 import { useToastContext } from "src/context/ToastContext/ToastContext";
 import { Progress } from "@kobalte/core/progress";
@@ -32,6 +31,8 @@ import { isRTL } from "@kobalte/core/i18n";
 import { getLang } from "src/utils/ui";
 import UploaderBlossom from "../Uploader/UploaderBlossom";
 import ArticleEditorToolbar from "./ArticleEditorToolbar";
+
+import { accountStore, activeUser } from "src/stores/AccountStore";
 
 export type ReadMentions = {
   users: Record<string, PrimalUser>,
@@ -770,7 +771,8 @@ const ArticleEditor: Component<{
 
         <div
           id="tiptapEditor"
-          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`} ref={tiptapEditor}
+          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`}
+          ref={tiptapEditor}
           onClick={() => editorTipTap()?.chain().focus().run()}
           dir={isRTL(getLang()) ? 'rtl' : 'ltr'}
         ></div>

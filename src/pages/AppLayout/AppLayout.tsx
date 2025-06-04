@@ -8,7 +8,7 @@ import styles from './AppLayout.module.scss';
 import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 import { settingsStore } from 'src/stores/SettingsStore';
 import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeContextMenu } from 'src/stores/AppStore';
+import { appStore, closeContextMenu, updateAppStore } from 'src/stores/AppStore';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -93,13 +93,13 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
                 New Article
               </a>
             </Match>
-            <Match when={['/notes', '/edit/note'].includes(location.pathname)}>
-              <a
-                href="/edit/note"
+            <Match when={['/notes'].includes(location.pathname)}>
+              <button
+                onClick={() => updateAppStore('showNewNoteEditor', true)}
                 class={styles.editorButton}
               >
                 New Note
-              </a>
+              </button>
             </Match>
           </Switch>
 

@@ -1,0 +1,34 @@
+import { Component, JSXElement } from 'solid-js';
+
+import styles from './NoteEditor.module.scss';
+import { Dialog as KobalteDialog } from '@kobalte/core/dialog';
+import NoteEditor from './NoteEditor';
+
+
+
+const NewNoteDialog: Component<{
+  id?: string,
+  open: boolean,
+  setOpen?: (v: boolean) => void,
+}> = (props) => {
+
+  return (
+    <KobalteDialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
+      <KobalteDialog.Portal>
+        <KobalteDialog.Overlay class={styles.dialogOverlay} />
+        <div class={styles.dialog}>
+          <KobalteDialog.Content class={styles.dialogContent} >
+            <div class={styles.dialogHeader}>
+
+            </div>
+            <KobalteDialog.Description class={styles.dialogDescription}>
+              <NoteEditor />
+            </KobalteDialog.Description>
+          </KobalteDialog.Content>
+        </div>
+      </KobalteDialog.Portal>
+    </KobalteDialog>
+  );
+}
+
+export default NewNoteDialog;

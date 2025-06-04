@@ -15,6 +15,7 @@ import { mediaStore } from './stores/MediaStore';
 import { relayStore } from './stores/RelayStore';
 import { settingsStore } from './stores/SettingsStore';
 import ConfirmDialog from './components/Dialogs/ConfirmDialog';
+import NewNoteDialog from './components/NoteEditor/NewNoteDialog';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -65,6 +66,11 @@ const App: Component = () => {
             onConfirm={appStore.confirmDialogInfo?.onConfirm}
             abortLabel={appStore.confirmDialogInfo?.abortLabel}
             onAbort={appStore.confirmDialogInfo?.onAbort}
+          />
+
+          <NewNoteDialog
+            open={appStore.showNewNoteEditor}
+            setOpen={(v) => updateAppStore('showNewNoteEditor', v)}
           />
         </Toaster>
       </AppProvider>
