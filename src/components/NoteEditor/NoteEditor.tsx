@@ -1,8 +1,8 @@
-import { Component, createSignal, For, JSXElement } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSXElement, Match, on, Switch } from 'solid-js';
 
 import styles from './NoteEditor.module.scss';
 
-import { Editor } from '@tiptap/core';
+import { Editor, generateHTML } from '@tiptap/core';
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -23,7 +23,7 @@ import { NAddrExtension } from "../ArticleEditor/nAddrMention";
 import { NProfileExtension } from "../ArticleEditor/nProfileMention";
 import { NEventExtension } from "../ArticleEditor/nEventMention";
 import { createTiptapEditor } from 'solid-tiptap';
-import { PrimalUser } from 'src/primal';
+import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { activeUser } from 'src/stores/AccountStore';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
@@ -34,6 +34,11 @@ import SearchOption from '../Search/SearchOptions';
 import { nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
+import { TextField } from '@kobalte/core/text-field';
+import { extendMarkdownEditor, MarkdownPlugin, mdToHtml } from '../ArticleEditor/markdownTransform';
+import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
+import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
+import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
 
 
 const NoteEditor: Component<{
@@ -41,11 +46,18 @@ const NoteEditor: Component<{
 }> = (props) => {
 
   let tiptapEditor: HTMLDivElement | undefined;
+  let editorPlainText: HTMLDivElement | undefined;
 
   const [selectedUser, setSelectedUser] = createSignal<PrimalUser>();
   const [searchQuery, setSearchQuery] = createSignal('');
   const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+
+  const [editorMode, setEditorMode] = createSignal<'html' | 'text'>('html');
+  const [plainContent, setPlainContent] = createSignal('');
+
+  const [showMention, setShowMention] = createSignal(false);
+  const [showAttach, setShowAttach] = createSignal(false);
 
   const addMentionToEditor = (user: PrimalUser | undefined, editor?: Editor) => {
     if (!editor || ! user) return;
@@ -62,211 +74,250 @@ const NoteEditor: Component<{
       .run()
   }
 
+  const addNoteToEditor = (note: PrimalNote | undefined, editor?: Editor) => {
+    if (!editor || !note) return;
+
+    const nevent = note.nId;
+
+    editor
+      .chain()
+      .focus()
+      .insertNEvent({ nevent })
+      .run()
+  }
+
+  const addReadToEditor = (read: PrimalArticle | undefined, editor?: Editor) => {
+    if (!editor || !read) return;
+
+    const naddr = read.nId;
+
+    editor
+      .chain()
+      .focus()
+      .insertNAddr({ naddr })
+      .run()
+  }
+
+
+  const attachImage = (src: string, title: string, alt: string) => {
+    const editor = editorTipTap();
+
+    if (!editor || src.length === 0) return;
+
+    editor.
+      chain().
+      focus().
+      setImage({ src, title, alt }).
+      run();
+
+    // Move cursor one space to the right to avoid overwriting the image.
+    const el = document.querySelector('.tiptap.ProseMirror');
+    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+  }
+
+  const extensions = [
+    Document, Paragraph, Text,
+    Link.configure({
+      openOnClick: false,
+      autolink: true,
+      defaultProtocol: 'https',
+      protocols: ['http', 'https'],
+    }),
+    Image.configure({ inline: true }),
+    CodeBlock,
+    // Markdown.configure({
+    //   html: true,
+    //   breaks: false,
+    //   transformPastedText: true,
+    //   transformCopiedText: true,
+    // }),
+    NAddrExtension,
+    Gapcursor,
+    Table.configure({
+      resizable: false,
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    Underline.configure({
+      HTMLAttributes: {
+        'data-underline': true,
+      }
+    }),
+    NProfileExtension,
+    NEventExtension,
+
+    MarkdownPlugin.configure({
+      exportOnUpdate: true,
+      onMarkdownUpdate: (md) => {
+        // console.log('MD UPDATE: ', md)
+        // props.setMarkdownContent(() => md)
+        // setMarkdown(md);
+      }
+    }),
+
+    // BubbleMenu.configure({
+    //   pluginKey: 'bubbleMenuOne',
+    //   element: document.getElementById('bubble_menu_one'),
+    //   tippyOptions: {
+    //     triggerTarget: document.getElementById('tableTrigger'),
+    //     popperOptions: {
+    //       strategy: 'fixed',
+    //     },
+    //   },
+    //   shouldShow: ({ editor, view, state, oldState, from, to }) => {
+
+    //     const dom = editor.view.coordsAtPos(state.selection.from);
+    //     props.showTableOptions(editor.isActive('table'), dom);
+
+
+    //     return false;
+    //   },
+    // }),
+
+    // AutoScrollExtension.configure({
+    //   minPadding: 32,  // Minimum padding in pixels
+    //   useDynamicPadding: true // Use the node height as padding
+    // })
+
+    Mention.configure({
+      suggestion: {
+        char: '@',
+        command: ({ editor, range, props }) => {
+          const user = selectedUser();
+
+          if (!user) return;
+
+          let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
+          const relays: string[] = [];//userRelays[user.pubkey] || [];
+
+          // if (relays.length > 0) {
+          //   pInfo.relays = [...relays];
+          // }
+
+          const nprofile = nip19.nprofileEncode(pInfo);
+
+          const delRange = {
+            from: range.from,
+            to: range.from + searchQuery().length,
+          };
+
+          setSearchQuery(() => '');
+
+          editor
+            .chain()
+            .focus()
+            .deleteRange({ ...delRange })
+            .insertNProfileAt(range, { nprofile, user, relays})
+            .insertContent({ type: 'text', text: ' ' })
+            .run()
+        },
+        items: async ({ editor, query}) => {
+          const users = query.length < 2 ?
+            await fetchRecomendedUsersAsync() :
+            await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
+
+          // userRelays = await getUserRelays();
+          setSuggestedUsers(() => [...users]);
+
+          return users;
+        },
+        render: () => {
+          let component: JSXElement | undefined;
+          let popups: Instance[];
+
+          return {
+            onStart: props => {
+              component = <div>
+                <For each={suggestedUsers}>
+                  {(user, index) => (
+                    <SearchOption
+                      id={`reads_suggested_user_${index()}`}
+                      title={userName(user.pubkey)}
+                      description={nip05Verification(user)}
+                      icon={<Avatar user={user} size={32} />}
+                      statNumber={user.userStats?.followers_count}
+                      statLabel={"Followers"}
+                      // @ts-ignore
+                      onClick={() => {
+                        setSelectedUser(() => user);
+                        props.command({ id: user.pubkey, label: user.name})
+                      }}
+                      highlighted={highlightedUser() === index()}
+                      hasBackground={true}
+                    />
+                  )}
+                </For>
+              </div>
+
+              // @ts-ignore
+              popups = tippy('#tiptapNoteEditor', {
+                getReferenceClientRect: props.clientRect,
+                content: component,
+                showOnCreate: true,
+                interactive: true,
+                trigger: 'manual',
+                placement: 'bottom-start',
+                zIndex: 99999,
+              });
+            },
+            onUpdate: (props) => {
+              setSearchQuery(() => props.query || '');
+            },
+
+            onKeyDown(props) {
+              if (props.event.key === 'Escape') {
+                popups[0]?.hide();
+
+                return true;
+              }
+
+              if (props.event.key === 'ArrowDown') {
+                setHighlightedUser(i => {
+                  if (suggestedUsers.length === 0) {
+                    return 0;
+                  }
+
+                  return i < suggestedUsers.length ? i + 1 : 0;
+                });
+
+                return true;
+              }
+
+              if (props.event.key === 'ArrowUp') {
+                setHighlightedUser(i => {
+                  if (!suggestedUsers || suggestedUsers.length === 0) {
+                    return 0;
+                  }
+
+                  return i > 0 ? i - 1 : suggestedUsers.length;
+                });
+                return true;
+              }
+
+
+              if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
+                const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
+                sel && sel.click();
+
+                return true;
+              }
+
+              // @ts-ignore
+              return component?.ref?.onKeyDown(props)
+            },
+            onExit: () => {
+              popups[0]?.destroy();
+            }
+          }
+        },
+      },
+    }),
+  ];
+
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
-    extensions: [
-      Document, Paragraph, Text,
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: 'https',
-        protocols: ['http', 'https'],
-      }),
-      Image.configure({ inline: true }),
-      CodeBlock,
-      // Markdown.configure({
-      //   html: true,
-      //   breaks: false,
-      //   transformPastedText: true,
-      //   transformCopiedText: true,
-      // }),
-      NAddrExtension,
-      Gapcursor,
-      Table.configure({
-        resizable: false,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      Underline.configure({
-        HTMLAttributes: {
-          'data-underline': true,
-        }
-      }),
-      NProfileExtension,
-      NEventExtension,
-
-      // MarkdownPlugin.configure({
-      //   exportOnUpdate: true,
-      //   onMarkdownUpdate: (md) => {
-      //     // console.log('MD UPDATE: ', md)
-      //     // props.setMarkdownContent(() => md)
-      //     // setMarkdown(md);
-      //   }
-      // }),
-
-      // BubbleMenu.configure({
-      //   pluginKey: 'bubbleMenuOne',
-      //   element: document.getElementById('bubble_menu_one'),
-      //   tippyOptions: {
-      //     triggerTarget: document.getElementById('tableTrigger'),
-      //     popperOptions: {
-      //       strategy: 'fixed',
-      //     },
-      //   },
-      //   shouldShow: ({ editor, view, state, oldState, from, to }) => {
-
-      //     const dom = editor.view.coordsAtPos(state.selection.from);
-      //     props.showTableOptions(editor.isActive('table'), dom);
-
-
-      //     return false;
-      //   },
-      // }),
-
-      // AutoScrollExtension.configure({
-      //   minPadding: 32,  // Minimum padding in pixels
-      //   useDynamicPadding: true // Use the node height as padding
-      // })
-
-      Mention.configure({
-        suggestion: {
-          char: '@',
-          command: ({ editor, range, props }) => {
-            console.log('COMMAND: ')
-            const user = selectedUser();
-
-            if (!user) return;
-
-            let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
-            const relays: string[] = [];//userRelays[user.pubkey] || [];
-
-            // if (relays.length > 0) {
-            //   pInfo.relays = [...relays];
-            // }
-
-            const nprofile = nip19.nprofileEncode(pInfo);
-
-            const delRange = {
-              from: range.from,
-              to: range.from + searchQuery().length,
-            };
-
-            setSearchQuery(() => '');
-
-            editor
-              .chain()
-              .focus()
-              .deleteRange({ ...delRange })
-              .insertNProfileAt(range, { nprofile, user, relays})
-              .insertContent({ type: 'text', text: ' ' })
-              .run()
-          },
-          items: async ({ editor, query}) => {
-            const users = query.length < 2 ?
-              await fetchRecomendedUsersAsync() :
-              await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
-
-            // userRelays = await getUserRelays();
-            setSuggestedUsers(() => [...users]);
-
-            return users;
-          },
-          render: () => {
-            let component: JSXElement | undefined;
-            let popups: Instance[];
-            console.log('RENDER')
-
-            return {
-              onStart: props => {
-                component = <div>
-                  <For each={suggestedUsers}>
-                    {(user, index) => (
-                      <SearchOption
-                        id={`reads_suggested_user_${index()}`}
-                        title={userName(user.pubkey)}
-                        description={nip05Verification(user)}
-                        icon={<Avatar user={user} size={32} />}
-                        statNumber={user.userStats?.followers_count}
-                        statLabel={"Followers"}
-                        // @ts-ignore
-                        onClick={() => {
-                          setSelectedUser(() => user);
-                          props.command({ id: user.pubkey, label: user.name})
-                        }}
-                        highlighted={highlightedUser() === index()}
-                        hasBackground={true}
-                      />
-                    )}
-                  </For>
-                </div>
-
-                // @ts-ignore
-                popups = tippy('#tiptapNoteEditor', {
-                  getReferenceClientRect: props.clientRect,
-                  content: component,
-                  showOnCreate: true,
-                  interactive: true,
-                  trigger: 'manual',
-                  placement: 'bottom-start',
-                  zIndex: 99999,
-                });
-              },
-              onUpdate: (props) => {
-                console.log('UPDATE: ', props)
-                setSearchQuery(() => props.query || '');
-              },
-
-              onKeyDown(props) {
-                if (props.event.key === 'Escape') {
-                  popups[0]?.hide();
-
-                  return true;
-                }
-
-                if (props.event.key === 'ArrowDown') {
-                  setHighlightedUser(i => {
-                    if (suggestedUsers.length === 0) {
-                      return 0;
-                    }
-
-                    return i < suggestedUsers.length ? i + 1 : 0;
-                  });
-
-                  return true;
-                }
-
-                if (props.event.key === 'ArrowUp') {
-                  setHighlightedUser(i => {
-                    if (!suggestedUsers || suggestedUsers.length === 0) {
-                      return 0;
-                    }
-
-                    return i > 0 ? i - 1 : suggestedUsers.length;
-                  });
-                  return true;
-                }
-
-
-                if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
-                  const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
-                  console.log('Enter: ', props)
-                  sel && sel.click();
-
-                  return true;
-                }
-
-                // @ts-ignore
-                return component?.ref?.onKeyDown(props)
-              },
-              onExit: () => {
-                popups[0]?.destroy();
-              }
-            }
-          },
-        },
-      }),
-    ],
+    extensions,
     editorProps: { handleDOMEvents: {
       drop: (view, e) => { e.preventDefault(); },
     } },
@@ -281,17 +332,113 @@ const NoteEditor: Component<{
     },
   }));
 
+  createEffect(on( editorMode, async (mode) => {
+    const json = editorTipTap()?.getJSON();
+
+    if (mode === 'text') {
+      setPlainContent(tiptapJsonToPlainText(json));
+      return;
+    }
+
+    if (mode === 'html') {
+      const plainText = plainContent();
+
+      const json = plainTextToTiptapJson(plainText);
+
+      let html = generateHTML(json, extensions);
+      html = await mdToHtml(html);
+      editorTipTap()?.chain().setContent(html);
+      // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
+
+    }
+  }));
+
 
   return (
     <>
-      <button onClick={() => addMentionToEditor(activeUser(), editorTipTap())}>Add Mention</button>
+      <div class={styles.editorNoteToolbar}>
+        <div class={styles.contentContols}>
+          <button
+            id="attachFile"
+            class={styles.mdToolButton}
+            onClick={() => setShowAttach(true)}
+            title={'attach a file'}
+          >
+            <div class={`${styles.attachIcon} ${styles.active}`}></div>
+          </button>
+
+          <button
+            id="addMention"
+            class={styles.mdToolButton}
+            onClick={() => setShowMention(true)}
+            title={'add a mention'}
+          >
+            <div class={`${styles.atIcon} ${styles.active}`}></div>
+          </button>
+        </div>
+        <div class={styles.editorModeControls}>
+          <button
+            id="editorMode"
+            class={`${styles.mdToolButton} ${editorMode() === 'text' ? styles.selected : ''}`}
+            onClick={() => setEditorMode((mode) => mode === 'html' ? 'text' : 'html')}
+            title={!editorMode() ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+          >
+            <div class={`${styles.modeIcon} ${styles.active}`}></div>
+          </button>
+        </div>
+      </div>
+      {/* <button onClick={() => addMentionToEditor(activeUser(), editorTipTap())}>Add Mention</button> */}
       <div
         id="tiptapNoteEditor"
         ref={tiptapEditor}
-        class={styles.editorNote}
-      >
+        class={`${styles.editorNote} ${editorMode() === 'text' ? 'displayNone' : ''}`}
+      ></div>
+
+      <div class={`${styles.editorPlainHolder} ${editorMode() === 'html' ? 'displayNone' : ''}`}>
+        <TextField
+          value={plainContent()}
+          onChange={value => {
+            setPlainContent(() => value || '');
+          }}
+        >
+          <TextField.TextArea
+            class={styles.editorPlain}
+            ref={editorPlainText}
+            autoResize={true}
+          />
+        </TextField>
+      </div>
+
+      <div class={styles.editorNoteFooter}>
 
       </div>
+
+      <ReadsMentionDialog
+        open={showMention()}
+        setOpen={(v: boolean) => setShowMention(() => v)}
+        onAddUser={(user: PrimalUser) => {
+          addMentionToEditor(user, editorTipTap());
+          setShowMention(() => false);
+        }}
+        onAddNote={(note: PrimalNote) => {
+          addNoteToEditor(note, editorTipTap());
+          setShowMention(() => false);
+        }}
+        onAddRead={(read: PrimalArticle) => {
+          addReadToEditor(read, editorTipTap());
+          setShowMention(() => false);
+        }}
+      />
+
+      <ReadsImageDialog
+        open={showAttach()}
+        setOpen={(v: boolean) => setShowAttach(() => v)}
+        editor={editorTipTap()}
+        onSubmit={(url: string, title:string, alt: string) => {
+          attachImage(url, title, alt);
+          setShowAttach(false);
+        }}
+      />
     </>
   );
 }

@@ -19,6 +19,7 @@ import { clearSearch, findContent, findUserByNupub, findUsers, getRecomendedUser
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Dialog from 'src/components/Dialogs/Dialog';
 import ArticlePreviewSuggestion, { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
+import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 
 
 
@@ -407,7 +408,7 @@ const ReadsMentionDialog: Component<{
                 >
                   <For each={searchStore.reads.slice(0, 10)} >
                     {read => (
-                      <ArticlePreviewSuggestion
+                      <ArticleReviewPreview
                         article={read}
                         onClick={() => {
                           selectRead(read)

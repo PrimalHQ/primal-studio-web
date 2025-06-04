@@ -18,7 +18,12 @@ export type ArticleProps = {
   id?: string,
   article: PrimalArticle,
   height?: number,
+  onClick?: () => void,
 };
+
+export const renderArticleReviewPreview = (config: { article: PrimalArticle }) => {
+  return (<div><ArticleReviewPreview article={config.article}/></div> as HTMLDivElement).innerHTML;
+}
 
 const ArticleReviewPreview: Component<ArticleProps> = (props) => {
 
@@ -87,6 +92,7 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
       ref={articlePreview}
       class={`${styles.article} ${styles.bordered}`}
       style={props.height ? `height: ${props.height}px` : ''}
+      onClick={props.onClick}
     >
       <div class={styles.header}>
         <div

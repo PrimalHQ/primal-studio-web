@@ -181,6 +181,10 @@ body::after{
   height: 0;
 }
 
+.displayNone {
+  display: none;
+}
+
 button {
   cursor: pointer;
   &:disabled {

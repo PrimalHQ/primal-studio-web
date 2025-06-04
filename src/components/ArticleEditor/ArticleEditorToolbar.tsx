@@ -624,7 +624,6 @@ const ArticleEditorToolbar: Component<{
         }}
       />
 
-
       <ReadsMentionDialog
         open={formatControls.enterMention}
         setOpen={(v: boolean) => updateFormatControls('enterMention', () => v)}

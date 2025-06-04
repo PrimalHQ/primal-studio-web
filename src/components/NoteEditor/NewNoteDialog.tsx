@@ -18,9 +18,6 @@ const NewNoteDialog: Component<{
         <KobalteDialog.Overlay class={styles.dialogOverlay} />
         <div class={styles.dialog}>
           <KobalteDialog.Content class={styles.dialogContent} >
-            <div class={styles.dialogHeader}>
-
-            </div>
             <KobalteDialog.Description class={styles.dialogDescription}>
               <NoteEditor />
             </KobalteDialog.Description>

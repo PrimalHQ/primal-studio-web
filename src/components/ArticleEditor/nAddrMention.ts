@@ -7,8 +7,8 @@ import { Kind } from 'src/constants';
 import { fetchArticles } from 'src/primal_api/events';
 import { nip19 } from 'src/utils/nTools';
 import { setReadMentions } from './ArticleEditor';
-import { renderArticlePreview } from '../Event/ArticlePreview';
 import { PrimalNote, PrimalZap } from 'src/primal';
+import { renderArticleReviewPreview } from '../Event/ArticleReviewPreview';
 
 export const findMissingEvent = async (naddr: string, editor: Editor) => {
   if (!naddr) return;
@@ -32,11 +32,8 @@ export const findMissingEvent = async (naddr: string, editor: Editor) => {
 
   if (mentions.length > 0 && events[0]) {
     setReadMentions('reads', () => ({ [naddr]: { ...events[0] } }));
-    const el = renderArticlePreview({
+    const el = renderArticleReviewPreview({
       article: events[0],
-      bordered: true,
-      hideFooter: true,
-      noLinks: true,
     })
 
     mentions.forEach(mention => {
