@@ -4,7 +4,7 @@ import { FeedRange, PrimalArticle, PrimalDraft } from "../../primal";
 import { Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
+import { deleteFromInbox, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortReads } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
@@ -29,7 +29,7 @@ export type ArticlesStore = {
   selected: string[],
   feedTotals: FeedTotals,
   showApproveDialog: boolean,
-  approvedEvent: PrimalDraft | undefined,
+  approvedEvents: PrimalDraft[],
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -40,7 +40,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
   offset: 0,
   selected: [],
   showApproveDialog: false,
-  approvedEvent: undefined,
+  approvedEvents: [],
   feedTotals: {
     sent: 0,
     inbox: 0,
@@ -79,12 +79,26 @@ export const toggleSelected = (id: string, add: boolean) => {
   }
 }
 
+export const toggleSelectedInbox = (id: string, add: boolean) => {
+  if (add && !articlesStore.selected.includes(id)) {
+    setArticlesStore('selected', articlesStore.selected.length, () => id);
+  }
+  else if (!add) {
+    setArticlesStore('selected', (sel) => sel.filter(s => s !== id))
+  }
+}
+
 export const deleteSelected = async () => {
   openConfirmDialog({
     title: "Delete Selected?",
     description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
     onConfirm: async () => {
       const selectedIds = articlesStore.selected;
+
+      if (articlesStore.tab === 'inbox') {
+        await deleteFromInbox(selectedIds);
+        return;
+      }
 
       let promisses: Promise<boolean>[] = []
 

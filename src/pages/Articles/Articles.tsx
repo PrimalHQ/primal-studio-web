@@ -175,9 +175,9 @@ const Articles: Component = () => {
       <ReadsApproveDialog
         open={articlesStore.showApproveDialog}
         setOpen={(v) => setArticlesStore('showApproveDialog', v)}
-        draft={articlesStore.approvedEvent}
+        drafts={articlesStore.approvedEvents}
         onClose={() => {
-          setArticlesStore('approvedEvent', () => undefined);
+          setArticlesStore('approvedEvents', () => []);
         }}
       />
 
@@ -220,6 +220,12 @@ const Articles: Component = () => {
               <button
                 class={styles.bulkControlButton}
                 disabled={articlesStore.selected.length === 0}
+                onClick={() => {
+                  const drafts = pageStore.articles.feedPages.flatMap(page => page.drafts.filter(d => articlesStore.selected.includes(d.id)))
+
+                  setArticlesStore('approvedEvents', drafts);
+                  setArticlesStore('showApproveDialog', true);
+                }}
               >
                 Approve Selected
               </button>
@@ -299,7 +305,7 @@ const Articles: Component = () => {
                               removeEventFromPageStore(id)
                             }}
                             onApprove={() => {
-                              setArticlesStore('approvedEvent', draft);
+                              setArticlesStore('approvedEvents', [draft!]);
                               setArticlesStore('showApproveDialog', true);
                             }}
                             type='inbox'

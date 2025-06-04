@@ -382,6 +382,8 @@ const ReadsEditor: Component = () => {
       tags,
     }
 
+    setIsPublishing(true);
+
     const { success, note } = await sendDraft(
       proposedUser()!,
       articleToSend,
@@ -399,6 +401,9 @@ const ReadsEditor: Component = () => {
           Kind.Draft,
         );
       }
+
+      setShowPublishArticle(false);
+      navigate('/articles')
     }
     else {
       toast?.sendWarning('Proposal sending failed');

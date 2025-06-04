@@ -131,7 +131,7 @@ export const scheduleArticle = async (
   if (!hasPubTime) {
     articleData.tags.push(["published_at", `${pubTime}`])
   } else {
-    articleData.tags = articleData.tags.map(
+    articleData.tags = (articleData.tags).map(
       t => t[0] === 'published_at' ? ['published_at', `${pubTime}`] : t);
   }
 

@@ -26,15 +26,11 @@ const ReadsApproveDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
-  draft: PrimalDraft | undefined,
+  drafts: PrimalDraft[],
   onClose?: () => void;
 }> = (props) => {
 
-  const article = () => props.draft ?
-    parseDraftedEvent(props.draft) as PrimalArticle :
-    undefined;
-
-  const publishDate = () => article()?.published_at || 0;
+  const publishDate = (article: PrimalArticle) => article.published_at || 0;
   const today = () => Math.ceil((new Date()).getTime() / 1_000);
 
   createEffect(() => {
@@ -43,39 +39,36 @@ const ReadsApproveDialog: Component<{
     }
   });
 
-  const doScheduleArticle = async (art: PrimalArticle) => {
-    const { success, note } = await scheduleArticle(art, [], publishDate());
-
-    if (success && note) {
-      deleteFromInbox([props.draft!.id]);
-      props.setOpen && props.setOpen(false);
-      return;
-    }
+  const firstArticlePublishDate = () => {
+    return props.drafts[0].draftedEvent?.created_at || 0;
   }
 
   const publishArticle = async () => {
     const pubkey = accountStore.pubkey;
-    const art = article();
-    if (!pubkey || !art) return;
 
-    let artToSend = unwrap(art);
+    if (!pubkey || props.drafts.length === 0) return;
 
-    artToSend.created_at = today();
-    artToSend.tags = artToSend.tags.map(
-      t => t[0] === 'published_at' ? ['published_at', `${today()}`] : t);
+    let deletedDrafts: string[] = []
 
-    if (publishDate() > today()) {
-      return await doScheduleArticle(artToSend);
+    for (let i=0; i<props.drafts.length; i++) {
+      let article = unwrap(parseDraftedEvent(props.drafts[i])) as PrimalArticle;
+
+      article.created_at = today();
+      article.tags = article.tags.map(
+        t => t[0] === 'published_at' ? ['published_at', `${today()}`] : t);
+
+      const { success, note } = publishDate(article) > today() ?
+        await scheduleArticle(article, [], publishDate(article)) :
+        await sendArticle(article, []);
+
+      if (success && note) {
+        deletedDrafts.push(article.id)
+      }
     }
 
-
-    const { success, note } = await sendArticle(artToSend, []);
-
-    if (success && note) {
-      deleteFromInbox([props.draft!.id]);
-      props.setOpen && props.setOpen(false);
-      return;
-    }
+    deleteFromInbox(deletedDrafts);
+    props.setOpen && props.setOpen(false);
+    return;
   };
 
 
@@ -88,16 +81,24 @@ const ReadsApproveDialog: Component<{
     >
       <div class={styles.readsPublishDialog}>
 
-        <div class={styles.previewHolder}>
-          {/* <ArticlePreviewPublish
-            article={props.article!}
-            hideContext={true}
-            hideFooter={true}
-          /> */}
-        </div>
+        <Show
+          when={props.drafts.length < 2}
+          fallback={<div>
+            Publish the {props.drafts.length} selected articles.
+          </div>}
+        >
+          <div class={styles.previewHolder}>
+            Preview of a Single Article
+            {/* <ArticlePreviewPublish
+              article={props.article!}
+              hideContext={true}
+              hideFooter={true}
+            /> */}
+          </div>
+        </Show>
 
         <div class={styles.additionalPublishInfo}>
-          <Show when={publishDate() > today()}>
+          <Show when={props.drafts.length === 1 && firstArticlePublishDate() > today()}>
             <div class={styles.publishDateDisplay}>
               <div class={styles.calendarIconBig}></div>
               <div class={styles.dateInfo}>
@@ -105,7 +106,7 @@ const ReadsApproveDialog: Component<{
                   Scheduled to publish:
                 </div>
                 <div class={styles.date}>
-                  {longDate(publishDate() || 0)}
+                  {longDate(firstArticlePublishDate() || 0)}
                 </div>
               </div>
             </div>
