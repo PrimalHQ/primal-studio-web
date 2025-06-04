@@ -24,6 +24,7 @@ import DraftPreview from 'src/components/Event/DraftPreview';
 import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
+import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -245,103 +246,140 @@ const Notes: Component = () => {
         </Show>
 
         <div class={styles.feedContent}>
-          <For each={notePages()}>
-            {(page, pageIndex) => (
-              <FeedPage
-                page={page}
-                isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
-                pageIndex={pageIndex()}
-                observer={notesPageObserver}
-                key="notes"
-                twoColumns={notePages().length === 0}
-                eventComponent={(e) => {
-                  if (notesStore.tab === 'sent') {
-                    const draft = page.drafts.find(a => a.id === e);
+          <Show
+            when={notePages().length > 0 || !pageStore.homeArticles.isFetching}
+            fallback={
+              <div class={styles.emptyList}>
+                <For each={Array(10)}>
+                  {() =>
+                    <NoteHomeSkeleton stretch={true} />
+                  }
+                </For>
+              </div>
+            }
+          >
+            <For each={notePages()}>
+              {(page, pageIndex) => (
+                <FeedPage
+                  page={page}
+                  isRenderEmpty={shouldRenderEmptyNotes(pageIndex())}
+                  pageIndex={pageIndex()}
+                  observer={notesPageObserver}
+                  key="notes"
+                  twoColumns={notePages().length === 0}
+                  eventComponent={(e) => {
+                    if (notesStore.tab === 'sent') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {openInPrimal(draft!)}}
-                          event={draft!}
-                          hideContextMenu={!['published'].includes(notesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <ProposalPreview
-                            draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {openInPrimal(draft!)}}
+                            event={draft!}
+                            hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                            type='sent'
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <ProposalPreview
+                              draft={draft!}
+                              onEdit={() => {openInPrimal(draft!)}}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                              type='sent'
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (notesStore.tab === 'inbox') {
-                    const draft = page.drafts.find(a => a.id === e);
+                    if (notesStore.tab === 'inbox') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {openInPrimal(draft!)}}
-                          event={draft!}
-                          hideContextMenu={!['published'].includes(notesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <ProposalPreview
-                            draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {openInPrimal(draft!)}}
+                            event={draft!}
+                            hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                            type='inbox'
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <ProposalPreview
+                              draft={draft!}
+                              onEdit={() => {openInPrimal(draft!)}}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                              type='inbox'
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (notesStore.tab === 'drafts') {
-                    const draft = page.drafts.find(a => a.id === e);
+                    if (notesStore.tab === 'drafts') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {}}
-                          event={draft!}
-                          hideContextMenu={!['published', 'published-replied'].includes(notesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <DraftPreview
-                            draft={draft!}
-                            onEdit={() => {openInPrimal(draft!)}}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={draft!}
+                            hideContextMenu={!['published', 'published-replied'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <DraftPreview
+                              draft={draft!}
+                              onEdit={() => {openInPrimal(draft!)}}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (notesStore.tab === 'scheduled') {
+                    if (notesStore.tab === 'scheduled') {
 
-                  const note = page.reads.find(a => a.id === e);
+                    const note = page.reads.find(a => a.id === e);
+
+                      return (
+                        <Show when={note}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={note!}
+                            hideContextMenu={true}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                          >
+                            <NotePreview
+                              id={e}
+                              note={note!}
+                              hideTime={true}
+                            />
+                            <ScheduledInfo
+                              event={note!}
+                              kind='notes'
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
+
+                    const note = page.notes.find(a => a.id === e);
 
                     return (
                       <Show when={note}>
                         <FeedItemCard
-                          onClick={() => {}}
+                          onClick={() => {openInPrimal(note!)}}
                           event={note!}
-                          hideContextMenu={true}
                           onDelete={(id: string) => {
                             removeEventFromPageStore(id)
                           }}
@@ -349,46 +387,22 @@ const Notes: Component = () => {
                           <NotePreview
                             id={e}
                             note={note!}
-                            hideTime={true}
                           />
-                          <ScheduledInfo
+                          <EventStats
                             event={note!}
-                            kind='notes'
                           />
                         </FeedItemCard>
                       </Show>
-                    );
-                  }
-
-                  const note = page.notes.find(a => a.id === e);
-
-                  return (
-                    <Show when={note}>
-                      <FeedItemCard
-                        onClick={() => {openInPrimal(note!)}}
-                        event={note!}
-                        onDelete={(id: string) => {
-                          removeEventFromPageStore(id)
-                        }}
-                      >
-                        <NotePreview
-                          id={e}
-                          note={note!}
-                        />
-                        <EventStats
-                          event={note!}
-                        />
-                      </FeedItemCard>
-                    </Show>
-                  )
-                }}
-              />
-            )}
-          </For>
-          <Paginator
-            loadNextPage={loadNextNotesPage}
-            isSmall={true}
-          />
+                    )
+                  }}
+                />
+              )}
+            </For>
+            <Paginator
+              loadNextPage={loadNextNotesPage}
+              isSmall={true}
+            />
+          </Show>
         </div>
 
         </div>

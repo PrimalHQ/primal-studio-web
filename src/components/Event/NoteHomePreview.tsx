@@ -19,8 +19,10 @@ import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import { logError } from 'src/utils/logger';
 
-export const NoteHomeSkeleton: Component = () => {
-  return <div class={styles.noteSkeleton}>
+export const NoteHomeSkeleton: Component<{
+  stretch?: boolean
+}> = (props) => {
+  return <div class={`${styles.noteSkeleton} ${props.stretch ? styles.stretch : ''}`}>
   </div>
 }
 

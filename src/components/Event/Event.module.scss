@@ -289,6 +289,10 @@
   border-radius: 12px;
 
   animation: skeleton-fade 2500ms linear infinite;
+
+  &.stretch {
+    width: 100%;
+  }
 }
 
 .notePreview {

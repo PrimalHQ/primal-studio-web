@@ -26,6 +26,7 @@ import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
 import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
+import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -240,168 +241,181 @@ const Articles: Component = () => {
           </div>
         </Show>
         <div class={styles.feedContent}>
-          <For each={articlePages()}>
-            {(page, pageIndex) => (
-              <FeedPage
-                page={page}
-                isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
-                pageIndex={pageIndex()}
-                observer={articlesPageObserver}
-                key="articles"
-                twoColumns={articlePages().length === 0}
-                eventComponent={(e) => {
-                  if (articlesStore.tab === 'sent') {
-                    const draft = page.drafts.find(a => a.id === e);
+          <Show
+            when={articlePages().length > 0 || !pageStore.homeArticles.isFetching}
+            fallback={
+              <div class={styles.emptyList}>
+                <For each={Array(10)}>
+                  {() =>
+                    <NoteHomeSkeleton stretch={true} />
+                  }
+                </For>
+              </div>
+            }
+          >
+            <For each={articlePages()}>
+              {(page, pageIndex) => (
+                <FeedPage
+                  page={page}
+                  isRenderEmpty={shouldRenderEmptyArticles(pageIndex())}
+                  pageIndex={pageIndex()}
+                  observer={articlesPageObserver}
+                  key="articles"
+                  twoColumns={articlePages().length === 0}
+                  eventComponent={(e) => {
+                    if (articlesStore.tab === 'sent') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {}}
-                          event={draft!}
-                          hideContextMenu={!['published'].includes(articlesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <ProposalPreview
-                            draft={draft!}
-                            onEdit={() => {
-                              navigate(`/edit/article/${draft!.id}`);
-                            }}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={draft!}
+                            hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                            onView={() => {
-                              navigate(`/view/draft/${draft!.id}`);
-                            }}
-                            type='sent'
-                            checked={articlesStore.selected.includes(draft?.id || '-')}
-                            onCheck={toggleSelected}
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <ProposalPreview
+                              draft={draft!}
+                              onEdit={() => {
+                                navigate(`/edit/article/${draft!.id}`);
+                              }}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                              onView={() => {
+                                navigate(`/view/draft/${draft!.id}`);
+                              }}
+                              type='sent'
+                              checked={articlesStore.selected.includes(draft?.id || '-')}
+                              onCheck={toggleSelected}
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (articlesStore.tab === 'inbox') {
-                    const draft = page.drafts.find(a => a.id === e);
+                    if (articlesStore.tab === 'inbox') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {}}
-                          event={draft!}
-                          hideContextMenu={!['published'].includes(articlesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <ProposalPreview
-                            draft={draft!}
-                            onEdit={() => {
-                              navigate(`/edit/article/${draft!.id}`);
-                            }}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={draft!}
+                            hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                            onApprove={() => {
-                              setArticlesStore('approvedEvents', [draft!]);
-                              setArticlesStore('showApproveDialog', true);
-                            }}
-                            type='inbox'
-                            checked={articlesStore.selected.includes(draft?.id || '-')}
-                            onCheck={toggleSelected}
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <ProposalPreview
+                              draft={draft!}
+                              onEdit={() => {
+                                navigate(`/edit/article/${draft!.id}`);
+                              }}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                              onApprove={() => {
+                                setArticlesStore('approvedEvents', [draft!]);
+                                setArticlesStore('showApproveDialog', true);
+                              }}
+                              type='inbox'
+                              checked={articlesStore.selected.includes(draft?.id || '-')}
+                              onCheck={toggleSelected}
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (articlesStore.tab === 'drafts') {
-                    const draft = page.drafts.find(a => a.id === e);
+                    if (articlesStore.tab === 'drafts') {
+                      const draft = page.drafts.find(a => a.id === e);
 
-                    return (
-                      <Show when={draft}>
-                        <FeedItemCard
-                          onClick={() => {}}
-                          event={draft!}
-                          hideContextMenu={!['published'].includes(articlesStore.tab)}
-                          onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
-                          }}
-                        >
-                          <DraftPreview
-                            draft={draft!}
-                            onEdit={() => {
-                              navigate(`/edit/article/${draft!.id}`);
-                            }}
+                      return (
+                        <Show when={draft}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={draft!}
+                            hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id)
                             }}
-                          />
-                        </FeedItemCard>
-                      </Show>
-                    );
-                  }
+                          >
+                            <DraftPreview
+                              draft={draft!}
+                              onEdit={() => {
+                                navigate(`/edit/article/${draft!.id}`);
+                              }}
+                              onDelete={(id: string) => {
+                                removeEventFromPageStore(id)
+                              }}
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
-                  if (articlesStore.tab === 'scheduled') {
+                    if (articlesStore.tab === 'scheduled') {
+
+                      const article = page.reads.find(a => a.id === e);
+
+                      return (
+                        <Show when={article}>
+                          <FeedItemCard
+                            onClick={() => {}}
+                            event={article!}
+                            hideContextMenu={true}
+                            onDelete={(id: string) => {
+                              removeEventFromPageStore(id)
+                            }}
+                          >
+                            <ArticlePreview
+                              article={article!}
+                              hideTime={true}
+                            />
+                            <ScheduledInfo
+                              event={article!}
+                              onEdit={() => {
+                                navigate(`/edit/article/${article!.id}`);
+                              }}
+                              kind='articles'
+                            />
+                          </FeedItemCard>
+                        </Show>
+                      );
+                    }
 
                     const article = page.reads.find(a => a.id === e);
 
                     return (
                       <Show when={article}>
                         <FeedItemCard
-                          onClick={() => {}}
+                          onClick={() => {openInPrimal(article!)}}
                           event={article!}
-                          hideContextMenu={true}
                           onDelete={(id: string) => {
                             removeEventFromPageStore(id)
                           }}
                         >
                           <ArticlePreview
                             article={article!}
-                            hideTime={true}
                           />
-                          <ScheduledInfo
+                          <EventStats
                             event={article!}
-                            onEdit={() => {
-                              navigate(`/edit/article/${article!.id}`);
-                            }}
-                            kind='articles'
                           />
                         </FeedItemCard>
                       </Show>
-                    );
-                  }
-
-                  const article = page.reads.find(a => a.id === e);
-
-                  return (
-                    <Show when={article}>
-                      <FeedItemCard
-                        onClick={() => {openInPrimal(article!)}}
-                        event={article!}
-                        onDelete={(id: string) => {
-                          removeEventFromPageStore(id)
-                        }}
-                      >
-                        <ArticlePreview
-                          article={article!}
-                        />
-                        <EventStats
-                          event={article!}
-                        />
-                      </FeedItemCard>
-                    </Show>
-                  )
-                }}
-              />
-            )}
-          </For>
-          <Paginator
-            loadNextPage={loadNextArticlesPage}
-            isSmall={true}
-          />
+                    )
+                  }}
+                />
+              )}
+            </For>
+            <Paginator
+              loadNextPage={loadNextArticlesPage}
+              isSmall={true}
+            />
+          </Show>
         </div>
 
         </div>
