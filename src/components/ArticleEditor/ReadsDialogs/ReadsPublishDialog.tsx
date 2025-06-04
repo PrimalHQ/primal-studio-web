@@ -7,12 +7,12 @@ import { ArticleEdit } from '../ArticleEditor';
 import Dialog from 'src/components/Dialogs/Dialog';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
-import ArticlePreviewPublish from 'src/components/Event/ArticlePreviewPublish';
 import { longDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
 import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { nip05Verification } from 'src/utils/ui';
 import Avatar from 'src/components/Avatar/Avatar';
+import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 
 
 const ReadsPublishDialog: Component<{
@@ -49,11 +49,9 @@ const ReadsPublishDialog: Component<{
         </Show>
 
         <div class={styles.previewHolder}>
-          {/* <ArticlePreviewPublish
+          <ArticleReviewPreview
             article={props.article!}
-            hideContext={true}
-            hideFooter={true}
-          /> */}
+          />
         </div>
 
         <div class={styles.additionalPublishInfo}>

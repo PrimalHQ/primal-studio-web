@@ -1,25 +1,17 @@
-import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, Show } from 'solid-js';
 
 import styles from './ReadsMentionDialog.module.scss';
-import { TextField } from '@kobalte/core/text-field';
-import { PrimalArticle, PrimalDraft, PrimalUser } from 'src/primal';
-import { ArticleEdit } from '../ArticleEditor';
+import { PrimalArticle, PrimalDraft } from 'src/primal';
 import Dialog from 'src/components/Dialogs/Dialog';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
-import ArticlePreviewPublish from 'src/components/Event/ArticlePreviewPublish';
 import { longDate } from 'src/utils/date';
-import { userName } from 'src/utils/profile';
-import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
-import { nip05Verification } from 'src/utils/ui';
-import Avatar from 'src/components/Avatar/Avatar';
 import { parseDraftedEvent } from 'src/utils/drafts';
 import { accountStore } from 'src/stores/AccountStore';
-import { referencesToTags } from 'src/utils/feeds';
 import { scheduleArticle, sendArticle } from 'src/primal_api/nostr';
 import { deleteFromInbox } from 'src/primal_api/studio';
-import { generateArticleIdentifier } from 'src/utils/kyes';
 import { unwrap } from 'solid-js/store';
+import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 
 
 const ReadsApproveDialog: Component<{
@@ -39,6 +31,10 @@ const ReadsApproveDialog: Component<{
     }
   });
 
+  const firstArticle = () => {
+    // @ts-ignore
+    return parseDraftedEvent(props.drafts[0]) as PrimalArticle;
+  }
   const firstArticlePublishDate = () => {
     return props.drafts[0].draftedEvent?.created_at || 0;
   }
@@ -71,6 +67,12 @@ const ReadsApproveDialog: Component<{
     return;
   };
 
+  createEffect(() => {
+    if (props.open) {
+      console.log('ARTICLE: ', firstArticle())
+    }
+  })
+
 
   return (
     <Dialog
@@ -88,12 +90,9 @@ const ReadsApproveDialog: Component<{
           </div>}
         >
           <div class={styles.previewHolder}>
-            Preview of a Single Article
-            {/* <ArticlePreviewPublish
-              article={props.article!}
-              hideContext={true}
-              hideFooter={true}
-            /> */}
+            <ArticleReviewPreview
+              article={firstArticle()}
+            />
           </div>
         </Show>
 

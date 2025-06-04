@@ -1,0 +1,156 @@
+import { Component, createSignal, createEffect, Show, For } from 'solid-js';
+import { wordsPerMinute } from 'src/constants';
+import { PrimalArticle } from 'src/primal';
+import { shortDate } from 'src/utils/date';
+import { userName } from 'src/utils/profile';
+import { nip19 } from '../../utils/nTools';
+import Avatar from '../Avatar/Avatar';
+import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import ArticleFooter from './ArticleFooter';
+
+import styles from './ArticleReviewPreview.module.scss';
+import missingImage from 'src/assets/images/missing_image.svg';
+
+const isDev = localStorage.getItem('devMode') === 'true';
+
+export type ArticleProps = {
+  id?: string,
+  article: PrimalArticle,
+  height?: number,
+};
+
+const ArticleReviewPreview: Component<ArticleProps> = (props) => {
+
+  let articlePreview: HTMLDivElement | undefined;
+
+  const onImageError = (event: any) => {
+    const image = event.target;
+
+    let src: string = props.article.user.picture;
+
+    if (image.src === src || image.src.endsWith(src)) {
+      src = missingImage;
+    }
+
+    image.onerror = "";
+    image.src = src;
+    return true;
+  };
+
+  const countLines = (el: Element) => {
+
+    // @ts-ignore
+    var divHeight = el.offsetHeight
+
+    // @ts-ignore
+    var lineHeight = el.computedStyleMap ?
+      (el.computedStyleMap().get('line-height')?.toString() || '0') :
+      window.getComputedStyle(el).getPropertyValue('line-height').valueOf();
+
+    var lines = divHeight / parseInt(lineHeight);
+
+    return lines;
+  }
+
+  const [contentStyle, setContentStyle] = createSignal('T3');
+
+  createEffect(() => {
+    const t = props.article.title;
+    const s = props.article.summary;
+
+    const tt = articlePreview?.querySelector(`.${styles.title}`);
+    const ss = articlePreview?.querySelector(`.${styles.summary}`);
+
+    if (!tt || !ss) return;
+
+    const titleLines = countLines(tt);
+    const summaryLines = countLines(ss);
+
+    if (titleLines === 1) setContentStyle('T1');
+
+    if (titleLines === 2) setContentStyle('T2');
+
+    if (titleLines === 3) setContentStyle('T3');
+  });
+
+  const conetntStyles = () => {
+    if (contentStyle() === 'T1') return styles.t1;
+    if (contentStyle() === 'T2') return styles.t2;
+
+    return ''
+  }
+
+
+  return (
+    <div
+      ref={articlePreview}
+      class={`${styles.article} ${styles.bordered}`}
+      style={props.height ? `height: ${props.height}px` : ''}
+    >
+      <div class={styles.header}>
+        <div
+          class={styles.userInfo}
+        >
+          <Avatar user={props.article.user} size={22}/>
+          <div class={styles.userName}>{userName(props.article.user.pubkey)}</div>
+          <VerificationCheck user={props.article.user} />
+          <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
+        </div>
+        <div class={styles.time}>
+          {shortDate(props.article.published_at)}
+        </div>
+      </div>
+
+      <div class={styles.body}>
+        <div class={styles.text}>
+          <div class={`${styles.content} ${conetntStyles()}`}>
+            <div class={styles.title}>
+              {props.article.title}
+            </div>
+            <div class={styles.summary}>
+              {props.article.summary}
+            </div>
+          </div>
+          <div class={styles.tags}>
+            <div class={styles.estimate}>
+              {Math.ceil((props.article.wordCount || 0) / wordsPerMinute)} minute read
+            </div>
+            <For each={props.article.keywords?.slice(0, 3)}>
+              {tag => (
+                <div class={styles.tag}>
+                  {tag}
+                </div>
+              )}
+            </For>
+            <Show when={props.article.keywords?.length && props.article.keywords.length > 3}>
+              <div class={styles.tag}>
+                + {props.article.keywords.length - 3}
+              </div>
+            </Show>
+          </div>
+        </div>
+        <div class={styles.image}>
+          <Show
+            when={props.article.image}
+            fallback={
+              <Show
+                when={props.article.user.picture}
+                fallback={<div class={styles.placeholderImage}></div>}
+              >
+                <img src={props.article.user.picture} onerror={onImageError} />
+              </Show>
+            }
+          >
+            <img
+              src={props.article.image}
+              onerror={onImageError}
+            />
+          </Show>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ArticleReviewPreview;
