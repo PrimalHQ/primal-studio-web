@@ -1,5 +1,5 @@
-import { A, RouteSectionProps, } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
+import { A, RouteSectionProps, useLocation, } from '@solidjs/router';
+import { Component, Match, Show, Switch } from 'solid-js';
 
 import primalBrandingLight from 'assets/images/primal_studio_light.svg';
 import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
@@ -11,6 +11,8 @@ import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeContextMenu } from 'src/stores/AppStore';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
+
+  const location = useLocation();
 
   return (
     <div class={styles.layout}>
@@ -81,6 +83,25 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
               <div class={styles.label}>Settings</div>
             </A>
           </nav>
+
+          <Switch>
+            <Match when={['/articles', '/edit/article'].includes(location.pathname)}>
+              <a
+                href="/edit/article"
+                class={styles.editorButton}
+              >
+                New Article
+              </a>
+            </Match>
+            <Match when={['/notes', '/edit/note'].includes(location.pathname)}>
+              <a
+                href="/edit/note"
+                class={styles.editorButton}
+              >
+                New Note
+              </a>
+            </Match>
+          </Switch>
 
           <footer>
             <ProfileWidget />
