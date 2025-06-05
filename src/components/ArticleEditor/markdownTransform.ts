@@ -23,8 +23,8 @@ import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { userName } from 'src/utils/profile';
 import { fetchArticles, fetchNotes } from 'src/primal_api/events';
 import { getUsers } from 'src/primal_api/profile';
-import { readMentions, setReadMentions } from './ArticleEditor';
 import { renderEmbeddedNote } from '../Event/Note';
+import { mentionStore, updateMentionStore } from 'src/stores/MentionStore';
 
 // import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 // import { fetchUserProfile } from '../handleFeeds';
@@ -59,11 +59,11 @@ const findMissingUser = async (nprofile: string) => {
 
   if (pubkey.length === 0) return;
 
-  let user = unwrap(readMentions.users[pubkey]);
+  let user = unwrap(mentionStore.users[pubkey]);
 
   if (!user) {
     const users = await getUsers([pubkey]);
-    setReadMentions('users', () => ({ [pubkey]: { ...users[0] } }));
+    updateMentionStore('users', () => ({ [pubkey]: { ...users[0] } }));
   }
 
   return user;

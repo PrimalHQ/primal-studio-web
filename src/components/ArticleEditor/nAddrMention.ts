@@ -6,9 +6,9 @@ import { APP_ID } from 'src/App';
 import { Kind } from 'src/constants';
 import { fetchArticles } from 'src/primal_api/events';
 import { nip19 } from 'src/utils/nTools';
-import { setReadMentions } from './ArticleEditor';
 import { PrimalNote, PrimalZap } from 'src/primal';
 import { renderArticleReviewPreview } from '../Event/ArticleReviewPreview';
+import { updateMentionStore } from 'src/stores/MentionStore';
 
 export const findMissingEvent = async (naddr: string, editor: Editor) => {
   if (!naddr) return;
@@ -31,7 +31,7 @@ export const findMissingEvent = async (naddr: string, editor: Editor) => {
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${naddr}]`);
 
   if (mentions.length > 0 && events[0]) {
-    setReadMentions('reads', () => ({ [naddr]: { ...events[0] } }));
+    updateMentionStore('reads', () => ({ [naddr]: { ...events[0] } }));
     const el = renderArticleReviewPreview({
       article: events[0],
     })

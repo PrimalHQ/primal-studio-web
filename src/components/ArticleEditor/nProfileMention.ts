@@ -3,13 +3,12 @@ import { mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range } from '@ti
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 
-import { APP_ID } from 'src/App';
 import { nip19 } from 'src/utils/nTools';
-import { readMentions, setReadMentions } from './ArticleEditor';
 import { unwrap } from 'solid-js/store';
 import { getUsers } from 'src/primal_api/profile';
 import { userName } from 'src/utils/profile';
 import { PrimalUser } from 'src/primal';
+import { mentionStore, updateMentionStore } from 'src/stores/MentionStore';
 
 export const findMissingUser = async (nprofile: string) => {
   const decode = nip19.decode(nprofile);
@@ -27,11 +26,11 @@ export const findMissingUser = async (nprofile: string) => {
   if (pubkey.length === 0) return;
 
 
-  let user = unwrap(readMentions.users[pubkey]);
+  let user = unwrap(mentionStore.users[pubkey]);
 
   if (!user) {
     const users = await getUsers([pubkey]);
-    setReadMentions('users', () => ({ [pubkey]: { ...users[0] } }));
+    updateMentionStore('users', () => ({ [pubkey]: { ...users[0] } }));
   }
 
   setTimeout(() => {
@@ -69,7 +68,7 @@ export const makeNProfileAttrs = (
   let name = bech32;
   if (user) {
     name = userName(user.pubkey);
-    setReadMentions('users', () => ({ [user.pubkey]: { ...user } }));
+    updateMentionStore('users', () => ({ [user.pubkey]: { ...user } }));
   }
   else {
     findMissingUser(name);

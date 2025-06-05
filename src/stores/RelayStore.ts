@@ -395,3 +395,18 @@ export const connectToRelay = async (relay: Relay) => {
     return false;
   }
 };
+
+export const getRelayTags = () => relayStore.all.map(r => {
+  let t = ['r', r.url];
+
+  const settings = relayStore.settings[r.url];
+
+  if (settings && settings.read && !settings.write) {
+    t = [...t, 'read'];
+  }
+  if (settings && !settings.read && settings.write) {
+    t = [...t, 'write'];
+  }
+
+  return t;
+});

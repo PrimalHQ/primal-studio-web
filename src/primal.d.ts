@@ -386,7 +386,7 @@ export type PrimalNote = {
   tags: string[][],
   topZaps: TopZap[],
   content: string,
-  relayHints?: Record<string, string>,
+  relayHints?: string[],
   stats: EventStats,
   studioStats: StudioNoteStats,
   actions: NoteActions,

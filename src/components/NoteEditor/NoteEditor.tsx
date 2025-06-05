@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, JSXElement, Match, on, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSXElement, Match, on, Show, Switch } from 'solid-js';
 
 import styles from './NoteEditor.module.scss';
 
@@ -39,11 +39,25 @@ import { extendMarkdownEditor, MarkdownPlugin, mdToHtml } from '../ArticleEditor
 import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
 import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
 import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
+import ButtonSecondary from '../Buttons/ButtonSecondary';
+import ButtonPrimary from '../Buttons/ButtonPrimary';
+import { referencesToTags } from 'src/utils/feeds';
+import { getRelayTags, relayStore } from 'src/stores/RelayStore';
+import { scheduleNote, sendArticleDraft, sendNote, sendNoteDraft } from 'src/primal_api/nostr';
+import ReadsPublishingDateDialog from '../ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
+import ReadsProposeDialog from '../ArticleEditor/ReadsDialogs/ReadsProposeDialog';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import { longDate } from 'src/utils/date';
+import { useParams } from '@solidjs/router';
+import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 
 const NoteEditor: Component<{
   id?: string,
+  onDone?: () => void,
 }> = (props) => {
+  const params = useParams();
+  const toast = useToastContext();
 
   let tiptapEditor: HTMLDivElement | undefined;
   let editorPlainText: HTMLDivElement | undefined;
@@ -58,6 +72,15 @@ const NoteEditor: Component<{
 
   const [showMention, setShowMention] = createSignal(false);
   const [showAttach, setShowAttach] = createSignal(false);
+
+
+  const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
+  const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
+  const [editScheduled, setEditScheduled] = createSignal(false);
+
+  const [showProposeDiaglog, setShowProposeDialog] = createSignal(false);
+  const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
+
 
   const addMentionToEditor = (user: PrimalUser | undefined, editor?: Editor) => {
     if (!editor || ! user) return;
@@ -333,9 +356,8 @@ const NoteEditor: Component<{
   }));
 
   createEffect(on( editorMode, async (mode) => {
-    const json = editorTipTap()?.getJSON();
-
     if (mode === 'text') {
+      const json = editorTipTap()?.getJSON();
       setPlainContent(tiptapJsonToPlainText(json));
       return;
     }
@@ -353,6 +375,77 @@ const NoteEditor: Component<{
     }
   }));
 
+  const getEditorContent = async (mode: 'html' | 'text') => {
+    if (mode === 'html') {
+      const plainText = plainContent();
+
+      const json = plainTextToTiptapJson(plainText);
+
+      let html = generateHTML(json, extensions);
+      return await mdToHtml(html);
+    }
+
+    const json = editorTipTap()?.getJSON();
+    return tiptapJsonToPlainText(json);
+  }
+
+  const proposeDraft = async (content: string, tags: string[][]) => {
+
+    const relayTags = relayStore.all.map(r => ['r', r.url]);
+
+    let tgs = [...tags, ...relayTags];
+
+    const { success, note } = await sendNoteDraft(
+      proposedUser()!,
+      content,
+      tgs,
+      futurePublishDate(),
+    );
+
+    if (success && note) {
+      toast?.sendSuccess('Proposal sent');
+      console.log('SENT: ', note);
+
+      // if (lastDraft.length > 0) {
+      //   sendDeleteEvent(
+      //     user.pubkey,
+      //     lastDraft,
+      //     Kind.Draft,
+      //   );
+      // }
+
+      props.onDone && props.onDone();
+    }
+    else {
+      toast?.sendWarning('Proposal sending failed');
+    }
+  };
+
+  const publishNote = async () => {
+    const content = await getEditorContent(editorMode());
+    let tags = referencesToTags(content);
+
+    if (proposedUser()) {
+      proposeDraft(content, tags);
+      return;
+    }
+
+    const relayTags = getRelayTags();
+    tags = [...tags, ...relayTags];
+
+    const pubDate = futurePublishDate();
+
+    const { success, note } = pubDate ?
+      await scheduleNote(content, tags, pubDate, editScheduled() ? params.id : undefined) :
+      await sendNote(content, tags);
+
+    if (success && note) {
+      console.log('SENT: ', note);
+
+      props.onDone && props.onDone();
+    }
+
+  };
 
   return (
     <>
@@ -410,7 +503,86 @@ const NoteEditor: Component<{
       </div>
 
       <div class={styles.editorNoteFooter}>
+          <div class={styles.advActions}>
+            <Show
+              when={!proposedUser()}
+              fallback={
+                <div class={styles.advSelection}>
+                  <Avatar user={proposedUser()} size={16} />
+                  <div class={styles.label}>
+                    {userName(proposedUser()!.pubkey)}
+                  </div>
+                  <VerificationCheck user={proposedUser()} />
+                  <button
+                    class={styles.advEditButton}
+                    onClick={() => setShowProposeDialog(true)}
+                  >
+                    Edit
+                  </button>
+                </div>
+              }
+            >
+              <button
+                class={styles.linkLike}
+                onClick={() => {
+                  setShowProposeDialog(true);
+                }}
+              >
+                Propose to user
+              </button>
+            </Show>
 
+            <Show
+              when={!futurePublishDate()}
+              fallback={
+                <div class={styles.advSelection}>
+                  <div class={styles.calendarIcon}></div>
+                  <div class={styles.label}>
+                    {longDate(futurePublishDate())}
+                  </div>
+                  <button
+                    class={styles.advEditButton}
+                    onClick={() => setShowPublishDateDialog(true)}
+                  >
+                    Edit
+                  </button>
+                </div>
+              }
+            >
+              <button
+                class={styles.linkLike}
+                onClick={() => {
+                  setShowPublishDateDialog(true);
+                }}
+              >
+                Schedule
+              </button>
+            </Show>
+          </div>
+          <div class={styles.pubActions}>
+            <ButtonSecondary
+              onClick={() => {
+                props.onDone && props.onDone();
+              }}
+            >
+              Cancel
+            </ButtonSecondary>
+
+            <ButtonPrimary
+              onClick={() => {
+                publishNote();
+              }}
+            >
+              <Switch fallback={<>Publish</>}>
+                <Match when={proposedUser()}>
+                  <>Send</>
+                </Match>
+                <Match when={futurePublishDate()}>
+                  <>Schedule</>
+                </Match>
+              </Switch>
+            </ButtonPrimary>
+          </div>
       </div>
 
       <ReadsMentionDialog
@@ -437,6 +609,24 @@ const NoteEditor: Component<{
         onSubmit={(url: string, title:string, alt: string) => {
           attachImage(url, title, alt);
           setShowAttach(false);
+        }}
+      />
+
+      <ReadsPublishingDateDialog
+        open={showPublishDateDialog()}
+        setOpen={setShowPublishDateDialog}
+        onSetPublishDate={(timestamp) => {
+          setFuturePublishDate(timestamp);
+          setShowPublishDateDialog(false);
+        }}
+      />
+
+      <ReadsProposeDialog
+        open={showProposeDiaglog()}
+        setOpen={setShowProposeDialog}
+        onAddUser={(user) => {
+          setProposedUser(user);
+          setShowProposeDialog(false);
         }}
       />
     </>

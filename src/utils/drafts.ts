@@ -44,8 +44,6 @@ export const parseDraftedEvent = (
 
   const event = draft.draftedEvent;
 
-  console.log('PARSE EVENT: ', draft)
-
   if (!event) return;
 
   if ([Kind.LongForm].includes(draft.contentKind)) {

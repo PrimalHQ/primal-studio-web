@@ -67,13 +67,6 @@ const ReadsApproveDialog: Component<{
     return;
   };
 
-  createEffect(() => {
-    if (props.open) {
-      console.log('ARTICLE: ', firstArticle())
-    }
-  })
-
-
   return (
     <Dialog
       triggerClass="hidden"

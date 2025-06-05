@@ -15,7 +15,7 @@ import ArticleEditor, { ArticleEdit, emptyArticleEdit } from 'src/components/Art
 import ReadsLeaveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsLeaveDialog';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import { longDate } from 'src/utils/date';
-import { scheduleArticle, sendArticle, sendDeleteEvent, sendDraft } from 'src/primal_api/nostr';
+import { scheduleArticle, sendArticle, sendDeleteEvent, sendArticleDraft } from 'src/primal_api/nostr';
 import { Kind, wordsPerMinute } from 'src/constants';
 import { APP_ID } from 'src/App';
 import { decrypt44 } from 'src/utils/nostrApi';
@@ -360,7 +360,7 @@ const ReadsEditor: Component = () => {
 
     const lastDraft = lastSaved.draftId;
 
-    let tags: string[][] = referencesToTags(article.content, {});;
+    let tags: string[][] = referencesToTags(article.content);;
 
     const relayTags = relayStore.all.map(r => ['r', r.url]);
 
@@ -384,7 +384,7 @@ const ReadsEditor: Component = () => {
 
     setIsPublishing(true);
 
-    const { success, note } = await sendDraft(
+    const { success, note } = await sendArticleDraft(
       proposedUser()!,
       articleToSend,
       markdownContent(),
@@ -423,8 +423,7 @@ const ReadsEditor: Component = () => {
 
     const content = markdownContent();
 
-    let relayHints = {}
-    let tags: string[][] = referencesToTags(content, relayHints);;
+    let tags: string[][] = referencesToTags(content);;
 
     const relayTags = relayStore.all.map(r => ['r', r.url]);
 
@@ -562,7 +561,7 @@ const ReadsEditor: Component = () => {
 
     const lastDraft = lastSaved.draftId;
 
-    const { success, note } = await sendDraft(
+    const { success, note } = await sendArticleDraft(
       user,
       article,
       markdownContent(),
@@ -600,8 +599,7 @@ const ReadsEditor: Component = () => {
 
     const content = markdownContent();
 
-    let relayHints = {}
-    let tags: string[][] = referencesToTags(content, relayHints);;
+    let tags: string[][] = referencesToTags(content);;
 
     const relayTags = relayStore.all.map(r => ['r', r.url])
 

@@ -636,4 +636,78 @@
   width: calc(100% - 32px);
   height: 56px;
   padding-inline: 16px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .advActions {
+    display: flex;
+
+    .linkLike {
+      color: var(--accent-links);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 16px;
+
+      padding-inline: 8px;
+
+      border-right: 1px solid var(--subtile-devider);
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+
+  .pubActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    >button {
+      padding-inline: 24px;
+    }
+  }
+}
+
+.calendarIcon {
+  width: 16px;
+  height: 16px;
+
+  background-color: var(--brand-text);
+  -webkit-mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
+}
+
+.advSelection {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  padding-inline: 8px;
+
+  border-right: 1px solid var(--subtile-devider);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  .label {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 14px;
+  }
+
+  .advEditButton {
+    color: var(--accent-links);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    padding-left: 4px;
+
+    border-left: 1px solid var(--subtile-devider);
+  }
 }

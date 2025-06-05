@@ -7,6 +7,7 @@ import { hexToNpub } from "./profile";
 import { parseBolt11 } from "./zaps";
 import { nip19 } from "./nTools";
 import { v4 as uuidv4 } from 'uuid';
+import { mentionStore } from "src/stores/MentionStore";
 
 export const noActions = (id: string) => ({
   event_id: id,
@@ -501,7 +502,7 @@ export const getNoteInPage = (
     nId: nip19.neventEncode(eventPointer),
     nIdShort: nip19.neventEncode(eventPointerShort),
     actions: (page.noteActions && page.noteActions[note.id]) ?? noActions(note.id),
-    relayHints: page.relayHints,
+    relayHints: [page.relayHints[note.id]],
 
     repost,
     event: { ...note },
@@ -610,7 +611,7 @@ export const getArticleInPage = (
     actions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
     stats: { ...stat },
     studioStats: { ...studioStats },
-    relayHints: page.relayHints,
+    relayHints: [page.relayHints[read.id]],
   };
 
   tags.forEach(tag => {
@@ -1072,6 +1073,9 @@ export const updateFeedPage = (page: EventFeedPage, content: NostrEventContent) 
   if ([Kind.StudioNoteStats].includes(content.kind)) {
     page.studioNoteStats = JSON.parse(content.content || '{}');
   }
+  if (content.kind === Kind.RelayHint) {
+    page.relayHints = JSON.parse(content.content || '{}');
+  }
 
   // if ([Kind.MediaInfo, Kind.EventZapInfo, Kind.Blossom, Kind.VerifiedUsersDict, Kind.RelayHint].includes(content.kind)) return;
 
@@ -1170,7 +1174,7 @@ export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: Paginati
 }
 
 
-export const referencesToTags = (value: string, relayHints: Record<string, string>) => {
+export const referencesToTags = (value: string) => {
   const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
   const regexMention =
     /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1['qpzry9x8gf2tvdw0s3jn54khce6mua7l']+)\b|#\[(\d+)\]/g;
@@ -1213,7 +1217,8 @@ export const referencesToTags = (value: string, relayHints: Record<string, strin
     }
 
     if (decoded.type === 'note') {
-      tags.push(['e', decoded.data, relayHints ? (relayHints[decoded.data] || '') : '', 'mention']);
+      const relays = mentionStore.notes[decoded.data].relayHints;
+      tags.push(['e', decoded.data, (relays && relays.length > 0) ? relays[0] : '', 'mention']);
       return;
     }
 

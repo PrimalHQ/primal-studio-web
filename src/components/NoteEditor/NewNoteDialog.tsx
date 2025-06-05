@@ -19,7 +19,9 @@ const NewNoteDialog: Component<{
         <div class={styles.dialog}>
           <KobalteDialog.Content class={styles.dialogContent} >
             <KobalteDialog.Description class={styles.dialogDescription}>
-              <NoteEditor />
+              <NoteEditor
+                onDone={() => props.setOpen && props.setOpen(false)}
+              />
             </KobalteDialog.Description>
           </KobalteDialog.Content>
         </div>

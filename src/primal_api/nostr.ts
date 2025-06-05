@@ -11,6 +11,8 @@ import { ArticleEdit } from "src/components/ArticleEditor/ArticleEditor";
 import { generateArticleIdentifier } from "src/utils/kyes";
 import { importScheduled, replaceScheduled } from "./studio";
 import { accountStore } from "src/stores/AccountStore";
+import { createUniqueId } from "solid-js";
+import { v4 as uuidv4 } from 'uuid';
 
 export const proxyEvent = async (event: NostrRelayEvent) => {
   let signedNote: NostrRelaySignedEvent | undefined;
@@ -116,8 +118,6 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
   return response;
 }
 
-
-
 export const scheduleArticle = async (
   articleData: ArticleEdit,
   tags: string[][],
@@ -157,8 +157,6 @@ export const scheduleArticle = async (
 
   return response;
 }
-
-
 
 export const sendEvent = async (
   event: NostrRelayEvent,
@@ -316,7 +314,7 @@ export const sendDeleteEvent = async (
   return response;
 };
 
-export const sendDraft = async (
+export const sendArticleDraft = async (
   user: PrimalUser,
   article: ArticleEdit,
   mdContent: string,
@@ -358,6 +356,114 @@ export const sendDraft = async (
     tags: [
       ['d', identifier],
       ['k', `${Kind.LongForm}`],
+      ['client', 'primal-web'],
+      ...draftTags,
+      // ["e", "<anchor event event id>", "<relay-url>"],
+      // ["a", "<anchor event address>", "<relay-url>"],
+    ],
+    content: e,
+    // other fields
+  }
+
+  const response = await sendEvent(draft);
+
+  if (response.success && response.note) {
+    triggerImportEvents([response.note], `draft_import_${APP_ID}`);
+  }
+
+  return response;
+};
+
+export const sendNote = async (text: string, tags: string[][]) => {
+  const event = {
+    content: text,
+    kind: Kind.Text,
+    tags,
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  const response = await sendEvent(event);
+
+  if (response.success && response.note) {
+    triggerImportEvents([response.note], `note_import_${APP_ID}`);
+  }
+
+  return response;
+
+}
+
+export const scheduleNote = async (
+  content: string,
+  tags: string[][],
+  pubTime: number,
+  replace_id?: string,
+) => {
+  let tgs = [...tags];
+  const hasPubTime = tgs.find(t => t[0] === 'published_at');
+
+  // const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
+
+  if (!hasPubTime) {
+    tgs.push(["published_at", `${pubTime}`])
+  } else {
+    tgs = (tgs).map(
+      t => t[0] === 'published_at' ? ['published_at', `${pubTime}`] : t);
+  }
+
+  const event = {
+    content,
+    kind: Kind.Text,
+    tags: [
+      ...tgs,
+    ],
+    created_at: pubTime,
+  };
+
+  const signedEvent = await signEvent(event)
+
+  const response = replace_id ?
+    await replaceScheduled(signedEvent, replace_id) :
+    await importScheduled(signedEvent);
+
+  // if (response.success && response.note) {
+  //   triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
+  // }
+
+  return response;
+}
+
+export const sendNoteDraft = async (
+  user: PrimalUser,
+  content: string,
+  tags: string[][],
+  pubTime?: number,
+): Promise<SendNoteResult> => {
+  const pk = user.pubkey;
+  const identifier = generateArticleIdentifier(uuidv4());
+  const time = pubTime || Math.floor((new Date()).getTime() / 1000);
+
+  const a = {
+    content,
+    kind: Kind.Text,
+    tags,
+    created_at: time,
+  };
+
+  const e = await encrypt44(pk, JSON.stringify(a));
+  // const d = await decrypt44(pk, e);
+
+  let draftTags: string[][] = []
+
+  if (pk != accountStore.pubkey) {
+    draftTags.push(['p', pk])
+  }
+
+  const draft = {
+    kind: Kind.Draft,
+    created_at: Math.floor((new Date()).getTime() / 1_000),
+    tags: [
+      ['d', identifier],
+      ['k', `${Kind.Text}`],
       ['client', 'primal-web'],
       ...draftTags,
       // ["e", "<anchor event event id>", "<relay-url>"],

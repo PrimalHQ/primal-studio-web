@@ -34,18 +34,6 @@ import ArticleEditorToolbar from "./ArticleEditorToolbar";
 
 import { accountStore, activeUser } from "src/stores/AccountStore";
 
-export type ReadMentions = {
-  users: Record<string, PrimalUser>,
-  notes: Record<string, PrimalNote>,
-  reads: Record<string, PrimalArticle>,
-};
-
-export const emptyReadsMentions = () => ({
-  users: {},
-  notes: {},
-  reads: {},
-})
-
 export type ArticleEdit = {
   title: string,
   image: string,
@@ -69,8 +57,6 @@ export const emptyArticleEdit = (): ArticleEdit => ({
 
 const titleImageUploadId = 'title_image';
 const contentImageUploadId = 'content_image';
-
-export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyReadsMentions());
 
 
 const ArticleEditor: Component<{

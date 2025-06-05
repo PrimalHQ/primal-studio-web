@@ -5,10 +5,10 @@ import type { MarkdownSerializerState } from 'prosemirror-markdown';
 
 import { APP_ID } from 'src/App';
 import { nip19 } from 'src/utils/nTools';
-import { setReadMentions } from './ArticleEditor';
 import { PrimalNote, PrimalZap } from 'src/primal';
 import { fetchNotes } from 'src/primal_api/events';
 import { renderEmbeddedNote } from '../Event/Note';
+import { updateMentionStore } from 'src/stores/MentionStore';
 
 export const createInputRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
@@ -37,7 +37,7 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
   if (mentions.length > 0 && events[0]) {
-    setReadMentions('notes', () => ({ [id]: { ...events[0] } }));
+    updateMentionStore('notes', () => ({ [id]: { ...events[0] } }));
 
     const el = renderEmbeddedNote({
       note: events[0],
