@@ -38,7 +38,7 @@ const AppRouter: Component = () => {
   return (
     <Router root={AppLayout} preload={true}>
       <Route path="/:pubkey?" component={Home} preload={homePreload} />
-      <Route path="/notes" component={Notes} preload={notesPreload}/>
+      <Route path="/notes/:pubkey?" component={Notes} preload={notesPreload}/>
       <Route path="/articles/:pubkey?" component={Articles} preload={articlesPreload} />
       <Route path="/media" component={Media} />
       <Route path="/account" component={Account} />
