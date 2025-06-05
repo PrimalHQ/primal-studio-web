@@ -113,7 +113,7 @@ const HomeStats: Component<{
           <div class={styles.label}>Zaps Delta</div>
           <div class={styles.zapNumbers}>
             <div class={styles.value}>
-              {humanizeNumber(homeStore.totals.zaps_sent - homeStore.totals.zaps_received)}
+              {humanizeNumber(Math.abs(homeStore.totals.zaps_sent - homeStore.totals.zaps_received))}
             </div>
             <div class={`${styles.valueMore} ${satsDiff() > 0 ? styles.positive : styles.negative}`}>
               {satsDiff() > 0 ? '+' : '-'} {humanizeNumber(Math.abs(satsDiff()))}
