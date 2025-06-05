@@ -1,6 +1,6 @@
 import { PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { decrypt44 } from "./nostrApi";
-import { logError } from "./logger";
+import { logError, logWarning } from "./logger";
 import { emptyMentions, extractReplyToFromTags, noActions } from "./feeds";
 import { Kind } from "src/constants";
 import DOMPurify from 'dompurify';
@@ -52,6 +52,8 @@ export const parseDraftedEvent = (
     const tags = event.tags || [];
     const coordinate = '';
     const naddr = '';
+
+    const relayHints = tags.reduce<string[]>((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, []);
 
     let {
       mentionedNotes,
@@ -106,7 +108,7 @@ export const parseDraftedEvent = (
         score: 0,
         sentiment: "neutral"
       },
-      relayHints: {},
+      relayHints,
     } as PrimalArticle;
 
     tags.forEach(tag => {
@@ -146,6 +148,7 @@ export const parseDraftedEvent = (
 
     const tags = note.tags || [];
     const replyTo = extractReplyToFromTags(tags);
+    const relayHints = tags.reduce<string[]>((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, []);
 
     // Parse mentions
     let {
@@ -163,9 +166,20 @@ export const parseDraftedEvent = (
       relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
     };
 
+
     const eventPointerShort: nip19.EventPointer = {
       id: note.id,
     };
+
+    let nId = '';
+    let nIdShort = '';
+
+    try {
+      nId = nip19.neventEncode(eventPointer);
+      nIdShort = nip19.neventEncode(eventPointerShort);
+    } catch (e) {
+      logWarning('bad id');
+    }
 
     return {
       user: author,
@@ -191,10 +205,10 @@ export const parseDraftedEvent = (
       sig: note.sig,
       kind: note.kind,
 
-      nId: nip19.neventEncode(eventPointer),
-      nIdShort: nip19.neventEncode(eventPointerShort),
+      nId,
+      nIdShort,
       actions: noActions(note.id),
-      relayHints: {},
+      relayHints,
 
       event: { ...note },
 
