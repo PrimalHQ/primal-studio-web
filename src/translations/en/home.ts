@@ -1,6 +1,6 @@
 export default {
   title: 'Home',
   header: 'Home',
-  topNotes: 'Top notes for selected range',
-  topArticles: 'Top articles for selected range',
+  topNotes: 'Top notes for the selected range',
+  topArticles: 'Top articles for the selected range',
 }
