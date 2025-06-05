@@ -65,6 +65,7 @@ export const fetchHomeTotals = async (
   ) => {
 
     const r = await getHomeTotals({ pubkey, ...options });
+
     setHomeStore('totals', () => ({ ...r }))
   };
 

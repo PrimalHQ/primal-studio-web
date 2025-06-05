@@ -26,18 +26,18 @@ export const humanizeNumber = (number: number, veryShort = false) => {
   }
 
   if (number < 100000) {
-    return `${parseFloat((number/1000).toFixed(1))} k`;
+    return `${parseFloat((number/1000).toFixed(1))}k`;
   }
 
   if (number < 1000000) {
-    return `${Math.floor(number/1000)} k`;
+    return `${Math.floor(number/1000)}k`;
   }
 
   if (number < 100000000) {
-    return `${parseFloat((number/1000000).toFixed(1))} m`;
+    return `${parseFloat((number/1000000).toFixed(1))}m`;
   }
 
-  return `${Math.floor(number/1000000)} m`;
+  return `${Math.floor(number/1000000)}m`;
 };
 
 export const truncateNumber = (amount: number, from?: 1 | 2 | 3 | 4) => {
