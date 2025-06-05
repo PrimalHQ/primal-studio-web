@@ -48,15 +48,14 @@ import ReadsPublishingDateDialog from '../ArticleEditor/ReadsDialogs/ReadsPublis
 import ReadsProposeDialog from '../ArticleEditor/ReadsDialogs/ReadsProposeDialog';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { longDate } from 'src/utils/date';
-import { useParams } from '@solidjs/router';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 
 const NoteEditor: Component<{
   id?: string,
   onDone?: () => void,
+  noteId?: string,
 }> = (props) => {
-  const params = useParams();
   const toast = useToastContext();
 
   let tiptapEditor: HTMLDivElement | undefined;
@@ -436,7 +435,7 @@ const NoteEditor: Component<{
     const pubDate = futurePublishDate();
 
     const { success, note } = pubDate ?
-      await scheduleNote(content, tags, pubDate, editScheduled() ? params.id : undefined) :
+      await scheduleNote(content, tags, pubDate, editScheduled() ? props.noteId : undefined) :
       await sendNote(content, tags);
 
     if (success && note) {
