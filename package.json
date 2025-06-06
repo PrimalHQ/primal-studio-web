@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@cookbook/solid-intl": "0.1.2",
+    "@jukben/emoji-search": "3.0.0",
     "@kobalte/core": "0.13.9",
     "@rnwonder/solid-date-picker": "1.4.1",
     "@solid-primitives/map": "0.5.0",

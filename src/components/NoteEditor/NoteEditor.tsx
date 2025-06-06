@@ -25,13 +25,13 @@ import { NEventExtension } from "../ArticleEditor/nEventMention";
 import { createTiptapEditor } from 'solid-tiptap';
 import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
-import { accountStore, activeUser } from 'src/stores/AccountStore';
+import { accountStore, activeUser, saveEmoji } from 'src/stores/AccountStore';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from 'src/App';
 import tippy, { Instance } from 'tippy.js';
 import SearchOption from '../Search/SearchOptions';
-import { nip05Verification } from 'src/utils/ui';
+import { insertIntoTextArea, nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
@@ -49,6 +49,7 @@ import ReadsProposeDialog from '../ArticleEditor/ReadsDialogs/ReadsProposeDialog
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { longDate } from 'src/utils/date';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
+import EmojiButton from '../EmojiPicker/EmojiButton';
 
 
 const NoteEditor: Component<{
@@ -59,7 +60,7 @@ const NoteEditor: Component<{
   const toast = useToastContext();
 
   let tiptapEditor: HTMLDivElement | undefined;
-  let editorPlainText: HTMLDivElement | undefined;
+  let editorPlainText: HTMLTextAreaElement | undefined;
 
   const [selectedUser, setSelectedUser] = createSignal<PrimalUser>();
   const [searchQuery, setSearchQuery] = createSignal('');
@@ -386,17 +387,16 @@ const NoteEditor: Component<{
       return;
     }
 
-    if (mode === 'html') {
-      const plainText = plainContent();
+    const plainText = plainContent();
 
-      const json = plainTextToTiptapJson(plainText);
+    const json = plainTextToTiptapJson(plainText);
 
-      let html = generateHTML(json, extensions);
-      html = await processMarkdownForNostr(html);
-      editorTipTap()?.chain().setContent(html);
-      // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
+    let html = generateHTML(json, extensions);
+    html = await processMarkdownForNostr(html);
 
-    }
+    editorTipTap()?.chain().setContent(html).run();
+    // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
+
   }));
 
   const getEditorContent = async (mode: 'html' | 'text' | 'phone') => {
@@ -537,6 +537,24 @@ const NoteEditor: Component<{
           >
             <div class={`${styles.atIcon} ${styles.active}`}></div>
           </button>
+
+          <EmojiButton
+            class={styles.mdToolButton}
+            onSelect={((emoji) => {
+              saveEmoji(emoji);
+              if (editorMode() === 'text') {
+                if (!editorPlainText) return;
+
+                const position = editorPlainText.selectionStart;
+
+                insertIntoTextArea(editorPlainText, emoji.name, position);
+                editorPlainText.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+              }
+
+              editorTipTap()?.chain().focus().insertContent(emoji.name).run();
+            })}
+          />
         </div>
         <div class={styles.editorModeControls}>
           <button

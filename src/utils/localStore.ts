@@ -1,3 +1,4 @@
+import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { Kind } from "src/constants";
 import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
 
@@ -10,6 +11,7 @@ export type LocalStore = {
   relaySettings: NostrRelaySettings,
   proxyThroughPrimal: boolean,
   connectToPrimaryRelays: boolean,
+  emojiHistory: EmojiOption[],
 };
 
 
@@ -21,6 +23,7 @@ export const emptyStorage: LocalStore = {
   relaySettings: {},
   proxyThroughPrimal: false,
   connectToPrimaryRelays: false,
+  emojiHistory: [],
 }
 
 
@@ -210,4 +213,26 @@ export const readProxyThroughPrimal = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.proxyThroughPrimal || false;
+}
+
+
+export const storeEmojiHistory = (
+  pubkey: string | undefined,
+  emojis: EmojiOption[],
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.emojiHistory = emojis;
+
+  setStorage(pubkey, store);
+}
+
+export const readEmojiHistory = (pubkey: string | undefined) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey);
+
+  return store.emojiHistory || [];
 }

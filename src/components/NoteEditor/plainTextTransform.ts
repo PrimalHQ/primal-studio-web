@@ -68,7 +68,6 @@ export const plainTextToTiptapJson = (plainText: string) => {
   if (typeof plainText !== 'string') {
     return { type: 'doc', content: [] };
   }
-
   const lines = plainText.split('\n');
   const content = [];
 
@@ -93,7 +92,8 @@ export const plainTextToTiptapJson = (plainText: string) => {
             text: token
           });
         }
-      } else if (token.startsWith('nostr:')) {
+      }
+      else if (token.startsWith('nostr:')) {
         // Handle Nostr entities
         const bech32 = token.substring(6); // Remove 'nostr:' prefix
 
@@ -114,18 +114,27 @@ export const plainTextToTiptapJson = (plainText: string) => {
 
         // Add additional attrs based on type
         if (nostrType === 'nprofile') {
+          // @ts-ignore
           nostrNode.attrs.pubkey = '';
+          // @ts-ignore
           nostrNode.attrs.relays = [];
+          // @ts-ignore
           nostrNode.attrs.name = '';
+          // @ts-ignore
         } else if (nostrType === 'nevent') {
+          // @ts-ignore
           nostrNode.attrs.id = '';
+          // @ts-ignore
           nostrNode.attrs.kind = 1;
+          // @ts-ignore
           nostrNode.attrs.author = '';
+          // @ts-ignore
           nostrNode.attrs.relays = [];
         }
 
         paragraphContent.push(nostrNode);
-      } else if (token.match(/^https?:\/\//)) {
+      }
+      else if (token.match(/^https?:\/\//)) {
         // Handle URLs - could be images, videos, or regular links
         if (token.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
           paragraphContent.push({
@@ -148,7 +157,8 @@ export const plainTextToTiptapJson = (plainText: string) => {
             text: token
           });
         }
-      } else if (token.trim() !== '') {
+      }
+      else if (token.trim() !== '') {
         // Regular text
         paragraphContent.push({
           type: 'text',

@@ -19,7 +19,7 @@ import {
 } from "../utils/socket";
 import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
-import { accountStore, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
+import { accountStore, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
@@ -138,6 +138,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
     fetchNostrKey();
 
     getRecomendedBlossomServers();
+
+    loadEmojiHistoryFromLocalStore();
   })
 
   // Handle fetching users identity --------------------------------------------

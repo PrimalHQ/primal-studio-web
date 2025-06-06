@@ -1,7 +1,7 @@
 import { createStore } from "solid-js/store";
 import { NostrEventContent, NostrWindow } from "../primal";
 import { logError, logInfo } from "../utils/logger";
-import { readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storePubkey, storeRelaySettings } from "../utils/localStore";
+import { readEmojiHistory, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storePubkey, storeRelaySettings } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19 } from "../utils/nTools";
@@ -15,6 +15,7 @@ import { getDefaultBlossomServers } from "src/primal_api/settings";
 import { sendBlossomEvent } from "src/primal_api/relays";
 import { parseUserMetadata } from "src/utils/profile";
 import { getMembershipStatus } from "src/primal_api/membership";
+import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -40,6 +41,7 @@ export type AccountStore = {
   recomendedBlossomServers: string[],
   accountIsReady: boolean,
   membershipStatus: MembershipStatus,
+  emojiHistory: EmojiOption[],
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -50,6 +52,7 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   recomendedBlossomServers: [],
   accountIsReady: false,
   membershipStatus: {},
+  emojiHistory: [],
 });
 
 let extensionAttempt = 0;
@@ -321,3 +324,24 @@ export const checkMembershipStatus = () => {
     getMembershipStatus(accountStore.pubkey, subId, memSocket);
   });
 };
+
+export const saveEmoji = (emoji: EmojiOption) => {
+  const history = accountStore.emojiHistory;
+
+  if (history.find(e => e.name === emoji.name)) {
+    let sorted = [...history];
+    sorted.sort((a, b) => a.name === emoji.name ? -1 : b.name === emoji.name ? 1 : 0);
+
+    updateAccountStore('emojiHistory', () => [...sorted]);
+    storeEmojiHistory(accountStore.pubkey, accountStore.emojiHistory);
+
+    return;
+  }
+
+  updateAccountStore('emojiHistory', (h) => [emoji, ...h].slice(0, 40));
+  storeEmojiHistory(accountStore.pubkey, accountStore.emojiHistory);
+};
+
+export const loadEmojiHistoryFromLocalStore = () => {
+  updateAccountStore('emojiHistory', () => readEmojiHistory(accountStore.pubkey));
+}

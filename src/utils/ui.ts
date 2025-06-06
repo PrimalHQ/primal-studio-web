@@ -114,3 +114,41 @@ export const sha256 = async (file: File) => {
     return hashHex;
   });
 }
+
+export const isVisibleInContainer = (element: Element, container: Element) => {
+  const { bottom, height, top } = element.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+
+  return top <= containerRect.top ? containerRect.top - top <= height : bottom - containerRect.bottom <= height;
+};
+
+export const getScreenCordinates = (obj: any) =>  {
+  let p: { x?: number, y?: number } = {};
+
+  p.x = obj.offsetLeft;
+  p.y = obj.offsetTop;
+
+  while (obj.offsetParent) {
+    p.x = p.x + obj.offsetParent.offsetLeft;
+    p.y = p.y + obj.offsetParent.offsetTop;
+    if (obj == document.getElementsByTagName("body")[0]) {
+      break;
+    }
+    else {
+      obj = obj.offsetParent;
+    }
+  }
+  return p;
+}
+
+export const insertIntoTextArea = (
+  textarea: HTMLTextAreaElement,
+  insertText: string,
+  position: number,
+) => {
+  const value = textarea.value;
+  const before = value.substring(0, position);
+  const after = value.substring(position);
+  textarea.value = before + insertText + after;
+  textarea.selectionStart = textarea.selectionEnd = position + 1;
+}

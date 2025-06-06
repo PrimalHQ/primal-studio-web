@@ -720,6 +720,16 @@
   mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
 }
 
+.emojiIcon {
+  width: 24px;
+  height: 24px;
+
+  background-color: var(--brand-text);
+  -webkit-mask: url(../../assets/icons/emoji.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/emoji.svg) 0 / 100% no-repeat;
+
+}
+
 .advSelection {
   display: flex;
   align-items: center;
