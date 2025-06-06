@@ -1,3 +1,117 @@
+export type ExtMediaConfig = {
+  src: string,
+  service: string,
+  originalUrl: string,
+};
+
+export type ExtMediaService = {
+  regex: RegExp,
+  convert: (match: string[], ...strings: string[]) => ExtMediaConfig;
+};
+
+export const convertConfig: Record<string, ExtMediaService> = {
+  // Spotify
+  spotify: {
+    regex: /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/g,
+    convert: (match, type, id) => ({
+      src: `https://open.spotify.com/embed/${type}/${id}`,
+      service: 'spotify',
+      originalUrl: match[0]
+    })
+  },
+
+  // YouTube
+  youtube: {
+    regex: /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/g,
+    convert: (match, videoId) => ({
+      src: `https://www.youtube.com/embed/${videoId}`,
+      service: 'youtube',
+      originalUrl: match[0]
+    })
+  },
+
+  // SoundCloud
+  soundcloud: {
+    regex: /(?:https?:\/\/)?(?:www\.)?soundcloud\.com\/[\w-]+\/[\w-]+/g,
+    convert: (match) => ({
+      src: `https://w.soundcloud.com/player/?url=${encodeURIComponent(match[0])}&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true`,
+      service: 'soundcloud',
+      originalUrl: match[0]
+    })
+  },
+
+  // Mixcloud
+  mixcloud: {
+    regex: /(?:https?:\/\/)?(?:www\.)?mixcloud\.com\/([^\/]+)\/([^\/\?]+)/g,
+    convert: (match, user, show) => ({
+      src: `https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${user}%2F${show}%2F`,
+      service: 'mixcloud',
+      originalUrl: match[0]
+    })
+  },
+
+  // Tidal
+  tidal: {
+    regex: /(?:https?:\/\/)?(?:www\.)?tidal\.com\/browse\/(track|album|playlist)\/([0-9]+)/g,
+    convert: (match, type, id) => ({
+      src: `https://embed.tidal.com/${type}s/${id}`,
+      service: 'tidal',
+      originalUrl: match[0]
+    })
+  },
+
+  // Twitch
+  twitch: {
+    regex: /(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/g,
+    convert: (match, channel) => ({
+      src: `https://player.twitch.tv/?channel=${channel}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}`,
+      service: 'twitch',
+      originalUrl: match[0]
+    })
+  },
+
+  // Rumble
+  rumble: {
+    regex: /(?:https?:\/\/)?(?:www\.)?rumble\.com\/([a-zA-Z0-9_-]+)/g,
+    convert: (match, videoId) => ({
+      src: `https://rumble.com/embed/${videoId}/`,
+      service: 'rumble',
+      originalUrl: match[0]
+    })
+  },
+
+  // Apple Music
+  applemusic: {
+    regex: /(?:https?:\/\/)?music\.apple\.com\/([a-z]{2})\/(album|song)\/[^\/]+\/([0-9]+)/g,
+    convert: (match, country, type, id) => ({
+      src: `https://embed.music.apple.com/${country}/${type}/${id}`,
+      service: 'applemusic',
+      originalUrl: match[0]
+    })
+  },
+
+  // Nostr Nests
+  // nostrnests: {
+  //   regex: /(?:https?:\/\/)?(?:www\.)?nostrnests\.com\/([a-zA-Z0-9_-]+)/g,
+  //   convert: (match, nestId) => ({
+  //     src: `https://nostrnests.com/embed/${nestId}`,
+  //     service: 'nostrnests',
+  //     originalUrl: match[0]
+  //   })
+  // },
+
+  // Wavlake
+  wavlake: {
+    regex: /(?:https?:\/\/)?(?:www\.)?wavlake\.com\/(track|album)\/([a-zA-Z0-9_-]+)/g,
+    convert: (match, type, id) => ({
+      src: `https://embed.wavlake.com/${type}/${id}`,
+      service: 'wavlake',
+      originalUrl: match[0]
+    })
+  }
+}
+
+
 /**
  * Converts TipTap editor JSON content to plain text representation
  * @param {Object} json - TipTap JSON content
@@ -26,6 +140,10 @@ export const tiptapJsonToPlainText = (json: any) => {
 
   if (json.type === 'video') {
     return json.attrs?.src || '';
+  }
+
+  if (json.type === 'mediaEmbed') {
+    return json.attrs?.originalUrl || json.attrs?.src || '';
   }
 
   // Handle other media types that might have URLs
@@ -84,23 +202,50 @@ export const plainTextToTiptapJson = (plainText: string) => {
     const tokens = line.split(/(\s+)/); // Keep whitespace in the split
 
     for (const token of tokens) {
-      if (token.match(/^\s+$/)) {
-        // Pure whitespace token
-        if (token.length > 0) {
-          paragraphContent.push({
-            type: 'text',
-            text: token
-          });
+      // Look for external media
+      let externalMediaEmbed: ExtMediaConfig | undefined;
+
+      for (const service of Object.keys(convertConfig)) {
+        const config = convertConfig[service];
+        const regex = new RegExp(config.regex.source, config.regex.flags);
+        let match = regex.exec(token);
+
+        if (match !== null) {
+          externalMediaEmbed = config.convert(match, ...match.slice(1));
+          break;
         }
       }
-      else if (token.startsWith('nostr:')) {
+
+      if (externalMediaEmbed) {
+        paragraphContent.push({
+          type: 'mediaEmbed',
+          attrs: {
+            ...externalMediaEmbed
+          }
+        });
+        continue;
+      }
+
+      if (token.match(/^\s+$/) && token.length > 0) {
+        // Pure whitespace token
+        paragraphContent.push({
+          type: 'text',
+          text: token
+        });
+        continue;
+      }
+
+      if (token.startsWith('nostr:')) {
         // Handle Nostr entities
         const bech32 = token.substring(6); // Remove 'nostr:' prefix
 
-        let nostrType = 'nprofile'; // default
+        let nostrType = 'nprofile';
+
         if (bech32.startsWith('nevent')) {
           nostrType = 'nevent';
-        } else if (bech32.startsWith('naddr')) {
+        }
+
+        if (bech32.startsWith('naddr')) {
           nostrType = 'naddr';
         }
 
@@ -121,7 +266,9 @@ export const plainTextToTiptapJson = (plainText: string) => {
           // @ts-ignore
           nostrNode.attrs.name = '';
           // @ts-ignore
-        } else if (nostrType === 'nevent') {
+        }
+
+        if (nostrType === 'nevent') {
           // @ts-ignore
           nostrNode.attrs.id = '';
           // @ts-ignore
@@ -133,8 +280,10 @@ export const plainTextToTiptapJson = (plainText: string) => {
         }
 
         paragraphContent.push(nostrNode);
+        continue;
       }
-      else if (token.match(/^https?:\/\//)) {
+
+      if (token.match(/^https?:\/\//)) {
         // Handle URLs - could be images, videos, or regular links
         if (token.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
           paragraphContent.push({
@@ -143,27 +292,33 @@ export const plainTextToTiptapJson = (plainText: string) => {
               src: token
             }
           });
-        } else if (token.match(/\.(mp4|webm|ogg|mov)$/i)) {
+          continue;
+        }
+        if (token.match(/\.(mp4|webm|ogg|mov)$/i)) {
           paragraphContent.push({
             type: 'video',
             attrs: {
               src: token
             }
           });
-        } else {
-          // Regular text that happens to be a URL
-          paragraphContent.push({
-            type: 'text',
-            text: token
-          });
+          continue;
         }
+
+        // Regular text that happens to be a URL
+        paragraphContent.push({
+          type: 'text',
+          text: token
+        });
+        continue;
       }
-      else if (token.trim() !== '') {
+
+      if (token.trim() !== '') {
         // Regular text
         paragraphContent.push({
           type: 'text',
           text: token
         });
+        continue;
       }
     }
 

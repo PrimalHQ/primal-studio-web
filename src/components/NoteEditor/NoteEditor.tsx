@@ -18,6 +18,7 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import CodeBlock from '@tiptap/extension-code-block';
+import { PluginKey } from '@tiptap/pm/state';
 
 import { NAddrExtension } from "../ArticleEditor/nAddrMention";
 import { NProfileExtension } from "../ArticleEditor/nProfileMention";
@@ -50,6 +51,8 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { longDate } from 'src/utils/date';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import EmojiButton from '../EmojiPicker/EmojiButton';
+import EmojiPickPopover from '../EmojiPicker/EmojiPickPopover';
+import MediaEmbed from '../ArticleEditor/MediaEmbedExtension';
 
 
 const NoteEditor: Component<{
@@ -205,6 +208,7 @@ const NoteEditor: Component<{
     Mention.configure({
       suggestion: {
         char: '@',
+        pluginKey: new PluginKey('userMention'),
         command: ({ editor, range, props }) => {
           const user = selectedUser();
 
@@ -335,6 +339,71 @@ const NoteEditor: Component<{
         },
       },
     }),
+    MediaEmbed,
+
+    // Mention.configure({
+    //   suggestion: {
+    //     char: ':',
+    //     pluginKey: new PluginKey('emoji'),
+    //     command: ({ editor, range, props }) => {
+
+    //       const delRange = {
+    //         from: range.from,
+    //         to: range.from + 1,
+    //       };
+
+    //       editor
+    //         .chain()
+    //         .focus()
+    //         // .deleteRange({ ...delRange })
+    //         .insertContent({ type: 'text', text: props.label || '' })
+    //         .insertContent({ type: 'text', text: ' ' })
+    //         .run()
+    //     },
+    //     items: ({ editor, query}) => {
+    //       return [];
+    //       // const users = query.length < 2 ?
+    //       //   await fetchRecomendedUsersAsync() :
+    //       //   await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
+
+    //       // // userRelays = await getUserRelays();
+    //       // setSuggestedUsers(() => [...users]);
+
+    //       // return users;
+    //     },
+    //     render: () => {
+    //       let component: JSXElement | undefined;
+    //       let popups: Instance[];
+
+    //       return {
+    //         onStart: props => {
+    //           component = <EmojiPickPopover
+    //             onClose={() => {}}
+    //             onSelect={(emoji) => {
+    //               props.command({ id: 'emoji', label: emoji.name })
+    //             }}
+    //           />
+
+    //           // @ts-ignore
+    //           popups = tippy('#tiptapNoteEditor', {
+    //             getReferenceClientRect: props.clientRect,
+    //             content: component,
+    //             showOnCreate: true,
+    //             interactive: true,
+    //             trigger: 'manual',
+    //             placement: 'bottom-start',
+    //             zIndex: 99999,
+    //           });
+    //         },
+    //         onUpdate: (props) => {
+    //         },
+    //         onExit: () => {
+    //           popups[0]?.destroy();
+    //         }
+    //       }
+    //     },
+    //   },
+    // }),
   ];
 
   const editorTipTap = createTiptapEditor(() => ({
@@ -370,7 +439,6 @@ const NoteEditor: Component<{
       const plainText = note.content;
 
       const json = plainTextToTiptapJson(plainText);
-
 
       let html = generateHTML(json, extensions);
       html = await processMarkdownForNostr(html);
