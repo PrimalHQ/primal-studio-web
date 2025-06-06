@@ -27,6 +27,9 @@ import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
 import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
 import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
+import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
+import { unwrap } from 'solid-js/store';
+import { scheduleArticle } from 'src/primal_api/nostr';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -181,6 +184,24 @@ const Articles: Component = () => {
           setArticlesStore('approvedEvents', () => []);
         }}
       />
+
+      <ReadsPublishingDateDialog
+        open={articlesStore.changePublishDateArticle !== undefined}
+        setOpen={(v) => !v && setArticlesStore('changePublishDateArticle', undefined)}
+        initialValue={articlesStore.changePublishDateArticle?.created_at}
+        onSetPublishDate={async (timestamp) => {
+          const article = unwrap(articlesStore.changePublishDateArticle);
+          if (!article) return;
+
+          const today = () => Math.ceil((new Date()).getTime() / 1_000);
+
+          const pubTime = timestamp || today();
+          await scheduleArticle(article, article.tags, pubTime, article.id);
+
+          setArticlesStore('changePublishDateArticle', undefined);
+        }}
+      />
+
 
       <div class={styles.feedHolder}>
         <div class={styles.itemsHolder}>
@@ -379,6 +400,9 @@ const Articles: Component = () => {
                               event={article!}
                               onEdit={() => {
                                 navigate(`/edit/article/${article!.id}`);
+                              }}
+                              onTimeChange={() => {
+                                setArticlesStore('changePublishDateArticle', article)
                               }}
                               kind='articles'
                             />

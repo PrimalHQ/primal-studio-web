@@ -1,6 +1,6 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { PrimalArticle, PrimalDraft } from "../../primal";
+import { PrimalArticle, PrimalDraft, PrimalNote } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
@@ -24,6 +24,7 @@ export type NotesStore = {
   feedTotals: FeedTotals,
   showApproveDialog: boolean,
   approvedEvents: PrimalDraft[],
+  changePublishDateNote: PrimalNote | undefined,
 }
 
 export const emptyNotesStore = (): NotesStore => ({
@@ -36,6 +37,7 @@ export const emptyNotesStore = (): NotesStore => ({
   selected: [],
   showApproveDialog: false,
   approvedEvents: [],
+  changePublishDateNote: undefined,
   feedTotals: {
     sent: 0,
     inbox: 0,

@@ -29,6 +29,9 @@ import { parseDraftedEvent } from 'src/utils/drafts';
 import { openEditNote } from 'src/stores/AppStore';
 import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
 import NotesApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/NotesApproveDialog';
+import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
+import { scheduleNote } from 'src/primal_api/nostr';
+import { unwrap } from 'solid-js/store';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -183,6 +186,23 @@ const Notes: Component = () => {
         drafts={notesStore.approvedEvents}
         onClose={() => {
           setNotesStore('approvedEvents', () => []);
+        }}
+      />
+
+      <ReadsPublishingDateDialog
+        open={notesStore.changePublishDateNote !== undefined}
+        setOpen={(v) => !v && setNotesStore('changePublishDateNote', undefined)}
+        initialValue={notesStore.changePublishDateNote?.created_at}
+        onSetPublishDate={async (timestamp) => {
+          const note = unwrap(notesStore.changePublishDateNote);
+          if (!note) return;
+
+          const today = () => Math.ceil((new Date()).getTime() / 1_000);
+
+          const pubTime = timestamp || today();
+          await scheduleNote(note.content, note.tags, pubTime, note.id);
+
+          setNotesStore('changePublishDateNote', undefined);
         }}
       />
 
@@ -399,6 +419,9 @@ const Notes: Component = () => {
                               kind='notes'
                               onEdit={() => {
                                 openEditNote(note);
+                              }}
+                              onTimeChange={() => {
+                                setNotesStore('changePublishDateNote', note)
                               }}
                             />
                           </FeedItemCard>

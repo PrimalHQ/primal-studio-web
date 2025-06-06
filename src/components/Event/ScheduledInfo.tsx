@@ -9,6 +9,7 @@ const ScheduledInfo: Component<{
   event: PrimalNote | PrimalArticle,
   kind: 'notes' | 'articles'
   onEdit?: () => void,
+  onTimeChange?: () => void,
 }> = (props) => {
 
   return (
@@ -34,7 +35,12 @@ const ScheduledInfo: Component<{
         <div class={styles.label}>Scheduled to publish on:</div>
         <div class={styles.publishTime}>
           <div class={styles.time}>{longDate(props.event.created_at)}</div>
-          <button class={styles.draftAction}>Edit Time</button>
+          <button
+            class={styles.draftAction}
+            onClick={props.onTimeChange}
+          >
+            Edit Time
+          </button>
         </div>
       </div>
     </div>

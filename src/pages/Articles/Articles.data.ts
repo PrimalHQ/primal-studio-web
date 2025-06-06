@@ -30,6 +30,7 @@ export type ArticlesStore = {
   feedTotals: FeedTotals,
   showApproveDialog: boolean,
   approvedEvents: PrimalDraft[],
+  changePublishDateArticle: PrimalArticle | undefined,
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -41,6 +42,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
   selected: [],
   showApproveDialog: false,
   approvedEvents: [],
+  changePublishDateArticle: undefined,
   feedTotals: {
     sent: 0,
     inbox: 0,

@@ -48,6 +48,7 @@ const ReadsPublishingDateDialog: Component<{
 
     const dateString = fullDate.toISOString().split('T')[0];
 
+
     const dateObj = dayjs(dateString);
 
     setSelection(() => ({
@@ -58,7 +59,7 @@ const ReadsPublishingDateDialog: Component<{
 
     setSelectedDate(() => ({
       selectedDateObject: {
-        day: dateObj.day() + 1,
+        day: dateObj.date(),
         month: dateObj.month(),
         year: dateObj.year(),
       }
