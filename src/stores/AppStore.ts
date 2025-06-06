@@ -1,3 +1,4 @@
+import { batch } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { ConfirmDialogInfo } from "src/components/Dialogs/ConfirmDialog";
 import { NoteContextMenuInfo } from "src/components/NoteContextMenu/NoteContexMenu";
@@ -13,6 +14,7 @@ export type AppStore = {
   showConfirmDialog: boolean,
   confirmDialogInfo: ConfirmDialogInfo | undefined,
   showNewNoteEditor: boolean,
+  editNote: PrimalNote | undefined,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -24,6 +26,7 @@ export const emptyAppStore = (): AppStore => ({
   showConfirmDialog: false,
   confirmDialogInfo: undefined,
   showNewNoteEditor: false,
+  editNote: undefined,
 });
 
 
@@ -99,4 +102,18 @@ export const addVerifiedUsers = (newVU: Record<string, string>) => {
     ...vu,
     ...newVU,
   }))
+}
+
+export const openEditNote = (note?: PrimalNote) => {
+  batch(() => {
+    updateAppStore('editNote', () => note)
+    updateAppStore('showNewNoteEditor', true);
+  });
+}
+
+export const closeEditNote = () => {
+  batch(() => {
+    updateAppStore('editNote', () => undefined)
+    updateAppStore('showNewNoteEditor', false);
+  });
 }

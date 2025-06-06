@@ -182,7 +182,7 @@ body::after{
 }
 
 .displayNone {
-  display: none;
+  display: none !important;
 }
 
 button {

@@ -25,7 +25,7 @@ import { NEventExtension } from "../ArticleEditor/nEventMention";
 import { createTiptapEditor } from 'solid-tiptap';
 import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
-import { activeUser } from 'src/stores/AccountStore';
+import { accountStore, activeUser } from 'src/stores/AccountStore';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from 'src/App';
@@ -35,7 +35,7 @@ import { nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
-import { extendMarkdownEditor, MarkdownPlugin, mdToHtml } from '../ArticleEditor/markdownTransform';
+import { extendMarkdownEditor, MarkdownPlugin, mdToHtml, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
 import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
 import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
 import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
@@ -54,7 +54,7 @@ import { useToastContext } from 'src/context/ToastContext/ToastContext';
 const NoteEditor: Component<{
   id?: string,
   onDone?: () => void,
-  noteId?: string,
+  note?: PrimalNote,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -66,7 +66,7 @@ const NoteEditor: Component<{
   const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
 
-  const [editorMode, setEditorMode] = createSignal<'html' | 'text'>('html');
+  const [editorMode, setEditorMode] = createSignal<'html' | 'text' | 'phone'>('html');
   const [plainContent, setPlainContent] = createSignal('');
 
   const [showMention, setShowMention] = createSignal(false);
@@ -79,7 +79,6 @@ const NoteEditor: Component<{
 
   const [showProposeDiaglog, setShowProposeDialog] = createSignal(false);
   const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
-
 
   const addMentionToEditor = (user: PrimalUser | undefined, editor?: Editor) => {
     if (!editor || ! user) return;
@@ -354,6 +353,32 @@ const NoteEditor: Component<{
     },
   }));
 
+  createEffect(on( () => [props.note, editorTipTap()], async (changes) => {
+    const note = changes[0] as PrimalNote;
+    const editor = changes[1] as Editor;
+
+    if (!note || !editor) return;
+    const mode = editorMode();
+
+    if (mode === 'text') {
+      setPlainContent(note.content);
+      return;
+    }
+
+    if (['html', 'phone'].includes(mode)) {
+      const plainText = note.content;
+
+      const json = plainTextToTiptapJson(plainText);
+
+
+      let html = generateHTML(json, extensions);
+      html = await processMarkdownForNostr(html);
+      editor.chain().setContent(html).run();
+      // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
+
+    }
+  }));
+
   createEffect(on( editorMode, async (mode) => {
     if (mode === 'text') {
       const json = editorTipTap()?.getJSON();
@@ -367,15 +392,24 @@ const NoteEditor: Component<{
       const json = plainTextToTiptapJson(plainText);
 
       let html = generateHTML(json, extensions);
-      html = await mdToHtml(html);
+      html = await processMarkdownForNostr(html);
       editorTipTap()?.chain().setContent(html);
       // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
 
     }
   }));
 
-  const getEditorContent = async (mode: 'html' | 'text') => {
-    if (mode === 'html') {
+  const getEditorContent = async (mode: 'html' | 'text' | 'phone') => {
+    if (['html', 'phone'].includes(mode)) {
+      const json = editorTipTap()?.getJSON();
+      return tiptapJsonToPlainText(json);
+    }
+
+    return plainContent();
+  }
+
+  const getPlainTextContent = async (mode: 'html' | 'text' | 'phone') => {
+    if (['html', 'phone'].includes(mode)) {
       const plainText = plainContent();
 
       const json = plainTextToTiptapJson(plainText);
@@ -387,6 +421,44 @@ const NoteEditor: Component<{
     const json = editorTipTap()?.getJSON();
     return tiptapJsonToPlainText(json);
   }
+
+
+  const saveDraft = async () => {
+    const user = activeUser();
+
+    if (!user) return;
+
+    const content = await getEditorContent(editorMode());
+
+    let tags = referencesToTags(content);
+
+    const relayTags = getRelayTags();
+
+    let tgs = [...tags, ...relayTags];
+
+    const { success, note } = await sendNoteDraft(
+      user,
+      content,
+      tgs,
+    );
+
+    if (success && note) {
+      toast?.sendSuccess('Saved draft');
+
+      // if (lastDraft.length > 0) {
+      //   sendDeleteEvent(
+      //     user.pubkey,
+      //     lastDraft,
+      //     Kind.Draft,
+      //   );
+      // }
+      props.onDone && props.onDone();
+
+    }
+    else {
+      toast?.sendWarning('Proposal sending failed');
+    }
+  };
 
   const proposeDraft = async (content: string, tags: string[][]) => {
 
@@ -403,7 +475,6 @@ const NoteEditor: Component<{
 
     if (success && note) {
       toast?.sendSuccess('Proposal sent');
-      console.log('SENT: ', note);
 
       // if (lastDraft.length > 0) {
       //   sendDeleteEvent(
@@ -435,11 +506,10 @@ const NoteEditor: Component<{
     const pubDate = futurePublishDate();
 
     const { success, note } = pubDate ?
-      await scheduleNote(content, tags, pubDate, editScheduled() ? props.noteId : undefined) :
+      await scheduleNote(content, tags, pubDate, editScheduled() ? props.note?.id : undefined) :
       await sendNote(content, tags);
 
     if (success && note) {
-      console.log('SENT: ', note);
 
       props.onDone && props.onDone();
     }
@@ -470,23 +540,42 @@ const NoteEditor: Component<{
         </div>
         <div class={styles.editorModeControls}>
           <button
-            id="editorMode"
-            class={`${styles.mdToolButton} ${editorMode() === 'text' ? styles.selected : ''}`}
-            onClick={() => setEditorMode((mode) => mode === 'html' ? 'text' : 'html')}
+            id="htmlMode"
+            class={`${styles.mdToolButton} ${editorMode() === 'html' ? styles.selected : ''}`}
+            onClick={() => setEditorMode('html')}
             title={!editorMode() ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
           >
-            <div class={`${styles.modeIcon} ${styles.active}`}></div>
+            <div class={`${styles.htmlModeIcon} ${styles.active}`}></div>
+          </button>
+
+          <button
+            id="phoneMode"
+            class={`${styles.mdToolButton} ${editorMode() === 'phone' ? styles.selected : ''}`}
+            onClick={() => setEditorMode('phone')}
+            title={!editorMode() ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+          >
+            <div class={`${styles.phoneModeIcon} ${styles.active}`}></div>
+          </button>
+
+          <button
+            id="textMode"
+            class={`${styles.mdToolButton} ${editorMode() === 'text' ? styles.selected : ''}`}
+            onClick={() => setEditorMode('text')}
+            title={!editorMode() ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+          >
+            <div class={`${styles.textModeIcon} ${styles.active}`}></div>
           </button>
         </div>
       </div>
-      {/* <button onClick={() => addMentionToEditor(activeUser(), editorTipTap())}>Add Mention</button> */}
-      <div
-        id="tiptapNoteEditor"
-        ref={tiptapEditor}
-        class={`${styles.editorNote} ${editorMode() === 'text' ? 'displayNone' : ''}`}
-      ></div>
+      <div class={`${styles.editorHtmlHolder} ${styles[`mode_${editorMode()}`]} ${editorMode() === 'text' ? 'displayNone' : ''}`}>
+        <div
+          id="tiptapNoteEditor"
+          ref={tiptapEditor}
+          class={`${styles.editorNote}  ${styles[`mode_${editorMode()}`]}`}
+        ></div>
+      </div>
 
-      <div class={`${styles.editorPlainHolder} ${editorMode() === 'html' ? 'displayNone' : ''}`}>
+      <div class={`${styles.editorPlainHolder} ${editorMode() !== 'text' ? 'displayNone' : ''}`}>
         <TextField
           value={plainContent()}
           onChange={value => {
@@ -557,6 +646,15 @@ const NoteEditor: Component<{
                 Schedule
               </button>
             </Show>
+
+            <button
+              class={styles.linkLike}
+              onClick={() => {
+                saveDraft();
+              }}
+            >
+              Save Draft
+            </button>
           </div>
           <div class={styles.pubActions}>
             <ButtonSecondary

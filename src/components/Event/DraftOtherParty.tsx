@@ -32,8 +32,14 @@ const DraftOtherParty: Component<{
       sender;
   }
 
-  const publishOn = () =>
-    parseInt((props.event.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+  const publishOn = () => {
+    let pub = parseInt((props.event.tags.find(t => t[0] === 'published_at') || ['published_at', '0'])[1]);
+
+    if (pub) return pub;
+
+    return props.event.created_at;
+
+  }
 
   const today = () => Math.ceil((new Date()).getTime() / 1_000);
 

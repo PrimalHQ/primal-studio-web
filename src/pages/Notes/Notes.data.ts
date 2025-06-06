@@ -1,6 +1,6 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { pageStore, updatePageStore } from "../../stores/PageStore";
-import { PrimalArticle } from "../../primal";
+import { PrimalArticle, PrimalDraft } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
@@ -22,6 +22,8 @@ export type NotesStore = {
   offset: number,
   selected: string[],
   feedTotals: FeedTotals,
+  showApproveDialog: boolean,
+  approvedEvents: PrimalDraft[],
 }
 
 export const emptyNotesStore = (): NotesStore => ({
@@ -32,6 +34,8 @@ export const emptyNotesStore = (): NotesStore => ({
   showReplies: false,
   offset: 0,
   selected: [],
+  showApproveDialog: false,
+  approvedEvents: [],
   feedTotals: {
     sent: 0,
     inbox: 0,
@@ -45,7 +49,7 @@ export const emptyNotesStore = (): NotesStore => ({
 export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
 
 export const isAllSelected = () => {
-  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+  const eventIds = pageStore.notes.feedPages.flatMap(p => p.page.elements);
 
   return eventIds.every(id => notesStore.selected.includes(id));
 }
@@ -56,7 +60,7 @@ export const toggleSelectAll = () => {
     return;
   }
 
-  const eventIds = pageStore.articles.feedPages.flatMap(p => p.page.elements);
+  const eventIds = pageStore.notes.feedPages.flatMap(p => p.page.elements);
 
   setNotesStore('selected', () => [...eventIds]);
 }

@@ -79,14 +79,14 @@ export const toggleSelected = (id: string, add: boolean) => {
   }
 }
 
-export const toggleSelectedInbox = (id: string, add: boolean) => {
-  if (add && !articlesStore.selected.includes(id)) {
-    setArticlesStore('selected', articlesStore.selected.length, () => id);
-  }
-  else if (!add) {
-    setArticlesStore('selected', (sel) => sel.filter(s => s !== id))
-  }
-}
+// export const toggleSelectedInbox = (id: string, add: boolean) => {
+//   if (add && !articlesStore.selected.includes(id)) {
+//     setArticlesStore('selected', articlesStore.selected.length, () => id);
+//   }
+//   else if (!add) {
+//     setArticlesStore('selected', (sel) => sel.filter(s => s !== id))
+//   }
+// }
 
 export const deleteSelected = async () => {
   openConfirmDialog({

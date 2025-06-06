@@ -7,7 +7,7 @@ import AppRouter from './Router';
 import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeContextMenu, updateAppStore } from './stores/AppStore';
+import { appStore, closeContextMenu, closeEditNote, openEditNote, updateAppStore } from './stores/AppStore';
 import { accountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
@@ -70,7 +70,8 @@ const App: Component = () => {
 
           <NewNoteDialog
             open={appStore.showNewNoteEditor}
-            setOpen={(v) => updateAppStore('showNewNoteEditor', v)}
+            setOpen={(v) => v ? openEditNote() : closeEditNote()}
+            note={appStore.editNote}
           />
         </Toaster>
       </AppProvider>

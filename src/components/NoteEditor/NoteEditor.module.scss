@@ -66,12 +66,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  margin-top: 12px;
 
   .dialogContent {
     padding: 0;
     background-color: var(--background-site);
     border-radius: 12px;
-    border: 1px solid var(--accent);
+    border: 2px solid var(--accent);
 
     animation: contentHide 150ms ease-in forwards;
 
@@ -149,13 +150,21 @@
 
   width: calc(100% - 40px);
   min-height: 277px;
-  max-height: calc(100dvh - 116px);
+  max-height: calc(100dvh - 130px);
   overflow-y: scroll;
   overflow-x: hidden;
   background-color: var(--background-site);
-  border-bottom: 1px solid var(--subtile-devider);
+
+  &.mode_phone {
+    width: 392px;
+    min-height: 592px;
+  }
+  // border-bottom: 1px solid var(--subtile-devider);
   // border-top: 1px solid var(--subtile-devider);
   // border-bottom: 1px solid var(--subtile-devider);
+
+
+
   cursor: text;
   text-align: left;
 
@@ -499,6 +508,14 @@
   }
 }
 
+.editorHtmlHolder {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background-color: var(--background-input);
+  border-bottom: 1px solid var(--subtile-devider);
+}
+
 .editorPlainHolder {
   width: 100%;
   background-color: var(--background-input);
@@ -508,7 +525,7 @@
 .editorPlain {
   width: calc(100% - 40px);
   min-height: 272px;
-  max-height: calc(100dvh - 116px);
+  max-height: calc(100dvh - 130px);
   overflow-y: scroll;
   overflow-x: hidden;
   background-color: var(--background-input);
@@ -544,6 +561,7 @@
   .editorModeControls {
     display: flex;
     justify-content: flex-end;
+    gap: 6px;
   }
 
   // >div {
@@ -581,7 +599,7 @@
   /* border: 1px solid var(--subtile-devider); */
   border-radius: 8px;
   margin: 0;
-  padding: 8px;
+  // padding: 8px;
 
   display: flex;
   justify-content: center;
@@ -594,6 +612,7 @@
   &.selected, &:hover {
     background-color: var(--background-input);
     color: var(--text-primary);
+    border: 1px solid var(--subtile-devider);
 
     >div {
       background-color: var(--text-secondary);
@@ -601,7 +620,27 @@
   }
 }
 
-.modeIcon {
+.htmlModeIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/desktop_mode.png) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/desktop_mode.png) no-repeat center;
+}
+
+.phoneModeIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/phone_mode.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/phone_mode.svg) no-repeat center;
+}
+
+.textModeIcon {
   width: 20px;
   height: 20px;
   margin: 0;

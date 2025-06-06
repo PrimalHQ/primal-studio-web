@@ -3,6 +3,7 @@ import { Component, JSXElement } from 'solid-js';
 import styles from './NoteEditor.module.scss';
 import { Dialog as KobalteDialog } from '@kobalte/core/dialog';
 import NoteEditor from './NoteEditor';
+import { PrimalNote } from 'src/primal';
 
 
 
@@ -10,6 +11,7 @@ const NewNoteDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
+  note: PrimalNote | undefined,
 }> = (props) => {
 
   return (
@@ -21,6 +23,7 @@ const NewNoteDialog: Component<{
             <KobalteDialog.Description class={styles.dialogDescription}>
               <NoteEditor
                 onDone={() => props.setOpen && props.setOpen(false)}
+                note={props.note}
               />
             </KobalteDialog.Description>
           </KobalteDialog.Content>

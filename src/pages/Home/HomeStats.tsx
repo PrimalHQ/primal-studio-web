@@ -14,7 +14,6 @@ const HomeStats: Component<{
   const satsDiff = () =>
     homeStore.totals.satszapped_received - homeStore.totals.satszapped_sent;
 
-
   return (
     <div class={styles.numbersHolder}>
       <div class={styles.variousStats}>

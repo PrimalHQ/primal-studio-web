@@ -399,16 +399,6 @@ export const scheduleNote = async (
   replace_id?: string,
 ) => {
   let tgs = [...tags];
-  const hasPubTime = tgs.find(t => t[0] === 'published_at');
-
-  // const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
-
-  if (!hasPubTime) {
-    tgs.push(["published_at", `${pubTime}`])
-  } else {
-    tgs = (tgs).map(
-      t => t[0] === 'published_at' ? ['published_at', `${pubTime}`] : t);
-  }
 
   const event = {
     content,

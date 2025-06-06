@@ -17,7 +17,7 @@ import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import { PrimalDraft, PrimalNote } from 'src/primal';
 import EventStats from 'src/components/Event/EventStats';
-import { deleteSelected, fetchFeedTotals, fetchNotes, isAllSelected, notesStore, setNotesStore, toggleSelectAll } from './Notes.data';
+import { deleteSelected, fetchFeedTotals, fetchNotes, isAllSelected, notesStore, setNotesStore, toggleSelectAll, toggleSelected } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import DraftPreview from 'src/components/Event/DraftPreview';
@@ -25,6 +25,10 @@ import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
 import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
+import { parseDraftedEvent } from 'src/utils/drafts';
+import { openEditNote } from 'src/stores/AppStore';
+import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
+import NotesApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/NotesApproveDialog';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -173,6 +177,15 @@ const Notes: Component = () => {
         />
       </Wormhole>
 
+      <NotesApproveDialog
+        open={notesStore.showApproveDialog}
+        setOpen={(v) => setNotesStore('showApproveDialog', v)}
+        drafts={notesStore.approvedEvents}
+        onClose={() => {
+          setNotesStore('approvedEvents', () => []);
+        }}
+      />
+
       <div class={styles.feedHolder}>
         <div class={styles.itemsHolder}>
         <div class={styles.feedHeader}>
@@ -274,7 +287,7 @@ const Notes: Component = () => {
                       return (
                         <Show when={draft}>
                           <FeedItemCard
-                            onClick={() => {openInPrimal(draft!)}}
+                            onClick={() => {}}
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
@@ -283,11 +296,16 @@ const Notes: Component = () => {
                           >
                             <ProposalPreview
                               draft={draft!}
-                              onEdit={() => {openInPrimal(draft!)}}
+                              onEdit={() => {
+                                const note = JSON.parse(draft!.plain) as PrimalNote;
+                                openEditNote(note);
+                              }}
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id)
                               }}
                               type='sent'
+                              checked={notesStore.selected.includes(draft?.id || '-')}
+                              onCheck={toggleSelected}
                             />
                           </FeedItemCard>
                         </Show>
@@ -300,7 +318,7 @@ const Notes: Component = () => {
                       return (
                         <Show when={draft}>
                           <FeedItemCard
-                            onClick={() => {openInPrimal(draft!)}}
+                            onClick={() => {}}
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
@@ -309,11 +327,20 @@ const Notes: Component = () => {
                           >
                             <ProposalPreview
                               draft={draft!}
-                              onEdit={() => {openInPrimal(draft!)}}
+                              onEdit={() => {
+                                const note = JSON.parse(draft!.plain) as PrimalNote;
+                                openEditNote(note);
+                              }}
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id)
                               }}
+                              onApprove={() => {
+                                setNotesStore('approvedEvents', [draft!]);
+                                setNotesStore('showApproveDialog', true);
+                              }}
                               type='inbox'
+                              checked={notesStore.selected.includes(draft?.id || '-')}
+                              onCheck={toggleSelected}
                             />
                           </FeedItemCard>
                         </Show>
@@ -335,7 +362,10 @@ const Notes: Component = () => {
                           >
                             <DraftPreview
                               draft={draft!}
-                              onEdit={() => {openInPrimal(draft!)}}
+                              onEdit={() => {
+                                const note = JSON.parse(draft!.plain) as PrimalNote;
+                                openEditNote(note);
+                              }}
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id)
                               }}
@@ -347,7 +377,7 @@ const Notes: Component = () => {
 
                     if (notesStore.tab === 'scheduled') {
 
-                    const note = page.reads.find(a => a.id === e);
+                      const note = page.notes.find(a => a.id === e);
 
                       return (
                         <Show when={note}>
@@ -367,6 +397,9 @@ const Notes: Component = () => {
                             <ScheduledInfo
                               event={note!}
                               kind='notes'
+                              onEdit={() => {
+                                openEditNote(note);
+                              }}
                             />
                           </FeedItemCard>
                         </Show>
