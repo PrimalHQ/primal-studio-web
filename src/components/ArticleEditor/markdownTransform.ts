@@ -25,6 +25,7 @@ import { fetchArticles, fetchNotes } from 'src/primal_api/events';
 import { getUsers } from 'src/primal_api/profile';
 import { renderEmbeddedNote } from '../Event/Note';
 import { mentionStore, updateMentionStore } from 'src/stores/MentionStore';
+import { convertConfig } from '../NoteEditor/plainTextTransform';
 
 // import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 // import { fetchUserProfile } from '../handleFeeds';
@@ -118,8 +119,152 @@ const findMissingAddr = async (naddr: string) => {
 
 }
 
+// Helper function to handle external media in HTML -> Markdown conversion
+export const processHTMLForExternalMedia = (html: string): string => {
+  // Replace nostr spans with their markdown representation
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+
+  // Find all nostr spans and replace them
+  const mediaDivs = tempDiv.querySelectorAll('div[originalurl]');
+
+  mediaDivs.forEach(div => {
+    const url = div.getAttribute('originalurl');
+    if (url) {
+      // Create a text node with the url
+      const nodeText = document.createTextNode(`${url}`);
+      div.parentNode?.replaceChild(nodeText, div);
+    }
+  });
+
+  return tempDiv.innerHTML;
+}
+
+// Helper function to handle external media in Markdown -> HTML conversion
+export const processMarkdownForExternalMedia = (html: string): string => {
+  const services: Record<string, { patterns: RegExp[], url: (...args: string[]) => string}> = {
+    spotify: {
+      patterns: [
+        /https?:\/\/open\.spotify\.com\/(track|album|playlist|artist|episode|show)\/([a-zA-Z0-9]+)/,
+        /https?:\/\/spotify\.com\/(track|album|playlist|artist|episode|show)\/([a-zA-Z0-9]+)/
+      ],
+      url: (match, type, id) => `https://open.spotify.com/embed/${type}/${id}`
+    },
+
+    youtube: {
+      patterns: [
+        /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+        /https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+)/,
+        /https?:\/\/(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/
+      ],
+      url: (match, id) => `https://www.youtube.com/embed/${id}`
+    },
+
+    twitch: {
+      patterns: [
+        /https?:\/\/(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)/,
+        /https?:\/\/(?:www\.)?twitch\.tv\/videos\/([0-9]+)/
+      ],
+      url: (match, channelOrVideo) => {
+        const isVideo = match.includes('/videos/')
+        if (isVideo) {
+          return `https://player.twitch.tv/?video=${channelOrVideo}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}" height="378" width="620" allowfullscreen></iframe>`;
+        }
+        return `https://player.twitch.tv/?channel=${channelOrVideo}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}" height="378" width="620" allowfullscreen></iframe>`;
+      }
+    },
+
+    soundcloud: {
+      patterns: [
+        /https?:\/\/soundcloud\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/
+      ],
+      url: (match, path) => `https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/${encodeURIComponent(path)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`
+    },
+
+    mixcloud: {
+      patterns: [
+        /https?:\/\/(?:www\.)?mixcloud\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)/
+      ],
+      url: (match, path) => `https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${encodeURIComponent(path)}%2F`
+    },
+
+    tidal: {
+      patterns: [
+        /https?:\/\/(?:listen\.)?tidal\.com\/(track|album|playlist)\/([a-zA-Z0-9-]+)/
+      ],
+      url: (match, type, id) => `https://embed.tidal.com/${type}s/${id}`
+    },
+
+    applemusic: {
+      patterns: [
+        /https?:\/\/music\.apple\.com\/([a-z]{2})\/(album|song|playlist)\/[^\/]*\/([0-9]+)/
+      ],
+      url: (match, country, type, id) => `https://embed.music.apple.com/${country}/${type}/${id}`
+    },
+
+    rumble: {
+      patterns: [
+        /https?:\/\/rumble\.com\/([a-zA-Z0-9_-]+)\.html/,
+        /https?:\/\/rumble\.com\/embed\/([a-zA-Z0-9_-]+)/
+      ],
+      url: (match, id) => `https://rumble.com/embed/${id}/`
+    },
+
+    wavlake: {
+      patterns: [
+        /https?:\/\/(?:www\.)?wavlake\.com\/(track|album)\/([a-zA-Z0-9-]+)/
+      ],
+      url: (match, type: string, id: string) => `https://embed.wavlake.com/${type}/${id}`
+    },
+
+    // nostrnests: {
+    //   patterns: [
+    //     /https?:\/\/(?:www\.)?nostrnests\.com\/([a-zA-Z0-9_-]+)/
+    //   ],
+    //   url: (id) => `https://nostrnests.com/embed/${id}`
+    // }
+  };
+
+  // Helper function to check if URL matches any service pattern
+  function getServiceMatch(url: string) {
+    for (const [serviceName, config] of Object.entries(services)) {
+      for (const pattern of config.patterns) {
+        const match = url.match(pattern);
+        if (match) {
+          return { serviceName, match, config };
+        }
+      }
+    }
+    return null;
+  }
+
+  // Replace anchor tags with iframes
+  const anchorRegex = /<a\s+([^>]*?)href\s*=\s*["']([^"']+)["']([^>]*?)>(.*?)<\/a>/gi;
+
+  const result = html.replace(anchorRegex, (fullMatch, beforeHref, url, afterHref, linkText) => {
+    const serviceMatch = getServiceMatch(url);
+
+    if (serviceMatch) {
+      const src = services[serviceMatch.serviceName].url.apply(null, serviceMatch.match);
+
+      const mention = document.createElement('div');
+      mention.setAttribute('data-media-embed', serviceMatch.serviceName);
+      mention.setAttribute('src', src);
+      mention.setAttribute('service', serviceMatch.serviceName);
+      mention.setAttribute('originalurl', serviceMatch.match[0]);
+
+      return mention.outerHTML;
+    }
+
+    return fullMatch; // Return original anchor tag if URL doesn't match any service
+  });
+
+  return result;
+}
+
+
 // Helper function to handle nostr IDs in HTML -> Markdown conversion
-const processHTMLForNostr = (html: string): string => {
+export const processHTMLForNostr = (html: string): string => {
   // Replace nostr spans with their markdown representation
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -286,6 +431,8 @@ export const mdToHtml = async (markdown: string) => {
     // Process the HTML for nostr identifiers
     html = await processMarkdownForNostr(html);
 
+    html = processMarkdownForExternalMedia(html);
+
     return html;
   } catch (error) {
     console.error('Error converting markdown to HTML:', error);
@@ -297,7 +444,9 @@ export const mdToHtml = async (markdown: string) => {
 export const htmlToMd = (html: string): string => {
   try {
     // Process HTML to handle nostr spans before converting to markdown
-    const processedHtml = processHTMLForNostr(html);
+    let processedHtml = processHTMLForNostr(html);
+
+    processedHtml = processHTMLForExternalMedia(processedHtml);
 
     const result = unified()
       .use(rehypeParse, { fragment: true })
@@ -436,7 +585,7 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
       setMarkdown: async (markdown: string) => {
         if (!editor) return
         const html = await mdToHtml(markdown);
-        editor.commands.setContent(html, false)
+        editor.commands.setContent(html, false);
       }
     }
   }
@@ -453,6 +602,7 @@ export const extendMarkdownEditor = (editor: Editor) => {
     setMarkdown: async (markdown: string) => {
       if (!editor) return
       const html = await mdToHtml(markdown)
+
       editor.commands.setContent('', false)
       editor.commands.setContent(html, false)
       // editor.chain().

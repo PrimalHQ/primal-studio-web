@@ -33,6 +33,7 @@ import UploaderBlossom from "../Uploader/UploaderBlossom";
 import ArticleEditorToolbar from "./ArticleEditorToolbar";
 
 import { accountStore, activeUser } from "src/stores/AccountStore";
+import MediaEmbed from "./MediaEmbedExtension";
 
 export type ArticleEdit = {
   title: string,
@@ -146,13 +147,14 @@ const ArticleEditor: Component<{
       }),
       NProfileExtension,
       NEventExtension,
+      MediaEmbed,
       MarkdownPlugin.configure({
         exportOnUpdate: true,
-        onMarkdownUpdate: (md) => {
+        // onMarkdownUpdate: (md) => {
           // console.log('MD UPDATE: ', md)
           // props.setMarkdownContent(() => md)
           // setMarkdown(md);
-        }
+        // }
       }),
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
