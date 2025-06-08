@@ -731,39 +731,63 @@ const ReadsEditor: Component = () => {
               <div class={styles.sidebarTools}>
                 <div class={styles.caption}>Edit & Preview</div>
 
-                <button
-                  class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
-                  onClick={() => {
-                    setEditorPreviewMode('editor');
-                  }}
-                >
-                  Edit Mode
-                </button>
+                <div class={styles.toolbarOptions}>
+                  <div class={styles.toolButtonWrap}>
+                    <button
+                      class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
+                      onClick={() => {
+                        setEditorPreviewMode('editor');
+                      }}
+                    >
+                      <div class={styles.editIcon}></div>
+                    </button>
+                    <div class={styles.toolButtonLabel}>
+                      Edit
+                    </div>
+                  </div>
 
-                <button
-                  class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
-                  onClick={() => {
-                    setEditorPreviewMode('browser');
-                  }}
-                >
-                  Preview
-                </button>
-                <button
-                  class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
-                  onClick={() => {
-                    setEditorPreviewMode('phone');
-                  }}
-                >
-                  Phone Preview
-                </button>
-                <button
-                  class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
-                  onClick={() => {
-                    setEditorPreviewMode('feed');
-                  }}
-                >
-                  Feed Preview
-                </button>
+                  <div class={styles.toolButtonWrap}>
+                    <button
+                      class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
+                      onClick={() => {
+                        setEditorPreviewMode('browser');
+                      }}
+                    >
+                      <div class={styles.desktopIcon}></div>
+                    </button>
+                    <div class={styles.toolButtonLabel}>
+                      Browser
+                    </div>
+                  </div>
+
+                  <div class={styles.toolButtonWrap}>
+                    <button
+                      class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
+                      onClick={() => {
+                        setEditorPreviewMode('phone');
+                      }}
+                    >
+                      <div class={styles.phoneIcon}></div>
+                    </button>
+                    <div class={styles.toolButtonLabel}>
+                      Phone
+                    </div>
+                  </div>
+
+                  <div class={styles.toolButtonWrap}>
+                    <button
+                      class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
+                      onClick={() => {
+                        setEditorPreviewMode('feed');
+                      }}
+                    >
+                      <div class={styles.feedIcon}></div>
+                    </button>
+                    <div class={styles.toolButtonLabel}>
+                      Feeds
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class={styles.sidebarPublish}>

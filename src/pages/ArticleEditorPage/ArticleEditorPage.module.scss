@@ -973,6 +973,13 @@ input.textInput {
   flex-direction: column;
   gap: 12px;
   align-items: flex-start;
+
+  .toolbarOptions {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
   .caption {
     color: var(--text-secondary);
     font-size: 16px;
@@ -980,24 +987,33 @@ input.textInput {
     line-height: 20px;
     margin-top: 0;
   }
+
+  .toolButtonWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
   .toolButton {
-    border-radius: 99px;
+    border-radius: 8px;
     background: var(--background-input);
     border: none;
     outline: none;
     margin: 0;
-    padding: 10px 16px;
-    width: 272px;
-
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 15px;
+    padding: 16px 20px;
 
     &.selected {
       border: 1px solid var(--text-tertiary);
       background: var(--background-header-input);
     }
+  }
+
+  .toolButtonLabel {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 14px;
   }
 }
 
@@ -1324,4 +1340,40 @@ input.textInput {
   align-items: flex-start;
   width: 100%;
   margin-top: 36px;
+}
+
+.editIcon {
+  width: 20px;
+  height: 20px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/edit.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/lf_editor_toolbar/edit.svg) 0 / 100% no-repeat;
+}
+
+.desktopIcon {
+  width: 20px;
+  height: 20px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/desktop.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/lf_editor_toolbar/desktop.svg) 0 / 100% no-repeat;
+}
+
+.phoneIcon {
+  width: 13px;
+  height: 20px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/phone_mode.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/lf_editor_toolbar/phone_mode.svg) 0 / 100% no-repeat;
+}
+
+.feedIcon {
+  width: 20px;
+  height: 20px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/feeds.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/lf_editor_toolbar/feeds.svg) 0 / 100% no-repeat;
 }
