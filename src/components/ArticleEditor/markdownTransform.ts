@@ -64,7 +64,8 @@ const findMissingUser = async (nprofile: string) => {
 
   if (!user) {
     const users = await getUsers([pubkey]);
-    updateMentionStore('users', () => ({ [pubkey]: { ...users[0] } }));
+    user = { ...users[0] };
+    updateMentionStore('users', () => ({ [pubkey]: { ...user } }));
   }
 
   return user;
@@ -301,6 +302,8 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
 
     if (['npub', 'nprofile'].includes(type)) {
       const user = await findMissingUser(bech32);
+
+      console.log('FOUND: ', user)
 
       if (user) {
         foundUsers[bech32] = { ...user };
