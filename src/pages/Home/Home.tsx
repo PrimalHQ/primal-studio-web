@@ -18,9 +18,10 @@ import Paginator from 'src/components/Paginator/Paginator';
 import ArticleHomePreview from 'src/components/Event/ArticleHomePreview';
 import { useParams } from '@solidjs/router';
 import HomeStats from './HomeStats';
-import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
+import SelectBox from 'src/components/SelectBox/SelectBox';
 import PageHeader from 'src/components/PageHeader/PageHeader';
 import { headerSortOptions } from 'src/constants';
+import { storeGraphSpan } from 'src/utils/localStore';
 
 const Home: Component = () => {
   const params = useParams();
@@ -118,7 +119,7 @@ const Home: Component = () => {
   const loadNextNotesPage = () => {
     if (pageStore.homeNotes.lastRange.since === 0) return;
 
-    const { since, until } = homeStore.graphSpan;
+    const { since, until, name } = homeStore.graphSpan;
 
     let offset = homeStore.noteOffset;
 
@@ -251,7 +252,8 @@ const Home: Component = () => {
           title={translate('home', 'header')}
           selection={homeStore.graphSpan.name}
           onSpanSelect={(span: GraphSpan) => {
-            setHomeStore('graphSpan', () => ({ ...span }))
+            setHomeStore('graphSpan', () => ({ ...span }));
+            storeGraphSpan(accountStore.pubkey, 'home', span);
           }}
         />
       </Wormhole>

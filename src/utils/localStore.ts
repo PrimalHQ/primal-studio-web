@@ -1,5 +1,6 @@
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { Kind } from "src/constants";
+import { GraphSpan } from "src/pages/Home/Home.data";
 import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
 
 
@@ -12,6 +13,7 @@ export type LocalStore = {
   proxyThroughPrimal: boolean,
   connectToPrimaryRelays: boolean,
   emojiHistory: EmojiOption[],
+  graphSpans: Record<string, GraphSpan>,
 };
 
 
@@ -24,8 +26,8 @@ export const emptyStorage: LocalStore = {
   proxyThroughPrimal: false,
   connectToPrimaryRelays: false,
   emojiHistory: [],
+  graphSpans: {},
 }
-
 
 export const storageName = (pubkey?: string) => {
   if (!pubkey) {
@@ -43,9 +45,14 @@ export const getStorage = (pubkey?: string) => {
   const name = storageName(pubkey);
   const storage = localStorage.getItem(name);
 
-  return storage ?
-    JSON.parse(storage) as LocalStore :
-    { ...emptyStorage };
+  return {
+    ...emptyStorage,
+    ...(JSON.parse(storage || '{}') as LocalStore),
+  }
+
+  // return storage ?
+  //   JSON.parse(storage) as LocalStore :
+  //   { ...emptyStorage };
 };
 
 export const setStorage = (pubkey: string | undefined, data: LocalStore) => {
@@ -235,4 +242,59 @@ export const readEmojiHistory = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.emojiHistory || [];
+}
+
+
+export const storeGraphSpan = (
+  pubkey: string | undefined,
+  page: string,
+  span: GraphSpan,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.graphSpans = {
+    ...store.graphSpans,
+    [page]: { ...span },
+  }
+
+  setStorage(pubkey, store);
+}
+
+export const defaultSpans = (): Record<string, GraphSpan> => ({
+  home: {
+    name: '1m',
+    until: Math.floor((new Date()).getTime() / 1_000),
+    since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  notes: {
+    name: '3m',
+    until: Math.floor((new Date()).getTime() / 1_000),
+    since: Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  articles: {
+    name: 'all',
+    until: Math.floor((new Date()).getTime() / 1_000),
+    since: 0,
+    resolution: 'month',
+  },
+})
+
+export const readGraphSpan = (
+  pubkey: string | undefined,
+  page: string,
+) => {
+  if (!pubkey) return {};
+
+  const store = getStorage(pubkey);
+
+  return (store.graphSpans[page] || defaultSpans()[page] || {
+    name: '1m',
+    until: Math.floor((new Date()).getTime() / 1_000),
+    since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+    resolution: 'day',
+  }) as GraphSpan;
 }

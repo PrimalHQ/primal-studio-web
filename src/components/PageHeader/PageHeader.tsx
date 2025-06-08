@@ -2,12 +2,11 @@
 import { Component, Show } from 'solid-js';
 
 import styles from './PageHeader.module.scss';
-import { GraphSpan, homeStore, setHomeStore } from 'src/pages/Home/Home.data';
-import { StudioGraph } from 'src/primal_api/studio';
+import { GraphSpan } from 'src/pages/Home/Home.data';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import DatePicker from '@rnwonder/solid-date-picker';
 import utils from "@rnwonder/solid-date-picker/utilities";
-import { translate } from 'src/translations/translate';
+import dayjs from 'dayjs';
 
 const PageHeader: Component<{
   id?: string,

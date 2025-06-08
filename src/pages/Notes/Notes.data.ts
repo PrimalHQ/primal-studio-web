@@ -6,11 +6,12 @@ import { createStore } from "solid-js/store";
 import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
-import { defaultSpan, FeedCriteria, GraphSpan, } from "../Home/Home.data";
+import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore, } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
 import { openConfirmDialog } from "src/stores/AppStore";
 import { doRequestDelete } from "src/primal_api/events";
 import { Kind } from "src/constants";
+import { readGraphSpan } from "src/utils/localStore";
 
 
 export type NotesStore = {
@@ -189,6 +190,10 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
   }
 
   if (!pk) return;
+
+  const span = readGraphSpan(accountStore.pubkey, 'notes');
+
+  setNotesStore('graphSpan', () => ({ ...span }));
 
   const { since, until } = notesStore.graphSpan;
 

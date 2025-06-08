@@ -32,6 +32,7 @@ import NotesApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/NotesA
 import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
 import { scheduleNote } from 'src/primal_api/nostr';
 import { unwrap } from 'solid-js/store';
+import { storeGraphSpan } from 'src/utils/localStore';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -175,7 +176,8 @@ const Notes: Component = () => {
           selection={notesStore.graphSpan.name}
           hideSpans={!['published', 'published-replied'].includes(notesStore.tab)}
           onSpanSelect={(span: GraphSpan) => {
-            setNotesStore('graphSpan', () => ({ ...span }))
+            setNotesStore('graphSpan', () => ({ ...span }));
+            storeGraphSpan(accountStore.pubkey, 'notes', span);
           }}
         />
       </Wormhole>

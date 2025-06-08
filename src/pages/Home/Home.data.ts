@@ -10,6 +10,7 @@ import { emptyEventFeedPage, emptyFeedRange, filterAndSortNotes, filterAndSortPa
 import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
+import { readGraphSpan } from "src/utils/localStore";
 
 export type GraphSpan = {
   name: string,
@@ -182,6 +183,10 @@ export const preloadHome = (args: RoutePreloadFuncArgs) => {
   }
 
   if (!pk) return;
+
+  const span = readGraphSpan(accountStore.pubkey, 'home');
+
+  setHomeStore('graphSpan', () => ({ ...span }));
 
   const { since, until, resolution } = homeStore.graphSpan;
 

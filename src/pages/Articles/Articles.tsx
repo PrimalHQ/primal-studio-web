@@ -30,6 +30,7 @@ import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
 import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
 import { unwrap } from 'solid-js/store';
 import { scheduleArticle } from 'src/primal_api/nostr';
+import { storeGraphSpan } from 'src/utils/localStore';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -171,7 +172,8 @@ const Articles: Component = () => {
           selection={articlesStore.graphSpan.name}
           hideSpans={!['published'].includes(articlesStore.tab)}
           onSpanSelect={(span: GraphSpan) => {
-            setArticlesStore('graphSpan', () => ({ ...span }))
+            setArticlesStore('graphSpan', () => ({ ...span }));
+            storeGraphSpan(accountStore.pubkey, 'articles', span);
           }}
         />
       </Wormhole>

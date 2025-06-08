@@ -7,10 +7,11 @@ import { createStore } from "solid-js/store";
 import { deleteFromInbox, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortReads } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
-import { defaultSpan, FeedCriteria, GraphSpan } from "../Home/Home.data";
+import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
 import { doRequestDelete } from "src/primal_api/events";
 import { openConfirmDialog } from "src/stores/AppStore";
+import { readGraphSpan } from "src/utils/localStore";
 
 
 export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
@@ -206,7 +207,12 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
 
   if (!pk) return;
 
-  const { since, until, resolution } = articlesStore.graphSpan;
+  const span = readGraphSpan(accountStore.pubkey, 'articles');
+
+  setArticlesStore('graphSpan', () => ({ ...span }));
+
+
+  const { since, until } = articlesStore.graphSpan;
 
   if (
     pageStore.articles.feedPages.length > 0
