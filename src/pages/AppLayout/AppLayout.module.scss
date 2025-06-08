@@ -34,8 +34,8 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 20px;
-    margin-inline: 24px;
+    gap: 24px;
+    margin-inline: 28px;
     // border: 1px solid darkgreen;
 
     .navItem {
@@ -112,7 +112,7 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
-      gap: 28px;
+      gap: 36px;
 
       width: 208px;
       height: 100dvh;
@@ -121,6 +121,7 @@
 
       footer {
         margin-top: auto;
+        margin-left: 28px;
       }
     }
   }
