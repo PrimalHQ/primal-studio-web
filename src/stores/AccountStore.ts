@@ -83,8 +83,9 @@ const setSec = (sec: string | undefined, force?: boolean) => {
       updateAccountStore('pubkey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
       checkMembershipStatus();
-      updateAccountStore('accountIsReady', () => true);
     }
+
+    updateAccountStore('accountIsReady', () => true);
 
     // Read profile from storage
 
