@@ -1091,6 +1091,11 @@ input.textInput {
     padding-top: 16px;
     padding-bottom: 10px;
     padding-left: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0;
   }
 
   .phonePreview {
@@ -1101,7 +1106,7 @@ input.textInput {
   }
 
   .sidebarPreview {
-    width: 324px;
+    width: 300px;
     border: 1px solid var(--background-input);
     border-radius: 8px;
     margin-left: 20px;
@@ -1114,7 +1119,6 @@ input.textInput {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 36px;
 }
 
 .tableOptions {

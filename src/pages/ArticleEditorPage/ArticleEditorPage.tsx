@@ -33,6 +33,10 @@ import Avatar from 'src/components/Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { nip05Verification } from 'src/utils/ui';
+import ArticleDesktopFeedPreview from 'src/components/ArticleEditor/Previews/ArticleDesktopFeedPreview';
+import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
+import ArticlePhoneReviewPreview from 'src/components/Event/ArticlePhoneReviewPreview';
+import ArticleSidebarReviewPreview from 'src/components/Event/ArticleSidebarReviewPreview';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -726,19 +730,18 @@ const ReadsEditor: Component = () => {
                   <div class={styles.caption}>
                     Desktop Feed Preview
                   </div>
-                  {/* <ArticlePreview
-                    article={genereatePreviewArticle()}
-                  /> */}
+                  <ArticleReviewPreview
+                    article={genereatePreviewArticle()!}
+                  />
 
                   <div class={styles.caption}>
                     Phone Feed Preview
                   </div>
                   <div class={styles.phonePreview}>
-                    {/* <ArticlePreviewPhone
-                      article={genereatePreviewArticle()}
+                    <ArticlePhoneReviewPreview
+                      article={genereatePreviewArticle()!}
                       hideFooter={true}
-                      noBorder={true}
-                    /> */}
+                    />
                   </div>
 
 
@@ -746,10 +749,10 @@ const ReadsEditor: Component = () => {
                     Sidebar Feed Preview
                   </div>
                   <div class={styles.sidebarPreview}>
-                    {/* <ArticleShort
-                      article={genereatePreviewArticle()}
+                    <ArticleSidebarReviewPreview
+                      article={genereatePreviewArticle()!}
                       noBorder={true}
-                    /> */}
+                    />
                   </div>
                 </div>
               </Match>
@@ -804,7 +807,7 @@ const ReadsEditor: Component = () => {
               >
                 Preview
               </button>
-              {/* <button
+              <button
                 class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
                 onClick={() => {
                   setEditorPreviewMode('phone');
@@ -819,7 +822,7 @@ const ReadsEditor: Component = () => {
                 }}
               >
                 Feed Preview
-              </button> */}
+              </button>
             </div>
 
             <div class={styles.sidebarPublish}>

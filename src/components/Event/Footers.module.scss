@@ -106,7 +106,7 @@
   }
 
   &.very_short {
-    grid-template-columns: 123px 123px 123px 123px auto;
+    grid-template-columns: 80px 80px 80px 80px auto;
 
     .bookmarkFoot {
       display: flex;
@@ -204,6 +204,7 @@
     @include typeDiv;
     .icon {
       @include statIcon;
+      height: 20px;
       -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
       mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
     }

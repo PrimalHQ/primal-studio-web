@@ -1,17 +1,25 @@
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { A } from '@solidjs/router';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import Avatar from '../Avatar/Avatar';
+import { wordsPerMinute } from '../../constants';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
-import styles from './Event.module.scss';
-import { NoteReactionsState, PrimalArticle } from 'src/primal';
-import { getMediaUrl } from 'src/stores/MediaStore';
+import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
+import defaultAvatarLight from '../../assets/images/reads_image_light.png';
+
+import styles from './ArticleReviewPreview.module.scss';
+import { nip19 } from 'src/utils/nTools';
+import { PrimalArticle, NoteReactionsState } from 'src/primal';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
-import { wordsPerMinute } from 'src/constants';
+import Avatar from '../Avatar/Avatar';
+import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import ArticleFooter from './ArticleFooter';
+import { getMediaUrl } from 'src/stores/MediaStore';
 
-export type ArticleProps = {
+const isDev = localStorage.getItem('devMode') === 'true';
+
+const ArticlePhoneReviewPreview: Component<{
   id?: string,
   article: PrimalArticle,
   height?: number,
@@ -19,20 +27,33 @@ export type ArticleProps = {
   hideFooter?: boolean,
   hideContext?: boolean,
   bordered?: boolean,
-  noLinks?: boolean,
-  onClick?: (url: string) => void,
+  noBorder?: boolean,
   onRemove?: (id: string) => void,
-  notif?: boolean,
-};
+}> = (props) => {
 
-export const renderArticlePreview = (props: ArticleProps) => (
-  <div>
-    <ArticlePreviewPublish {...props} />
-  </div> as HTMLDivElement
-  ).innerHTML;
+  const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
+    likes: 0,
+    liked: false,
+    reposts: 0,
+    reposted: false,
+    replies: 0,
+    replied: false,
+    zapCount: 0,
+    satsZapped: 0,
+    zapped: false,
+    zappedAmount: 0,
+    zappedNow: false,
+    isZapping: false,
+    showZapAnim: false,
+    hideZapIcon: false,
+    moreZapsAvailable: false,
+    isRepostMenuVisible: false,
+    topZaps: [],
+    topZapsFeed: [],
+    quoteCount: 0,
+  });
 
-const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
-
+  let articleContextMenu: HTMLDivElement | undefined;
 
   let articlePreview: HTMLDivElement | undefined;
 
@@ -105,15 +126,20 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
     return lines;
   }
 
+
   const [contentStyle, setContentStyle] = createSignal('T3');
 
   createEffect(() => {
+    const t = props.article.title;
+    const s = props.article.summary;
 
     const tt = articlePreview?.querySelector(`.${styles.title}`);
+    const ss = articlePreview?.querySelector(`.${styles.summary}`);
 
-    if (!tt) return;
+    if (!tt || !ss) return;
 
     const titleLines = countLines(tt);
+    const summaryLines = countLines(ss);
 
     if (titleLines === 1) setContentStyle('T1');
 
@@ -132,17 +158,22 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
   return (
     <div
       ref={articlePreview}
-      class={`${styles.article} ${props.bordered ? styles.bordered : ''} ${props.notif ? styles.notif : ''}`}
+      class={`${styles.articlePhone} ${props.bordered ? styles.bordered : ''} ${props.noBorder ? styles.noBorder : ''}`}
       style={props.height ? `height: ${props.height}px` : ''}
     >
+      <Show when={!props.hideContext}>
+        <div class={styles.upRightFloater}>
+          <NoteContextTrigger
+            ref={articleContextMenu}
+          />
+        </div>
+      </Show>
+
       <div class={styles.header}>
-        <div
-          class={styles.userInfo}
-        >
-          <Avatar user={props.article.user} size={22} />
-          <div class={styles.userName}>{userName(props.article.pubkey)}</div>
+        <div class={styles.userInfo}>
+          <Avatar user={props.article.user} size={22}/>
+          <div class={styles.userName}>{userName(props.article.user.pubkey)}</div>
           <VerificationCheck user={props.article.user} />
-          <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
         </div>
         <div class={styles.time}>
           {shortDate(props.article.published_at)}
@@ -155,28 +186,9 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
             <div class={styles.title}>
               {props.article.title}
             </div>
-            <div class={styles.summary}>
-              {props.article.summary}
-            </div>
-          </div>
-          <div class={styles.tags}>
-            <div class={styles.estimate}>
-              {Math.ceil((props.article.wordCount || 0) / wordsPerMinute)} minute read
-            </div>
-            <For each={props.article.tags?.slice(0, 3)}>
-              {tag => (
-                <div class={styles.tag}>
-                  {tag}
-                </div>
-              )}
-            </For>
-            <Show when={props.article.tags?.length && props.article.tags.length > 3}>
-              <div class={styles.tag}>
-                + {props.article.tags.length - 3}
-              </div>
-            </Show>
           </div>
         </div>
+
         <div class={styles.image}>
           <Show
             when={props.article.image}
@@ -198,10 +210,23 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
         </div>
       </div>
 
+      <div class={styles.stats}>
+        <div class={styles.estimates}>
+          <div class={styles.estimate}>
+            {Math.ceil((props.article.wordCount || 0) / wordsPerMinute)} minute read
+          </div>
+          <div class={styles.estimate}>
+            <div class={styles.commentIcon}></div>
+            {Math.ceil(props.article.stats.replies)} comments
+          </div>
+        </div>
+      </div>
+
       <Show when={!props.hideFooter}>
-        <div class={`${props.notif ? styles.footerNotif : styles.footer}`}>
+        <div class={styles.footer}>
           <ArticleFooter
             note={props.article}
+            size="very_short"
           />
         </div>
       </Show>
@@ -210,4 +235,4 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
   );
 }
 
-export default ArticlePreviewPublish;
+export default ArticlePhoneReviewPreview;

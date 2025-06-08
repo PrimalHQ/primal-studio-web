@@ -51,6 +51,7 @@ const ReadsPublishDialog: Component<{
         <div class={styles.previewHolder}>
           <ArticleReviewPreview
             article={props.article!}
+            bordered={true}
           />
         </div>
 

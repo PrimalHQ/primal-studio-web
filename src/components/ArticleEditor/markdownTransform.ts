@@ -303,8 +303,6 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
     if (['npub', 'nprofile'].includes(type)) {
       const user = await findMissingUser(bech32);
 
-      console.log('FOUND: ', user)
-
       if (user) {
         foundUsers[bech32] = { ...user };
       }

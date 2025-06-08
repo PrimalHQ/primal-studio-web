@@ -7,7 +7,7 @@ import ArticleFooterActionButton from './ArticleFooterActionButton';
 
 const ArticleFooter: Component<{
   note: PrimalArticle,
-  size?: 'xwide' | 'wide' | 'normal' | 'short',
+  size?: 'xwide' | 'wide' | 'normal' | 'short' | 'very_short',
   id?: string,
   isPhoneView?: boolean,
 }> = (props) => {

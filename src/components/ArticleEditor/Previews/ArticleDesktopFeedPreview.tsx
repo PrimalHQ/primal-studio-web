@@ -1,41 +1,115 @@
-import { Component, createSignal, createEffect, Show, For } from 'solid-js';
+// import { A } from '@solidjs/router';
+import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
+import defaultAvatarLight from '../../assets/images/reads_image_light.png';
+
+import styles from './ArticlePreviews.module.scss';
+import { nip19 } from 'nostr-tools';
+import Avatar from 'src/components/Avatar/Avatar';
+import ArticleFooter from 'src/components/Event/ArticleFooter';
+import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
+import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { wordsPerMinute } from 'src/constants';
-import { PrimalArticle } from 'src/primal';
+import { PrimalArticle, NoteReactionsState } from 'src/primal';
+import media from 'src/translations/en/media';
+import settings from 'src/translations/en/settings';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
-import { nip19 } from '../../utils/nTools';
-import Avatar from '../Avatar/Avatar';
-import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
-import ArticleFooter from './ArticleFooter';
+import { getMediaUrl } from 'src/stores/MediaStore';
 
-import styles from './ArticleReviewPreview.module.scss';
-import missingImage from 'src/assets/images/missing_image.svg';
+const isDev = localStorage.getItem('devMode') === 'true';
 
 export type ArticleProps = {
   id?: string,
   article: PrimalArticle,
   height?: number,
+  onRender?: (article: PrimalArticle, el: HTMLDivElement | undefined) => void,
+  hideFooter?: boolean,
+  hideContext?: boolean,
   bordered?: boolean,
-  onClick?: () => void,
+  noLinks?: boolean,
+  onClick?: (url: string) => void,
+  onRemove?: (id: string) => void,
+  notif?: boolean,
 };
 
-export const renderArticleReviewPreview = (config: { article: PrimalArticle }) => {
-  return (<div><ArticleReviewPreview article={config.article}/></div> as HTMLDivElement).innerHTML;
-}
+const ArticleDesktopFeedPreview: Component<ArticleProps> = (props) => {
 
-const ArticleReviewPreview: Component<ArticleProps> = (props) => {
+  const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
+    likes: 0,
+    liked: false,
+    reposts: 0,
+    reposted: false,
+    replies: 0,
+    replied: false,
+    zapCount: 0,
+    satsZapped: 0,
+    zapped: false,
+    zappedAmount: 0,
+    zappedNow: false,
+    isZapping: false,
+    showZapAnim: false,
+    hideZapIcon: false,
+    moreZapsAvailable: false,
+    isRepostMenuVisible: false,
+    topZaps: [],
+    topZapsFeed: [],
+    quoteCount: 0,
+  });
+
+  let articleContextMenu: HTMLDivElement | undefined;
 
   let articlePreview: HTMLDivElement | undefined;
+
+  const articleImage = () => {
+    const url = props.article.image;
+
+    let m = getMediaUrl(url, 's');
+
+    if (!m) {
+      m = getMediaUrl(url, 'm');
+    }
+
+    if (!m) {
+      m = getMediaUrl(url, 'o');
+    }
+
+    if (!m) {
+      m = url;
+    }
+
+    return m;
+  }
+
+  const authorAvatar = () => {
+    const url = props.article.user.picture;
+
+    let m = getMediaUrl(url, 's');
+
+    if (!m) {
+      m = getMediaUrl(url, 'm');
+    }
+
+    if (!m) {
+      m = getMediaUrl(url, 'o');
+    }
+
+    if (!m) {
+      m = url;
+    }
+
+    return m;
+  }
+
+  const onImageLoaded = () => {
+    props.onRender && props.onRender(props.article, articlePreview);
+  };
 
   const onImageError = (event: any) => {
     const image = event.target;
 
-    let src: string = props.article.user.picture;
-
-    if (image.src === src || image.src.endsWith(src)) {
-      src = missingImage;
-    }
+    let src: string = authorAvatar();
 
     image.onerror = "";
     image.src = src;
@@ -85,19 +159,18 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
     return ''
   }
 
-
   return (
     <div
       ref={articlePreview}
-      class={`${styles.article} ${props.bordered ? styles.bordered : ''}`}
+      class={`${styles.articleDesktopFeedPreview} ${props.bordered ? styles.bordered : ''} ${props.notif ? styles.notif : ''}`}
       style={props.height ? `height: ${props.height}px` : ''}
-      onClick={props.onClick}
     >
+
       <div class={styles.header}>
         <div
           class={styles.userInfo}
         >
-          <Avatar user={props.article.user} size={22}/>
+          <Avatar user={props.article.user} size={22} />
           <div class={styles.userName}>{userName(props.article.user.pubkey)}</div>
           <VerificationCheck user={props.article.user} />
           <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
@@ -122,10 +195,10 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
               {Math.ceil((props.article.wordCount || 0) / wordsPerMinute)} minute read
             </div>
             <For each={props.article.keywords?.slice(0, 3)}>
-              {tag => (
-                <div class={styles.tag}>
-                  {tag}
-                </div>
+              {keyword => (
+                <a href={`/reads/${keyword}`} class={styles.tag}>
+                  {keyword}
+                </a>
               )}
             </For>
             <Show when={props.article.keywords?.length && props.article.keywords.length > 3}>
@@ -140,29 +213,32 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
             when={props.article.image}
             fallback={
               <Show
-                when={props.article.user.picture}
+                when={authorAvatar()}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
-                <img src={props.article.user.picture} onerror={onImageError} />
+                <img src={props.article.user.picture} onload={onImageLoaded} onerror={onImageError} />
               </Show>
             }
           >
             <img
-              src={props.article.image}
+              src={articleImage()}
+              onload={onImageLoaded}
               onerror={onImageError}
             />
           </Show>
         </div>
       </div>
 
-        <div class={styles.footer}>
+      <Show when={!props.hideFooter}>
+        <div class={`${props.notif ? styles.footerNotif : styles.footer}`}>
           <ArticleFooter
             note={props.article}
-            size="normal"
           />
         </div>
+      </Show>
+
     </div>
   );
 }
 
-export default ArticleReviewPreview;
+export default ArticleDesktopFeedPreview;
