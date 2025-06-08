@@ -560,3 +560,13 @@
   }
 
 }
+
+.commentIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/feed_reply.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/feed_reply.svg) no-repeat 0/100%;
+}

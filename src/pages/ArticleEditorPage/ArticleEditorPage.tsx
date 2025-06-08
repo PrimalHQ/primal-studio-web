@@ -7,7 +7,7 @@ import { isIPhone } from '@kobalte/utils';
 import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import { createStore } from 'solid-js/store';
-import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
+import { BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts, triggerImportEvents } from 'src/primal_api/events';
 import { accountStore, activeUser } from 'src/stores/AccountStore';
 import PageTitle from 'src/components/PageTitle/PageTitle';
@@ -38,6 +38,7 @@ import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 import ArticlePhoneReviewPreview from 'src/components/Event/ArticlePhoneReviewPreview';
 import ArticleSidebarReviewPreview from 'src/components/Event/ArticleSidebarReviewPreview';
 import StickySidebar from 'src/components/StickySidebar/StickySidebar';
+import ArticleEditorPreview from 'src/components/ArticleEditor/ArticleEditorPreview';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -60,6 +61,7 @@ const ReadsEditor: Component = () => {
   const toast = useToastContext();
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
@@ -118,84 +120,6 @@ const ReadsEditor: Component = () => {
 
     return str.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
   }
-
-  // const genereatePreviewArticle = (): PrimalArticle | undefined => {
-
-  //   // const content = markdownContent();
-
-  //   // let relayHints = {}
-  //   // let tags: string[][] = referencesToTags(content, relayHints);;
-
-  //   // const relayTags = account.relays.map(r => {
-  //   //   let t = ['r', r.url];
-
-  //   //   const settings = account.relaySettings[r.url];
-  //   //   if (settings && settings.read && !settings.write) {
-  //   //     t = [...t, 'read'];
-  //   //   }
-  //   //   if (settings && !settings.read && settings.write) {
-  //   //     t = [...t, 'write'];
-  //   //   }
-
-  //   //   return t;
-  //   // });
-
-  //   // tags = [...tags, ...relayTags];
-
-  //   // tags.push(['clent', 'Primal']);
-
-  //   // const now = Math.floor((new Date()).getTime() / 1_000);
-  //   // const pubkey = account.publicKey || '';
-  //   // const identifier = generateIdentifier();
-  //   // const coordinate = `${Kind.LongForm}:${account.publicKey}:${identifier}`;
-  //   // const naddr = nip19.naddrEncode({
-  //   //   kind: Kind.LongForm,
-  //   //   pubkey,
-  //   //   identifier,
-  //   // });
-  //   // const id = 'preview_article';
-
-  //   // const previewArticle: PrimalArticle = {
-  //   //   ...article,
-  //   //   image: accordionSection().includes('hero_image') ? article.image : '',
-  //   //   content,
-  //   //   user: account.activeUser,
-  //   //   published: now - 90,
-  //   //   topZaps: [],
-  //   //   id,
-  //   //   pubkey,
-  //   //   naddr,
-  //   //   noteId: naddr,
-  //   //   coordinate,
-  //   //   wordCount: Math.ceil(content.split(' ').length / wordsPerMinute),
-  //   //   noteActions: { event_id: id, liked: false, replied: false, reposted: false, zapped: false },
-  //   //   likes: 0,
-  //   //   mentions: 0,
-  //   //   replies: 0,
-  //   //   reposts: 0,
-  //   //   bookmarks: 0,
-  //   //   zaps: 0,
-  //   //   score: 0,
-  //   //   score24h: 0,
-  //   //   satszapped: 0,
-  //   //   client: 'Primal',
-  //   //   msg: {
-  //   //     kind: Kind.LongForm,
-  //   //     content,
-  //   //     id,
-  //   //     pubkey,
-  //   //     sig: 'signature',
-  //   //     tags,
-  //   //   },
-  //   //   mentionedNotes: readMentions.notes,
-  //   //   mentionedArticles: readMentions.reads,
-  //   //   mentionedUsers: readMentions.users,
-  //   //   // mentionedZaps: Record<string, PrimalZap>,
-  //   //   // mentionedHighlights: Record<string, any>,
-  //   // };
-
-  //   // return previewArticle;
-  // }
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -710,19 +634,35 @@ const ReadsEditor: Component = () => {
               </Match>
 
               <Match when={editorPreviewMode() === 'browser'}>
-                <div>
-                  {/* <ReadsEditorPreview
-                    article={genereatePreviewArticle()}
-                  /> */}
-                </div>
+                <ArticleEditorPreview
+                  accordionSection={accordionSection()}
+                  markdownContent={markdownContent()}
+                  setMarkdownContent={setMarkdownContent}
+                  article={article}
+                  articlePreview={genereatePreviewArticle()}
+                  setArticle={setArticle}
+                  fixedToolbar={fixedToolbar()}
+                  setEditor={setEditor}
+                  showTableOptions={updateTableOptions}
+                  viewMode={true}
+                />
               </Match>
 
               <Match when={editorPreviewMode() === 'phone'}>
                 <div class={styles.phonePreview} >
-                  {/* <ReadsEditorPreview
-                    article={genereatePreviewArticle()}
-                    isPhoneView={true}
-                  /> */}
+                  <ArticleEditorPreview
+                    accordionSection={accordionSection()}
+                    markdownContent={markdownContent()}
+                    setMarkdownContent={setMarkdownContent}
+                    article={article}
+                    articlePreview={genereatePreviewArticle()}
+                    setArticle={setArticle}
+                    fixedToolbar={fixedToolbar()}
+                    setEditor={setEditor}
+                    showTableOptions={updateTableOptions}
+                    viewMode={true}
+                    isPhone={true}
+                  />
                 </div>
               </Match>
 
@@ -744,7 +684,6 @@ const ReadsEditor: Component = () => {
                       hideFooter={true}
                     />
                   </div>
-
 
                   <div class={styles.caption}>
                     Sidebar Feed Preview

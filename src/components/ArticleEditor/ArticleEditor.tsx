@@ -114,6 +114,7 @@ const ArticleEditor: Component<{
 
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
+    editable: location.pathname.includes('/view/draft'),
     extensions: [
       StarterKit.configure({
         dropcursor: false,

@@ -1317,3 +1317,11 @@ input.textInput {
   mask: url(../../assets/icons/calendar.svg) 0 / 100% no-repeat;
 
 }
+
+.phonePreview {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 36px;
+}
