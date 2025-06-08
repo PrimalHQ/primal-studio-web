@@ -290,6 +290,13 @@ const ArticleEditorPreview: Component<{
               />
             </TextField>
           </div>
+
+          <div
+            class={styles.doZaps}
+          >
+            <div class={styles.zapIcon}></div>
+            <div class={styles.zapText}>Zap</div>
+          </div>
         </div>
 
       </div>
