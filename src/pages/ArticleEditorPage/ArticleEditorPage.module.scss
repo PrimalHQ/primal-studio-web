@@ -947,138 +947,137 @@ input.textInput {
 
 
 .sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 36px;
-
-  .sidebarOptions {
+  >div {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    .caption {
-      color: var(--text-secondary);
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 20px;
-      margin-top: 0;
-    }
+    gap: 36px;
   }
-
-  .sidebarTools {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-    .caption {
-      color: var(--text-secondary);
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 20px;
-      margin-top: 0;
-    }
-    .toolButton {
-      border-radius: 99px;
-      background: var(--background-input);
-      border: none;
-      outline: none;
-      margin: 0;
-      padding: 10px 16px;
-      width: 272px;
-
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 15px;
-
-      &.selected {
-        border: 1px solid var(--text-tertiary);
-        background: var(--background-header-input);
-      }
-    }
-  }
-
-  .sidebarPublish {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-    .caption {
-      color: var(--text-secondary);
-      font-size: 16px;
-      font-weight: 400;
-      line-height: 20px;
-      margin-top: 0;
-    }
-    .status {
-      margin-top: -12px;
-      color: var(--text-tertiary);
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 20px;
-
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 6px;
-
-      .statusBulb {
-        width: 5px;
-        height: 5px;
-        border-radius: 99px;
-
-        &.savedBulb {
-          background-color: var(--success-bright);
-        }
-        &.unsavedBulb {
-          background-color: var(--warning-bright-two);
-        }
-      }
-
-    }
-    .toolButton {
-      border-radius: 99px;
-      background: var(--background-input);
-      border: none;
-      outline: none;
-      margin: 0;
-      padding: 10px 16px;
-      width: 272px;
-
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 15px;
-
-      &:disabled {
-        background: var(--background-input);
-        color: var(--text-tertiary-2);
-      }
-    }
-    .toolPrimaryButton {
-      border-radius: 99px;
-      background: var(--accent);
-      border: none;
-      outline: none;
-      margin: 0;
-      padding: 10px 16px;
-      width: 272px;
-
-      color: var(--text-primary-button);
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 15px;
-
-      &:disabled {
-        background: var(--background-input);
-        color: var(--text-tertiary-2);
-      }
-    }
-  }
-
-
 }
 
+.sidebarOptions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  .caption {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 0;
+  }
+}
+
+.sidebarTools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  .caption {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 0;
+  }
+  .toolButton {
+    border-radius: 99px;
+    background: var(--background-input);
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 10px 16px;
+    width: 272px;
+
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 15px;
+
+    &.selected {
+      border: 1px solid var(--text-tertiary);
+      background: var(--background-header-input);
+    }
+  }
+}
+
+.sidebarPublish {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  .caption {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 0;
+  }
+  .status {
+    margin-top: -12px;
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+
+    .statusBulb {
+      width: 5px;
+      height: 5px;
+      border-radius: 99px;
+
+      &.savedBulb {
+        background-color: var(--success-bright);
+      }
+      &.unsavedBulb {
+        background-color: var(--warning-bright-two);
+      }
+    }
+
+  }
+  .toolButton {
+    border-radius: 99px;
+    background: var(--background-input);
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 10px 16px;
+    width: 272px;
+
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 15px;
+
+    &:disabled {
+      background: var(--background-input);
+      color: var(--text-tertiary-2);
+    }
+  }
+  .toolPrimaryButton {
+    border-radius: 99px;
+    background: var(--accent);
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 10px 16px;
+    width: 272px;
+
+    color: var(--text-primary-button);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 15px;
+
+    &:disabled {
+      background: var(--background-input);
+      color: var(--text-tertiary-2);
+    }
+  }
+}
 
 .feedPreview {
   padding: 12px 0px;

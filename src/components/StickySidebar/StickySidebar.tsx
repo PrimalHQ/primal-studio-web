@@ -12,9 +12,9 @@ const StickySidebar: Component<{
   return (
     <Switch fallback={
       <div id={props.id} class={styles.stickyWrapper}>
-        <div class={styles.trendingSection}>
+
           {props.children}
-        </div>
+
       </div>
     }>
       <Match when={!props.noWormhole}>
@@ -22,9 +22,7 @@ const StickySidebar: Component<{
           to="right_sidebar"
         >
           <div id={props.id} class={styles.stickyWrapper}>
-            <div class={styles.trendingSection}>
               {props.children}
-            </div>
           </div>
         </Wormhole>
       </Match>

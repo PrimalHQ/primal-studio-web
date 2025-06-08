@@ -37,6 +37,7 @@ import ArticleDesktopFeedPreview from 'src/components/ArticleEditor/Previews/Art
 import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 import ArticlePhoneReviewPreview from 'src/components/Event/ArticlePhoneReviewPreview';
 import ArticleSidebarReviewPreview from 'src/components/Event/ArticleSidebarReviewPreview';
+import StickySidebar from 'src/components/StickySidebar/StickySidebar';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -760,187 +761,189 @@ const ReadsEditor: Component = () => {
           </div>
 
           <div class={styles.sidebar}>
-            <div class={styles.sidebarOptions}>
-              <div class={styles.caption}>Options</div>
-              <CheckBox
-                onChange={(checked: boolean) => {
-                  if (!checked) {
-                    setAccordionSection((as) => as.filter(s => s !== 'metadata'));
-                    return;
-                  }
+            <StickySidebar noWormhole={true}>
+              <div class={styles.sidebarOptions}>
+                <div class={styles.caption}>Options</div>
+                <CheckBox
+                  onChange={(checked: boolean) => {
+                    if (!checked) {
+                      setAccordionSection((as) => as.filter(s => s !== 'metadata'));
+                      return;
+                    }
 
-                  setAccordionSection((as) => [...as, 'metadata']);
-                }}
-                checked={accordionSection().includes('metadata')}
-                label="Show article metadata"
-              />
-              <CheckBox
-                onChange={(checked: boolean) => {
-                  if (!checked) {
-                    setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
-                    return;
-                  }
+                    setAccordionSection((as) => [...as, 'metadata']);
+                  }}
+                  checked={accordionSection().includes('metadata')}
+                  label="Show article metadata"
+                />
+                <CheckBox
+                  onChange={(checked: boolean) => {
+                    if (!checked) {
+                      setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
+                      return;
+                    }
 
-                  setAccordionSection((as) => [...as, 'hero_image']);
-                }}
-                checked={accordionSection().includes('hero_image')}
-                label="Use hero image"
-              />
-            </div>
-            <div class={styles.sidebarTools}>
-              <div class={styles.caption}>Edit & Preview</div>
+                    setAccordionSection((as) => [...as, 'hero_image']);
+                  }}
+                  checked={accordionSection().includes('hero_image')}
+                  label="Use hero image"
+                />
+              </div>
+              <div class={styles.sidebarTools}>
+                <div class={styles.caption}>Edit & Preview</div>
 
-              <button
-                class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
-                onClick={() => {
-                  setEditorPreviewMode('editor');
-                }}
-              >
-                Edit Mode
-              </button>
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('editor');
+                  }}
+                >
+                  Edit Mode
+                </button>
 
-              <button
-                class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
-                onClick={() => {
-                  setEditorPreviewMode('browser');
-                }}
-              >
-                Preview
-              </button>
-              <button
-                class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
-                onClick={() => {
-                  setEditorPreviewMode('phone');
-                }}
-              >
-                Phone Preview
-              </button>
-              <button
-                class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
-                onClick={() => {
-                  setEditorPreviewMode('feed');
-                }}
-              >
-                Feed Preview
-              </button>
-            </div>
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('browser');
+                  }}
+                >
+                  Preview
+                </button>
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('phone');
+                  }}
+                >
+                  Phone Preview
+                </button>
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('feed');
+                  }}
+                >
+                  Feed Preview
+                </button>
+              </div>
 
-            <div class={styles.sidebarPublish}>
-              <div class={styles.caption}>{'Content & Publishing'}</div>
+              <div class={styles.sidebarPublish}>
+                <div class={styles.caption}>{'Content & Publishing'}</div>
 
-              <Show
-                when={futurePublishDate()}
-                fallback={
-                  <button
-                    class={styles.toolButton}
-                    onClick={() => setShowPublishDateDialog(true)}
-                  >
-                    Schedule Publish Time
-                  </button>
-                }
-              >
-                <div class={styles.publishDateDisplay}>
-                  <div class={styles.calendarIconBig}></div>
-                  <div class={styles.dateInfo}>
-                    <div class={styles.label}>
-                      Scheduled to publish:
-                    </div>
-                    <div class={styles.date}>
-                      {longDate(futurePublishDate() || 0)}
-                      <button
-                        class={styles.linkButton}
-                        onClick={() => setShowPublishDateDialog(true)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Show>
-
-              <Show
-                when={proposedUser()}
-                fallback={
-                  <button
-                    class={styles.toolButton}
-                    onClick={() => setShowProposeDialog(true)}
-                  >
-                    Propose to a Nostr User
-                  </button>
-                }
-              >
-                <div class={styles.publishDateDisplay}>
-                  <Avatar user={proposedUser()!} size={32} />
-
-                  <div class={styles.dateInfo}>
-                    <div class={styles.label}>
-                      Proposed to:
-                    </div>
-                    <div class={styles.userInfo}>
-                      <div class={styles.userName}>{userName(proposedUser()!.pubkey)}</div>
-                      <VerificationCheck user={proposedUser()} />
-                      <div class={styles.nip05}>{nip05Verification(proposedUser())}</div>
-                      <button
-                        class={styles.linkButton}
-                        onClick={() => setShowProposeDialog(true)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Show>
-            </div>
-            <div class={styles.sidebarPublish}>
-              <div class={styles.caption}>{'Save & Publish'}</div>
-              <Switch>
-                <Match when={article.title.length === 0}>
-                  <div class={styles.status}>
-                    Enter article title before you can save
-                  </div>
-                </Match>
-
-                <Match when={!isUnsaved()}>
-                  <div class={styles.status}>
-                    <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
-                    <div>Saved changes: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
-                  </div>
-                </Match>
-
-                <Match when={isUnsaved()}>
-                  <div class={styles.status}>
-                    <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
-                    <Show
-                      when={lastSaved.time}
-                      fallback={<div>Unsaved changes (no saved drafts yet)</div>}
+                <Show
+                  when={futurePublishDate()}
+                  fallback={
+                    <button
+                      class={styles.toolButton}
+                      onClick={() => setShowPublishDateDialog(true)}
                     >
-                      <div>Unsaved changes since: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
-                    </Show>
+                      Schedule Publish Time
+                    </button>
+                  }
+                >
+                  <div class={styles.publishDateDisplay}>
+                    <div class={styles.calendarIconBig}></div>
+                    <div class={styles.dateInfo}>
+                      <div class={styles.label}>
+                        Scheduled to publish:
+                      </div>
+                      <div class={styles.date}>
+                        {longDate(futurePublishDate() || 0)}
+                        <button
+                          class={styles.linkButton}
+                          onClick={() => setShowPublishDateDialog(true)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </Match>
-              </Switch>
+                </Show>
 
-              <button
-                class={styles.toolButton}
-                onClick={saveDraft}
-                disabled={!isUnsaved()}
-              >
-                Save Draft Privately
-              </button>
-
-              <button
-                class={styles.toolPrimaryButton}
-                disabled={article.title.length === 0}
-                onClick={() => {setShowPublishArticle(true)}}
-              >
                 <Show
                   when={proposedUser()}
-                  fallback={<>Continue to Publish Article</>}
+                  fallback={
+                    <button
+                      class={styles.toolButton}
+                      onClick={() => setShowProposeDialog(true)}
+                    >
+                      Propose to a Nostr User
+                    </button>
+                  }
                 >
-                  <>Continue to Send Article</>
+                  <div class={styles.publishDateDisplay}>
+                    <Avatar user={proposedUser()!} size={32} />
+
+                    <div class={styles.dateInfo}>
+                      <div class={styles.label}>
+                        Proposed to:
+                      </div>
+                      <div class={styles.userInfo}>
+                        <div class={styles.userName}>{userName(proposedUser()!.pubkey)}</div>
+                        <VerificationCheck user={proposedUser()} />
+                        <div class={styles.nip05}>{nip05Verification(proposedUser())}</div>
+                        <button
+                          class={styles.linkButton}
+                          onClick={() => setShowProposeDialog(true)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </Show>
-              </button>
-            </div>
+              </div>
+              <div class={styles.sidebarPublish}>
+                <div class={styles.caption}>{'Save & Publish'}</div>
+                <Switch>
+                  <Match when={article.title.length === 0}>
+                    <div class={styles.status}>
+                      Enter article title before you can save
+                    </div>
+                  </Match>
+
+                  <Match when={!isUnsaved()}>
+                    <div class={styles.status}>
+                      <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
+                      <div>Saved changes: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                    </div>
+                  </Match>
+
+                  <Match when={isUnsaved()}>
+                    <div class={styles.status}>
+                      <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
+                      <Show
+                        when={lastSaved.time}
+                        fallback={<div>Unsaved changes (no saved drafts yet)</div>}
+                      >
+                        <div>Unsaved changes since: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                      </Show>
+                    </div>
+                  </Match>
+                </Switch>
+
+                <button
+                  class={styles.toolButton}
+                  onClick={saveDraft}
+                  disabled={!isUnsaved()}
+                >
+                  Save Draft Privately
+                </button>
+
+                <button
+                  class={styles.toolPrimaryButton}
+                  disabled={article.title.length === 0}
+                  onClick={() => {setShowPublishArticle(true)}}
+                >
+                  <Show
+                    when={proposedUser()}
+                    fallback={<>Continue to Publish Article</>}
+                  >
+                    <>Continue to Send Article</>
+                  </Show>
+                </button>
+              </div>
+            </StickySidebar>
 
             <Show when={showTableOptions()}>
               <div id="tableOptions" class={styles.tableOptions}>
