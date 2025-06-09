@@ -196,20 +196,24 @@ export const updateAccountProfile = (pubkey: string) => {
 
 
 export const fetchBlossomServers = (pubkey: string) => {
-  const subId = `blossom_${APP_ID}`;
+  return new Promise<string[]>((resolve) => {
+    const subId = `blossom_${APP_ID}`;
 
-  primalAPI({
-    subId,
-    action: () => getReplacableEvent(pubkey, Kind.Blossom, subId),
-    onEvent: (content) => {
-      const servers = ((content as NostrEventContent).tags || []).reduce((acc, t) => {
-        if (t[0] !== 'server') return acc;
+    primalAPI({
+      subId,
+      action: () => getReplacableEvent(pubkey, Kind.Blossom, subId),
+      onEvent: (content) => {
+        const servers = ((content as NostrEventContent).tags || []).reduce((acc, t) => {
+          if (t[0] !== 'server') return acc;
 
-        return [...acc, t[1]];
-      }, []);
+          return [...acc, t[1]];
+        }, []);
 
-      updateAccountStore('blossomServers', () => [...servers]);
-    }
+        updateAccountStore('blossomServers', () => [...servers]);
+
+        resolve(servers);
+      }
+    });
   });
 }
 

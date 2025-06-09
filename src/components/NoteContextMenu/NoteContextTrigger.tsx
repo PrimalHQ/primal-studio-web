@@ -6,14 +6,18 @@ const NoteContextTrigger: Component<{
   ref: HTMLDivElement | undefined,
   id?: string,
   onClick?: () => void,
+  collapsed?: boolean,
 }> = (props) => {
 
   let contextMenu: HTMLDivElement | undefined;
 
   return (
-    <div ref={props.ref} class={styles.context}>
+    <div
+      ref={props.ref}
+      class={styles.context}
+    >
       <button
-        class={styles.contextButton}
+        class={`${styles.contextButton} ${props.collapsed ? styles.collapsed : ''}`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

@@ -5,6 +5,7 @@ import { accountStore } from './stores/AccountStore';
 import { preloadNotes } from './pages/Notes/Notes.data';
 import { preloadHome } from './pages/Home/Home.data';
 import { preloadArticles } from './pages/Articles/Articles.data';
+import { preloadMedia } from './pages/Media/Media.data';
 
 const AppRouter: Component = () => {
 
@@ -30,17 +31,17 @@ const AppRouter: Component = () => {
 
   const NotFound = lazy(() => import('./pages/NotFound'));
 
-
   const homePreload: RoutePreloadFunc = (args) => preloadHome(args);
   const articlesPreload: RoutePreloadFunc = (args) => preloadArticles(args);
   const notesPreload: RoutePreloadFunc = (args) => preloadNotes(args);
+  const mediaPreload: RoutePreloadFunc = (args) => preloadMedia(args);
 
   return (
     <Router root={AppLayout} preload={true}>
       <Route path="/:pubkey?" component={Home} preload={homePreload} />
       <Route path="/notes/:pubkey?" component={Notes} preload={notesPreload}/>
       <Route path="/articles/:pubkey?" component={Articles} preload={articlesPreload} />
-      <Route path="/media" component={Media} />
+      <Route path="/media/:pubkey?" component={Media} preload={mediaPreload} />
       <Route path="/account" component={Account} />
       <Route path="/settings" component={Settings}>
         <Route path="/" component={SettingsMenu} />

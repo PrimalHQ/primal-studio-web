@@ -18,6 +18,11 @@
     align-items: center;
     cursor: pointer;
 
+    &.collapsed {
+      width: fit-content;
+      height: 12px;
+    }
+
     &:focus {
       outline: none;
       box-shadow: none;

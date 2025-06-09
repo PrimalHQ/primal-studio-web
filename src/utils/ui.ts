@@ -152,3 +152,23 @@ export const insertIntoTextArea = (
   textarea.value = before + insertText + after;
   textarea.selectionStart = textarea.selectionEnd = position + 1;
 }
+
+export const fileSize = (size: number) => {
+  if (size > 1_000_000_000_000) {
+    return `${(size / 1_000_000_000_000).toFixed(2)}TB`;
+  }
+
+  if (size > 1_000_000_000) {
+    return `${(size / 1_000_000_000).toFixed(2)}GB`;
+  }
+
+  if (size > 1_000_000) {
+    return `${(size / 1_000_000).toFixed(2)}MB`;
+  }
+
+  if (size > 1_000) {
+    return `${(size / 1_000).toFixed(2)}KB`;
+  }
+
+  return `${(size).toFixed(2)}Bytes`
+}
