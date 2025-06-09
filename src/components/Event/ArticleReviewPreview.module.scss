@@ -98,7 +98,7 @@
       justify-content: space-between;
       gap: 8px;
       flex-grow: 1;
-      height: 142px;
+      min-height: 142px;
 
       .content {
         .title {
