@@ -1,4 +1,4 @@
-import { Component, createEffect, on, onCleanup, } from 'solid-js';
+import { Component, createEffect, createMemo, on, onCleanup, } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -37,7 +37,7 @@ const Media: Component = () => {
     },
   );
 
-  const blobs = () => {
+  const blobs = createMemo(() => {
     const unsorted = blossomStore.media[blossomStore.server || ''] || [];
 
     const sorted = unsorted.toSorted((a, b) => {
@@ -57,22 +57,26 @@ const Media: Component = () => {
 
       // sort by type
       const values: Record<string, number> = {
-        image: 3,
-        video: 2,
+        image: 50,
+        video: 40,
+        audio: 30,
+        text: 20,
         other: 1,
       };
 
-      const aType = (b.type?.split('/') || 'other')[0]
+      const aType = (a.type?.split('/') || 'other')[0]
       const bType = (b.type?.split('/') || 'other')[0]
 
-      let aTypeValue = values[aType];
-      let bTypeValue = values[bType];
+      let aTypeValue = values[aType] || values['other'];
+      let bTypeValue = values[bType] || values['other'];
 
       return bTypeValue - aTypeValue;
     });
 
+    // console.log('SORTED: ', blossomStore.sort, sorted.map(s => s.type))
+
     return sorted;
-  }
+  })
 
 
   onCleanup(() => {
