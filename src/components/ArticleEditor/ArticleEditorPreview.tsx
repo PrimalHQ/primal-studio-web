@@ -28,13 +28,17 @@ import { TextField } from "@kobalte/core/text-field";
 import { useToastContext } from "src/context/ToastContext/ToastContext";
 import { Progress } from "@kobalte/core/progress";
 import { isRTL } from "@kobalte/core/i18n";
-import { getLang } from "src/utils/ui";
+import { getLang, nip05Verification } from "src/utils/ui";
 import UploaderBlossom from "../Uploader/UploaderBlossom";
 import ArticleEditorToolbar from "./ArticleEditorToolbar";
 
 import { accountStore, activeUser } from "src/stores/AccountStore";
 import MediaEmbed from "./MediaEmbedExtension";
 import ArticleFooter from "../Event/ArticleFooter";
+import Avatar from "../Avatar/Avatar";
+import { userName } from "src/utils/profile";
+import VerificationCheck from "../VerificationCheck/VerificationCheck";
+import { shortDate } from "src/utils/date";
 
 export type ArticleEdit = {
   title: string,
@@ -246,6 +250,25 @@ const ArticleEditorPreview: Component<{
   return (
     <div class={`${styles.articleEditor} ${props.isPhone ? styles.phoneView : ''}`}>
       <div class={styles.metadataWrapper} id="editor_metadata">
+        <div class={styles.articleHeader}>
+          <Avatar user={props.articlePreview?.user} size={38} />
+          <div class={styles.userInfo}>
+            <div class={styles.nameAndVerification}>
+              <div class={styles.userName}>{userName(props.articlePreview?.user.pubkey)}</div>
+              <VerificationCheck user={props.articlePreview?.user} />
+            </div>
+            <div class={styles.nip05}>
+              {nip05Verification(props.articlePreview?.user)}
+            </div>
+          </div>
+        </div>
+
+        <div class={styles.topBar}>
+          <div class={styles.date}>
+            {shortDate(props.articlePreview?.published_at)} &middot; via {props.articlePreview?.client}
+          </div>
+        </div>
+
         <div class={`${styles.metadata} ${!accordionSection().includes('hero_image') ? styles.noHeroImage : ''}`}>
           <TextField
             class={styles.titleInput}
