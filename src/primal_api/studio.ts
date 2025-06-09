@@ -80,7 +80,7 @@ export const getHomeTotals = async (opts?: HomePayload) => {
 
   let payload: HomePayload = {
     until: today,
-    since: today - 30 * 24 * 60 * 60 ,
+    since: 0 ,
   };
 
   if (opts?.pubkey) {
