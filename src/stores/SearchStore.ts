@@ -285,8 +285,8 @@ export const findContent = async (query: string, until = 0) => {
     const sortedReads = filterAndSortReads(reads, paging);
 
     updateSearchStore('paging', () => ({ ...paging }));
-    updateSearchStore('reads', (ns) => [ ...ns, ...sortedReads]);
-    updateSearchStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+    updateSearchStore('reads', () => [ ...sortedReads]);
+    updateSearchStore('notes', () => [ ...sortedNotes]);
 
   } catch (e) {
     logError('ERROR fetching search results: ', e);
