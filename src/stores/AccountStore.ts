@@ -80,7 +80,6 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     const pubkey = getPublicKey(decoded.data);
 
     if (pubkey !== accountStore.pubkey || force) {
-      console.log('PUBKEY CHANGED: ', pubkey, accountStore.pubkey);
       updateAccountStore('pubkey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
       checkMembershipStatus();

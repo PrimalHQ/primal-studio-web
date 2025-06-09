@@ -34,6 +34,7 @@ export const findMissingEvent = async (naddr: string, editor: Editor) => {
     updateMentionStore('reads', () => ({ [naddr]: { ...events[0] } }));
     const el = renderArticleReviewPreview({
       article: events[0],
+      bordered: true
     })
 
     mentions.forEach(mention => {

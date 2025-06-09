@@ -26,6 +26,8 @@ import { getUsers } from 'src/primal_api/profile';
 import { renderEmbeddedNote } from '../Event/Note';
 import { mentionStore, updateMentionStore } from 'src/stores/MentionStore';
 import { convertConfig } from '../NoteEditor/plainTextTransform';
+import { renderArticlePreview } from '../Event/ArticlePreviewPublish';
+import { renderArticleReviewPreview } from '../Event/ArticleReviewPreview';
 
 // import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 // import { fetchUserProfile } from '../handleFeeds';
@@ -378,11 +380,8 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
       const relays: string[] = [];
       const article = foundArticles[bech32];
 
-      const el = renderArticlePreview({
+      const el = renderArticleReviewPreview({
         article,
-        bordered: true,
-        hideFooter: true,
-        noLinks: true,
       })
 
       const mention = document.createElement('div');
@@ -617,7 +616,4 @@ export const extendMarkdownEditor = (editor: Editor) => {
 }
 
 
-function renderArticlePreview(arg0: { article: PrimalArticle; bordered: boolean; hideFooter: boolean; noLinks: boolean; }) {
-  throw new Error('Function not implemented.');
-}
 // nostr:nevent1qvzqqqqqqypzpzxvzd935e04fm6g4nqa7dn9qc7nafzlqn4t3t6xgmjkr3dwnyreqqsx6u9ykdnn50df50prxl2rkt0zl03y0x2wudl5esnw9td6phjeekgnj2yfp

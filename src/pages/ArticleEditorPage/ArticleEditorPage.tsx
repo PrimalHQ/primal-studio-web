@@ -630,6 +630,7 @@ const ReadsEditor: Component = () => {
                   fixedToolbar={fixedToolbar()}
                   setEditor={setEditor}
                   showTableOptions={updateTableOptions}
+                  viewMode={location.pathname.includes('/view/draft')}
                 />
               </Match>
 

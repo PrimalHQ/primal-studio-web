@@ -20,8 +20,8 @@ export type ArticleProps = {
   onClick?: () => void,
 };
 
-export const renderArticleReviewPreview = (config: { article: PrimalArticle }) => {
-  return (<div><ArticleReviewPreview article={config.article}/></div> as HTMLDivElement).innerHTML;
+export const renderArticleReviewPreview = (config: ArticleProps) => {
+  return (<div><ArticleReviewPreview article={config.article} bordered={config.bordered} /></div> as HTMLDivElement).innerHTML;
 }
 
 const ArticleReviewPreview: Component<ArticleProps> = (props) => {
@@ -155,12 +155,12 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
         </div>
       </div>
 
-        <div class={styles.footer}>
+        {/* <div class={styles.footer}>
           <ArticleFooter
             note={props.article}
             size="normal"
           />
-        </div>
+        </div> */}
     </div>
   );
 }

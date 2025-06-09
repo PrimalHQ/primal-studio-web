@@ -198,13 +198,15 @@ const ArticlePreviewPublish: Component<ArticleProps> = (props) => {
         </div>
       </div>
 
-      <Show when={!props.hideFooter}>
+      <div>Bojan</div>
+
+      {/* <Show when={!props.hideFooter}>
         <div class={`${props.notif ? styles.footerNotif : styles.footer}`}>
           <ArticleFooter
             note={props.article}
           />
         </div>
-      </Show>
+      </Show> */}
 
     </div>
   );

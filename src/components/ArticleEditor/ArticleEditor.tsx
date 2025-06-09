@@ -70,6 +70,7 @@ const ArticleEditor: Component<{
   fixedToolbar: boolean,
   setEditor: (editor: Editor) => void,
   showTableOptions: (value: boolean, position: Partial<DOMRect>) => void,
+  viewMode?: boolean,
 }> = (props) => {
 
   const toast = useToastContext();
@@ -99,11 +100,16 @@ const ArticleEditor: Component<{
 
     setEditorContent(editor, props.article.content);
 
-    if (location.pathname.includes('/view/draft')) {
-      editor.setEditable(false);
-      setViewMode(true);
-    }
+    // if (location.pathname.includes('/view/draft')) {
+    //   editor.setEditable(false);
+    //   setViewMode(true);
+    // }
   });
+
+  createEffect(() => {
+    editorTipTap()?.setEditable(!(props.viewMode || false));
+    setViewMode(props.viewMode || false);
+  })
 
   let tiptapEditor: HTMLDivElement | undefined;
   let editorPlainText: HTMLTextAreaElement | undefined;
@@ -325,7 +331,8 @@ const ArticleEditor: Component<{
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
     onUpdate({ editor, transaction }) {
-      props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
+      const c = extendMarkdownEditor(editor).getMarkdown();
+      props.setMarkdownContent(() => c || props.markdownContent);
     },
   }));
 

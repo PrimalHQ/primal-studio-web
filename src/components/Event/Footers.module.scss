@@ -214,7 +214,8 @@
     @include typeDiv;
     .icon {
       @include statIcon;
-      height: 20px;
+      width: 11px;
+      height: 16px;
       -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
       mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
     }
