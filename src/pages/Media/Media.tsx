@@ -105,7 +105,7 @@ const Media: Component = () => {
   }
 
   const selectedSortOption = (): SelectOption => {
-    return { value: blossomStore.sort || '',  label: blossomStore.sort || '' };
+    return { value: blossomStore.sort || '',  label: translate('media', 'sort', blossomStore.sort) || '' };
   }
 
   return (
@@ -140,7 +140,7 @@ const Media: Component = () => {
           <SelectBox
             prefix="Sort by:"
             value={selectedSortOption()}
-            options={sortOptions.map(s => ({ label: s, value: s }))}
+            options={sortOptions.map(s => ({ label: translate('media', 'sort', s), value: s }))}
             onChange={(option) => {
               if (!option) return;
               // @ts-ignore
