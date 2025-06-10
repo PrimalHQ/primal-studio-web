@@ -57,7 +57,7 @@ const NotePreview: Component<{
     switch (ast.type) {
       case 'image':
         setImages(images.length, () => ast);
-        break;
+        return '';
       // case 'video':
       //   return renderImage(ast);
       // case 'youtube':
@@ -197,9 +197,6 @@ const NotePreview: Component<{
         <div class={styles.content}>
           <Show
             when={images.length > 0}
-            fallback={
-              <img class={styles.image} src={author().picture} onerror={onImgError} />
-            }
           >
             {renderImage(images[0])}
           </Show>
