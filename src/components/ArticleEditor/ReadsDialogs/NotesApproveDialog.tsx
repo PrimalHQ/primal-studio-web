@@ -75,7 +75,7 @@ const NotesApproveDialog: Component<{
         <Show
           when={props.drafts.length < 2}
           fallback={<div>
-            Publish the {props.drafts.length} selected articles.
+            Publish the {props.drafts.length} selected notes.
           </div>}
         >
           <div class={styles.previewHolder}>
