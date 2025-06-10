@@ -94,6 +94,21 @@ const MediaList: Component<{
     );
   };
 
+  const itemClass = (sha: string) => {
+    let k = styles.item;
+
+    if (blossomStore.selectedMedia.includes(sha)) {
+      k += ` ${styles.selected}`;
+    }
+
+    if (!visibleItems.find(s => s === sha)) {
+      k += ` ${styles.hidden}`;
+    }
+
+    return k;
+  }
+
+
   return (
     <table
       class={styles.mediaList}
@@ -125,7 +140,7 @@ const MediaList: Component<{
             return (
               <tr
                 data-id={blob.sha256}
-                class={`${styles.item} ${blossomStore.selectedMedia.includes(blob.sha256) ? styles.selected : ''}`}
+                class={itemClass(blob.sha256)}
               >
                 <Switch fallback={
                   <>
@@ -137,7 +152,7 @@ const MediaList: Component<{
                     <td></td>
                   </>
                 }>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>
+                  <Match when={blob.type?.includes('image/')}>
                     <td>
                       <CheckBox
                         onChange={() => {
@@ -169,7 +184,7 @@ const MediaList: Component<{
                       />
                     </td>
                   </Match>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('video/')}>
+                  <Match when={blob.type?.includes('video/')}>
                    <td>
                       <CheckBox
                         onChange={() => {
@@ -204,7 +219,7 @@ const MediaList: Component<{
                       />
                     </td>
                   </Match>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256)}>
+                  <Match when={true}>
                     <td>
                       <CheckBox
                         onChange={() => {

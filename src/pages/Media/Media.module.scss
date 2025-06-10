@@ -1,8 +1,3 @@
-@keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
 .mediaLayout {
   display: grid;
   grid-template-columns: 964px;
@@ -58,6 +53,15 @@
     border: 2px solid var(--background-site);
     border-radius: 8px;
     overflow: hidden;
+
+    opacity: 1;
+    transition: opacity 300ms linear;
+
+    &.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transition: visibility 0s 300ms, opacity 300ms linear;
+    }
 
     .missingFile {
       width: 100%;
@@ -120,6 +124,19 @@
     &.selected {
       background-color: var(--devider);
     }
+
+    td {
+      opacity: 1;
+      transition: opacity 300ms linear;
+    }
+
+    &.hidden {
+      td {
+        opacity: 0;
+        visibility: hidden;
+        transition: visibility 0s 300ms, opacity 300ms linear;
+      }
+    }
   }
 
   th {
@@ -149,9 +166,6 @@
     text-align: left;
     padding-block: 16px;
     height: 32px;
-
-    -webkit-animation: fadein 300ms;
-    animation: fadein 300ms;
 
     img, video {
       width: 36px;

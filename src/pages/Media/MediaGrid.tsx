@@ -104,6 +104,20 @@ const MediaGrid: Component<{
     );
   };
 
+  const itemClass = (sha: string) => {
+    let k = styles.item;
+
+    if (blossomStore.selectedMedia.includes(sha)) {
+      k += ` ${styles.selected}`;
+    }
+
+    if (!visibleItems.find(s => s === sha)) {
+      k += ` ${styles.hidden}`;
+    }
+
+    return k;
+  }
+
   return (
     <div
       class={styles.mediaListGrid}
@@ -123,13 +137,13 @@ const MediaGrid: Component<{
               </Show>
               <div
                 data-id={blob.sha256}
-                class={`${styles.item} ${blossomStore.selectedMedia.includes(blob.sha256) ? styles.selected : ''}`}
+                class={itemClass(blob.sha256)}
                 onClick={() => {
                   toggleMediaSelect(blob);
                 }}
               >
                 <Switch>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>
+                  <Match when={blob.type?.includes('image/')}>
                     <img
                       src={blob.url}
                       title={shortDate(blob.uploaded)}
@@ -142,7 +156,6 @@ const MediaGrid: Component<{
                         <NoteContextTrigger
                           ref={contextMenu}
                           onClick={(e: MouseEvent) => {
-                            console.log('CLICK: ', blob.sha256)
                             onContextMenuTrigger(blob, contextMenu);
                           }}
                           collapsed={true}
@@ -150,7 +163,7 @@ const MediaGrid: Component<{
                       </div>
                     </div>
                   </Match>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('video/')}>
+                  <Match when={blob.type?.includes('video/')}>
                     <video
                       src={blob.url}
                       title={shortDate(blob.uploaded)}
@@ -173,7 +186,7 @@ const MediaGrid: Component<{
                       </div>
                     </div>
                   </Match>
-                  <Match when={visibleItems.find(sha => sha === blob.sha256)}>
+                  <Match when={true}>
                     <div class={styles.missingFile}>{blob.type || blob.url}</div>
 
                     <div class={styles.itemFooter}>
