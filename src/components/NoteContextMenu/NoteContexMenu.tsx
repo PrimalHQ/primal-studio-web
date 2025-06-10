@@ -237,7 +237,7 @@ const NoteContextMenu: Component<{
       {
         label: "Score Breakdown",
         action: openScore,
-        icon: 'image_icon',
+        icon: 'content_score',
       },
     ];
   };
