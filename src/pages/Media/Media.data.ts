@@ -14,6 +14,7 @@ export type BlossomStore = {
   listType: 'grid' | 'list',
   sort: typeof mediaSortOptions[number],
   isFetchingList: boolean,
+  selectedMedia: string[],
 };
 
 export const emptyBlossomStore = (): BlossomStore => ({
@@ -22,6 +23,7 @@ export const emptyBlossomStore = (): BlossomStore => ({
   listType: 'grid',
   isFetchingList: false,
   sort: 'latest',
+  selectedMedia: [],
 });
 
 export type BlossomListOptions = {
@@ -46,6 +48,15 @@ export const mergeBlossomBlobArrays = (arr1: BlobDescriptor[], arr2: BlobDescrip
 // }
 
 export const [blossomStore, setBlossomStore] = createStore<BlossomStore>(emptyBlossomStore());
+
+export const toggleMediaSelect = (blob: BlobDescriptor) => {
+  if (blossomStore.selectedMedia.find(m => blob.sha256 === m)) {
+    setBlossomStore('selectedMedia', (ms) => ms.filter(m => m !== blob.sha256));
+    return;
+  }
+
+  setBlossomStore('selectedMedia', blossomStore.selectedMedia.length, () => blob.sha256);
+};
 
 export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomListOptions) => {
   setBlossomStore('isFetchingList', true);
@@ -94,6 +105,16 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
 
   return media;
 
+}
+
+export const deleteMultipleMedia = async (shas: string[]) => {
+  let success: Record<string, boolean> = {};
+
+  for (let i=0; i<shas.length; i++) {
+    success[shas[i]] = await deleteMedia(shas[i]);
+  }
+
+  return success;
 }
 
 export const deleteMedia = async (sha256: string) => {

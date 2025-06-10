@@ -1,7 +1,7 @@
 import { Component, createEffect, For, Match, onCleanup, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
-import { blossomStore, deleteMedia } from './Media.data';
+import { blossomStore, deleteMedia, toggleMediaSelect } from './Media.data';
 import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
@@ -123,7 +123,10 @@ const MediaGrid: Component<{
               </Show>
               <div
                 data-id={blob.sha256}
-                class={styles.item}
+                class={`${styles.item} ${blossomStore.selectedMedia.includes(blob.sha256) ? styles.selected : ''}`}
+                onClick={() => {
+                  toggleMediaSelect(blob);
+                }}
               >
                 <Switch>
                   <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>

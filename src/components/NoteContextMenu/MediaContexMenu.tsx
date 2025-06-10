@@ -192,7 +192,6 @@ const MediaContextMenu: Component<{
             title: "Delete file?",
             description: "This will issue a “delete” command to the blossom server where this file is located. Do you want to continue?",
             onConfirm: () => {
-              console.log('DELETE: ', data)
               data?.onDelete && data.onDelete(data.blob.sha256);
             },
             onAbort: () => {},

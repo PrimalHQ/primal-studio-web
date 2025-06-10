@@ -1,7 +1,7 @@
 import { Component, createEffect, For, Match, onCleanup, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
-import { blossomStore, deleteMedia } from './Media.data';
+import { blossomStore, deleteMedia, toggleMediaSelect } from './Media.data';
 import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
@@ -103,7 +103,8 @@ const MediaList: Component<{
         <tr>
           <th>
             <CheckBox
-              onChange={() => {}}
+              onChange={() => {
+              }}
               checked={false}
             />
           </th>
@@ -124,7 +125,7 @@ const MediaList: Component<{
             return (
               <tr
                 data-id={blob.sha256}
-                class={styles.item}
+                class={`${styles.item} ${blossomStore.selectedMedia.includes(blob.sha256) ? styles.selected : ''}`}
               >
                 <Switch fallback={
                   <>
@@ -139,8 +140,10 @@ const MediaList: Component<{
                   <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>
                     <td>
                       <CheckBox
-                        onChange={() => {}}
-                        checked={false}
+                        onChange={() => {
+                          toggleMediaSelect(blob);
+                        }}
+                        checked={blossomStore.selectedMedia.includes(blob.sha256)}
                       />
                     </td>
                     <td class={styles.file}>
@@ -169,8 +172,10 @@ const MediaList: Component<{
                   <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('video/')}>
                    <td>
                       <CheckBox
-                        onChange={() => {}}
-                        checked={false}
+                        onChange={() => {
+                          toggleMediaSelect(blob);
+                        }}
+                        checked={blossomStore.selectedMedia.includes(blob.sha256)}
                       />
                     </td>
                     <td class={styles.file}>
@@ -202,8 +207,10 @@ const MediaList: Component<{
                   <Match when={visibleItems.find(sha => sha === blob.sha256)}>
                     <td>
                       <CheckBox
-                        onChange={() => {}}
-                        checked={false}
+                        onChange={() => {
+                          toggleMediaSelect(blob);
+                        }}
+                        checked={blossomStore.selectedMedia.includes(blob.sha256)}
                       />
                     </td>
                     <td class={styles.file}>

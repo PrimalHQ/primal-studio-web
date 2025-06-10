@@ -1,19 +1,21 @@
-import { Component, createEffect, createMemo, Match, on, onCleanup, Switch, } from 'solid-js';
+import { Component, createEffect, createMemo, Match, on, onCleanup, Show, Switch, } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Media.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
-import { blossomStore, fetchBlossomMediaList, setBlossomStore, mediaSortOptions } from './Media.data';
-import { createStore } from 'solid-js/store';
+import { blossomStore, fetchBlossomMediaList, setBlossomStore, mediaSortOptions, deleteMultipleMedia } from './Media.data';
 import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
 import { accountStore } from 'src/stores/AccountStore';
 import { fileSize } from 'src/utils/ui';
 import MediaGrid from './MediaGrid';
 import MediaList from './MediaList';
 import { storeMediaPageConfig } from 'src/utils/localStore';
+import { useToastContext } from 'src/context/ToastContext/ToastContext';
+import { openConfirmDialog } from 'src/stores/AppStore';
 
 const Media: Component = () => {
+  const toast = useToastContext();
 
   const blobs = createMemo(() => {
     const unsorted = blossomStore.media[blossomStore.server || ''] || [];
@@ -96,6 +98,42 @@ const Media: Component = () => {
               <div class={styles.number}>{fileSize(blobs().reduce<number>((acc,b) => b.size + acc, 0))}</div>
               <div class={styles.label}>used</div>
             </div>
+
+            <Show when={blossomStore.selectedMedia.length > 0}>
+              <button
+                class={styles.linkButton}
+                onClick={async () => {
+                  openConfirmDialog({
+                    title: "Delete files?",
+                    description: `This will issue a “delete” command to the blossom server to remove ${blossomStore.selectedMedia.length} files. Do you want to continue?`,
+                    onConfirm: async () => {
+                      const deleted = await deleteMultipleMedia(blossomStore.selectedMedia);
+
+                      const allDeleted = Object.values(deleted).every(d => d);
+
+                      if (allDeleted) {
+                        toast?.sendSuccess('All selected files deleted')
+                        setBlossomStore('selectedMedia', () => []);
+                        return;
+                      }
+
+                      const failed = Object.entries(deleted).reduce<string[]>((acc, entry) => {
+                        if (entry[1]) return acc;
+
+                        return [...acc, entry[0]];
+                      }, [])
+
+                      setBlossomStore('selectedMedia', () => [ ...failed ]);
+                      toast?.sendWarning('Failed to delete all files');
+                    },
+                    onAbort: () => {},
+                  });
+
+                }}
+              >
+                Delete {blossomStore.selectedMedia.length} selected files
+              </button>
+            </Show>
           </div>
         </div>
 
@@ -126,7 +164,7 @@ const Media: Component = () => {
               class={`${styles.listTypeButton} ${blossomStore.listType === 'list' ? styles.selected : ''}`}
               onClick={() => {
                 setBlossomStore('listType', () => 'list');
-              storeMediaPageConfig(accountStore.pubkey, { listType: 'list' });
+                storeMediaPageConfig(accountStore.pubkey, { listType: 'list' });
               }}
             >
               <div class={styles.listIcon}></div>
