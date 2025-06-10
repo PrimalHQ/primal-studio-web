@@ -40,7 +40,9 @@ const MediaGrid: Component<{
           return (
             <>
               <Show when={isNewMonth(blob, index())}>
-                <div class={styles.monthCaption}>{dayjs.unix(blob.uploaded).format('MMMM YYYY')}</div>
+                <div class={styles.monthCaption}>
+                  {dayjs.unix(blob.uploaded).format('MMMM YYYY')}
+                </div>
               </Show>
               <div
                 data-id={blob.sha256}
@@ -73,6 +75,21 @@ const MediaGrid: Component<{
                       controls
                     >
                     </video>
+                    <div class={styles.itemFooter}>
+                      <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
+                      <div class={styles.mediaType}>{blob.type?.split('/')[1]}</div>
+                      <div class={styles.mediaContext}>
+                        <NoteContextTrigger
+                          ref={contextMenu}
+                          onClick={() => {}}
+                          collapsed={true}
+                        />
+                      </div>
+                    </div>
+                  </Match>
+                  <Match when={props.visibleItems.find(sha => sha === blob.sha256)}>
+                    <div class={styles.missingFile}>{blob.type || blob.url}</div>
+
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
                       <div class={styles.mediaType}>{blob.type?.split('/')[1]}</div>
