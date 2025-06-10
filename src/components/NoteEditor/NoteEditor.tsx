@@ -576,11 +576,10 @@ const NoteEditor: Component<{
     const pubDate = futurePublishDate();
 
     const { success, note } = pubDate ?
-      await scheduleNote(content, tags, pubDate, editScheduled() ? props.note?.id : undefined) :
+      await scheduleNote(content, tags, pubDate, props.note?.id) :
       await sendNote(content, tags);
 
     if (success && note) {
-
       props.onDone && props.onDone();
     }
 
@@ -800,6 +799,7 @@ const NoteEditor: Component<{
       <ReadsPublishingDateDialog
         open={showPublishDateDialog()}
         setOpen={setShowPublishDateDialog}
+        initialValue={props.note?.created_at}
         onSetPublishDate={(timestamp) => {
           setFuturePublishDate(timestamp);
           setShowPublishDateDialog(false);
