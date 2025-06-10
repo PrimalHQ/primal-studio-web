@@ -53,6 +53,7 @@ import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import EmojiButton from '../EmojiPicker/EmojiButton';
 import EmojiPickPopover from '../EmojiPicker/EmojiPickPopover';
 import MediaEmbed from '../ArticleEditor/MediaEmbedExtension';
+import dayjs from 'dayjs';
 
 
 const NoteEditor: Component<{
@@ -427,27 +428,23 @@ const NoteEditor: Component<{
     const note = changes[0] as PrimalNote;
     const editor = changes[1] as Editor;
 
-
     if (!note || !editor) return;
-    const mode = editorMode();
 
-    if (mode === 'text') {
-      setPlainContent(note.content);
-      return;
+    const plainText = note.content;
+
+    setPlainContent(plainText);
+
+    const json = plainTextToTiptapJson(plainText);
+
+    let html = generateHTML(json, extensions);
+    html = await processMarkdownForNostr(html);
+    console.log('NOTE: ', html)
+    editor.chain().setContent(html).run();
+
+    if (note.created_at > dayjs().unix()) {
+      setFuturePublishDate(() => note.created_at)
     }
 
-    if (['html', 'phone'].includes(mode)) {
-      const plainText = note.content;
-
-      const json = plainTextToTiptapJson(plainText);
-
-      let html = generateHTML(json, extensions);
-      html = await processMarkdownForNostr(html);
-      console.log('NOTE: ', html)
-      editor.chain().setContent(html).run();
-      // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
-
-    }
   }));
 
   createEffect(on( editorMode, async (mode, prev) => {
