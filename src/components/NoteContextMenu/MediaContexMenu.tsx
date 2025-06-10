@@ -156,11 +156,11 @@ const MediaContextMenu: Component<{
         action: copyFileHash,
         icon: 'copy_note_text',
       },
-      {
-        label: "Update Thumbnail",
-        action: updateThumbnail,
-        icon: 'image_icon',
-      },
+      // {
+      //   label: "Update Thumbnail",
+      //   action: updateThumbnail,
+      //   icon: 'image_icon',
+      // },
     ];
   };
 
