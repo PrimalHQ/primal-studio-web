@@ -7,7 +7,7 @@ import AppRouter from './Router';
 import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeContextMenu, closeEditNote, openEditNote, updateAppStore } from './stores/AppStore';
+import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu } from './stores/AppStore';
 import { accountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
@@ -16,6 +16,7 @@ import { relayStore } from './stores/RelayStore';
 import { settingsStore } from './stores/SettingsStore';
 import ConfirmDialog from './components/Dialogs/ConfirmDialog';
 import NewNoteDialog from './components/NoteEditor/NewNoteDialog';
+import MediaContextMenu from './components/NoteContextMenu/MediaContexMenu';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -53,8 +54,14 @@ const App: Component = () => {
 
           <NoteContextMenu
             open={appStore.showNoteContextMenu}
-            onClose={closeContextMenu}
+            onClose={closeNoteContextMenu}
             data={appStore.noteContextMenuInfo}
+          />
+
+          <MediaContextMenu
+            open={appStore.showMediaContextMenu}
+            onClose={closeMediaContextMenu}
+            data={appStore.mediaContextMenuInfo}
           />
 
           <ConfirmDialog

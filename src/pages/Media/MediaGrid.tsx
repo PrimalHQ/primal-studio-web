@@ -1,18 +1,63 @@
-import { Component, For, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, onCleanup, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
-import { blossomStore } from './Media.data';
+import { blossomStore, deleteMedia } from './Media.data';
 import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
 import { BlobDescriptor } from 'blossom-client-sdk';
 import { fileSize } from 'src/utils/ui';
+import { createStore } from 'solid-js/store';
+import { openMediaContextMenu } from 'src/stores/AppStore';
+import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 const MediaGrid: Component<{
-  ref?: HTMLDivElement | undefined,
   items: BlobDescriptor[],
-  visibleItems: string[],
 }> = (props) => {
+  const toast = useToastContext();
+
+  const [visibleItems, setVisibleItems] = createStore<string[]>([]);
+
+  let containerRef: HTMLDivElement | undefined;
+
+  // Create intersection observer
+  const observer = new IntersectionObserver(
+    (entries) => {
+      let visible = [ ...visibleItems ];
+
+      entries.forEach((entry) => {
+        const id = entry.target.getAttribute('data-id');
+        if (!id) return;
+
+        if (entry.isIntersecting) {
+          visible.push(id);
+        } else {
+          visible = visible.filter(i => i !== id);
+        }
+      });
+
+      setVisibleItems(() => [...visible]);
+    },
+  );
+
+  onCleanup(() => {
+    observer?.disconnect();
+  });
+
+  createEffect(() => {
+    if (!containerRef) return;
+
+    const bls = props.items;
+
+    setTimeout(() => {
+      for(let i=0; i< bls.length; i++) {
+        const id = bls[i].sha256;
+        const el = containerRef.querySelector(`[data-id="${id}"]`);
+        el && observer.observe(el);
+      }
+
+    }, 100)
+  });
 
   const isNewMonth = (blob: BlobDescriptor, index: number) => {
     const lastBlobTime = props.items[index - 1]?.uploaded || 0;
@@ -27,10 +72,31 @@ const MediaGrid: Component<{
     return isNew;
   }
 
+  const onContextMenuTrigger = (
+    blob: BlobDescriptor,
+    contextMenu: HTMLDivElement | undefined,
+  ) => {
+    openMediaContextMenu(
+      blob,
+      contextMenu?.getBoundingClientRect(),
+      () => {},
+      async () => {
+        const isDeleted = await deleteMedia(blob.sha256);
+
+        if (isDeleted) {
+          toast?.sendSuccess('File deleted')
+        }
+        else {
+          toast?.sendWarning('Failed to delete file')
+        }
+      },
+    );
+  };
+
   return (
     <div
       class={styles.mediaListGrid}
-      ref={props.ref}
+      ref={containerRef}
     >
       <For each={props.items}>
         {(blob, index) => {
@@ -49,7 +115,7 @@ const MediaGrid: Component<{
                 class={styles.item}
               >
                 <Switch>
-                  <Match when={props.visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>
+                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('image/')}>
                     <img
                       src={blob.url}
                       title={shortDate(blob.uploaded)}
@@ -60,13 +126,16 @@ const MediaGrid: Component<{
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}
-                          onClick={() => {}}
+                          onClick={(e: MouseEvent) => {
+                            console.log('CLICK: ', blob.sha256)
+                            onContextMenuTrigger(blob, contextMenu);
+                          }}
                           collapsed={true}
                         />
                       </div>
                     </div>
                   </Match>
-                  <Match when={props.visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('video/')}>
+                  <Match when={visibleItems.find(sha => sha === blob.sha256) && blob.type?.includes('video/')}>
                     <video
                       src={blob.url}
                       title={shortDate(blob.uploaded)}
@@ -81,13 +150,15 @@ const MediaGrid: Component<{
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}
-                          onClick={() => {}}
+                          onClick={() => {
+                            onContextMenuTrigger(blob, contextMenu);
+                          }}
                           collapsed={true}
                         />
                       </div>
                     </div>
                   </Match>
-                  <Match when={props.visibleItems.find(sha => sha === blob.sha256)}>
+                  <Match when={visibleItems.find(sha => sha === blob.sha256)}>
                     <div class={styles.missingFile}>{blob.type || blob.url}</div>
 
                     <div class={styles.itemFooter}>
@@ -96,7 +167,9 @@ const MediaGrid: Component<{
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}
-                          onClick={() => {}}
+                          onClick={() => {
+                            onContextMenuTrigger(blob, contextMenu);
+                          }}
                           collapsed={true}
                         />
                       </div>

@@ -1,6 +1,8 @@
+import { BlobDescriptor } from "blossom-client-sdk";
 import { batch } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { ConfirmDialogInfo } from "src/components/Dialogs/ConfirmDialog";
+import { MediaContextMenuInfo } from "src/components/NoteContextMenu/MediaContexMenu";
 import { NoteContextMenuInfo } from "src/components/NoteContextMenu/NoteContexMenu";
 import { PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { reset } from "src/utils/socket";
@@ -11,6 +13,8 @@ export type AppStore = {
   verifiedUsers: Record<string, string>,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showMediaContextMenu: boolean,
+  mediaContextMenuInfo: MediaContextMenuInfo | undefined,
   showConfirmDialog: boolean,
   confirmDialogInfo: ConfirmDialogInfo | undefined,
   showNewNoteEditor: boolean,
@@ -23,6 +27,8 @@ export const emptyAppStore = (): AppStore => ({
   verifiedUsers: {},
   showNoteContextMenu: false,
   noteContextMenuInfo: undefined,
+  showMediaContextMenu: false,
+  mediaContextMenuInfo: undefined,
   showConfirmDialog: false,
   confirmDialogInfo: undefined,
   showNewNoteEditor: false,
@@ -69,12 +75,36 @@ export const changeCachingService = (url?: string) => {
   reset();
 };
 
+export const openMediaContextMenu = (
+  blob: BlobDescriptor,
+  position: DOMRect | undefined,
+  openReactions: () => void,
+  onDelete: (id: string) => void,
+) => {
+  if (appStore.showMediaContextMenu) return;
+
+  updateAppStore('mediaContextMenuInfo', reconcile({
+    blob,
+    position,
+    openReactions,
+    onDelete,
+  }))
+  updateAppStore('showMediaContextMenu', () => true);
+};
+
+export const closeMediaContextMenu = () => {
+  updateAppStore('mediaContextMenuInfo', () => undefined);
+  updateAppStore('showMediaContextMenu', () => false);
+};
+
 export const openNoteContextMenu = (
   note: PrimalNote | PrimalArticle | PrimalDraft,
   position: DOMRect | undefined,
   openReactions: () => void,
   onDelete: (id: string) => void,
 ) => {
+  if (appStore.showNoteContextMenu) return;
+
   updateAppStore('noteContextMenuInfo', reconcile({
     note,
     position,
@@ -84,7 +114,7 @@ export const openNoteContextMenu = (
   updateAppStore('showNoteContextMenu', () => true);
 };
 
-export const closeContextMenu = () => {
+export const closeNoteContextMenu = () => {
   updateAppStore('showNoteContextMenu', () => false);
 };
 

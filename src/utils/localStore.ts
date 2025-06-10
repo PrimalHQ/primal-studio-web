@@ -1,8 +1,14 @@
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
+import { mediaSortOptions } from "src/pages/Media/Media.data";
 import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
 
+export type MediaPageConfig = {
+  server?: string,
+  sort?: typeof mediaSortOptions[number],
+  listType?: 'grid' | 'list',
+}
 
 export type LocalStore = {
   metadata: NostrEventContent | undefined,
@@ -14,6 +20,7 @@ export type LocalStore = {
   connectToPrimaryRelays: boolean,
   emojiHistory: EmojiOption[],
   graphSpans: Record<string, GraphSpan>,
+  mediaPageConfig: MediaPageConfig,
 };
 
 
@@ -27,6 +34,7 @@ export const emptyStorage: LocalStore = {
   connectToPrimaryRelays: false,
   emojiHistory: [],
   graphSpans: {},
+  mediaPageConfig: {}
 }
 
 export const storageName = (pubkey?: string) => {
@@ -244,24 +252,6 @@ export const readEmojiHistory = (pubkey: string | undefined) => {
   return store.emojiHistory || [];
 }
 
-
-export const storeGraphSpan = (
-  pubkey: string | undefined,
-  page: string,
-  span: GraphSpan,
-) => {
-  if (!pubkey) return;
-
-  const store = getStorage(pubkey);
-
-  store.graphSpans = {
-    ...store.graphSpans,
-    [page]: { ...span },
-  }
-
-  setStorage(pubkey, store);
-}
-
 export const defaultSpans = (): Record<string, GraphSpan> => ({
   home: {
     name: '1m',
@@ -283,6 +273,23 @@ export const defaultSpans = (): Record<string, GraphSpan> => ({
   },
 })
 
+export const storeGraphSpan = (
+  pubkey: string | undefined,
+  page: string,
+  span: GraphSpan,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.graphSpans = {
+    ...store.graphSpans,
+    [page]: { ...span },
+  }
+
+  setStorage(pubkey, store);
+}
+
 export const readGraphSpan = (
   pubkey: string | undefined,
   page: string,
@@ -297,4 +304,30 @@ export const readGraphSpan = (
     since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
     resolution: 'day',
   }) as GraphSpan;
+}
+
+export const storeMediaPageConfig = (
+  pubkey: string | undefined,
+  config: MediaPageConfig,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.mediaPageConfig = {
+    ...store.mediaPageConfig,
+    ...config,
+  }
+
+  setStorage(pubkey, store);
+}
+
+export const readMediaPageConfig  = (
+  pubkey: string | undefined,
+) => {
+  if (!pubkey) return {};
+
+  const store = getStorage(pubkey);
+
+  return store.mediaPageConfig;
 }

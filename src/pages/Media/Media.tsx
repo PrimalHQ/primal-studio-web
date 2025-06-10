@@ -1,41 +1,19 @@
-import { Component, createEffect, createMemo, on, onCleanup, } from 'solid-js';
+import { Component, createEffect, createMemo, Match, on, onCleanup, Switch, } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Media.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
-import { blossomStore, fetchBlossomMediaList, setBlossomStore, sortOptions } from './Media.data';
+import { blossomStore, fetchBlossomMediaList, setBlossomStore, mediaSortOptions } from './Media.data';
 import { createStore } from 'solid-js/store';
 import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
 import { accountStore } from 'src/stores/AccountStore';
 import { fileSize } from 'src/utils/ui';
 import MediaGrid from './MediaGrid';
+import MediaList from './MediaList';
+import { storeMediaPageConfig } from 'src/utils/localStore';
 
 const Media: Component = () => {
-
-  const [visibleItems, setVisibleItems] = createStore<string[]>([]);
-
-  let containerRef: HTMLDivElement | undefined;
-
-  // Create intersection observer
-  const observer = new IntersectionObserver(
-    (entries) => {
-      let visible = [ ...visibleItems ];
-
-      entries.forEach((entry) => {
-        const id = entry.target.getAttribute('data-id');
-        if (!id) return;
-
-        if (entry.isIntersecting) {
-          visible.push(id);
-        } else {
-          visible = visible.filter(i => i !== id);
-        }
-      });
-
-      setVisibleItems(() => [...visible]);
-    },
-  );
 
   const blobs = createMemo(() => {
     const unsorted = blossomStore.media[blossomStore.server || ''] || [];
@@ -78,26 +56,6 @@ const Media: Component = () => {
     return sorted;
   })
 
-
-  onCleanup(() => {
-    observer?.disconnect();
-  });
-
-  createEffect(() => {
-    if (!containerRef) return;
-
-    const bls = blobs();
-
-    setTimeout(() => {
-      for(let i=0; i< bls.length; i++) {
-        const id = bls[i].sha256;
-        const el = containerRef.querySelector(`[data-id="${id}"]`);
-        el && observer.observe(el);
-      }
-
-    }, 100)
-  });
-
   createEffect(on(() => blossomStore.server, () => {
     if (blossomStore.isFetchingList) return;
     fetchBlossomMediaList(accountStore.pubkey, { server: blossomStore.server })
@@ -125,7 +83,8 @@ const Media: Component = () => {
             value={selectedServerOption()}
             options={accountStore.blossomServers.map(s => ({ label: s, value: s }))}
             onChange={(option) => {
-              setBlossomStore('server', (option?.value));
+              setBlossomStore('server', option?.value);
+              storeMediaPageConfig(accountStore.pubkey, { server: option?.value });
             }}
           />
           <div class={styles.serverInfo}>
@@ -144,23 +103,31 @@ const Media: Component = () => {
           <SelectBox
             prefix="Sort by:"
             value={selectedSortOption()}
-            options={sortOptions.map(s => ({ label: translate('media', 'sort', s), value: s }))}
+            options={mediaSortOptions.map(s => ({ label: translate('media', 'sort', s), value: s }))}
             onChange={(option) => {
               if (!option) return;
               // @ts-ignore
               setBlossomStore('sort', option.value);
+              // @ts-ignore
+              storeMediaPageConfig(accountStore.pubkey, { sort: option.value });
             }}
           />
           <div class={styles.listType}>
             <button
               class={`${styles.listTypeButton} ${blossomStore.listType === 'grid' ? styles.selected : ''}`}
-              onClick={() => setBlossomStore('listType', () => 'grid')}
+              onClick={() => {
+                setBlossomStore('listType', () => 'grid');
+              storeMediaPageConfig(accountStore.pubkey, { listType: 'grid' });
+              }}
             >
               <div class={styles.gridIcon}></div>
             </button>
             <button
               class={`${styles.listTypeButton} ${blossomStore.listType === 'list' ? styles.selected : ''}`}
-              onClick={() => setBlossomStore('listType', () => 'list')}
+              onClick={() => {
+                setBlossomStore('listType', () => 'list');
+              storeMediaPageConfig(accountStore.pubkey, { listType: 'list' });
+              }}
             >
               <div class={styles.listIcon}></div>
             </button>
@@ -169,11 +136,19 @@ const Media: Component = () => {
 
       </div>
 
-      <MediaGrid
-        ref={containerRef}
-        items={blobs()}
-        visibleItems={visibleItems}
-      />
+      <Switch>
+        <Match when={blossomStore.listType === 'grid'}>
+          <MediaGrid
+            items={blobs()}
+          />
+        </Match>
+
+        <Match when={blossomStore.listType === 'list'}>
+          <MediaList
+            items={blobs()}
+          />
+        </Match>
+      </Switch>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import styles from './AppLayout.module.scss';
 import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 import { settingsStore } from 'src/stores/SettingsStore';
 import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeContextMenu, openEditNote, updateAppStore } from 'src/stores/AppStore';
+import { appStore, closeNoteContextMenu, openEditNote, updateAppStore } from 'src/stores/AppStore';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 

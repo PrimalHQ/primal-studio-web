@@ -48,7 +48,7 @@ const SelectBox: Component<{
               <div class={styles.prefix}>{props.prefix}</div>
             </Show>
 
-            {s.selectedOption().label}
+            {s.selectedOption()?.label || ''}
             </>
           )}
         </Select.Value>

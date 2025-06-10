@@ -2,16 +2,17 @@ import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { BlobDescriptor, BlossomClient } from "blossom-client-sdk";
 import { createStore } from "solid-js/store";
 import { accountStore, fetchBlossomServers } from "src/stores/AccountStore";
+import { readMediaPageConfig } from "src/utils/localStore";
 import { signEvent } from "src/utils/nostrApi";
 import { utils } from 'src/utils/nTools';
 
-export const sortOptions = ['latest', 'oldest', 'size', 'type'] as const;
+export const mediaSortOptions = ['latest', 'oldest', 'size', 'type'] as const;
 
 export type BlossomStore = {
   server: string | undefined,
   media: Record<string, BlobDescriptor[]>,
   listType: 'grid' | 'list',
-  sort: typeof sortOptions[number],
+  sort: typeof mediaSortOptions[number],
   isFetchingList: boolean,
 };
 
@@ -27,7 +28,7 @@ export type BlossomListOptions = {
   since?: number,
   until?: number,
   server?: string,
-  sort?: typeof sortOptions[number]
+  sort?: typeof mediaSortOptions[number]
 }
 
 export const mergeBlossomBlobArrays = (arr1: BlobDescriptor[], arr2: BlobDescriptor[]): BlobDescriptor[] => {
@@ -95,6 +96,33 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
 
 }
 
+export const deleteMedia = async (sha256: string) => {
+  const server = blossomStore.server;
+  if (!server) return false;
+
+  const auth = await BlossomClient.createDeleteAuth(
+    signEvent,
+    sha256,
+    { message: `delete media file: ${sha256}`},
+  );
+
+  const host = utils.normalizeURL(server);
+
+  const success = await BlossomClient.deleteBlob(
+    host,
+    sha256,
+    {
+      auth,
+    },
+  );
+
+  if (success) {
+    setBlossomStore('media', server, (blobs) => blobs.filter(b => b.sha256 !== sha256));
+  }
+
+  return success;
+}
+
 export const preloadMedia = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;
 
@@ -103,6 +131,10 @@ export const preloadMedia = (args: RoutePreloadFuncArgs) => {
   }
 
   if (!pk) return;
+
+  const config = readMediaPageConfig(accountStore.pubkey);
+
+  setBlossomStore(() => ({ ...config }));
 
   query(fetchBlossomMediaList, 'fetchBlossomMedia')(pk, { server: blossomStore.server });
 }

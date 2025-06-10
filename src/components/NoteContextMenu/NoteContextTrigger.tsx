@@ -5,7 +5,7 @@ import styles from './NoteContext.module.scss';
 const NoteContextTrigger: Component<{
   ref: HTMLDivElement | undefined,
   id?: string,
-  onClick?: () => void,
+  onClick?: (e: MouseEvent) => void,
   collapsed?: boolean,
 }> = (props) => {
 
@@ -21,7 +21,7 @@ const NoteContextTrigger: Component<{
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          props.onClick && props.onClick();
+          props.onClick && props.onClick(e);
         }}
       >
         <div class={styles.contextIcon} ></div>
