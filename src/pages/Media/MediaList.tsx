@@ -12,6 +12,9 @@ import { createStore } from 'solid-js/store';
 import { openMediaContextMenu } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
+import missingImage from 'assets/images/missing_image.svg';
+
+
 const MediaList: Component<{
   items: BlobDescriptor[],
 }> = (props) => {
@@ -61,6 +64,14 @@ const MediaList: Component<{
   });
 
   const shortSha = (sha: string) => sha.slice(0, 28);
+
+  const onImgError = async (event: any) => {
+    const image = event.target;
+
+    image.onerror = "";
+    image.src = missingImage;
+    return true;
+  };
 
   const onContextMenuTrigger = (
     blob: BlobDescriptor,
@@ -137,6 +148,7 @@ const MediaList: Component<{
                         <img
                           src={blob.url}
                           title={shortDate(blob.uploaded)}
+                          onerror={onImgError}
                         />
                         <div>{shortSha(blob.sha256)}</div>
                       </div>
