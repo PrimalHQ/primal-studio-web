@@ -427,6 +427,7 @@ const NoteEditor: Component<{
     const note = changes[0] as PrimalNote;
     const editor = changes[1] as Editor;
 
+
     if (!note || !editor) return;
     const mode = editorMode();
 
@@ -442,13 +443,16 @@ const NoteEditor: Component<{
 
       let html = generateHTML(json, extensions);
       html = await processMarkdownForNostr(html);
+      console.log('NOTE: ', html)
       editor.chain().setContent(html).run();
       // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
 
     }
   }));
 
-  createEffect(on( editorMode, async (mode) => {
+  createEffect(on( editorMode, async (mode, prev) => {
+    if (prev === undefined || mode === prev) return;
+
     if (mode === 'text') {
       const json = editorTipTap()?.getJSON();
       setPlainContent(tiptapJsonToPlainText(json));
@@ -462,6 +466,7 @@ const NoteEditor: Component<{
     let html = generateHTML(json, extensions);
     html = await processMarkdownForNostr(html);
 
+      console.log('NOTE 1: ', html, mode, prev)
     editorTipTap()?.chain().setContent(html).run();
     // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
 

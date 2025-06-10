@@ -318,7 +318,7 @@ const Notes: Component = () => {
                           >
                             <ProposalPreview
                               draft={draft!}
-                              onEdit={() => {
+                              onView={() => {
                                 const note = JSON.parse(draft!.plain) as PrimalNote;
                                 openEditNote(note);
                               }}
