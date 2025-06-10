@@ -222,8 +222,11 @@ const Articles: Component = () => {
           </StudioTabs>
           <SelectBox
             prefix="Sort by:"
-            value={headerSortOptions.find(o => o.value === articlesStore.criteria) || headerSortOptions[0]}
-            options={headerSortOptions}
+            value={
+              headerSortOptions(articlesStore.tab).find(o => o.value === articlesStore.criteria) ||
+              headerSortOptions(articlesStore.tab)[0]
+            }
+            options={headerSortOptions(articlesStore.tab)}
             onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
           />
         </div>

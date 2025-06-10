@@ -136,27 +136,38 @@ export const minKnownProfiles: {"names": Record<string,string>} = {
   }
 };
 
-export const headerSortOptions: SelectOption[] = [
-  {
-    value: 'score',
-    label: 'Content Score',
-  },
-  {
-    value: 'satszapped',
-    label: 'Sats Zapped',
-  },
-  {
-    value: 'sentiment',
-    label: 'Sentiment',
-  },
-  {
-    value: 'latest',
-    label: 'Latest',
-  },
-  {
-    value: 'oldest',
-    label: 'Oldest',
-  },
-]
+export const headerSortOptions = (tab: string): SelectOption[] => {
+  const common = [
+    {
+      value: 'latest',
+      label: 'Latest',
+    },
+    {
+      value: 'oldest',
+      label: 'Oldest',
+    },
+  ];
+
+ const published = [
+    {
+      value: 'score',
+      label: 'Content Score',
+    },
+    {
+      value: 'satszapped',
+      label: 'Sats Zapped',
+    },
+    {
+      value: 'sentiment',
+      label: 'Sentiment',
+    },
+  ]
+
+  if (tab === 'published') {
+    return [...published, ...common];
+  }
+
+  return [ ...common ];
+}
 
 export const wordsPerMinute = 238;

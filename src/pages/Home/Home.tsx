@@ -279,8 +279,8 @@ const Home: Component = () => {
             </div>
             <SelectBox
               prefix="Sort by:"
-              value={headerSortOptions.find(o => o.value === homeStore.noteSort) || headerSortOptions[0]}
-              options={headerSortOptions}
+              value={headerSortOptions('published').find(o => o.value === homeStore.noteSort) || headerSortOptions('published')[0]}
+              options={headerSortOptions('published')}
               onChange={(option) => setHomeStore('noteSort', (option?.value || 'score') as FeedCriteria)}
             />
           </div>
@@ -334,8 +334,8 @@ const Home: Component = () => {
             </div>
             <SelectBox
               prefix="Sort by:"
-              value={headerSortOptions.find(o => o.value === homeStore.articleSort) || headerSortOptions[0]}
-              options={headerSortOptions}
+              value={headerSortOptions('published').find(o => o.value === homeStore.articleSort) || headerSortOptions('published')[0]}
+              options={headerSortOptions('published')}
               onChange={(option) => setHomeStore('articleSort', (option?.value || 'score') as FeedCriteria)}
             />
           </div>

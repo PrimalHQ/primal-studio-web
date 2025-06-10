@@ -242,8 +242,8 @@ const Notes: Component = () => {
 
             <SelectBox
               prefix="Sort by:"
-              value={headerSortOptions.find(o => o.value === notesStore.criteria) || headerSortOptions[0]}
-              options={headerSortOptions}
+              value={headerSortOptions(notesStore.tab).find(o => o.value === notesStore.criteria) || headerSortOptions(notesStore.tab)[0]}
+              options={headerSortOptions(notesStore.tab)}
               onChange={(option) => setNotesStore('criteria', (option?.value || 'score') as FeedCriteria)}
             />
           </div>
