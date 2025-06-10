@@ -17,6 +17,8 @@ export type AppStore = {
   mediaContextMenuInfo: MediaContextMenuInfo | undefined,
   showConfirmDialog: boolean,
   confirmDialogInfo: ConfirmDialogInfo | undefined,
+  showContentScoreBreakdown: boolean,
+  scoreBrakdownEvent: PrimalNote | PrimalArticle | PrimalDraft | undefined,
   showNewNoteEditor: boolean,
   editNote: PrimalNote | undefined,
 };
@@ -31,6 +33,8 @@ export const emptyAppStore = (): AppStore => ({
   mediaContextMenuInfo: undefined,
   showConfirmDialog: false,
   confirmDialogInfo: undefined,
+  showContentScoreBreakdown: false,
+  scoreBrakdownEvent: undefined,
   showNewNoteEditor: false,
   editNote: undefined,
 });
@@ -125,6 +129,15 @@ export const openConfirmDialog = (config: ConfirmDialogInfo) => {
 
 export const closeConfirmDialog = () => {
   updateAppStore('showConfirmDialog', () => false);
+};
+
+export const openScoreBreakdown = (event: PrimalNote | PrimalArticle | PrimalDraft | undefined) => {
+  updateAppStore('scoreBrakdownEvent', () => event);
+  updateAppStore('showContentScoreBreakdown', () => true);
+};
+
+export const closeScoreBreakdown = () => {
+  updateAppStore('showContentScoreBreakdown', () => false);
 };
 
 export const addVerifiedUsers = (newVU: Record<string, string>) => {

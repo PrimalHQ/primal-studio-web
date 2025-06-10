@@ -6,7 +6,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { PrimalNote, PrimalArticle, PrimalDraft } from 'src/primal';
 import account from 'src/translations/en/account';
 import { accountStore, activeUser } from 'src/stores/AccountStore';
-import { appStore, openConfirmDialog } from 'src/stores/AppStore';
+import { appStore, openConfirmDialog, openScoreBreakdown } from 'src/stores/AppStore';
 import { nip19 } from 'src/utils/nTools';
 import { getEventFromStore } from 'src/stores/EventStore';
 import { Kind } from 'src/constants';
@@ -148,6 +148,12 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess('Note raw data copied');
   };
 
+  const openScore = () => {
+    if (!props.data) return;
+    openScoreBreakdown(props.data.note)
+    props.onClose()
+  };
+
   // const doRequestDelete = async () => {
   //   const user = activeUser();
   //   const noteToDelete = note();
@@ -227,6 +233,11 @@ const NoteContextMenu: Component<{
         label: "Copy Raw Data",
         action: copyRawData,
         icon: 'copy_raw_data',
+      },
+      {
+        label: "Score Breakdown",
+        action: openScore,
+        icon: 'image_icon',
       },
     ];
   };

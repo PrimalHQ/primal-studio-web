@@ -2,7 +2,7 @@ import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
 import { signEvent } from "src/utils/nostrApi";
 import { primalAPI, sendMessage } from "src/utils/socket";
-import { EventFeedResult, FeedRange, FeedResult, NostrEventContent, SendNoteResult } from "src/primal";
+import { EventFeedResult, FeedRange, FeedResult, NostrEventContent, SendNoteResult, StatsWeights } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { fetchKnownProfiles, npubToHex } from "src/utils/profile";
 import { v4 as uuidv4 } from 'uuid';
@@ -884,3 +884,52 @@ export const getScheduledEvents = async (ids: string[]) => {
     })
   })
 };
+
+export const getStatWeights = async (
+) => {
+  const subId = `get_scores_${APP_ID}`;
+
+  let payload = {};
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `scoring`,
+      ...payload
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<StatsWeights>((resolve, reject) => {
+
+    let weights: StatsWeights = {};
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        weights = JSON.parse(event.content || '{}');
+      },
+      onEose: () => {
+        resolve(weights);
+      },
+      onNotice: () => {
+        reject(`failed_to_fetch_score_weights`);
+      }
+    });
+  });
+}

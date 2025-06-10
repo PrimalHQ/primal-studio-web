@@ -39,7 +39,7 @@ const EventStats: Component<{
           <div class={styles.unit}>Reposts</div>
         </div>
         <div class={styles.stat}>
-          <div class={styles.number}>{humanizeNumber(props.event.stats.bookmarks)}</div>
+          <div class={styles.number}>{humanizeNumber(props.event.studioStats.bookmarks)}</div>
           <div class={styles.unit}>Bookmarks</div>
         </div>
       </div>

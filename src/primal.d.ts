@@ -289,6 +289,15 @@ export type StudioNoteStats = {
   satszapped: number,
   score: number,
   sentiment: 'positive' | 'negative' | 'neutral',
+  zaps: number,
+  quotes: number,
+  replies: number,
+  reposts: number,
+  bookmarks: number,
+  reactions: number,
+  replies_long: number,
+  replies_short: number,
+  replies_medium: number,
 }
 
 export type EventFeedPage = {
@@ -420,6 +429,7 @@ export type PrimalDraft = {
   nIdShort: string,
   sender: PrimalUser,
   receiver: PrimalUser,
+  studioStats?: StudioNoteStats,
 }
 
 export type PrimalZap = {
@@ -499,4 +509,15 @@ export type NoteReactionsState = {
   topZaps: TopZap[],
   topZapsFeed: TopZap[],
   quoteCount: number,
+};
+
+export type StatsWeights = {
+  bookmarks?: number,
+  quotes?: number,
+  reactions?: number,
+  replies_long?: number,
+  replies_medium?: number,
+  replies_short?: number,
+  reposts?: number,
+  zaps?: number,
 };

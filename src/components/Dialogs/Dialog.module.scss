@@ -638,3 +638,57 @@
   }
 
 }
+
+.contentScoreBreakdownDialog {
+  display: flex;
+  flex-direction: column;
+
+  table {
+    width: 534px;
+    // border: 1px solid var(--subtile-devider);
+    border-collapse: collapse;
+
+    th {
+      padding: 10px 12px;
+      overflow: hidden;
+      color: var(--text-primary);
+      text-overflow: ellipsis;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 24px;
+
+      background: var(--background-input);
+      border-block: 1px solid var(--subtile-devider);
+      border-right: 1px solid var(--subtile-devider);
+
+      &:first-child {
+        border-left: 1px solid var(--subtile-devider);
+      }
+
+    }
+
+    td {
+      padding: 10px 12px;
+      overflow: hidden;
+      color: var(--text-primary);
+      text-overflow: ellipsis;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 24px;
+
+      background: var(--background-site);
+      border-bottom: 1px solid var(--subtile-devider);
+      border-right: 1px solid var(--subtile-devider);
+
+      &:first-child {
+        border-left: 1px solid var(--subtile-devider);
+      }
+
+      &.total {
+        background: none;
+        border: none;
+      }
+
+    }
+  }
+}
