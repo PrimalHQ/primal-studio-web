@@ -15,6 +15,7 @@ export type BlossomStore = {
   sort: typeof mediaSortOptions[number],
   isFetchingList: boolean,
   selectedMedia: string[],
+  uploadingFiles: File[],
 };
 
 export const emptyBlossomStore = (): BlossomStore => ({
@@ -24,6 +25,7 @@ export const emptyBlossomStore = (): BlossomStore => ({
   isFetchingList: false,
   sort: 'latest',
   selectedMedia: [],
+  uploadingFiles: [],
 });
 
 export type BlossomListOptions = {
@@ -48,6 +50,10 @@ export const mergeBlossomBlobArrays = (arr1: BlobDescriptor[], arr2: BlobDescrip
 // }
 
 export const [blossomStore, setBlossomStore] = createStore<BlossomStore>(emptyBlossomStore());
+
+export const addMedia = (blob: BlobDescriptor) => {
+  setBlossomStore('media', blossomStore.server || '_', (blobs) => [ { ...blob }, ...blobs ]);
+};
 
 export const toggleMediaSelect = (blob: BlobDescriptor) => {
   if (blossomStore.selectedMedia.find(m => blob.sha256 === m)) {
@@ -121,6 +127,11 @@ export const deleteMedia = async (sha256: string) => {
   const server = blossomStore.server;
   if (!server) return false;
 
+  const index = blossomStore.media[server].findIndex(b => b.sha256 === sha256);
+  const oldBlob = blossomStore.media[server][index];
+
+  setBlossomStore('media', server, (blobs) => blobs.filter(b => b.sha256 !== sha256));
+
   const auth = await BlossomClient.createDeleteAuth(
     signEvent,
     sha256,
@@ -138,7 +149,7 @@ export const deleteMedia = async (sha256: string) => {
   );
 
   if (success) {
-    setBlossomStore('media', server, (blobs) => blobs.filter(b => b.sha256 !== sha256));
+    setBlossomStore('media', server, index, () => ({ ...oldBlob }));
   }
 
   return success;

@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, JSXElement, on, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, on, Show } from 'solid-js';
 import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
@@ -6,30 +6,14 @@ import { createStore } from 'solid-js/store';
 import { v4 as uuidv4 } from 'uuid';
 import ButtonGhost from '../Buttons/ButtonGhost';
 
-import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout, encodeAuthorizationHeader } from "blossom-client-sdk";
+import { BlossomClient, BlobDescriptor, fetchWithTimeout, encodeAuthorizationHeader } from "blossom-client-sdk";
 import { sha256 } from 'src/utils/ui';
 import { accountStore, primalBlossom } from 'src/stores/AccountStore';
 import { logInfo, logWarning } from 'src/utils/logger';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import { signEvent } from 'src/utils/nostrApi';
-
-const MB = 1024 * 1024;
-
-export const uploadLimit = {
-  regular: 100,
-  premium: 1024,
-  premiumLegend: 1024,
-}
-
-export type UploadState = {
-  isUploading: boolean,
-  progress: number,
-  id?: string,
-  uploadLimit: number,
-  file?: File,
-  xhr?: XMLHttpRequest,
-  auth?: SignedEvent,
-}
+import { uploadLimit, UploadState } from 'src/utils/upload';
+import { MB } from 'src/constants';
 
 const UploaderBlossom: Component<{
   uploadId?: string,

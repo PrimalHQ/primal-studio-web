@@ -13,6 +13,10 @@ import { openMediaContextMenu } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 import missingImage from 'assets/images/missing_image.svg';
+import { cancelUpload, uploadStore } from 'src/utils/upload';
+import { Progress } from '@kobalte/core/progress';
+
+import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
 
 
 const MediaList: Component<{
@@ -23,6 +27,21 @@ const MediaList: Component<{
   const [visibleItems, setVisibleItems] = createStore<string[]>([]);
 
   let containerRef: HTMLTableElement | undefined;
+
+  const items = () => {
+    const uploads: BlobDescriptor[] = uploadStore.uploadOrder.map(u => {
+      const upload = uploadStore.uploads[u];
+      return {
+        uploaded: dayjs().unix(),
+        type: 'upload',
+        sha256: upload?.id || '',
+        size: upload.file?.size || 0,
+        url: upload.file?.name || 'file',
+      };
+    });
+
+    return [ ...uploads, ...props.items ];
+  }
 
   // Create intersection observer
   const observer = new IntersectionObserver(
@@ -51,7 +70,7 @@ const MediaList: Component<{
   createEffect(() => {
     if (!containerRef) return;
 
-    const bls = props.items;
+    const bls = items();
 
     setTimeout(() => {
       for(let i=0; i< bls.length; i++) {
@@ -81,15 +100,10 @@ const MediaList: Component<{
       blob,
       contextMenu?.getBoundingClientRect(),
       () => {},
-      async () => {
-        const isDeleted = await deleteMedia(blob.sha256);
-
-        if (isDeleted) {
-          toast?.sendSuccess('File deleted')
-        }
-        else {
-          toast?.sendWarning('Failed to delete file')
-        }
+      () => {
+        deleteMedia(blob.sha256).then(isDeleted => {
+          toast?.sendSuccess(isDeleted ? 'File deleted' : 'Failed to delete file');
+        });
       },
     );
   };
@@ -132,8 +146,8 @@ const MediaList: Component<{
       </thead>
 
       <tbody>
-        <For each={props.items}>
-          {(blob) => {
+        <For each={items()}>
+          {(blob, index) => {
 
             let contextMenu: HTMLDivElement | undefined;
 
@@ -152,6 +166,46 @@ const MediaList: Component<{
                     <td></td>
                   </>
                 }>
+                  <Match when={blob.type === 'upload'}>
+                    <td>
+                      <CheckBox
+                        onChange={() => {}}
+                        checked={false}
+                      />
+                    </td>
+                    <td class={styles.file}>
+                      <div>
+                        <div class={styles.progress}>
+                          <Progress
+                            value={uploadStore.uploads[blob.sha256]?.progress || 0}
+                            class={stylesUploader.uploadProgress}
+                          >
+                            <div class={stylesUploader.progressTrackContainer}>
+                              <Progress.Track class={stylesUploader.progressTrack}>
+                                <Progress.Fill
+                                  class={`${stylesUploader.progressFill}`}
+                                />
+                              </Progress.Track>
+                            </div>
+                          </Progress>
+                        </div>
+                        <div>Uploading...</div>
+                      </div>
+                    </td>
+                    <td class={styles.type}>{blob.type || ''}</td>
+                    <td class={styles.size}>{fileSize(blob.size)}</td>
+                    <td colspan={2} class={styles.cancelUpload}>
+                      <button
+                        class={styles.linkButton}
+                        onClick={() => {
+                          cancelUpload(blob.sha256);
+                          toast?.sendInfo('Upload canceled')
+                        }}
+                      >
+                        Cancel upload
+                      </button>
+                    </td>
+                  </Match>
                   <Match when={blob.type?.includes('image/')}>
                     <td>
                       <CheckBox

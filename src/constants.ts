@@ -117,6 +117,9 @@ export const MONTH = 30 * DAY;
 export const YEAR = 365 * DAY;
 
 
+export const MB = 1024 * 1024;
+
+
 export const minKnownProfiles: {"names": Record<string,string>} = {
   "names": {
     "miljan": "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",

@@ -53,8 +53,6 @@ const Media: Component = () => {
       return bTypeValue - aTypeValue;
     });
 
-    // console.log('SORTED: ', blossomStore.sort, sorted.map(s => s.type))
-
     return sorted;
   })
 

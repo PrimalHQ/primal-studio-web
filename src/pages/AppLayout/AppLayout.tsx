@@ -9,10 +9,14 @@ import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 import { settingsStore } from 'src/stores/SettingsStore';
 import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeNoteContextMenu, openEditNote, updateAppStore } from 'src/stores/AppStore';
+import { uploadFile } from 'src/utils/upload';
+import { addMedia } from '../Media/Media.data';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
   const location = useLocation();
+
+  let mediaUploadInput: HTMLInputElement | undefined;
 
   return (
     <div class={styles.layout}>
@@ -99,6 +103,40 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
                 class={styles.editorButton}
               >
                 New Note
+              </button>
+            </Match>
+            <Match when={['/media'].includes(location.pathname)}>
+              <input
+                id="upload-new-media"
+                type="file"
+                ref={mediaUploadInput}
+                onChange={(e) => {
+                  if (!mediaUploadInput) return;
+
+                  const file = mediaUploadInput.files ?
+                    mediaUploadInput.files[0] :
+                    null;
+
+                  if (!file) return;
+                  uploadFile(file, {
+                    onSuccsess: (blob) => {
+                      addMedia(blob);
+                    },
+                    onCancel: () => {
+                      mediaUploadInput.value = '';
+                    }
+                  });
+                }}
+                hidden={true}
+                accept="image/*,video/*,audio/*"
+              />
+              <button
+                onClick={() => {
+                  mediaUploadInput?.click();
+                }}
+                class={styles.editorButton}
+              >
+                Upload File
               </button>
             </Match>
           </Switch>

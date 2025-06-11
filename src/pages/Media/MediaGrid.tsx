@@ -12,7 +12,10 @@ import { openMediaContextMenu } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 import missingImage from 'assets/images/missing_image.svg';
+import { cancelUpload, uploadStore } from 'src/utils/upload';
+import { Progress } from '@kobalte/core/progress';
 
+import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
 
 const MediaGrid: Component<{
   items: BlobDescriptor[],
@@ -22,6 +25,21 @@ const MediaGrid: Component<{
   const [visibleItems, setVisibleItems] = createStore<string[]>([]);
 
   let containerRef: HTMLDivElement | undefined;
+
+  const items = () => {
+    const uploads: BlobDescriptor[] = uploadStore.uploadOrder.map(u => {
+      const upload = uploadStore.uploads[u];
+      return {
+        uploaded: dayjs().unix(),
+        type: 'upload',
+        sha256: upload?.id || '',
+        size: upload.file?.size || 0,
+        url: upload.file?.name || 'file',
+      };
+    });
+
+    return [ ...uploads, ...props.items ];
+  }
 
   // Create intersection observer
   const observer = new IntersectionObserver(
@@ -50,7 +68,7 @@ const MediaGrid: Component<{
   createEffect(() => {
     if (!containerRef) return;
 
-    const bls = props.items;
+    const bls = items();
 
     setTimeout(() => {
       for(let i=0; i< bls.length; i++) {
@@ -63,7 +81,7 @@ const MediaGrid: Component<{
   });
 
   const isNewMonth = (blob: BlobDescriptor, index: number) => {
-    const lastBlobTime = props.items[index - 1]?.uploaded || 0;
+    const lastBlobTime = items()[index - 1]?.uploaded || 0;
 
     const lbDate = dayjs.unix(lastBlobTime);
     const date = dayjs.unix(blob.uploaded);
@@ -91,15 +109,10 @@ const MediaGrid: Component<{
       blob,
       contextMenu?.getBoundingClientRect(),
       () => {},
-      async () => {
-        const isDeleted = await deleteMedia(blob.sha256);
-
-        if (isDeleted) {
-          toast?.sendSuccess('File deleted')
-        }
-        else {
-          toast?.sendWarning('Failed to delete file')
-        }
+      () => {
+        deleteMedia(blob.sha256).then(isDeleted => {
+          toast?.sendSuccess(isDeleted ? 'File deleted' : 'Failed to delete file');
+        });
       },
     );
   };
@@ -123,7 +136,7 @@ const MediaGrid: Component<{
       class={styles.mediaListGrid}
       ref={containerRef}
     >
-      <For each={props.items}>
+      <For each={items()}>
         {(blob, index) => {
 
           let contextMenu: HTMLDivElement | undefined;
@@ -143,6 +156,31 @@ const MediaGrid: Component<{
                 }}
               >
                 <Switch>
+                  <Match when={blob.type === 'upload'}>
+                    <div
+                      class={styles.cancelUpload}
+                      onClick={() => {
+                        cancelUpload(blob.sha256);
+                        toast?.sendInfo('Upload canceled')
+                      }}
+                    >
+                      <div class={styles.closeIcon}></div>
+                    </div>
+                    <div class={`${styles.itemFooter} ${styles.progress}`}>
+                      <Progress
+                        value={uploadStore.uploads[blob.sha256]?.progress || 0}
+                        class={stylesUploader.uploadProgress}
+                      >
+                        <div class={stylesUploader.progressTrackContainer}>
+                          <Progress.Track class={stylesUploader.progressTrack}>
+                            <Progress.Fill
+                              class={`${stylesUploader.progressFill}`}
+                            />
+                          </Progress.Track>
+                        </div>
+                      </Progress>
+                    </div>
+                  </Match>
                   <Match when={blob.type?.includes('image/')}>
                     <img
                       src={blob.url}

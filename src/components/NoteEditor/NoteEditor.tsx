@@ -438,7 +438,6 @@ const NoteEditor: Component<{
 
     let html = generateHTML(json, extensions);
     html = await processMarkdownForNostr(html);
-    console.log('NOTE: ', html)
     editor.chain().setContent(html).run();
 
     if (note.created_at > dayjs().unix()) {
@@ -463,7 +462,6 @@ const NoteEditor: Component<{
     let html = generateHTML(json, extensions);
     html = await processMarkdownForNostr(html);
 
-      console.log('NOTE 1: ', html, mode, prev)
     editorTipTap()?.chain().setContent(html).run();
     // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
 
