@@ -55,7 +55,7 @@ const MediaContextMenu: Component<{
       left: (Math.floor(position()?.left || 0)),
     }
 
-    context?.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 8}px;`);
+    context?.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 2}px;`);
 
     const height = 440;
     const orient = Math.floor(position()?.bottom || 0) + height < window.innerHeight ? 'down' : 'up';

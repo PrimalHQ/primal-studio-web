@@ -6,8 +6,8 @@
   align-items: center;
 
   .contextButton {
-    width: 42px;
-    height: 32px;
+    width: 32px;
+    height: 28px;
     padding: 0;
     margin: 0;
     background: none;
@@ -29,8 +29,8 @@
     }
 
     .contextIcon {
-      width: 16px;
-      height: 14px;
+      width: 12px;
+      height: 2px;
       background-color: var(--text-secondary-2);
       -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
       mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;

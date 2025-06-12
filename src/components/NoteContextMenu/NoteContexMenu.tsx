@@ -64,7 +64,7 @@ const NoteContextMenu: Component<{
       left: (Math.floor(position()?.left || 0)),
     }
 
-    context?.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 22}px;`);
+    context?.setAttribute('style',`top: ${pos.top + 6}px; left: ${pos.left + 12}px;`);
 
     const height = 440;
     const orient = Math.floor(position()?.bottom || 0) + height < window.innerHeight ? 'down' : 'up';
