@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalNote, PrimalUser } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -18,18 +18,36 @@ import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
 import { logError } from 'src/utils/logger';
+import { getUsers } from 'src/primal_api/profile';
+import { emptyUser } from 'src/utils/feeds';
 
 const NotePreview: Component<{
-  id: string | undefined,
+  id?: string,
   note: PrimalNote,
   hideTime?: boolean,
+  onClick?: (note: PrimalNote) => void,
 }> = (props) => {
 
   const [noteAst, setNoteAst] = createSignal<NoteAST[]>([{ type: 'text', value: ''}])
+  const [author, setAuthor] = createSignal<PrimalUser>({ ...emptyUser(props.note.pubkey) });
+
+  const getAuthor = async () => {
+    if (!props.note) return;
+    let user = props.note?.user;
+
+    if (!user || user.name.length === 0) {
+      const users = await getUsers([props.note?.pubkey]);
+
+      user = users.length > 0 ? users[0] : user;
+    }
+
+    setAuthor(user);
+  }
 
   createEffect(() => {
     if (props.note) {
       parseNote(props.note);
+      getAuthor();
     } else {
       logError('Missing Note: ', props.id)
     }
@@ -37,7 +55,6 @@ const NotePreview: Component<{
 
   const note = () => props.note;
 
-  const author = () => props.note?.user;
 
   const user = (pubkey?: string) => ({
     pubkey: pubkey || '',
@@ -175,7 +192,10 @@ const NotePreview: Component<{
   }
 
   return (
-    <div class={styles.eventHolder}>
+    <div
+      class={styles.eventHolder}
+      onClick={() => props.onClick && props.onClick(props.note)}
+    >
       <div class={styles.userAvatar}>
         <Avatar
           user={author()}

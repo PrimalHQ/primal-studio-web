@@ -24,6 +24,7 @@ import { utils } from 'src/utils/nTools';
 const MediaList: Component<{
   server?: string,
   items: BlobDescriptor[],
+  onShowUsage?: (url?: string) => void,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -173,7 +174,7 @@ const MediaList: Component<{
     const list = [ ...profiles, ...notes, ...articles];
 
     if (list.length > 4) {
-      more = <button class={styles.linkButton}>more...</button>
+      more = <button onClick={() => props.onShowUsage && props.onShowUsage(url)} class={styles.linkButton}>more...</button>
     }
 
     return <div class={styles.usageList}>{[...list.slice(0, 4), more]}</div>;

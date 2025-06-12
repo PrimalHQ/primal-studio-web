@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle } from '../../primal';
+import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalUser } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
@@ -17,6 +17,9 @@ import missingImage from 'assets/images/missing_image.svg';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import { humanizeNumber } from 'src/utils/ui';
+import { logError } from 'src/utils/logger';
+import { getUsers } from 'src/primal_api/profile';
+import { emptyUser } from 'src/utils/feeds';
 
 export const renderArticlePreview = (config: any) => {
   return (<div>ARTICLE</div> as HTMLDivElement).innerHTML;
@@ -25,17 +28,31 @@ export const renderArticlePreview = (config: any) => {
 const ArticlePreview: Component<{
   article: PrimalArticle,
   hideTime?: boolean,
+  onClick?: (article: PrimalArticle) => void,
 }> = (props) => {
 
   const article = () => props.article;
+
+  const [author, setAuthor] = createSignal<PrimalUser>({ ...emptyUser(props.article.pubkey) });
+
+  const getAuthor = async () => {
+    if (!props.article) return;
+    let user = props.article?.user;
+
+    if (!user || user.name.length === 0) {
+      const users = await getUsers([props.article?.pubkey]);
+
+      user = users.length > 0 ? users[0] : user;
+    }
+
+    setAuthor(user);
+  }
 
   const published = () => ((article()?.tags || []).find(t => t[0] === 'published_at') || ['published_at', 0])[1];
 
   const image = () => ((article()?.tags || []).find(t => t[0] === 'image') || ['image', missingImage])[1];
 
   const title = () => ((article()?.tags || []).find(t => t[0] === 'title') || ['title', ''])[1];
-
-  const author = () => article()?.user;
 
   const onImgError = async (event: any) => {
     const image = event.target;
@@ -98,8 +115,19 @@ const ArticlePreview: Component<{
     return <img class={styles.image} src={src} onerror={onImgError} />;
   }
 
+  createEffect(() => {
+    if (props.article) {
+      getAuthor();
+    } else {
+      logError('Missing Article')
+    }
+  });
+
   return (
-    <div class={styles.eventHolder}>
+    <div
+      class={styles.eventHolder}
+      onClick={() => props.onClick && props.onClick(props.article)}
+    >
       <div class={styles.userAvatar}>
         <Avatar
           user={author()}

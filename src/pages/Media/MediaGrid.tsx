@@ -1,7 +1,7 @@
-import { Component, createEffect, For, Match, onCleanup, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
-import { blossomStore, deleteMedia, toggleMediaSelect } from './Media.data';
+import { blossomStore, deleteMedia, fetchUsageInfo, toggleMediaSelect } from './Media.data';
 import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
@@ -64,6 +64,28 @@ const MediaGrid: Component<{
   onCleanup(() => {
     observer?.disconnect();
   });
+
+  createEffect(on(() => [visibleItems.length, blossomStore.server], (change) => {
+    const len = change[0];
+    const server = change[1];
+
+    if (!len || !server) return;
+
+    const vi = [ ...visibleItems ];
+
+    const storedUrls = blossomStore.usageInfo.urls;
+
+    const urls = (vi as string[]).reduce<string[]>((acc, id) => {
+      const blob = blossomStore.media[(server as string)].find(b => b.sha256 === id);
+      if (!blob || storedUrls.includes(blob.url)) return acc;
+
+      return [ ...acc, blob.url ];
+    }, []);
+
+    if (urls.length === 0) return;
+
+    fetchUsageInfo(urls);
+  }));
 
   createEffect(() => {
     if (!containerRef) return;
@@ -151,7 +173,8 @@ const MediaGrid: Component<{
               <div
                 data-id={blob.sha256}
                 class={itemClass(blob.sha256)}
-                onClick={() => {
+                onClick={(e: MouseEvent) => {
+                  e.preventDefault();
                   toggleMediaSelect(blob);
                 }}
               >

@@ -358,7 +358,6 @@ export const convertToUser = (user: NostrEventContent, pubkey: string, stats?: R
   } as PrimalUser;
 }
 
-
 export const getUserInPage = (page: EventFeedPage, pubkey: string) => {
   const user = page.users[pubkey];
   const stats = userStatsInPage(page, pubkey);

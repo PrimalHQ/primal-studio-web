@@ -21,6 +21,7 @@ export type AppStore = {
   scoreBrakdownEvent: PrimalNote | PrimalArticle | PrimalDraft | undefined,
   showNewNoteEditor: boolean,
   editNote: PrimalNote | undefined,
+  mediaUsageUrl: string | undefined,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -37,6 +38,7 @@ export const emptyAppStore = (): AppStore => ({
   scoreBrakdownEvent: undefined,
   showNewNoteEditor: false,
   editNote: undefined,
+  mediaUsageUrl: undefined,
 });
 
 
@@ -159,4 +161,8 @@ export const closeEditNote = () => {
     updateAppStore('editNote', () => undefined)
     updateAppStore('showNewNoteEditor', false);
   });
+}
+
+export const setMediaUsageUrl = (url: string | undefined) => {
+  updateAppStore('mediaUsageUrl', () => url);
 }

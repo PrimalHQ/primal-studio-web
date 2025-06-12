@@ -217,7 +217,14 @@ export const fetchUsageInfo = async (urls: string[]) => {
   })
 };
 
-export const urlUsage = (url: string) => {
+export const urlUsage = (url?: string) => {
+  if (!url) return {
+    profiles: [],
+    notes: [],
+    articles: [],
+    drafts: [],
+  }
+
   const uses = blossomStore.usageInfo.usage[url] || [];
 
   if (uses.length === 0) return {

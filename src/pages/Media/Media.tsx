@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, Match, on, onCleanup, Show, Switch, } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, Match, on, onCleanup, Show, Switch, } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -12,7 +12,8 @@ import MediaGrid from './MediaGrid';
 import MediaList from './MediaList';
 import { storeMediaPageConfig } from 'src/utils/localStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
-import { openConfirmDialog } from 'src/stores/AppStore';
+import { openConfirmDialog, setMediaUsageUrl } from 'src/stores/AppStore';
+import MediaUsesDialog from './MediaUsesDialog';
 
 const Media: Component = () => {
   const toast = useToastContext();
@@ -183,9 +184,11 @@ const Media: Component = () => {
           <MediaList
             items={blobs()}
             server={blossomStore.server || ''}
+            onShowUsage={setMediaUsageUrl}
           />
         </Match>
       </Switch>
+
     </div>
   );
 }

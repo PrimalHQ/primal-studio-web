@@ -15,7 +15,11 @@ const Dialog: Component<{
 }> = (props) => {
 
   return (
-    <KobalteDialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
+    <KobalteDialog
+      open={props.open}
+      onOpenChange={props.setOpen}
+      modal={true}
+    >
       <KobalteDialog.Trigger class={props.triggerClass}>
         {props.triggerContent}
       </KobalteDialog.Trigger>

@@ -182,32 +182,6 @@ const Notes: Component = () => {
         />
       </Wormhole>
 
-      <NotesApproveDialog
-        open={notesStore.showApproveDialog}
-        setOpen={(v) => setNotesStore('showApproveDialog', v)}
-        drafts={notesStore.approvedEvents}
-        onClose={() => {
-          setNotesStore('approvedEvents', () => []);
-        }}
-      />
-
-      <ReadsPublishingDateDialog
-        open={notesStore.changePublishDateNote !== undefined}
-        setOpen={(v) => !v && setNotesStore('changePublishDateNote', undefined)}
-        initialValue={notesStore.changePublishDateNote?.created_at}
-        onSetPublishDate={async (timestamp) => {
-          const note = unwrap(notesStore.changePublishDateNote);
-          if (!note) return;
-
-          const today = () => Math.ceil((new Date()).getTime() / 1_000);
-
-          const pubTime = timestamp || today();
-          await scheduleNote(note.content, note.tags, pubTime, note.id);
-
-          setNotesStore('changePublishDateNote', undefined);
-        }}
-      />
-
       <div class={styles.feedHolder}>
         <div class={styles.itemsHolder}>
         <div class={styles.feedHeader}>
@@ -465,6 +439,32 @@ const Notes: Component = () => {
 
         </div>
       </div>
+
+      <NotesApproveDialog
+        open={notesStore.showApproveDialog}
+        setOpen={(v) => setNotesStore('showApproveDialog', v)}
+        drafts={notesStore.approvedEvents}
+        onClose={() => {
+          setNotesStore('approvedEvents', () => []);
+        }}
+      />
+
+      <ReadsPublishingDateDialog
+        open={notesStore.changePublishDateNote !== undefined}
+        setOpen={(v) => !v && setNotesStore('changePublishDateNote', undefined)}
+        initialValue={notesStore.changePublishDateNote?.created_at}
+        onSetPublishDate={async (timestamp) => {
+          const note = unwrap(notesStore.changePublishDateNote);
+          if (!note) return;
+
+          const today = () => Math.ceil((new Date()).getTime() / 1_000);
+
+          const pubTime = timestamp || today();
+          await scheduleNote(note.content, note.tags, pubTime, note.id);
+
+          setNotesStore('changePublishDateNote', undefined);
+        }}
+      />
     </>
   );
 }

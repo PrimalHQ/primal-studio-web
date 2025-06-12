@@ -359,3 +359,29 @@
   display: flex;
   gap: 4px;
 }
+
+
+.mediaUsesDialog {
+  width: 640px;
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .useSection {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .usageItem {
+    border-radius: 12px;
+    background-color: var(--background-sheet);
+    padding: 12px;
+    width: calc(100% - 24px);
+    cursor: pointer;
+  }
+}

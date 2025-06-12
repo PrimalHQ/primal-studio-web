@@ -7,7 +7,7 @@ import AppRouter from './Router';
 import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu } from './stores/AppStore';
+import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu, setMediaUsageUrl } from './stores/AppStore';
 import { accountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
@@ -18,6 +18,7 @@ import ConfirmDialog from './components/Dialogs/ConfirmDialog';
 import NewNoteDialog from './components/NoteEditor/NewNoteDialog';
 import MediaContextMenu from './components/NoteContextMenu/MediaContexMenu';
 import ContentScoreBreakdownDialog from './components/Dialogs/ContentScoreBreakdownDialog';
+import MediaUsesDialog from './pages/Media/MediaUsesDialog';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -86,6 +87,12 @@ const App: Component = () => {
             open={appStore.showNewNoteEditor}
             setOpen={(v) => v ? openEditNote() : closeEditNote()}
             note={appStore.editNote}
+          />
+
+          <MediaUsesDialog
+            open={!!appStore.mediaUsageUrl}
+            setOpen={v => !v && setMediaUsageUrl(undefined)}
+            url={appStore.mediaUsageUrl}
           />
         </Toaster>
       </AppProvider>

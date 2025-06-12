@@ -6,7 +6,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { PrimalNote, PrimalArticle, PrimalDraft } from 'src/primal';
 import account from 'src/translations/en/account';
 import { accountStore, activeUser } from 'src/stores/AccountStore';
-import { appStore, openConfirmDialog } from 'src/stores/AppStore';
+import { appStore, openConfirmDialog, setMediaUsageUrl } from 'src/stores/AppStore';
 import { nip19 } from 'src/utils/nTools';
 import { getEventFromStore } from 'src/stores/EventStore';
 import { Kind } from 'src/constants';
@@ -155,6 +155,11 @@ const MediaContextMenu: Component<{
         label: "Copy File Hash",
         action: copyFileHash,
         icon: 'copy_note_text',
+      },
+      {
+        label: "Show Uses",
+        action: () => setMediaUsageUrl(props.data?.blob.url),
+        icon: 'uses',
       },
       // {
       //   label: "Update Thumbnail",
