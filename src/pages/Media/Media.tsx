@@ -182,6 +182,7 @@ const Media: Component = () => {
         <Match when={blossomStore.listType === 'list'}>
           <MediaList
             items={blobs()}
+            server={blossomStore.server || ''}
           />
         </Match>
       </Switch>

@@ -6,7 +6,7 @@ import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
 import { BlobDescriptor } from 'blossom-client-sdk';
-import { fileSize } from 'src/utils/ui';
+import { fileSize, humanizeFileType } from 'src/utils/ui';
 import { createStore } from 'solid-js/store';
 import { openMediaContextMenu } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
@@ -189,7 +189,7 @@ const MediaGrid: Component<{
                     />
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
-                      <div class={styles.mediaType}>{blob.type?.split('/')[1]}</div>
+                      <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}
@@ -212,7 +212,7 @@ const MediaGrid: Component<{
                     </video>
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
-                      <div class={styles.mediaType}>{blob.type?.split('/')[1]}</div>
+                      <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}
@@ -229,7 +229,7 @@ const MediaGrid: Component<{
 
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
-                      <div class={styles.mediaType}>{blob.type?.split('/')[1]}</div>
+                      <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
                       <div class={styles.mediaContext}>
                         <NoteContextTrigger
                           ref={contextMenu}

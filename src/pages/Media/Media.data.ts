@@ -1,6 +1,8 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { BlobDescriptor, BlossomClient } from "blossom-client-sdk";
 import { createStore } from "solid-js/store";
+import { PrimalUser, PrimalNote, PrimalArticle, PrimalDraft } from "src/primal";
+import { getMediaUses } from "src/primal_api/studio";
 import { accountStore, fetchBlossomServers } from "src/stores/AccountStore";
 import { readMediaPageConfig } from "src/utils/localStore";
 import { signEvent } from "src/utils/nostrApi";
@@ -16,6 +18,14 @@ export type BlossomStore = {
   isFetchingList: boolean,
   selectedMedia: string[],
   uploadingFiles: File[],
+  usageInfo: {
+    users: PrimalUser[],
+    notes: PrimalNote[],
+    reads: PrimalArticle[],
+    drafts: PrimalDraft[],
+    usage: Record<string, string[]>,
+    urls: string[],
+  }
 };
 
 export const emptyBlossomStore = (): BlossomStore => ({
@@ -26,6 +36,14 @@ export const emptyBlossomStore = (): BlossomStore => ({
   sort: 'latest',
   selectedMedia: [],
   uploadingFiles: [],
+  usageInfo: {
+    users: [],
+    notes: [],
+    reads: [],
+    drafts: [],
+    usage: {},
+    urls: [],
+  }
 });
 
 export type BlossomListOptions = {
@@ -154,6 +172,68 @@ export const deleteMedia = async (sha256: string) => {
 
   return success;
 }
+
+export const fetchUsageInfo = async (urls: string[]) => {
+  const { users, notes, reads, drafts, usage } = await getMediaUses(urls);
+
+  setBlossomStore('usageInfo', (usageInfo) => {
+    let usrs = [ ...users ];
+    if (usageInfo.users.length > 0) {
+      const ids = usageInfo.users.map(u => u.pubkey);
+      usrs = usrs.filter(u => !ids.includes(u.pubkey));
+    }
+
+    let nts = [ ...notes ];
+    if (usageInfo.notes.length > 0) {
+      const ids = usageInfo.notes.map(n => n.id);
+      nts = nts.filter(n => !ids.includes(n.id));
+    }
+
+    let arts = [ ...reads ];
+    if (usageInfo.reads.length > 0) {
+      const ids = usageInfo.reads.map(n => n.id);
+      arts = arts.filter(n => !ids.includes(n.id));
+    }
+
+    let drfts = [ ...drafts ];
+    if (usageInfo.drafts.length > 0) {
+      const ids = usageInfo.drafts.map(n => n.id);
+      drfts = drfts.filter(n => !ids.includes(n.id));
+    }
+
+    let us = [ ...urls ];
+    if (usageInfo.urls.length > 0) {
+      us = us.filter(u => !usageInfo.urls.includes(u));
+    }
+
+    return {
+      users: [ ...usageInfo.users, ...usrs ],
+      notes: [ ...usageInfo.notes, ...nts],
+      reads: [ ...usageInfo.reads, ...arts],
+      drafts: [ ...usageInfo.drafts, ...drfts],
+      urls: [ ...usageInfo.urls, ...us ],
+      usage: { ...usageInfo.usage, ...usage },
+    };
+  })
+};
+
+export const urlUsage = (url: string) => {
+  const uses = blossomStore.usageInfo.usage[url] || [];
+
+  if (uses.length === 0) return {
+    profiles: [],
+    notes: [],
+    articles: [],
+    drafts: [],
+  };
+
+  return {
+    profiles: blossomStore.usageInfo.users.filter(u => uses.includes(u.pubkey)),
+    notes: blossomStore.usageInfo.notes.filter(u => uses.includes(u.id)),
+    articles: blossomStore.usageInfo.reads.filter(u => uses.includes(u.id)),
+    drafts: blossomStore.usageInfo.drafts.filter(u => uses.includes(u.id)),
+  }
+};
 
 export const preloadMedia = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;

@@ -933,3 +933,60 @@ export const getStatWeights = async (
     });
   });
 }
+
+export const getMediaUses = async (
+  urls: string[],
+) => {
+  const subId = `media_uses_${APP_ID}`;
+
+  let payload = {
+    urls,
+  };
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `media_files_usage`,
+      ...payload
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<EventFeedResult & { usage: Record<string, string[]> }>((resolve, reject) => {
+
+    let page = { ...emptyEventFeedPage() };
+    let usage: Record<string, string[]> = {};
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        if (event.kind === Kind.StudioMediaUseage) {
+          usage = JSON.parse(event.content || '{}');
+          return;
+        }
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        resolve({ ...pageResolve(page), usage });
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_top_events');
+      }
+    });
+  });
+}

@@ -172,3 +172,11 @@ export const fileSize = (size: number) => {
 
   return `${(size).toFixed(2)}Bytes`
 }
+
+export const humanizeFileType = (type: string | undefined) => {
+  const ext = type?.split('/')[1] || '';
+
+  if (ext === 'quicktime') return 'mov';
+
+  return ext;
+}

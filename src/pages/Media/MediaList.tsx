@@ -1,15 +1,15 @@
-import { Component, createEffect, For, Match, onCleanup, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
-import { blossomStore, deleteMedia, toggleMediaSelect } from './Media.data';
+import { blossomStore, deleteMedia, fetchUsageInfo, toggleMediaSelect, urlUsage } from './Media.data';
 import { shortDate } from 'src/utils/date';
 import dayjs from 'dayjs'
 import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
 import { BlobDescriptor } from 'blossom-client-sdk';
-import { fileSize } from 'src/utils/ui';
+import { fileSize, humanizeFileType } from 'src/utils/ui';
 import CheckBox from 'src/components/CheckBox/CheckBox';
-import { createStore } from 'solid-js/store';
-import { openMediaContextMenu } from 'src/stores/AppStore';
+import { createStore, unwrap } from 'solid-js/store';
+import { openMediaContextMenu, profileLink } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 import missingImage from 'assets/images/missing_image.svg';
@@ -17,9 +17,12 @@ import { cancelUpload, uploadStore } from 'src/utils/upload';
 import { Progress } from '@kobalte/core/progress';
 
 import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
+import { getMediaUses } from 'src/primal_api/studio';
+import { utils } from 'src/utils/nTools';
 
 
 const MediaList: Component<{
+  server?: string,
   items: BlobDescriptor[],
 }> = (props) => {
   const toast = useToastContext();
@@ -62,6 +65,42 @@ const MediaList: Component<{
       setVisibleItems(() => [...visible]);
     },
   );
+
+  createEffect(on(() => [visibleItems.length, blossomStore.server], (change) => {
+    const len = change[0];
+    const server = change[1];
+
+    if (!len || !server) return;
+
+    const vi = [ ...visibleItems ];
+
+    const storedUrls = blossomStore.usageInfo.urls;
+
+    const urls = (vi as string[]).reduce<string[]>((acc, id) => {
+      const blob = blossomStore.media[(server as string)].find(b => b.sha256 === id);
+      if (!blob || storedUrls.includes(blob.url)) return acc;
+
+      return [ ...acc, blob.url ];
+    }, []);
+
+    if (urls.length === 0) return;
+
+    fetchUsageInfo(urls);
+  }));
+
+  // createEffect(() => {
+  //   const bls = items();
+
+  //   if (bls.length === 0 || !props.server) return;
+
+  //   const urls = bls.slice(0, 20).map(b => {
+  //     return b.url;
+  //     // const ext = b.url.split(b.sha256)[1];
+  //     // return `${utils.normalizeURL(props.server!)}${b.sha256}`
+  //   })
+
+  //   fetchUsageInfo(urls);
+  // });
 
   onCleanup(() => {
     observer?.disconnect();
@@ -122,6 +161,24 @@ const MediaList: Component<{
     return k;
   }
 
+  const usesOfMedia = (url: string) => {
+    const usage = urlUsage(url);
+
+    const profiles = usage.profiles.map(p => <a class={styles.usageLink} href={`https://primal.net${profileLink(p.pubkey)}`} target='_blank'>Profile</a>);
+    const notes = usage.notes.map(n => <a class={styles.usageLink} href={`https://primal.net/e/${n.nIdShort}`} target='_blank'>Note</a>);
+    const articles = usage.articles.map(a => <a class={styles.usageLink} href={`https://primal.net/a/${a.nId}`} target='_blank'>Article</a>);
+
+    let more = <></>;
+
+    const list = [ ...profiles, ...notes, ...articles];
+
+    if (list.length > 4) {
+      more = <button class={styles.linkButton}>more...</button>
+    }
+
+    return <div class={styles.usageList}>{[...list.slice(0, 4), more]}</div>;
+  }
+
 
   return (
     <table
@@ -138,6 +195,7 @@ const MediaList: Component<{
             />
           </th>
           <th>File</th>
+          <th>Uses</th>
           <th>Type</th>
           <th>Size</th>
           <th>Date/time</th>
@@ -158,6 +216,7 @@ const MediaList: Component<{
               >
                 <Switch fallback={
                   <>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -192,7 +251,8 @@ const MediaList: Component<{
                         <div>Uploading...</div>
                       </div>
                     </td>
-                    <td class={styles.type}>{blob.type || ''}</td>
+                    <td class={styles.uses}></td>
+                    <td class={styles.type}>{humanizeFileType(blob.type || '')}</td>
                     <td class={styles.size}>{fileSize(blob.size)}</td>
                     <td colspan={2} class={styles.cancelUpload}>
                       <button
@@ -225,7 +285,8 @@ const MediaList: Component<{
                         <div>{shortSha(blob.sha256)}</div>
                       </div>
                     </td>
-                    <td class={styles.type}>{blob.type || ''}</td>
+                    <td class={styles.uses}>{usesOfMedia(blob.url)}</td>
+                    <td class={styles.type}>{humanizeFileType(blob.type || '')}</td>
                     <td class={styles.size}>{fileSize(blob.size)}</td>
                     <td class={styles.date}>{dayjs.unix(blob.uploaded).format('MMM DD, YYYY, hh:mm A')}</td>
                     <td class={styles.context}>
@@ -260,7 +321,8 @@ const MediaList: Component<{
                         <div>{shortSha(blob.sha256)}</div>
                       </div>
                     </td>
-                    <td class={styles.type}>{blob.type || ''}</td>
+                    <td class={styles.uses}>{usesOfMedia(blob.url)}</td>
+                    <td class={styles.type}>{humanizeFileType(blob.type || '')}</td>
                     <td class={styles.size}>{fileSize(blob.size)}</td>
                     <td class={styles.date}>{dayjs.unix(blob.uploaded).format('MMM DD, YYYY, hh:mm A')}</td>
                     <td class={styles.context}>
@@ -285,7 +347,8 @@ const MediaList: Component<{
                     <td class={styles.file}>
                       <div>{shortSha(blob.sha256)}</div>
                     </td>
-                    <td class={styles.type}>{blob.type || ''}</td>
+                    <td class={styles.uses}>{usesOfMedia(blob.url)}</td>
+                    <td class={styles.type}>{humanizeFileType(blob.type || '')}</td>
                     <td class={styles.size}>{fileSize(blob.size)}</td>
                     <td class={styles.date}>{dayjs.unix(blob.uploaded).format('MMM DD, YYYY, hh:mm A')}</td>
                     <td class={styles.context}>
