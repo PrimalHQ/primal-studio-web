@@ -65,7 +65,7 @@
   height: 76px;
   background: var(--background-header-input);
   border-radius: 12px;
-  padding: 12px 20px;
+  padding: 12px 32px 12px 12px;
   text-decoration: none;
   position: relative;
 
@@ -74,6 +74,12 @@
     top: 0;
     right: 0;
     visibility: hidden;
+  }
+
+  .activeContextMenuTrigger {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   &:hover {
@@ -104,7 +110,7 @@
       align-items: center;
       gap: 4px;
       .userName {
-        color: var(--text-secondary);
+        color: var(--text-primary);
         font-size: 12px;
         font-weight: 700;
         line-height: 16px;
@@ -313,6 +319,12 @@
     visibility: hidden;
   }
 
+  .activeContextMenuTrigger {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
   .holder {
     display: flex;
     gap: 10px;
@@ -332,7 +344,7 @@
         align-items: center;
         gap: 4px;
         .userName {
-          color: var(--text-secondary);
+          color: var(--text-primary);
           font-size: 12px;
           font-weight: 700;
           line-height: 16px;

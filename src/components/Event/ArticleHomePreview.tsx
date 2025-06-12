@@ -151,7 +151,7 @@ const ArticleHomePreview: Component<{
       target='_blank'
     >
       <div class={styles.holder}>
-        <div class={styles.contextMenuTrigger}>
+        <div class={appStore.noteContextMenuInfo?.note.id === props.article.id ? styles.activeContextMenuTrigger : styles.contextMenuTrigger}>
           <NoteContextTrigger
             ref={contextMenu}
             onClick={onContextMenuTrigger}

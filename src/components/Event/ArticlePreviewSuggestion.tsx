@@ -1,22 +1,13 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
-import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle } from '../../primal';
+import { Component, Show } from 'solid-js';
+import { PrimalArticle } from '../../primal';
 
 import styles from './Event.module.scss';
-import { userName } from '../../utils/profile';
-import { nip19 } from 'nostr-tools';
-import { eventStore } from '../../stores/EventStore';
-import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
-import { FeedEvent } from './FeedPage';
 import { getMediaUrl, getUsersBlossomUrls } from 'src/stores/MediaStore';
-import { createStore } from 'solid-js/store';
+
 import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
 import missingImage from 'assets/images/missing_image.svg';
-import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
-import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
-import { humanizeNumber } from 'src/utils/ui';
 
 export const renderArticlePreview = (config: any) => {
   return (<div>ARTICLE</div> as HTMLDivElement).innerHTML;

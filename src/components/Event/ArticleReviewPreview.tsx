@@ -3,11 +3,8 @@ import { wordsPerMinute } from 'src/constants';
 import { PrimalArticle } from 'src/primal';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
-import { nip19 } from '../../utils/nTools';
 import Avatar from '../Avatar/Avatar';
-import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
-import ArticleFooter from './ArticleFooter';
 
 import styles from './ArticleReviewPreview.module.scss';
 import missingImage from 'src/assets/images/missing_image.svg';

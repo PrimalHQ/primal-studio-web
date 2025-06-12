@@ -1,22 +1,10 @@
-import { Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
-import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
+import { Component, JSXElement, Show } from 'solid-js';
+import { PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
-import { userName } from '../../utils/profile';
-import { nip19 } from 'nostr-tools';
-import { eventStore } from '../../stores/EventStore';
-import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
-import { FeedEvent } from './FeedPage';
-import { getMediaUrl, getUsersBlossomUrls } from 'src/stores/MediaStore';
-import { createStore } from 'solid-js/store';
-import Avatar from '../Avatar/Avatar';
-import { longDate } from 'src/utils/date';
 
-import missingImage from 'assets/images/missing_image.svg';
 import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
 import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
-import { humanizeNumber } from 'src/utils/ui';
 
 const FeedItemCard: Component<{
   children?: JSXElement,
@@ -56,7 +44,7 @@ const FeedItemCard: Component<{
       onClick={props.onClick}
     >
       <Show when={!props.hideContextMenu}>
-        <div class={styles.contextMenuTrigger}>
+        <div class={appStore.noteContextMenuInfo?.note.id === props.event.id ? styles.activeContextMenuTrigger : styles.contextMenuTrigger}>
           <NoteContextTrigger
             ref={contextMenu}
             onClick={onContextMenuTrigger}

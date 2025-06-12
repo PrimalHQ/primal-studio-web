@@ -121,6 +121,7 @@ export const openNoteContextMenu = (
 };
 
 export const closeNoteContextMenu = () => {
+  updateAppStore('noteContextMenuInfo', undefined);
   updateAppStore('showNoteContextMenu', () => false);
 };
 

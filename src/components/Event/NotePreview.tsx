@@ -6,17 +6,13 @@ import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
 import { nip19 } from 'nostr-tools';
 import { eventStore } from '../../stores/EventStore';
-import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
-import { FeedEvent } from './FeedPage';
+import { NoteAST, parseTextToAST } from 'src/utils/parser';
 import { getMediaUrl, getUsersBlossomUrls } from 'src/stores/MediaStore';
 import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
 
 import missingImage from 'assets/images/missing_image.svg';
-import { appStore, openNoteContextMenu } from 'src/stores/AppStore';
-import NoteContextTrigger from '../NoteContextMenu/NoteContextTrigger';
-import { humanizeNumber } from 'src/utils/ui';
 import { logError } from 'src/utils/logger';
 import { getUsers } from 'src/primal_api/profile';
 import { emptyUser } from 'src/utils/feeds';

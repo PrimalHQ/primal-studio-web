@@ -1,13 +1,12 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
-import { noteRegexG, profileRegexG } from '../../constants';
-import { EventDisplayVariant, NostrEventContent, PrimalNote } from '../../primal';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { EventDisplayVariant, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
 import { userName } from '../../utils/profile';
 import { nip19 } from '../../utils/nTools';
 import { eventStore } from '../../stores/EventStore';
-import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
-import { FeedEvent } from './FeedPage';
+import { NoteAST, parseTextToAST } from 'src/utils/parser';
+
 import { getMediaUrl, getUsersBlossomUrls } from 'src/stores/MediaStore';
 import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
@@ -235,7 +234,7 @@ const NoteHomePreview: Component<{
       target='_blank'
       ref={np}
     >
-      <div class={styles.contextMenuTrigger}>
+      <div class={appStore.noteContextMenuInfo?.note.id === props.note.id ? styles.activeContextMenuTrigger : styles.contextMenuTrigger}>
         <NoteContextTrigger
           ref={contextMenu}
           onClick={onContextMenuTrigger}

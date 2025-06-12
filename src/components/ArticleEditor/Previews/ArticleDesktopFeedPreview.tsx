@@ -1,24 +1,15 @@
-// import { A } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
-import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 
 import styles from './ArticlePreviews.module.scss';
-import { nip19 } from 'nostr-tools';
 import Avatar from 'src/components/Avatar/Avatar';
 import ArticleFooter from 'src/components/Event/ArticleFooter';
-import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigger';
 import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { wordsPerMinute } from 'src/constants';
 import { PrimalArticle, NoteReactionsState } from 'src/primal';
-import media from 'src/translations/en/media';
-import settings from 'src/translations/en/settings';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
 import { getMediaUrl } from 'src/stores/MediaStore';
-
-const isDev = localStorage.getItem('devMode') === 'true';
 
 export type ArticleProps = {
   id?: string,
