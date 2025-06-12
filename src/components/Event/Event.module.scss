@@ -24,7 +24,7 @@
 
 .note {
   // width: 100%;
-  word-break: break-all;
+  word-break: break-word;
   padding: 12px;
 }
 
@@ -152,7 +152,7 @@
         text-overflow: ellipsis;
         line-height: 1.4;
         max-height: calc(1.4em * 3); /* Fallback for browsers that don't support line-clamp */
-        word-break: break-all;
+        word-break: break-word;
         text-align: left;
 
         color: var(--text-primary);
@@ -171,7 +171,7 @@
         text-overflow: ellipsis;
         line-height: 1.4;
         max-height: calc(1.4em * 3); /* Fallback for browsers that don't support line-clamp */
-        word-break: break-all;
+        word-break: break-word;
         text-align: left;
 
         color: var(--text-secondary);
@@ -386,7 +386,7 @@
           text-overflow: ellipsis;
           line-height: 1.4;
           max-height: calc(1.4em * 3); /* Fallback for browsers that don't support line-clamp */
-          word-break: break-all;
+          word-break: break-word;
           text-align: left;
 
           color: var(--text-primary);
@@ -405,7 +405,7 @@
           text-overflow: ellipsis;
           line-height: 1.4;
           max-height: calc(1.4em * 3); /* Fallback for browsers that don't support line-clamp */
-          word-break: break-all;
+          word-break: break-word;
           text-align: left;
 
           // display: flex;
