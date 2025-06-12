@@ -148,7 +148,7 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
       </aside>
 
       <main>
-        <header id="header"></header>
+        <header id="header" class={['/media'].includes(location.pathname) ? styles.borderedHeader : ''}></header>
 
         <section class={styles.central}>
           {props.children}

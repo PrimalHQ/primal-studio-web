@@ -21,6 +21,10 @@
     &:empty {
       height: 0;
     }
+
+    &.borderedHeader {
+      border-right: 1px solid var(--devider);
+    }
   }
 
   footer {
