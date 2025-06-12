@@ -72,6 +72,11 @@
     left: unset;
     right: -4px;
   }
+  &.mediaContext {
+    top: 6px;
+    left: unset;
+    right: -4px;
+  }
 
   animation: outTop 150ms ease-in forwards;
 }
@@ -110,7 +115,7 @@
     right: -4px;
   }
   &.mediaContext {
-    bottom: 54px;
+    bottom: 48px;
     left: unset;
     right: -4px;
   }
