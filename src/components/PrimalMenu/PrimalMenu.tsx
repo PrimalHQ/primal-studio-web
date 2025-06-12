@@ -7,7 +7,7 @@ import { MenuItem } from "../NoteContextMenu/NoteContexMenu";
 const PrimalMenu: Component<{
   id: string,
   items: MenuItem[],
-  position?: 'note_footer' | 'profile' | 'note_context',
+  position?: 'note_footer' | 'profile' | 'note_context' | 'media_context',
   orientation?: 'up' | 'down',
   reverse?: boolean,
   hidden?: boolean,
@@ -22,15 +22,19 @@ const PrimalMenu: Component<{
   };
 
   const positionClass = () => {
-    if (props.position == 'note_context') {
+    if (props.position === 'note_context') {
       return styles.noteContext
     }
 
-    if (props.position == 'note_footer') {
+    if (props.position === 'media_context') {
+      return styles.mediaContext
+    }
+
+    if (props.position === 'note_footer') {
       return styles.noteFooter
     }
 
-    if (props.position == 'profile') {
+    if (props.position === 'profile') {
       return styles.profile
     }
 

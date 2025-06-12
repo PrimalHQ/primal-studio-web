@@ -55,7 +55,7 @@ const MediaContextMenu: Component<{
       left: (Math.floor(position()?.left || 0)),
     }
 
-    context?.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 22}px;`);
+    context?.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 8}px;`);
 
     const height = 440;
     const orient = Math.floor(position()?.bottom || 0) + height < window.innerHeight ? 'down' : 'up';
@@ -217,10 +217,10 @@ const MediaContextMenu: Component<{
   return (
     <div class={styles.contextMenu} ref={context}>
       <PrimalMenu
-        id={`note_context_${props.data?.blob.sha256}`}
+        id={`media_context_${props.data?.blob.sha256}`}
         items={noteContext()}
         hidden={!props.open}
-        position="note_context"
+        position="media_context"
         orientation={orientation()}
       />
     </div>

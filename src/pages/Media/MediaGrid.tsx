@@ -213,14 +213,16 @@ const MediaGrid: Component<{
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
                       <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
-                      <div class={styles.mediaContext}>
-                        <NoteContextTrigger
-                          ref={contextMenu}
-                          onClick={(e: MouseEvent) => {
-                            onContextMenuTrigger(blob, contextMenu);
-                          }}
-                          collapsed={true}
-                        />
+                      <div class={styles.mediaContextHolder}>
+                        <div class={styles.mediaContext}>
+                          <NoteContextTrigger
+                            ref={contextMenu}
+                            onClick={(e: MouseEvent) => {
+                              onContextMenuTrigger(blob, contextMenu);
+                            }}
+                            collapsed={true}
+                          />
+                        </div>
                       </div>
                     </div>
                   </Match>
@@ -236,14 +238,16 @@ const MediaGrid: Component<{
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
                       <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
-                      <div class={styles.mediaContext}>
-                        <NoteContextTrigger
-                          ref={contextMenu}
-                          onClick={() => {
-                            onContextMenuTrigger(blob, contextMenu);
-                          }}
-                          collapsed={true}
-                        />
+                      <div class={styles.mediaContextHolder}>
+                        <div class={styles.mediaContext}>
+                          <NoteContextTrigger
+                            ref={contextMenu}
+                            onClick={() => {
+                              onContextMenuTrigger(blob, contextMenu);
+                            }}
+                            collapsed={true}
+                          />
+                        </div>
                       </div>
                     </div>
                   </Match>
@@ -253,14 +257,16 @@ const MediaGrid: Component<{
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
                       <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>
-                      <div class={styles.mediaContext}>
-                        <NoteContextTrigger
-                          ref={contextMenu}
-                          onClick={() => {
-                            onContextMenuTrigger(blob, contextMenu);
-                          }}
-                          collapsed={true}
-                        />
+                      <div class={styles.mediaContextHolder}>
+                        <div class={styles.mediaContext}>
+                          <NoteContextTrigger
+                            ref={contextMenu}
+                            onClick={() => {
+                              onContextMenuTrigger(blob, contextMenu);
+                            }}
+                            collapsed={true}
+                          />
+                        </div>
                       </div>
                     </div>
                   </Match>
