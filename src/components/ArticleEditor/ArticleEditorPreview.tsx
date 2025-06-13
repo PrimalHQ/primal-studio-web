@@ -267,7 +267,7 @@ const ArticleEditorPreview: Component<{
               </div>
             </div>
             <div
-              class={styles.doZaps}
+              class={styles.doFollow}
             >
               <div class={styles.zapText}>Follow</div>
             </div>

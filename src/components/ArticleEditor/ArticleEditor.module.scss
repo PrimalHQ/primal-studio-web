@@ -1375,6 +1375,28 @@
   } */
 }
 
+.doFollow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--text-primary);
+  border-radius: 99999px;
+  margin: 0px;
+  padding-inline: 18px;
+  padding-block: 10px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 600;
+  background: var(--text-primary);
+  color: var(--background-site);
+  width: fit-content;
+  cursor: default;
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
 .doZaps {
   position: relative;
   display: flex;
