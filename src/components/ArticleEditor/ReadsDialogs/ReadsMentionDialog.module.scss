@@ -682,12 +682,24 @@ input.textInput {
     gap: 8px;
 
     input {
-      width: 32px;
-      padding: 20px;
+      width: 70px;
+      height: 58px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       text-align: center;
+      padding: 0;
+
       border-radius: 12px;
       border: 1px solid var(--subtile-devider);
+
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 20px;
     }
+
   }
 
   .actions {

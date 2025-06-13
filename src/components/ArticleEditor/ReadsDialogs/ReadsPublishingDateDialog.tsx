@@ -16,6 +16,8 @@ import objectSupport from 'dayjs/plugin/objectSupport';
 import timezone from 'dayjs/plugin/timezone';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
+import { Select } from '@kobalte/core/select';
+import SelectAMPMBox from 'src/components/SelectBox/SelectAMPMBox';
 
 dayjs.extend(utc);
 dayjs.extend(objectSupport)
@@ -40,6 +42,10 @@ const ReadsPublishingDateDialog: Component<{
   });
 
   const [selectedDate, setSelectedDate] = createSignal<PickerAloneValue>({})
+
+  const timeOfDay = () => {
+    return selection.hour < 12 ? 'AM' : 'PM';
+  }
 
   createEffect(() => {
     const value = props.initialValue || Math.floor((new Date()).getTime() / 1_000);
@@ -74,6 +80,20 @@ const ReadsPublishingDateDialog: Component<{
     return timestamp;
   }
 
+  const timeDisplay = () => {
+    const timestamp = convertSelectionToTimestamp();
+
+    return dayjs.unix(timestamp).format('YYYY-MM-DD, hh:mm A')
+  }
+
+  const normalizeHours = (hours: number) => {
+    if (hours > 12 || hours < 0) {
+      return Math.abs(hours) % 12
+    }
+
+    return hours;
+  }
+
   return (
     <Dialog
       triggerClass="hidden"
@@ -85,7 +105,7 @@ const ReadsPublishingDateDialog: Component<{
         <div class={styles.datetimeInput}>
           <input
             class={styles.textInput}
-            value={longDate(convertSelectionToTimestamp())}
+            value={timeDisplay()}
             disabled={true}
           />
         </div>
@@ -111,14 +131,13 @@ const ReadsPublishingDateDialog: Component<{
           <div class={styles.timeInputs}>
             <input
               class={`${styles.textInput} ${styles.timeInput}`}
-              value={selection.hour}
+              value={normalizeHours(selection.hour)}
               onChange={(e) => {
                 const v = e.target.value;
-                const num = parseInt(v);
+                let num = parseInt(v);
                 if (isNaN(num)) return;
                 if (num > 24 || num < 0) {
-                  setSelection('hour', () => Math.abs(num) % 24);
-                  return;
+                  num = Math.abs(num) % 24
                 }
 
                 setSelection('hour', () => num);
@@ -138,6 +157,26 @@ const ReadsPublishingDateDialog: Component<{
                 }
 
                 setSelection('minutes', () => num);
+              }}
+            />
+
+            <SelectAMPMBox
+              value={{ label: timeOfDay(), value: timeOfDay() }}
+              options={[ { label: 'AM', value: 'AM' }, { label: 'PM', value: 'PM' }, ]}
+              onChange={(opt) => {
+                const val = opt?.value;
+                const cur = timeOfDay();
+
+                if (val === cur) return;
+
+                if (val === 'AM') {
+                  setSelection('hour', (h) => h - 12);
+                }
+
+                if (val === 'PM') {
+                  setSelection('hour', (h) => h + 12);
+                }
+
               }}
             />
           </div>
