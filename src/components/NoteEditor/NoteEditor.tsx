@@ -255,7 +255,7 @@ const NoteEditor: Component<{
 
           return {
             onStart: props => {
-              component = <div>
+              component = <div class={styles.userSuggestions}>
                 <For each={suggestedUsers}>
                   {(user, index) => (
                     <SearchOption
@@ -271,7 +271,7 @@ const NoteEditor: Component<{
                         props.command({ id: user.pubkey, label: user.name})
                       }}
                       highlighted={highlightedUser() === index()}
-                      hasBackground={true}
+                      // hasBackground={true}
                     />
                   )}
                 </For>

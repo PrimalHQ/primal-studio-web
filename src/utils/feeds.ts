@@ -289,11 +289,12 @@ export const userStatsInPage = (page: EventFeedPage, pubkey: string) => {
   let stats = { ...(page.userStats || {}) };
 
   if (stats[pubkey]) {
+    stats[pubkey].followers_count = page.userFollowerCounts[pubkey];
     stats[pubkey].followers_increase = page.userFollowerIncrease[pubkey];
   } else {
     stats[pubkey] = {
       pubkey: pubkey,
-      followers_count: 0,
+      followers_count: page.userFollowerCounts[pubkey] || 0,
       follows_count: 0,
       note_count: 0,
       reply_count: 0,
