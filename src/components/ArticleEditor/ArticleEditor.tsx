@@ -683,6 +683,12 @@ const ArticleEditor: Component<{
                 class={styles.keywordsInput}
                 onKeyDown={(e: KeyboardEvent) => {
                   // @ts-ignore
+                  if (['Tab'].includes(e.code) && e.target?.value.length > 0) {
+                    e.preventDefault();
+                  }
+                  e.stopImmediatePropagation();
+                  e.stopPropagation();
+                  // @ts-ignore
                   const value = e.target?.value || '';
 
                   if (e.code === 'Backspace' && value.length === 0) {
@@ -699,6 +705,8 @@ const ArticleEditor: Component<{
                       // @ts-ignore
                       e.target.value = ''
                     }
+                    // @ts-ignore
+                    e.target?.focus();
                     return;
                   }
 

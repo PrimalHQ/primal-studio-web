@@ -716,18 +716,6 @@ const ReadsEditor: Component = () => {
                 <CheckBox
                   onChange={(checked: boolean) => {
                     if (!checked) {
-                      setAccordionSection((as) => as.filter(s => s !== 'metadata'));
-                      return;
-                    }
-
-                    setAccordionSection((as) => [...as, 'metadata']);
-                  }}
-                  checked={accordionSection().includes('metadata')}
-                  label="Show article metadata"
-                />
-                <CheckBox
-                  onChange={(checked: boolean) => {
-                    if (!checked) {
                       setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
                       return;
                     }
@@ -736,6 +724,18 @@ const ReadsEditor: Component = () => {
                   }}
                   checked={accordionSection().includes('hero_image')}
                   label="Use hero image"
+                />
+                <CheckBox
+                  onChange={(checked: boolean) => {
+                    if (!checked) {
+                      setAccordionSection((as) => as.filter(s => s !== 'metadata'));
+                      return;
+                    }
+
+                    setAccordionSection((as) => [...as, 'metadata']);
+                  }}
+                  checked={accordionSection().includes('metadata')}
+                  label="Show article metadata"
                 />
               </div>
               <div class={styles.sidebarTools}>
