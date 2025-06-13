@@ -10,18 +10,22 @@ import { TimeValue } from "@rnwonder/solid-date-picker";
 import TimePicker from "@rnwonder/solid-date-picker/timePicker";
 import { longDate, shortDate } from 'src/utils/date';
 import { createStore } from 'solid-js/store';
+
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import objectSupport from 'dayjs/plugin/objectSupport';
 import timezone from 'dayjs/plugin/timezone';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import { Select } from '@kobalte/core/select';
 import SelectAMPMBox from 'src/components/SelectBox/SelectAMPMBox';
 
 dayjs.extend(utc);
-dayjs.extend(objectSupport)
-dayjs.extend(timezone)
+dayjs.extend(objectSupport);
+dayjs.extend(timezone);
+dayjs.extend(advancedFormat);
 
 const ReadsPublishingDateDialog: Component<{
   id?: string,
@@ -83,7 +87,7 @@ const ReadsPublishingDateDialog: Component<{
   const timeDisplay = () => {
     const timestamp = convertSelectionToTimestamp();
 
-    return dayjs.unix(timestamp).format('YYYY-MM-DD, hh:mm A')
+    return dayjs.unix(timestamp).format('YYYY-MM-DD, hh:mm A') + ` ${dayjs.tz.guess()}`
   }
 
   const normalizeHours = (hours: number) => {
