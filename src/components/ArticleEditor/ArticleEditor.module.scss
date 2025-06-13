@@ -533,11 +533,12 @@
 
 .articleEditor {
   &.phoneView {
+    position: relative;
     width: 346px;
     height: 704px;
     overflow-y: scroll;
-    border: 1px solid var(--text-primary);
-    border-radius: 12px;
+    border: 3px solid var(--text-secondary);
+    border-radius: 32px;
 
     &::-webkit-scrollbar {
       display: block;
@@ -558,6 +559,64 @@
 
     &::-webkit-scrollbar-thumb {
       display: none;
+    }
+
+    .phoneHeader {
+      width: calc(100% - 48px);
+      // height: 50px;
+      padding-inline: 24px;
+      padding-top: 18px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .time {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 500;
+        line-height: normal;
+      }
+
+      .phoneStatus {
+        width: 62px;
+        height: 12px;
+        display: inline-block;
+        margin: 0px 0px;
+        background-color: var(--text-secondary);
+        -webkit-mask: url(../../assets/icons/phone_status_header.svg) no-repeat center;
+        mask: url(../../assets/icons/phone_status_header.svg) no-repeat center;
+      }
+    }
+
+    .contentPreview {
+      height: 643px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+
+
+      scrollbar-width: none;
+      &::-webkit-scrollbar{
+        display: none;
+      }
+    }
+
+    .bottomBar {
+      padding-block: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+
+      >div {
+        width: 133px;
+        height: 5px;
+        flex-shrink: 0;
+
+        border-radius: 4px;
+        background: var(--text-primary);
+        opacity: 0.8;
+      }
     }
   }
 
@@ -591,6 +650,9 @@
 
       &:hover {
         background-color: var(--background-input);
+      }
+      img {
+        object-fit: cover;
       }
     }
 
@@ -676,6 +738,7 @@
     }
 
     .titleInput {
+      width: 100%;
       textarea {
         display: block;
         background-color: var(--background-site);
@@ -690,6 +753,10 @@
 
         &::placeholder {
           color: var(--text-tertiary);
+        }
+
+        &:focus:read-write::placeholder {
+          color: transparent;
         }
       }
     }
@@ -729,6 +796,10 @@
 
         &::placeholder {
           color: var(--text-tertiary);
+        }
+
+        &:focus:read-write::placeholder {
+          color: transparent;
         }
       }
     }
@@ -793,6 +864,10 @@
 
         &::placeholder {
           color: var(--text-tertiary);
+        }
+
+        &:focus:read-write::placeholder {
+          color: transparent;
         }
       }
     }
@@ -1177,6 +1252,14 @@
     // margin-left: 20px;
     margin: 20px;
   }
+
+  .phoneHeader {
+    display: none;
+  }
+
+  .bottomBar {
+    display: none;
+  }
 }
 
 .hiddenEditor {
@@ -1216,7 +1299,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    background-color: black;
+    background: none;
     border-radius: 99px;
   }
 }

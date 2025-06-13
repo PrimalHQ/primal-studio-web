@@ -249,113 +249,122 @@ const ArticleEditorPreview: Component<{
 
   return (
     <div class={`${styles.articleEditor} ${props.isPhone ? styles.phoneView : ''}`}>
-      <div class={styles.metadataWrapper} id="editor_metadata">
-        <div class={styles.articleHeader}>
-          <Avatar user={props.articlePreview?.user} size={38} />
-          <div class={styles.userInfo}>
-            <div class={styles.nameAndVerification}>
-              <div class={styles.userName}>{userName(props.articlePreview?.user.pubkey)}</div>
-              <VerificationCheck user={props.articlePreview?.user} />
-            </div>
-            <div class={styles.nip05}>
-              {nip05Verification(props.articlePreview?.user)}
-            </div>
-          </div>
-        </div>
-
-        <div class={styles.topBar}>
-          <div class={styles.date}>
-            {shortDate(props.articlePreview?.published_at)} &middot; via {props.articlePreview?.client}
-          </div>
-        </div>
-
-        <div class={`${styles.metadata} ${!accordionSection().includes('hero_image') ? styles.noHeroImage : ''}`}>
-          <TextField
-            class={styles.titleInput}
-            value={props.article.title}
-          >
-            <TextField.TextArea
-              rows={1}
-              autoResize={true}
-              placeholder="Title"
-              readOnly={viewMode}
-            />
-          </TextField>
-
-          <Show
-            when={heroImgSrc().length > 0}
-          >
-            <div class={styles.uploadImageHolder}>
-              <div
-                class={styles.uploadButton}
-              >
-                <img
-                  class={styles.titleImage}
-                  src={heroImgSrc()}
-                  onload={() => setImageLoaded(true)}
-                  onError={onImageError}
-                />
+      <div class={styles.phoneHeader}>
+        <div class={styles.time}>9:41</div>
+        <div class={styles.phoneStatus}></div>
+      </div>
+      <div class={styles.contentPreview}>
+        <div class={styles.metadataWrapper} id="editor_metadata">
+          <div class={styles.articleHeader}>
+            <Avatar user={props.articlePreview?.user} size={38} />
+            <div class={styles.userInfo}>
+              <div class={styles.nameAndVerification}>
+                <div class={styles.userName}>{userName(props.articlePreview?.user.pubkey)}</div>
+                <VerificationCheck user={props.articlePreview?.user} />
+              </div>
+              <div class={styles.nip05}>
+                {nip05Verification(props.articlePreview?.user)}
               </div>
             </div>
-          </Show>
+          </div>
 
-          <div class={styles.summary}>
-            <div class={styles.border}></div>
+          <div class={styles.topBar}>
+            <div class={styles.date}>
+              {shortDate(props.articlePreview?.published_at)} &middot; via {props.articlePreview?.client}
+            </div>
+          </div>
+
+          <div class={`${styles.metadata} ${!accordionSection().includes('hero_image') ? styles.noHeroImage : ''}`}>
             <TextField
-              class={styles.summaryInput}
-              value={props.article.summary}
+              class={styles.titleInput}
+              value={props.article.title}
             >
               <TextField.TextArea
                 rows={1}
                 autoResize={true}
-                placeholder="Article Summary"
+                placeholder="Title"
                 readOnly={viewMode}
               />
             </TextField>
-          </div>
 
-          <div
-            class={styles.doZaps}
-          >
-            <div class={styles.zapIcon}></div>
-            <div class={styles.zapText}>Zap</div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class={styles.contentEditor}>
-        <div
-          id="tiptapEditor"
-          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`}
-          ref={tiptapEditor}
-          onClick={() => editorTipTap()?.chain().focus().run()}
-          dir={isRTL(getLang()) ? 'rtl' : 'ltr'}
-        ></div>
-        <div style="height: 20px;"></div>
-      </div>
-
-      <div class={styles.keywords}>
-        <div
-          class={`${styles.keywordList} ${styles.noBorder}`}
-        >
-          <For each={props.article.keywords}>
-            {tag => (
-              <div
-                class={styles.keyword}
-              >
-                {tag}
+            <Show
+              when={heroImgSrc().length > 0}
+            >
+              <div class={styles.uploadImageHolder}>
+                <div
+                  class={styles.uploadButton}
+                >
+                  <img
+                    class={styles.titleImage}
+                    src={heroImgSrc()}
+                    onload={() => setImageLoaded(true)}
+                    onError={onImageError}
+                  />
+                </div>
               </div>
-            )}
-          </For>
+            </Show>
+
+            <div class={styles.summary}>
+              <div class={styles.border}></div>
+              <TextField
+                class={styles.summaryInput}
+                value={props.article.summary}
+              >
+                <TextField.TextArea
+                  rows={1}
+                  autoResize={true}
+                  placeholder="Article Summary"
+                  readOnly={viewMode}
+                />
+              </TextField>
+            </div>
+
+            <div
+              class={styles.doZaps}
+            >
+              <div class={styles.zapIcon}></div>
+              <div class={styles.zapText}>Zap</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class={styles.contentEditor}>
+          <div
+            id="tiptapEditor"
+            class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`}
+            ref={tiptapEditor}
+            onClick={() => editorTipTap()?.chain().focus().run()}
+            dir={isRTL(getLang()) ? 'rtl' : 'ltr'}
+          ></div>
+          <div style="height: 20px;"></div>
+        </div>
+
+        <div class={styles.keywords}>
+          <div
+            class={`${styles.keywordList} ${styles.noBorder}`}
+          >
+            <For each={props.article.keywords}>
+              {tag => (
+                <div
+                  class={styles.keyword}
+                >
+                  {tag}
+                </div>
+              )}
+            </For>
+          </div>
+        </div>
+
+        <div class={styles.articleFooter}>
+          <ArticleFooter
+            note={props.articlePreview!}
+            size={props.isPhone ? 'phone' : 'normal'}
+          />
         </div>
       </div>
-
-      <div class={styles.articleFooter}>
-        <ArticleFooter
-          note={props.articlePreview!}
-          size={props.isPhone ? 'phone' : 'normal'}
-        />
+      <div class={styles.bottomBar}>
+        <div></div>
       </div>
     </div>
   )

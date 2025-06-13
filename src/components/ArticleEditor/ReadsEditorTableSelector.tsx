@@ -48,7 +48,10 @@ const ReadsEditorTableSelector: Component<{
 
   return (
     <Popover placement="bottom-start">
-      <Popover.Trigger class={styles.tableSelectTrigger}>
+      <Popover.Trigger
+        class={styles.tableSelectTrigger}
+        tabIndex={-1}
+      >
         <div class={styles.tableIcon}></div>
         <div class={styles.chevronIcon}></div>
       </Popover.Trigger>

@@ -355,6 +355,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isBoldActive ? styles.selected : ''}`}
             onClick={bold}
             title="bold"
+            tabIndex={-1}
           >
             <div class={styles.boldIcon}></div>
           </button>
@@ -364,6 +365,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isItalicActive ? styles.selected : ''}`}
             onClick={italic}
             title="italic"
+            tabIndex={-1}
           >
             <div class={styles.italicIcon}></div>
           </button>
@@ -373,6 +375,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isUlineActive ? styles.selected : ''}`}
             onClick={uline}
             title="underline"
+            tabIndex={-1}
           >
             <div class={styles.ulineIcon}></div>
           </button>
@@ -382,6 +385,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isStrikeActive ? styles.selected : ''}`}
             onClick={strike}
             title="strike"
+            tabIndex={-1}
           >
             <div class={styles.strikeIcon}></div>
           </button>
@@ -393,6 +397,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton}`}
             onClick={bulletList}
             title="bullet list"
+            tabIndex={-1}
           >
             <div class={styles.bulletListIcon}></div>
           </button>
@@ -402,6 +407,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton}`}
             onClick={orderedList}
             title="ordered list"
+            tabIndex={-1}
           >
             <div class={styles.orderedListIcon}></div>
           </button>
@@ -419,6 +425,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterImage', () => true);
             }}
             title="image"
+            tabIndex={-1}
           >
             <div class={styles.attachIcon}></div>
           </button>
@@ -430,6 +437,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterMention', () => true);
             }}
             title="mention"
+            tabIndex={-1}
           >
             <div class={styles.atIcon}></div>
           </button>
@@ -451,6 +459,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterLink', () => true);
             }}
             title="link"
+            tabIndex={-1}
           >
             <div class={styles.linkIcon}></div>
           </button>
@@ -462,6 +471,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${!props.wysiwygMode ? styles.selected : ''}`}
             onClick={props.toggleEditorMode}
             title={!props.wysiwygMode ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+            tabIndex={-1}
           >
             <Show
               when={props.wysiwygMode}
@@ -487,6 +497,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isBoldActive ? styles.selected : ''}`}
             onClick={bold}
             title="bold"
+            tabIndex={-1}
           >
             <div class={styles.boldIcon}></div>
           </button>
@@ -496,6 +507,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isItalicActive ? styles.selected : ''}`}
             onClick={italic}
             title="italic"
+            tabIndex={-1}
           >
             <div class={styles.italicIcon}></div>
           </button>
@@ -505,6 +517,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isUlineActive ? styles.selected : ''}`}
             onClick={uline}
             title="underline"
+            tabIndex={-1}
           >
             <div class={styles.ulineIcon}></div>
           </button>
@@ -514,6 +527,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${formatControls.isStrikeActive ? styles.selected : ''}`}
             onClick={strike}
             title="strike"
+            tabIndex={-1}
           >
             <div class={styles.strikeIcon}></div>
           </button>
@@ -525,6 +539,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton}`}
             onClick={bulletList}
             title="bullet list"
+            tabIndex={-1}
           >
             <div class={styles.bulletListIcon}></div>
           </button>
@@ -534,6 +549,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton}`}
             onClick={orderedList}
             title="ordered list"
+            tabIndex={-1}
           >
             <div class={styles.orderedListIcon}></div>
           </button>
@@ -551,6 +567,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterImage', () => true);
             }}
             title="image"
+            tabIndex={-1}
           >
             <div class={styles.attachIcon}></div>
           </button>
@@ -562,6 +579,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterMention', () => true);
             }}
             title="mention"
+            tabIndex={-1}
           >
             <div class={styles.atIcon}></div>
           </button>
@@ -583,6 +601,7 @@ const ArticleEditorToolbar: Component<{
               updateFormatControls('enterLink', () => true);
             }}
             title="link"
+            tabIndex={-1}
           >
             <div class={styles.linkIcon}></div>
           </button>
@@ -594,6 +613,7 @@ const ArticleEditorToolbar: Component<{
             class={`${styles.mdToolButton} ${!props.wysiwygMode ? styles.selected : ''}`}
             onClick={props.toggleEditorMode}
             title={!props.wysiwygMode ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+            tabIndex={-1}
           >
             <Show
               when={props.wysiwygMode}

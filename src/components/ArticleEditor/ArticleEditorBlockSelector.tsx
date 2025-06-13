@@ -55,7 +55,7 @@ const ArticleEditorBlockSelector: Component<{
       )}
     >
       <Select.Label />
-      <Select.Trigger class={`${styles.trigger}`}>
+      <Select.Trigger tabIndex={-1} class={`${styles.trigger}`}>
         <Select.Value<SelectorOption>>
           {s => s.selectedOption()?.label}
         </Select.Value>

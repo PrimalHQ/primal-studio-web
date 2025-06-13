@@ -178,33 +178,6 @@ const Articles: Component = () => {
         />
       </Wormhole>
 
-      <ReadsApproveDialog
-        open={articlesStore.showApproveDialog}
-        setOpen={(v) => setArticlesStore('showApproveDialog', v)}
-        drafts={articlesStore.approvedEvents}
-        onClose={() => {
-          setArticlesStore('approvedEvents', () => []);
-        }}
-      />
-
-      <ReadsPublishingDateDialog
-        open={articlesStore.changePublishDateArticle !== undefined}
-        setOpen={(v) => !v && setArticlesStore('changePublishDateArticle', undefined)}
-        initialValue={articlesStore.changePublishDateArticle?.created_at}
-        onSetPublishDate={async (timestamp) => {
-          const article = unwrap(articlesStore.changePublishDateArticle);
-          if (!article) return;
-
-          const today = () => Math.ceil((new Date()).getTime() / 1_000);
-
-          const pubTime = timestamp || today();
-          await scheduleArticle(article, article.tags, pubTime, article.id);
-
-          setArticlesStore('changePublishDateArticle', undefined);
-        }}
-      />
-
-
       <div class={styles.feedHolder}>
         <div class={styles.itemsHolder}>
         <div class={styles.feedHeader}>
@@ -449,6 +422,34 @@ const Articles: Component = () => {
 
         </div>
       </div>
+
+      <ReadsApproveDialog
+        open={articlesStore.showApproveDialog}
+        setOpen={(v) => setArticlesStore('showApproveDialog', v)}
+        drafts={articlesStore.approvedEvents}
+        onClose={() => {
+          setArticlesStore('approvedEvents', () => []);
+        }}
+      />
+
+      <ReadsPublishingDateDialog
+        open={articlesStore.changePublishDateArticle !== undefined}
+        setOpen={(v) => !v && setArticlesStore('changePublishDateArticle', undefined)}
+        initialValue={articlesStore.changePublishDateArticle?.created_at}
+        onSetPublishDate={async (timestamp) => {
+          const article = unwrap(articlesStore.changePublishDateArticle);
+          if (!article) return;
+
+          const today = () => Math.ceil((new Date()).getTime() / 1_000);
+
+          const pubTime = timestamp || today();
+          await scheduleArticle(article, article.tags, pubTime, article.id);
+
+          setArticlesStore('changePublishDateArticle', undefined);
+        }}
+      />
+
+
     </>
   );
 }

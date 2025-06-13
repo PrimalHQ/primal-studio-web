@@ -122,7 +122,7 @@ const ArticlePreview: Component<{
       <div class={styles.userAvatar}>
         <Avatar
           user={author()}
-          size={24}
+          size={20}
         />
       </div>
       <div class={styles.noteInfo}>

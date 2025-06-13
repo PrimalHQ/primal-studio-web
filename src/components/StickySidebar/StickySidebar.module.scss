@@ -11,6 +11,7 @@
   padding-left: 8px;
 
   &::-webkit-scrollbar{
+    scrollbar-width: none;
     display: none;
   }
 }
