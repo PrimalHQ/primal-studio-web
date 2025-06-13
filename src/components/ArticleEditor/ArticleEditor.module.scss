@@ -1418,6 +1418,7 @@
     align-items: flex-start;
     justify-content: flex-start;
     padding-left: 6px;
+    width: calc(100% - 60px);
   }
 
   .nameAndVerification {
@@ -1437,13 +1438,12 @@
     }
   }
 
-
   .nip05 {
     font-size: 12px;
     line-height: 16px;
     font-weight: 400;
     color: var(--text-tertiary);
-    width: 82px;
+    max-width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
