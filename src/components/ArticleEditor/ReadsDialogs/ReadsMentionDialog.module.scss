@@ -39,6 +39,17 @@
   flex-direction: column;
   gap: 12px;
   align-items: flex-start;
+  width: 100%;
+
+  input.textInput {
+    width: 550px;
+    height: 20px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+  }
 
   .actions {
     display: flex;
@@ -160,7 +171,7 @@
   >div, .inputHolder {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: flex-start;
 
     .actions {
@@ -231,6 +242,7 @@
     }
     input {
       width: 332px;
+      height: 20px;
     }
   }
 }
