@@ -1,18 +1,15 @@
 import { Component, createEffect, createSignal } from 'solid-js';
 
 import styles from './NoteContext.module.scss';
-import ConfirmDialog from '../Dialogs/ConfirmDialog';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { PrimalNote, PrimalArticle, PrimalDraft } from 'src/primal';
-import account from 'src/translations/en/account';
-import { accountStore, activeUser } from 'src/stores/AccountStore';
+import { accountStore } from 'src/stores/AccountStore';
 import { appStore, openConfirmDialog, openScoreBreakdown } from 'src/stores/AppStore';
 import { nip19 } from 'src/utils/nTools';
 import { getEventFromStore } from 'src/stores/EventStore';
 import { Kind } from 'src/constants';
-import { sendDeleteEvent } from 'src/primal_api/nostr';
-import { doRequestDelete, triggerImportEvents } from 'src/primal_api/events';
-import { APP_ID } from 'src/App';
+import { doRequestDelete } from 'src/primal_api/events';
+import { globalNavigate } from 'src/App';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
 export type NoteContextMenuInfo = {
@@ -40,8 +37,6 @@ const NoteContextMenu: Component<{
 }> = (props) => {
 
   const toaster = useToastContext();
-
-  const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -154,32 +149,6 @@ const NoteContextMenu: Component<{
     props.onClose()
   };
 
-  // const doRequestDelete = async () => {
-  //   const user = activeUser();
-  //   const noteToDelete = note();
-
-  //   if (!props.data || !user || !noteToDelete) return;
-
-  //   const kind = noteToDelete.kind;
-
-  //   const id = kind === Kind.LongForm ?
-  //     (noteToDelete as PrimalArticle).coordinate :
-  //     noteToDelete.id;
-
-  //   const { success, note: deleteEvent } = await sendDeleteEvent(
-  //     user.pubkey,
-  //     id,
-  //     noteToDelete.kind,
-  //   );
-
-  //   if (!success || !deleteEvent) return;
-
-  //   triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
-
-  //   props.data.onDelete && props.data.onDelete(noteToDelete.id);
-  //   props.onClose();
-  // };
-
   const onClickOutside = (e: MouseEvent) => {
     if (
       !props.data ||
@@ -200,42 +169,67 @@ const NoteContextMenu: Component<{
 
   const noteContextForEveryone: () => MenuItem[] = () => {
 
+    let labels = {
+      open: 'Open in Primal',
+      copyLink: 'Copy Note Link',
+      copyText: 'Copy Note Text',
+      copyId: 'Copy Note ID',
+      copyRaw: 'Copy Raw Data',
+      score: 'Score BreakDown',
+    }
+
+    let kindSpecificItems: MenuItem[] = [];
+
+    if (props.data?.note.kind === Kind.LongForm) {
+      labels = {
+        ...labels,
+        copyLink: 'Copy Article Link',
+        copyText: 'Copy Article Text',
+        copyId: 'Copy Article ID',
+      };
+
+      kindSpecificItems = [
+        {
+          label: "Edit Article",
+          action: () => {
+            const navigate = globalNavigate();
+            navigate && navigate(`/edit/article/${props.data?.note.nId}`);
+            props.onClose();
+          },
+          icon: 'edit',
+        },
+      ]
+    }
+
     return [
-      // {
-      //   label: "Reactions",
-      //   action: () => {
-      //     props.data?.openReactions && props.data?.openReactions();
-      //     props.onClose()
-      //   },
-      //   icon: 'heart',
-      // },
+      ...kindSpecificItems,
       {
-        label: "Open in Primal",
+        label: labels.open,
         action: openInPrimal,
         icon: 'new_tab',
       },
       {
-        label: "Copy Note Link",
+        label: labels.copyLink,
         action: copyNoteLink,
         icon: 'copy_note_link',
       },
       {
-        label: "Copy Note Text",
+        label: labels.copyText,
         action: copyNoteText,
         icon: 'copy_note_text',
       },
       {
-        label: "Copy Note ID",
+        label: labels.copyId,
         action: copyNoteId,
         icon: 'copy_note_id',
       },
       {
-        label: "Copy Raw Data",
+        label: labels.copyRaw,
         action: copyRawData,
         icon: 'copy_raw_data',
       },
       {
-        label: "Score Breakdown",
+        label: labels.score,
         action: openScore,
         icon: 'content_score',
       },

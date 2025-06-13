@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './App.module.scss';
 import { AppProvider } from './context/AppContext';
@@ -19,10 +19,13 @@ import NewNoteDialog from './components/NoteEditor/NewNoteDialog';
 import MediaContextMenu from './components/NoteContextMenu/MediaContexMenu';
 import ContentScoreBreakdownDialog from './components/Dialogs/ContentScoreBreakdownDialog';
 import MediaUsesDialog from './pages/Media/MediaUsesDialog';
+import { Navigator, useNavigate } from "@solidjs/router";
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
 export const LANG = 'en';
+
+export const [globalNavigate, setGlobalNavigate] = createSignal<Navigator>();
 
 const App: Component = () => {
 
@@ -44,7 +47,6 @@ const App: Component = () => {
   primalWindow.appStore = appStore;
   primalWindow.relayStore = relayStore;
   primalWindow.settingsStore = settingsStore;
-
 
   return (
     <div class={styles.App}>

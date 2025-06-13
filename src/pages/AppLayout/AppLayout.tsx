@@ -1,5 +1,5 @@
-import { A, RouteSectionProps, useLocation, } from '@solidjs/router';
-import { Component, Match, Show, Switch } from 'solid-js';
+import { A, RouteSectionProps, useLocation, useNavigate, } from '@solidjs/router';
+import { Component, createEffect, Match, onMount, Show, Switch } from 'solid-js';
 
 import primalBrandingLight from 'assets/images/primal_studio_light.svg';
 import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
@@ -11,12 +11,19 @@ import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeNoteContextMenu, openEditNote, updateAppStore } from 'src/stores/AppStore';
 import { uploadFile } from 'src/utils/upload';
 import { addMedia } from '../Media/Media.data';
+import { setGlobalNavigate } from 'src/App';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   let mediaUploadInput: HTMLInputElement | undefined;
+
+  createEffect(() => {
+    // Initialize the global navigator
+    setGlobalNavigate(() => navigate);
+  })
 
   return (
     <div class={styles.layout}>
