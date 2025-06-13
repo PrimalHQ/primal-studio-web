@@ -76,7 +76,7 @@ const ReadsImageDialog: Component<{
 
   return (
     <Dialog
-      triggerClass="hidden"
+      triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
       title="Insert Image"

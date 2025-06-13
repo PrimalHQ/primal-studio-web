@@ -31,7 +31,7 @@ const ReadsPublishDialog: Component<{
 
   return (
     <Dialog
-      triggerClass="hidden"
+      triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
       title="Publish Article"

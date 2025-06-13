@@ -40,7 +40,7 @@ const ConfirmDialog: Component<ConfirmDialogInfo & {
           {props.title || translate('defaults', 'confirmDialog', 'title')}
         </div>
       }
-      triggerClass={'hidden'}
+      triggerClass={'displayNone'}
     >
       <div id={props.id} class={styles.confirmDialog}>
 

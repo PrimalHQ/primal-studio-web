@@ -100,7 +100,7 @@ const ReadsPublishingDateDialog: Component<{
 
   return (
     <Dialog
-      triggerClass="hidden"
+      triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
       title={"Schedule Publishing Time"}

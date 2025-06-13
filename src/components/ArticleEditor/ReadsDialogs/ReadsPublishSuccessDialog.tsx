@@ -14,7 +14,7 @@ const ReadsPublishSuccessDialog: Component<{
 
   return (
     <Dialog
-      triggerClass="hidden"
+      triggerClass="displayNone"
       open={props.open}
       setOpen={props.onClose}
       title="Success!"

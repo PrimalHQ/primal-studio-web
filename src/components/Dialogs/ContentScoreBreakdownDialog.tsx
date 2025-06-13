@@ -112,7 +112,7 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
           Content Score Breakdown
         </div>
       }
-      triggerClass={'hidden'}
+      triggerClass={'displayNone'}
     >
       <div id={props.id} class={styles.contentScoreBreakdownDialog}>
         <table>
