@@ -254,7 +254,7 @@ const ArticleEditorPreview: Component<{
         <div class={styles.phoneStatus}></div>
       </div>
       <div class={styles.contentPreview}>
-        <div class={styles.metadataWrapper} id="editor_metadata">
+        <div class={styles.metadataWrapperPreview} id="editor_metadata">
           <div class={styles.articleHeader}>
             <Avatar user={props.articlePreview?.user} size={38} />
             <div class={styles.userInfo}>
@@ -265,6 +265,11 @@ const ArticleEditorPreview: Component<{
               <div class={styles.nip05}>
                 {nip05Verification(props.articlePreview?.user)}
               </div>
+            </div>
+            <div
+              class={styles.doZaps}
+            >
+              <div class={styles.zapText}>Follow</div>
             </div>
           </div>
 
