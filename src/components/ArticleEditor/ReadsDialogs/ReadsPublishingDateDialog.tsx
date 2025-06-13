@@ -87,7 +87,7 @@ const ReadsPublishingDateDialog: Component<{
   const timeDisplay = () => {
     const timestamp = convertSelectionToTimestamp();
 
-    return dayjs.unix(timestamp).format('YYYY-MM-DD, hh:mm A') + ` ${dayjs.tz.guess()}`
+    return dayjs.unix(timestamp).format('YYYY-MM-DD, hh:mm A z')
   }
 
   const normalizeHours = (hours: number) => {
