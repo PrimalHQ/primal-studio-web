@@ -17,6 +17,12 @@ const MediaUsesDialog: Component<{
 
   const usage = createMemo(() => urlUsage(props.url));
 
+  const noUses = () => {
+    const usg = usage();
+
+    return usg.articles.length === 0  && usg.notes.length === 0 && usg.profiles.length === 0;
+  }
+
   return (
     <Dialog
       triggerClass="displayNone"
@@ -25,6 +31,11 @@ const MediaUsesDialog: Component<{
       title="Media usage in Notes and Articles"
     >
       <div class={styles.mediaUsesDialog}>
+        <Show when={noUses()}>
+          <div class={styles.noUses}>
+            This media file is not used in any notes, articles, or profile metadata.
+          </div>
+        </Show>
         <Show when={usage().profiles.length > 0}>
           <div class={styles.useSection}>
             <div class={styles.usageSectionCaption}>Profiles</div>
