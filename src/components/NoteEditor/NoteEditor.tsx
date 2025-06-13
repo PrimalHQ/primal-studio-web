@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, For, JSXElement, Match, on, Show
 
 import styles from './NoteEditor.module.scss';
 
-import { Editor, generateHTML } from '@tiptap/core';
+import { Editor, generateHTML, JSONContent } from '@tiptap/core';
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
@@ -36,7 +36,7 @@ import { insertIntoTextArea, nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
-import { extendMarkdownEditor, MarkdownPlugin, mdToHtml, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
+import { extendMarkdownEditor, MarkdownPlugin, mdToHtml, processHTMLForNostr, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
 import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
 import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
 import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
@@ -449,17 +449,17 @@ const NoteEditor: Component<{
   createEffect(on( editorMode, async (mode, prev) => {
     if (prev === undefined || mode === prev) return;
 
+    const json: JSONContent = prev === 'text' ?
+      plainTextToTiptapJson(plainContent()) :
+      (editorTipTap()?.getJSON() || { type: 'doc', content: [] });
+
     if (mode === 'text') {
-      const json = editorTipTap()?.getJSON();
       setPlainContent(tiptapJsonToPlainText(json));
       return;
     }
 
-    const plainText = plainContent();
-
-    const json = plainTextToTiptapJson(plainText);
-
     let html = generateHTML(json, extensions);
+    html = processHTMLForNostr(html);
     html = await processMarkdownForNostr(html);
 
     editorTipTap()?.chain().setContent(html).run();

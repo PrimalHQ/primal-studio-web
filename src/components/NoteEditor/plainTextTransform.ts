@@ -1,3 +1,5 @@
+import { JSONContent } from '@tiptap/core';
+
 export type ExtMediaConfig = {
   src: string,
   service: string,
@@ -182,7 +184,7 @@ export const tiptapJsonToPlainText = (json: any) => {
  * @param {string} plainText - Plain text to convert
  * @returns {Object} TipTap JSON content
  */
-export const plainTextToTiptapJson = (plainText: string) => {
+export const plainTextToTiptapJson = (plainText: string): JSONContent => {
   if (typeof plainText !== 'string') {
     return { type: 'doc', content: [] };
   }

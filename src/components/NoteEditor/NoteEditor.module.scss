@@ -514,6 +514,10 @@
   width: 100%;
   background-color: var(--background-input);
   border-bottom: 1px solid var(--subtile-devider);
+
+  div[contenteditable] {
+    padding-top: 20px;
+  }
 }
 
 .editorPlainHolder {
