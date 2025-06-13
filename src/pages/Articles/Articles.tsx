@@ -241,7 +241,7 @@ const Articles: Component = () => {
         </Show>
         <div class={styles.feedContent}>
           <Show
-            when={articlePages().length > 0 || !pageStore.homeArticles.isFetching}
+            when={articlePages().length > 0 || !pageStore.articles.isFetching}
             fallback={
               <div class={styles.emptyList}>
                 <For each={Array(10)}>

@@ -256,7 +256,7 @@ const Notes: Component = () => {
 
         <div class={styles.feedContent}>
           <Show
-            when={notePages().length > 0 || !pageStore.homeArticles.isFetching}
+            when={notePages().length > 0 || !pageStore.notes.isFetching}
             fallback={
               <div class={styles.emptyList}>
                 <For each={Array(10)}>
