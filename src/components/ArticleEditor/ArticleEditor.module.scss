@@ -534,8 +534,8 @@
 .articleEditor {
   &.phoneView {
     position: relative;
-    width: 346px;
-    height: 704px;
+    width: 375px;
+    height: 800px;
     overflow-y: scroll;
     border: 3px solid var(--text-secondary);
     border-radius: 32px;
@@ -590,7 +590,7 @@
     }
 
     .contentPreview {
-      height: 643px;
+      height: 739px;
       overflow-y: scroll;
       overflow-x: hidden;
 
@@ -810,6 +810,7 @@
 
     .metadata {
       padding-top: 0;
+      min-height: 0;
     }
   }
 
