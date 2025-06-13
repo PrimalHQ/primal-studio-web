@@ -120,7 +120,7 @@ const NoteHomePreview: Component<{
     const image = event.target;
 
     // list of user's blossom servers from kind 10_063
-    const userBlossoms = getUsersBlossomUrls(props.note.pubkey || '') || [];
+    const userBlossoms = getUsersBlossomUrls(props.note?.pubkey || '') || [];
 
     // Image url from a Note
     const originalSrc = image.src || '';
@@ -234,7 +234,7 @@ const NoteHomePreview: Component<{
       target='_blank'
       ref={np}
     >
-      <div class={appStore.noteContextMenuInfo?.note.id === props.note.id ? styles.activeContextMenuTrigger : styles.contextMenuTrigger}>
+      <div class={appStore.noteContextMenuInfo?.note?.id === props.note?.id ? styles.activeContextMenuTrigger : styles.contextMenuTrigger}>
         <NoteContextTrigger
           ref={contextMenu}
           onClick={onContextMenuTrigger}

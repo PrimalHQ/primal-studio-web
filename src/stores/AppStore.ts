@@ -135,11 +135,12 @@ export const closeConfirmDialog = () => {
 };
 
 export const openScoreBreakdown = (event: PrimalNote | PrimalArticle | PrimalDraft | undefined) => {
-  updateAppStore('scoreBrakdownEvent', () => event);
+  updateAppStore('scoreBrakdownEvent', () => ({ ...event }));
   updateAppStore('showContentScoreBreakdown', () => true);
 };
 
 export const closeScoreBreakdown = () => {
+  updateAppStore('scoreBrakdownEvent', () => undefined);
   updateAppStore('showContentScoreBreakdown', () => false);
 };
 

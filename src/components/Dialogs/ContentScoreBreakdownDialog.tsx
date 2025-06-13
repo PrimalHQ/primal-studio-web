@@ -64,11 +64,6 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
   const [totalScore, setTotalScore] = createSignal(0);
 
   const setOpen = (isOpen: boolean) => {
-    if (!isOpen) {
-      setWeights(() => []);
-      setTotalScore(0);
-    }
-
     props.setOpen && props.setOpen(isOpen);
 
   }
@@ -76,6 +71,11 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
   createEffect(() => {
     if (props.open) {
       fetchScores();
+    } else {
+      setTimeout(() => {
+        setWeights(() => []);
+        setTotalScore(0);
+      }, 300)
     }
   });
 
@@ -125,13 +125,13 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
             </tr>
           </thead>
           <tbody>
-            <For each={weights}>
-              {weight => (
+            <For each={rowConfig}>
+              {config => (
                 <tr>
-                  <td>{weight.label}</td>
-                  <td>{weight.stat}</td>
-                  <td>{weight.weight}</td>
-                  <td>{weight.score}</td>
+                  <td>{config.label}</td>
+                  <td>{weights.find(w => w.label === config.label)?.stat || 0}</td>
+                  <td>{weights.find(w => w.label === config.label)?.weight || 0}</td>
+                  <td>{weights.find(w => w.label === config.label)?.score || 0}</td>
                 </tr>
               )}
             </For>
