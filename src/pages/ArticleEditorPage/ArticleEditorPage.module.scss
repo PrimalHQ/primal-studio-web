@@ -1138,9 +1138,9 @@ input.textInput {
 
 .tableOptions {
   position: fixed;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
   z-index: 25;
   background-color: var(--background-input);
   padding: 8px 4px;
@@ -1178,8 +1178,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--warning-bright);
-  -webkit-mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
 }
 
 .colAfterIcon {
@@ -1188,8 +1188,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
 }
 
 .colBeforeIcon {
@@ -1198,8 +1198,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
 }
 
 .rowBellowIcon {
@@ -1208,8 +1208,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
 }
 
 .rowAboveIcon {
@@ -1218,8 +1218,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
 }
 
 .mergeIcon {
@@ -1228,8 +1228,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/merge.svg) no-repeat 0px / 18px;
 }
 
 .splitIcon {
@@ -1238,8 +1238,8 @@ input.textInput {
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
+  -webkit-mask: url(../../assets/icons/table/split.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/split.svg) no-repeat 0px / 18px;
 }
 
 .delRowIcon {
@@ -1247,11 +1247,11 @@ input.textInput {
   height: 18px;
   display: inline-block;
   margin: 0px 0px;
-  background-image: url(../assets/icons/table/del_row_dark.svg);
+  background-image: url(../../assets/icons/table/del_row_dark.svg);
   background-size: 18px;
   /* background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px; */
+  -webkit-mask: url(../../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px; */
 }
 
 .delColIcon {
@@ -1259,11 +1259,11 @@ input.textInput {
   height: 18px;
   display: inline-block;
   margin: 0px 0px;
-  background-image: url(../assets/icons/table/del_col_dark.svg);
+  background-image: url(../../assets/icons/table/del_col_dark.svg);
   background-size: 18px;
   /* background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px;
-  mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px; */
+  -webkit-mask: url(../../assets/icons/table/head_col.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/table/head_col.svg) no-repeat 0px / 18px; */
 }
 
 .publishDateDisplay {
