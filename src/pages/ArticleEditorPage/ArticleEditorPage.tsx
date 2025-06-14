@@ -352,7 +352,7 @@ const ReadsEditor: Component = () => {
 
     const content = markdownContent();
 
-    let tags: string[][] = referencesToTags(content);;
+    let tags: string[][] = referencesToTags(content);
 
     const relayTags = relayStore.all.map(r => ['r', r.url]);
 
@@ -1011,6 +1011,7 @@ const ReadsEditor: Component = () => {
           <ReadsPublishingDateDialog
             open={showPublishDateDialog()}
             setOpen={setShowPublishDateDialog}
+            initialValue={futurePublishDate()}
             onSetPublishDate={(timestamp) => {
               setFuturePublishDate(timestamp);
               setShowPublishDateDialog(false);

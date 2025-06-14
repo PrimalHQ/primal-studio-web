@@ -13,6 +13,7 @@ import { importScheduled, replaceScheduled } from "./studio";
 import { accountStore } from "src/stores/AccountStore";
 import { createUniqueId } from "solid-js";
 import { v4 as uuidv4 } from 'uuid';
+import { unwrap } from "solid-js/store";
 
 export const proxyEvent = async (event: NostrRelayEvent) => {
   let signedNote: NostrRelaySignedEvent | undefined;
@@ -92,19 +93,19 @@ export const proxyEvent = async (event: NostrRelayEvent) => {
 export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
-  let articleTags = [...(articleData.tags || [])];
+  // let articleTags = [...(articleData.tags || [])];
 
-  const pubTime = articleTags.find(t => t[0] === 'published_at')
+  const pubTime = tags.find(t => t[0] === 'published_at')
 
   if (!pubTime) {
-    articleTags.push(["published_at", `${time}`])
+    tags.push(["published_at", `${time}`])
   }
   const event = {
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
       ...tags,
-      ...articleTags,
+      // ...articleTags,
     ],
     created_at: time,
   };
@@ -124,14 +125,16 @@ export const scheduleArticle = async (
   pubTime: number,
   replace_id?: string,
 ) => {
-  const hasPubTime = articleData.tags.find(t => t[0] === 'published_at');
+  const hasPubTime = tags.find(t => t[0] === 'published_at');
 
   // const time = Math.floor((new Date(pubTime * 1_000)).getTime() / 1_000)
 
+  let pubTags: string[][] = [];
+
   if (!hasPubTime) {
-    articleData.tags.push(["published_at", `${pubTime}`])
+    pubTags.push(["published_at", `${pubTime}`])
   } else {
-    articleData.tags = (articleData.tags).map(
+    tags = tags.map(
       t => t[0] === 'published_at' ? ['published_at', `${pubTime}`] : t);
   }
 
@@ -139,8 +142,9 @@ export const scheduleArticle = async (
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
-      ...articleData.tags,
+      // ...articleData.tags,
       ...tags,
+      ...pubTags,
     ],
     created_at: pubTime,
   };
