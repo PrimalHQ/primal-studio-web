@@ -154,7 +154,7 @@ const Note: Component<{
 
           </Switch>
         )}
-      </For>;
+      </For>
     </>
 
   }
