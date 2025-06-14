@@ -415,6 +415,7 @@ const NoteEditor: Component<{
     } },
     content: '',
     onCreate({ editor }) {
+      editor.chain().focus().run();
       // setEditorContent(editor, props.markdownContent);
       // props.setEditor(editor);
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
@@ -460,6 +461,10 @@ const NoteEditor: Component<{
 
   createEffect(on( editorMode, async (mode, prev) => {
     if (prev === undefined || mode === prev) return;
+
+    if (
+      ['html', 'phone'].includes(prev) &&
+      ['html', 'phone'].includes(mode) ) return;
 
     const json: JSONContent = prev === 'text' ?
       plainTextToTiptapJson(plainContent()) :
