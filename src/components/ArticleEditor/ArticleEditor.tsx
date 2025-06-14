@@ -337,9 +337,24 @@ const ArticleEditor: Component<{
   }));
 
   const setEditorContent = async (editor: Editor, content: string) => {
-    const c = await mdToHtml(content);
+    let c = await mdToHtml(content);
+
+    c = c.replaceAll('<p></p>', '');
+    c += '<p></p>';
+
     editor.chain().
-      setContent(c).
+      setContent(c, false).
+      // applyNostrPasteRules(c).
+      // applyNProfilePasteRules(c).
+      // applyNAddrPasteRules(c).
+      focus().run();
+
+
+    c = c.replaceAll('<p></p>', '');
+    c += '<p></p>';
+
+    editor.chain().
+      setContent(c, false).
       // applyNostrPasteRules(c).
       // applyNProfilePasteRules(c).
       // applyNAddrPasteRules(c).

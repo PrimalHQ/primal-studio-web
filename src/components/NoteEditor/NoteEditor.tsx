@@ -420,6 +420,18 @@ const NoteEditor: Component<{
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
     onUpdate({ editor, transaction }) {
+      // let content = editor.getHTML();
+      // content = content.replaceAll('<p></p>', '');
+      // editor.commands.setContent(content, false);
+      // console.log('UPDATED: ', content)
+      // let json = editor.getJSON().content;
+
+      // if (Array.isArray(json) && json.length === 1 && !json[0].hasOwnProperty("content")) {
+      //   content = null;
+      // }
+
+      // editor.emit('')
+
       // props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
   }));
@@ -462,9 +474,11 @@ const NoteEditor: Component<{
     html = processHTMLForNostr(html);
     html = await processMarkdownForNostr(html);
 
-    editorTipTap()?.chain().setContent(html).run();
-    // extendMarkdownEditor(editorTipTap()!).setMarkdown(plainText);
+    editorTipTap()?.chain().setContent(html, false).run();
 
+    html = html.replaceAll('<p></p>', '');
+    html += '<p></p>';
+    editorTipTap()?.chain().setContent(html, false).focus().run();
   }));
 
   const getEditorContent = async (mode: 'html' | 'text' | 'phone') => {

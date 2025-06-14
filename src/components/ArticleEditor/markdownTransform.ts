@@ -461,7 +461,7 @@ export const htmlToMd = (html: string): string => {
       })
       .processSync(processedHtml);
 
-    return result.toString();
+    return result.toString().replaceAll('\n\n', '\n');
   } catch (error) {
     console.error('Error converting HTML to markdown:', error);
     // Return a sanitized version of the HTML as fallback
@@ -601,10 +601,11 @@ export const extendMarkdownEditor = (editor: Editor) => {
     },
     setMarkdown: async (markdown: string) => {
       if (!editor) return
-      const html = await mdToHtml(markdown)
+      let html = await mdToHtml(markdown)
 
-      editor.commands.setContent('', false)
-      editor.commands.setContent(html, false)
+      editor.commands.setContent(html, false);
+      // editorTipTap()?.chain().setContent(html, false).focus().run();
+      // editor.commands.setContent('', false)
       // editor.chain().
       //   setContent(html, false).
       //   applyNostrPasteRules(html).
