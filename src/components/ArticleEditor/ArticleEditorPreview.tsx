@@ -328,7 +328,7 @@ const ArticleEditorPreview: Component<{
               class={styles.doZaps}
             >
               <div class={styles.zapIcon}></div>
-              <div class={styles.zapText}>Zap</div>
+              <div class={styles.zapText}>Be the first to zap this article!</div>
             </div>
           </div>
 

@@ -1134,6 +1134,7 @@ input.textInput {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 20px;
 }
 
 .tableOptions {
@@ -1334,12 +1335,13 @@ input.textInput {
 
 }
 
-.phonePreview {
+.phonePreviewFeed {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  width: 100%;
-  margin-top: 36px;
+  width: 375px;
+  border: 1px solid var(--devider);
+  border-radius: 8px;
 }
 
 .editIcon {

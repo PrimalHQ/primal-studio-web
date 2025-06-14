@@ -688,7 +688,7 @@ const ReadsEditor: Component = () => {
                   <div class={styles.caption}>
                     Phone Feed Preview
                   </div>
-                  <div class={styles.phonePreview}>
+                  <div class={styles.phonePreviewFeed}>
                     <ArticlePhoneReviewPreview
                       article={genereatePreviewArticle()!}
                       hideFooter={true}
