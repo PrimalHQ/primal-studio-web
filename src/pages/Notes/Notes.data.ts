@@ -1,9 +1,9 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
-import { pageStore, updatePageStore } from "../../stores/PageStore";
+import { pageStore, removeEventFromPageStore, updatePageStore } from "../../stores/PageStore";
 import { PrimalArticle, PrimalDraft, PrimalNote } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
+import { deleteFromInbox, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore, } from "../Home/Home.data";
@@ -77,22 +77,32 @@ export const toggleSelected = (id: string, add: boolean) => {
   }
 }
 
-export const deleteSelected = async () => {
+export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts' | 'zaps') => {
   openConfirmDialog({
-    title: "Delete All?",
+    title: "Delete Selected?",
     description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
     onConfirm: async () => {
       const selectedIds = notesStore.selected;
 
-      let promisses: Promise<boolean>[] = []
+      if (notesStore.tab === 'inbox') {
+        await deleteFromInbox(selectedIds);
+      }
+      else {
+        let promisses: Promise<boolean>[] = []
+
+        for (let i=0; i<selectedIds.length;i++) {
+          const id = selectedIds[i];
+
+          promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+        }
+
+        await Promise.any(promisses);
+      }
 
       for (let i=0; i<selectedIds.length;i++) {
         const id = selectedIds[i];
-
-        promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+        removeEventFromPageStore(id, type)
       }
-
-      await Promise.any(promisses);
     },
     onAbort: () => {},
   });

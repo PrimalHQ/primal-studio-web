@@ -1,5 +1,5 @@
 import { query, RoutePreloadFuncArgs } from "@solidjs/router";
-import { pageStore, updatePageStore } from "../../stores/PageStore";
+import { pageStore, removeEventFromPageStore, updatePageStore } from "../../stores/PageStore";
 import { FeedRange, PrimalArticle, PrimalDraft } from "../../primal";
 import { Kind } from "../../constants";
 import { batch } from "solid-js";
@@ -91,7 +91,7 @@ export const toggleSelected = (id: string, add: boolean) => {
 //   }
 // }
 
-export const deleteSelected = async () => {
+export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts' | 'zaps') => {
   openConfirmDialog({
     title: "Delete Selected?",
     description: "This will issue a “request delete” command to the relays where these drafts were published. Do you want to continue?",
@@ -100,18 +100,23 @@ export const deleteSelected = async () => {
 
       if (articlesStore.tab === 'inbox') {
         await deleteFromInbox(selectedIds);
-        return;
       }
+      else {
+        let promisses: Promise<boolean>[] = []
 
-      let promisses: Promise<boolean>[] = []
+        for (let i=0; i<selectedIds.length;i++) {
+          const id = selectedIds[i];
+
+          promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+        }
+
+        await Promise.any(promisses);
+      }
 
       for (let i=0; i<selectedIds.length;i++) {
         const id = selectedIds[i];
-
-        promisses.push(doRequestDelete(accountStore.pubkey, id, Kind.Draft));
+        removeEventFromPageStore(id, type)
       }
-
-      await Promise.any(promisses);
     },
     onAbort: () => {},
   });

@@ -247,7 +247,7 @@ const Notes: Component = () => {
             <button
               class={styles.bulkControlButton}
               disabled={notesStore.selected.length === 0}
-              onClick={deleteSelected}
+              onClick={() => deleteSelected('drafts')}
             >
               Delete Selected
             </button>
@@ -287,7 +287,7 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <ProposalPreview
@@ -297,7 +297,7 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
+                                removeEventFromPageStore(id, 'drafts')
                               }}
                               type='sent'
                               checked={notesStore.selected.includes(draft?.id || '-')}
@@ -318,7 +318,7 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <ProposalPreview
@@ -328,7 +328,7 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
+                                removeEventFromPageStore(id, 'drafts')
                               }}
                               onApprove={() => {
                                 setNotesStore('approvedEvents', [draft!]);
@@ -353,7 +353,7 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published', 'published-replied'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <DraftPreview
@@ -363,7 +363,7 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
+                                removeEventFromPageStore(id, 'drafts')
                               }}
                             />
                           </FeedItemCard>
@@ -382,7 +382,7 @@ const Notes: Component = () => {
                             event={note!}
                             hideContextMenu={true}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'notes')
                             }}
                           >
                             <NotePreview
@@ -413,7 +413,7 @@ const Notes: Component = () => {
                           onClick={() => {openInPrimal(note!)}}
                           event={note!}
                           onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
+                            removeEventFromPageStore(id, 'notes')
                           }}
                         >
                           <NotePreview

@@ -44,6 +44,7 @@ export const [pageStore, updatePageStore] = createStore<PageStore>(emptyStore())
 
 export const removeEventFromPageStore = (
   eventId: string,
+  eventType: 'notes' | 'reads' | 'users' | 'drafts' | 'zaps',
 ) => {
   const keys = Object.keys(pageStore) as (keyof PageStore)[];
 
@@ -52,10 +53,10 @@ export const removeEventFromPageStore = (
 
     if (pageIndex < 0) return;
 
-    const eventKey = pageStore[key].mainEventKey;
+    // const eventKey = pageStore[key].mainEventKey;
 
-    if (!['notes', 'reads', 'users', 'drafts', 'zaps'].includes(eventKey))
-      return;
+    // if (!['notes', 'reads', 'users', 'drafts', 'zaps'].includes(eventKey))
+    //   return;
 
     updatePageStore(key, 'feedPages', (pages) => {
       let newPages = [...pages];
@@ -64,20 +65,12 @@ export const removeEventFromPageStore = (
       newPages[pageIndex] = {
         ...page,
         // @ts-ignore
-        [eventKey]: page[eventKey].filter(ev => ev.id !== eventId),
+        [eventType]: page[eventType].filter(ev => ev.id !== eventId),
       }
 
       return newPages;
     })
 
-  //   updatePageStore(key, 'feedPages', pageIndex, (result) => {
-  //     if (!['notes', 'reads', 'users', 'drafts', 'zaps'].includes(eventKey)) return {};
-
-  //     const eventIds = result.eventIds.filter(id => id !== eventId);
-  //     // @ts-ignore
-  //     const events = result[eventKey].filter(ev => ev.id !== eventId);
-
-  //     return ({ eventIds, [eventKey]: events })});
 
   })
 

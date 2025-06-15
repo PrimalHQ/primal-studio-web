@@ -233,7 +233,7 @@ const Articles: Component = () => {
             <button
               class={styles.bulkControlButton}
               disabled={articlesStore.selected.length === 0}
-              onClick={deleteSelected}
+              onClick={() => deleteSelected('drafts')}
             >
               Delete Selected
             </button>
@@ -272,7 +272,7 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <ProposalPreview
@@ -280,9 +280,9 @@ const Articles: Component = () => {
                               onEdit={() => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
-                              onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
-                              }}
+                              // onDelete={(id: string) => {
+                              //   removeEventFromPageStore(id, 'drafts')
+                              // }}
                               onView={() => {
                                 navigate(`/view/draft/${draft!.id}`);
                               }}
@@ -305,7 +305,7 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <ProposalPreview
@@ -314,7 +314,7 @@ const Articles: Component = () => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
+                                removeEventFromPageStore(id, 'drafts')
                               }}
                               onApprove={() => {
                                 setArticlesStore('approvedEvents', [draft!]);
@@ -339,7 +339,7 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'drafts')
                             }}
                           >
                             <DraftPreview
@@ -348,7 +348,7 @@ const Articles: Component = () => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id)
+                                removeEventFromPageStore(id, 'drafts')
                               }}
                             />
                           </FeedItemCard>
@@ -367,7 +367,7 @@ const Articles: Component = () => {
                             event={article!}
                             hideContextMenu={true}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id)
+                              removeEventFromPageStore(id, 'reads')
                             }}
                           >
                             <ArticlePreview
@@ -397,7 +397,7 @@ const Articles: Component = () => {
                           onClick={() => {openInPrimal(article!)}}
                           event={article!}
                           onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
+                            removeEventFromPageStore(id, 'reads')
                           }}
                         >
                           <ArticlePreview

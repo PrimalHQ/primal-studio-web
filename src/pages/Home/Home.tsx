@@ -312,7 +312,7 @@ const Home: Component = () => {
                         note={page.notes.find(n => n.id === e)!}
                         variant='feed'
                         onDelete={(id: string) => {
-                          removeEventFromPageStore(id)
+                          removeEventFromPageStore(id, 'notes')
                         }}
                       />
                     )}
@@ -367,7 +367,7 @@ const Home: Component = () => {
                           article={page.reads.find(a => a.id === e)!}
                           variant='feed'
                           onDelete={(id: string) => {
-                            removeEventFromPageStore(id)
+                            removeEventFromPageStore(id, 'reads')
                           }}
                         />
                       </Show>
