@@ -54,6 +54,7 @@ import EmojiButton from '../EmojiPicker/EmojiButton';
 import EmojiPickPopover from '../EmojiPicker/EmojiPickPopover';
 import MediaEmbed from '../ArticleEditor/MediaEmbedExtension';
 import dayjs from 'dayjs';
+import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
 
 
 const NoteEditor: Component<{
@@ -532,6 +533,11 @@ const NoteEditor: Component<{
     if (success && note) {
       toast?.sendSuccess('Saved draft');
 
+      fetchFeedTotals(accountStore.pubkey, {
+        since: notesStore.graphSpan.since,
+        until: notesStore.graphSpan.until,
+        kind: 'notes'
+      });
       // if (lastDraft.length > 0) {
       //   sendDeleteEvent(
       //     user.pubkey,
@@ -562,6 +568,11 @@ const NoteEditor: Component<{
 
     if (success && note) {
       toast?.sendSuccess('Proposal sent');
+      fetchFeedTotals(accountStore.pubkey, {
+        since: notesStore.graphSpan.since,
+        until: notesStore.graphSpan.until,
+        kind: 'notes'
+      });
 
       // if (lastDraft.length > 0) {
       //   sendDeleteEvent(
@@ -597,6 +608,11 @@ const NoteEditor: Component<{
       await sendNote(content, tags);
 
     if (success && note) {
+      fetchFeedTotals(accountStore.pubkey, {
+        since: notesStore.graphSpan.since,
+        until: notesStore.graphSpan.until,
+        kind: 'notes'
+      });
       props.onDone && props.onDone();
     }
 

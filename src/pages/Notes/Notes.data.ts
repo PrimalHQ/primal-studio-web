@@ -103,6 +103,12 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
         const id = selectedIds[i];
         removeEventFromPageStore(id, type)
       }
+
+      fetchFeedTotals(accountStore.pubkey, {
+        since: notesStore.graphSpan.since,
+        until: notesStore.graphSpan.until,
+        kind: 'notes',
+      });
     },
     onAbort: () => {},
   });

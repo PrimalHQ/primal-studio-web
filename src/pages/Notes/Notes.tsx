@@ -287,7 +287,13 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: notesStore.graphSpan.since,
+                                until: notesStore.graphSpan.until,
+                                kind: 'notes'
+                              });
                             }}
                           >
                             <ProposalPreview
@@ -297,7 +303,12 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id, 'drafts')
+                                removeEventFromPageStore(id, 'drafts');
+                                fetchFeedTotals(accountStore.pubkey, {
+                                  since: notesStore.graphSpan.since,
+                                  until: notesStore.graphSpan.until,
+                                  kind: 'notes'
+                                });
                               }}
                               type='sent'
                               checked={notesStore.selected.includes(draft?.id || '-')}
@@ -318,7 +329,12 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: notesStore.graphSpan.since,
+                                until: notesStore.graphSpan.until,
+                                kind: 'notes'
+                              });
                             }}
                           >
                             <ProposalPreview
@@ -328,7 +344,12 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id, 'drafts')
+                                removeEventFromPageStore(id, 'drafts');
+                                fetchFeedTotals(accountStore.pubkey, {
+                                  since: notesStore.graphSpan.since,
+                                  until: notesStore.graphSpan.until,
+                                  kind: 'notes'
+                                });
                               }}
                               onApprove={() => {
                                 setNotesStore('approvedEvents', [draft!]);
@@ -353,7 +374,12 @@ const Notes: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published', 'published-replied'].includes(notesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: notesStore.graphSpan.since,
+                                until: notesStore.graphSpan.until,
+                                kind: 'notes'
+                              });
                             }}
                           >
                             <DraftPreview
@@ -363,7 +389,12 @@ const Notes: Component = () => {
                                 openEditNote(note);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id, 'drafts')
+                                removeEventFromPageStore(id, 'drafts');
+                                fetchFeedTotals(accountStore.pubkey, {
+                                  since: notesStore.graphSpan.since,
+                                  until: notesStore.graphSpan.until,
+                                  kind: 'notes'
+                                });
                               }}
                             />
                           </FeedItemCard>
@@ -382,7 +413,12 @@ const Notes: Component = () => {
                             event={note!}
                             hideContextMenu={true}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'notes')
+                              removeEventFromPageStore(id, 'notes');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: notesStore.graphSpan.since,
+                                until: notesStore.graphSpan.until,
+                                kind: 'notes'
+                              });
                             }}
                           >
                             <NotePreview
@@ -413,7 +449,12 @@ const Notes: Component = () => {
                           onClick={() => {openInPrimal(note!)}}
                           event={note!}
                           onDelete={(id: string) => {
-                            removeEventFromPageStore(id, 'notes')
+                            removeEventFromPageStore(id, 'notes');
+                            fetchFeedTotals(accountStore.pubkey, {
+                              since: notesStore.graphSpan.since,
+                              until: notesStore.graphSpan.until,
+                              kind: 'notes'
+                            });
                           }}
                         >
                           <NotePreview

@@ -470,7 +470,7 @@ export const sendNoteDraft = async (
   const response = await sendEvent(draft);
 
   if (response.success && response.note) {
-    triggerImportEvents([response.note], `draft_import_${APP_ID}`);
+    await triggerImportEvents([response.note], `draft_import_${APP_ID}`);
   }
 
   return response;

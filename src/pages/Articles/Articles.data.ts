@@ -117,6 +117,12 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
         const id = selectedIds[i];
         removeEventFromPageStore(id, type)
       }
+
+      fetchFeedTotals(accountStore.pubkey, {
+        since: articlesStore.graphSpan.since,
+        until: articlesStore.graphSpan.until,
+        kind: 'articles',
+      });
     },
     onAbort: () => {},
   });

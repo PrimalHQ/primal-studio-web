@@ -272,7 +272,12 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: articlesStore.graphSpan.since,
+                                until: articlesStore.graphSpan.until,
+                                kind: 'articles'
+                              });
                             }}
                           >
                             <ProposalPreview
@@ -280,9 +285,6 @@ const Articles: Component = () => {
                               onEdit={() => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
-                              // onDelete={(id: string) => {
-                              //   removeEventFromPageStore(id, 'drafts')
-                              // }}
                               onView={() => {
                                 navigate(`/view/draft/${draft!.id}`);
                               }}
@@ -305,7 +307,12 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: articlesStore.graphSpan.since,
+                                until: articlesStore.graphSpan.until,
+                                kind: 'articles'
+                              });
                             }}
                           >
                             <ProposalPreview
@@ -314,7 +321,12 @@ const Articles: Component = () => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id, 'drafts')
+                                removeEventFromPageStore(id, 'drafts');
+                                fetchFeedTotals(accountStore.pubkey, {
+                                  since: articlesStore.graphSpan.since,
+                                  until: articlesStore.graphSpan.until,
+                                  kind: 'articles'
+                                });
                               }}
                               onApprove={() => {
                                 setArticlesStore('approvedEvents', [draft!]);
@@ -339,7 +351,12 @@ const Articles: Component = () => {
                             event={draft!}
                             hideContextMenu={!['published'].includes(articlesStore.tab)}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'drafts')
+                              removeEventFromPageStore(id, 'drafts');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: articlesStore.graphSpan.since,
+                                until: articlesStore.graphSpan.until,
+                                kind: 'articles'
+                              });
                             }}
                           >
                             <DraftPreview
@@ -348,7 +365,12 @@ const Articles: Component = () => {
                                 navigate(`/edit/article/${draft!.id}`);
                               }}
                               onDelete={(id: string) => {
-                                removeEventFromPageStore(id, 'drafts')
+                                removeEventFromPageStore(id, 'drafts');
+                                fetchFeedTotals(accountStore.pubkey, {
+                                  since: articlesStore.graphSpan.since,
+                                  until: articlesStore.graphSpan.until,
+                                  kind: 'articles'
+                                });
                               }}
                             />
                           </FeedItemCard>
@@ -367,7 +389,12 @@ const Articles: Component = () => {
                             event={article!}
                             hideContextMenu={true}
                             onDelete={(id: string) => {
-                              removeEventFromPageStore(id, 'reads')
+                              removeEventFromPageStore(id, 'reads');
+                              fetchFeedTotals(accountStore.pubkey, {
+                                since: articlesStore.graphSpan.since,
+                                until: articlesStore.graphSpan.until,
+                                kind: 'articles'
+                              });
                             }}
                           >
                             <ArticlePreview
@@ -397,7 +424,12 @@ const Articles: Component = () => {
                           onClick={() => {openInPrimal(article!)}}
                           event={article!}
                           onDelete={(id: string) => {
-                            removeEventFromPageStore(id, 'reads')
+                            removeEventFromPageStore(id, 'reads');
+                            fetchFeedTotals(accountStore.pubkey, {
+                              since: articlesStore.graphSpan.since,
+                              until: articlesStore.graphSpan.until,
+                              kind: 'articles'
+                            });
                           }}
                         >
                           <ArticlePreview
