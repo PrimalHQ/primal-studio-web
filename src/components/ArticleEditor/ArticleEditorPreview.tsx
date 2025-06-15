@@ -181,9 +181,20 @@ const ArticleEditorPreview: Component<{
   }));
 
   const setEditorContent = async (editor: Editor, content: string) => {
-    const c = await mdToHtml(content);
+    let c = await mdToHtml(content.replaceAll('\n\n', '\n'));
+
+    c = c.replaceAll('<p></p>', '');
+    c += '<p></p>';
+
     editor.chain().
-      setContent(c).
+      setContent(c, false).
+      focus().run();
+
+    c = c.replaceAll('<p></p>', '');
+    c += '<p></p>';
+
+    editor.chain().
+      setContent(c, false).
       focus().run();
   }
 

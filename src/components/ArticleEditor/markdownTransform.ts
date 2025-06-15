@@ -461,7 +461,7 @@ export const htmlToMd = (html: string): string => {
       })
       .processSync(processedHtml);
 
-    return result.toString().replaceAll('\n\n', '\n');
+    return result.toString().replaceAll('\n\n\n', '\n');
   } catch (error) {
     console.error('Error converting HTML to markdown:', error);
     // Return a sanitized version of the HTML as fallback
