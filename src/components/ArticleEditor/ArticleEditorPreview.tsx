@@ -259,7 +259,7 @@ const ArticleEditorPreview: Component<{
   };
 
   return (
-    <div class={`${styles.articleEditor} ${props.isPhone ? styles.phoneView : ''}`}>
+    <div class={`${styles.articleEditor} ${props.isPhone ? styles.phoneView : styles.browserView }`}>
       <div class={styles.phoneHeader}>
         <div class={styles.time}>9:41</div>
         <div class={styles.phoneStatus}></div>
@@ -353,7 +353,6 @@ const ArticleEditorPreview: Component<{
             onClick={() => editorTipTap()?.chain().focus().run()}
             dir={isRTL(getLang()) ? 'rtl' : 'ltr'}
           ></div>
-          <div style="height: 20px;"></div>
         </div>
 
         <div class={styles.keywords}>
