@@ -171,6 +171,10 @@ export const headerSortOptions = (tab: string): SelectOption[] => {
     return [...published, ...common];
   }
 
+  if (tab === 'scheduled') {
+    return [...common].reverse();
+  }
+
   return [ ...common ];
 }
 
