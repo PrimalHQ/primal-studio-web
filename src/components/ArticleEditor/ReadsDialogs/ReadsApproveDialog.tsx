@@ -54,11 +54,11 @@ const ReadsApproveDialog: Component<{
         t => t[0] === 'published_at' ? ['published_at', `${today()}`] : t);
 
       const { success, note } = publishDate(article) > today() ?
-        await scheduleArticle(article, [], publishDate(article)) :
-        await sendArticle(article, []);
+        await scheduleArticle(article, article.tags, publishDate(article)) :
+        await sendArticle(article, article.tags);
 
       if (success && note) {
-        deletedDrafts.push(article.id)
+        deletedDrafts.push(props.drafts[i].id)
       }
     }
 

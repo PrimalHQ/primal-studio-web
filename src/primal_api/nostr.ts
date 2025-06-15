@@ -113,7 +113,7 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
   const response = await sendEvent(event);
 
   if (response.success && response.note) {
-    triggerImportEvents([response.note], `del_last_draft_import_${APP_ID}`);
+    triggerImportEvents([response.note], `send_article_import_${APP_ID}`);
   }
 
   return response;
