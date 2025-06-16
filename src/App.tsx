@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, lazy, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './App.module.scss';
 import { AppProvider } from './context/AppContext';
@@ -19,7 +19,7 @@ import NewNoteDialog from './components/NoteEditor/NewNoteDialog';
 import MediaContextMenu from './components/NoteContextMenu/MediaContexMenu';
 import ContentScoreBreakdownDialog from './components/Dialogs/ContentScoreBreakdownDialog';
 import MediaUsesDialog from './pages/Media/MediaUsesDialog';
-import { Navigator } from "@solidjs/router";
+import { Navigator, Route, Router } from "@solidjs/router";
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -48,11 +48,20 @@ const App: Component = () => {
   primalWindow.relayStore = relayStore;
   primalWindow.settingsStore = settingsStore;
 
+  const Landing = lazy(() => import('./pages/Landing/Landing'));
+
   return (
     <div class={styles.App}>
       <AppProvider>
         <Toaster>
-          <Show when={accountStore.accountIsReady}>
+          <Show
+            when={accountStore.accountIsReady}
+            fallback={
+              <Router preload={true}>
+                <Route path="/" component={Landing} />
+              </Router>
+            }
+          >
             <AppRouter />
           </Show>
 

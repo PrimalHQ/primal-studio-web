@@ -11,6 +11,7 @@ import Landing from './pages/Landing/Landing';
 
 const AppRouter: Component = () => {
 
+  const Landing = lazy(() => import('./pages/Landing/Landing'));
 
   const AppLayout = lazy(() => import('./pages/AppLayout/AppLayout'));
 
