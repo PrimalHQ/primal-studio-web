@@ -1,4 +1,4 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 
@@ -18,6 +18,8 @@ import SignInDialog from './SignInDialog';
 import PrimalProFAQ from './PrimalProFAQ';
 
 import { isIPhone, isAndroid } from '@kobalte/utils';
+import { useBeforeLeave } from '@solidjs/router';
+import { settingsStore } from 'src/stores/SettingsStore';
 
 const Landing: Component = () => {
 
@@ -28,6 +30,16 @@ const Landing: Component = () => {
   const isPhone = () => {
     return isIPhone() || isAndroid() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
   };
+
+  onMount(() => {
+    const html: HTMLElement | null = document.querySelector('html');
+    html?.setAttribute('data-theme', 'studio_dark');
+  });
+
+  useBeforeLeave(() => {
+    const html: HTMLElement | null = document.querySelector('html');
+    html?.setAttribute('data-theme', settingsStore.theme);
+  })
 
   return (
     <div class={styles.landing}>
