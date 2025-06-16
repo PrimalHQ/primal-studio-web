@@ -16,9 +16,9 @@ import { readGraphSpan } from "src/utils/localStore";
 
 export type NotesStore = {
   notes: PrimalArticle[],
-  criteria: FeedCriteria,
   graphSpan: GraphSpan,
   tab: FeedEventState,
+  tabCriteriaOptions: Record<FeedEventState, FeedCriteria>,
   showReplies: boolean,
   offset: number,
   selected: string[],
@@ -30,9 +30,16 @@ export type NotesStore = {
 
 export const emptyNotesStore = (): NotesStore => ({
   notes: [],
-  criteria: 'score',
   graphSpan: defaultSpan(),
   tab: 'published',
+  tabCriteriaOptions: {
+    'published': 'latest',
+    'published-replied': 'latest',
+    'scheduled': 'oldest',
+    'inbox': 'latest',
+    'sent': 'latest',
+    'drafts': 'latest',
+  },
   showReplies: false,
   offset: 0,
   selected: [],

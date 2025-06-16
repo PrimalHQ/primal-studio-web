@@ -23,9 +23,9 @@ export const filterAndSortNotes = (notes: string[], paging: FeedRange) => {
 
 export type ArticlesStore = {
   articles: PrimalArticle[],
-  criteria: FeedCriteria,
   graphSpan: GraphSpan,
   tab: FeedEventState,
+  tabCriteriaOptions: Record<FeedEventState, FeedCriteria>,
   offset: number,
   selected: string[],
   feedTotals: FeedTotals,
@@ -36,9 +36,16 @@ export type ArticlesStore = {
 
 export const emptyHomeStore = (): ArticlesStore => ({
   articles: [],
-  criteria: 'score',
   graphSpan: defaultSpan(),
   tab: 'published',
+  tabCriteriaOptions: {
+    'published': 'latest',
+    'published-replied': 'latest',
+    'scheduled': 'oldest',
+    'inbox': 'latest',
+    'sent': 'latest',
+    'drafts': 'latest',
+  },
   offset: 0,
   selected: [],
   showApproveDialog: false,

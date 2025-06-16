@@ -84,7 +84,7 @@ const Notes: Component = () => {
         until,
         offset,
         limit: 30,
-        criteria: notesStore.criteria,
+        criteria: notesStore.tabCriteriaOptions[notesStore.tab],
         state: notesStore.tab,
         showReplies: notesStore.showReplies,
       },
@@ -108,7 +108,7 @@ const Notes: Component = () => {
         until,
         limit: 30,
         offset: 0,
-        criteria: criteria || notesStore.criteria,
+        criteria: criteria || notesStore.tabCriteriaOptions[notesStore.tab],
         state: state || notesStore.tab,
         showReplies: showReplies || notesStore.showReplies,
       },
@@ -132,7 +132,7 @@ const Notes: Component = () => {
     })
   );
 
-  createEffect(on(() => notesStore.criteria, (criteria, prev) => {
+  createEffect(on(() => notesStore.tabCriteriaOptions[notesStore.tab], (criteria, prev) => {
     if (!prev || criteria === prev) return;
     const { since, until } = notesStore.graphSpan;
 
@@ -216,9 +216,9 @@ const Notes: Component = () => {
 
             <SelectBox
               prefix="Sort by:"
-              value={headerSortOptions(notesStore.tab).find(o => o.value === notesStore.criteria) || headerSortOptions(notesStore.tab)[0]}
+              value={headerSortOptions(notesStore.tab).find(o => o.value === notesStore.tabCriteriaOptions[notesStore.tab]) || headerSortOptions(notesStore.tab)[0]}
               options={headerSortOptions(notesStore.tab)}
-              onChange={(option) => setNotesStore('criteria', (option?.value || 'score') as FeedCriteria)}
+              onChange={(option) => setNotesStore('tabCriteriaOptions', notesStore.tab, (option?.value || 'score') as FeedCriteria)}
             />
           </div>
         </div>

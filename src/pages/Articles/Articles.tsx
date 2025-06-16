@@ -84,7 +84,7 @@ const Articles: Component = () => {
         until,
         offset,
         limit: 30,
-        criteria: articlesStore.criteria,
+        criteria: articlesStore.tabCriteriaOptions[articlesStore.tab],
       },
     );
   };
@@ -106,7 +106,7 @@ const Articles: Component = () => {
         until,
         limit: 30,
         offset: 0,
-        criteria: articlesStore.criteria,
+        criteria: articlesStore.tabCriteriaOptions[articlesStore.tab],
       },
     );
   }
@@ -127,7 +127,7 @@ const Articles: Component = () => {
     })
   );
 
-  createEffect(on(() => articlesStore.criteria, (criteria, prev) => {
+  createEffect(on(() => articlesStore.tabCriteriaOptions[articlesStore.tab], (criteria, prev) => {
     if (!prev || criteria === prev) return;
     const { since, until } = articlesStore.graphSpan;
 
@@ -197,11 +197,11 @@ const Articles: Component = () => {
           <SelectBox
             prefix="Sort by:"
             value={
-              headerSortOptions(articlesStore.tab).find(o => o.value === articlesStore.criteria) ||
+              headerSortOptions(articlesStore.tab).find(o => o.value === articlesStore.tabCriteriaOptions[articlesStore.tab]) ||
               headerSortOptions(articlesStore.tab)[0]
             }
             options={headerSortOptions(articlesStore.tab)}
-            onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
+            onChange={(option) => setArticlesStore('tabCriteriaOptions', articlesStore.tab, (option?.value || 'score') as FeedCriteria)}
           />
         </div>
         <Show when={['sent', 'inbox', 'scheduled'].includes(articlesStore.tab) && !pageStore.articles.isFetching}>

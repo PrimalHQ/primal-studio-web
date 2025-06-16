@@ -475,7 +475,8 @@ export const getNoteInPage = (
   const note = pageNote.kind === Kind.Repost ? parseRepost(pageNote) : pageNote;
 
   // if this is a repost extract repost info
-  const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
+  // const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
+  const repost = undefined; // This is not needed
 
   const author = getUserInPage(page, note.pubkey!);
   const stat = page.noteStats[note.id];
