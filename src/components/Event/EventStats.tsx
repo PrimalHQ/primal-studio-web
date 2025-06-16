@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import { PrimalArticle, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';

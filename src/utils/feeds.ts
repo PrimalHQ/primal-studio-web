@@ -67,6 +67,21 @@ export const emptyStats = () => ({
   media_count: 0,
 });
 
+export const emptyStudioStats = () => ({
+  satszapped: 0,
+  score: 0,
+  sentiment: 'neutral',
+  zaps: 0,
+  quotes: 0,
+  replies: 0,
+  reposts: 0,
+  bookmarks: 0,
+  reactions: 0,
+  replies_long: 0,
+  replies_short: 0,
+  replies_medium: 0,
+});
+
 export const emptyEventFeedPage: () => EventFeedPage = () => ({
   eventIds: [],
   users: {},
@@ -465,7 +480,7 @@ export const getNoteInPage = (
   const author = getUserInPage(page, note.pubkey!);
   const stat = page.noteStats[note.id];
   const topZaps = page.topZaps[note.id] || [];
-  const studioStats = page.studioNoteStats[note.id];
+  const studioStats = page.studioNoteStats[note.id] || emptyStudioStats();
 
   const tags = note.tags || [];
   const replyTo = extractReplyToFromTags(tags);
@@ -559,7 +574,7 @@ export const getArticleInPage = (
   const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
   const author = getUserInPage(page, read.pubkey!);
   const stat = page.noteStats[read.id];
-  const studioStats = page.studioNoteStats[coordinate];
+  const studioStats = page.studioNoteStats[coordinate] || emptyStudioStats();
   const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
   const wordCount = (page.wordCount || {})[read.id] || 0;
   const tags = read.tags || [];
