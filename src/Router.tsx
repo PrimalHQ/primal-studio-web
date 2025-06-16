@@ -7,7 +7,10 @@ import { preloadHome } from './pages/Home/Home.data';
 import { preloadArticles } from './pages/Articles/Articles.data';
 import { preloadMedia } from './pages/Media/Media.data';
 
+import Landing from './pages/Landing/Landing';
+
 const AppRouter: Component = () => {
+
 
   const AppLayout = lazy(() => import('./pages/AppLayout/AppLayout'));
 
@@ -38,7 +41,8 @@ const AppRouter: Component = () => {
 
   return (
     <Router root={AppLayout} preload={true}>
-      <Route path="/:pubkey?" component={Home} preload={homePreload} />
+      <Route path="/" component={Landing} />
+      <Route path="/home/:pubkey?" component={Home} preload={homePreload} />
       <Route path="/notes/:pubkey?" component={Notes} preload={notesPreload}/>
       <Route path="/articles/:pubkey?" component={Articles} preload={articlesPreload} />
       <Route path="/media/:pubkey?" component={Media} preload={mediaPreload} />
