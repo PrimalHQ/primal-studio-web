@@ -12,6 +12,8 @@ import { scheduleArticle, sendArticle } from 'src/primal_api/nostr';
 import { deleteFromInbox } from 'src/primal_api/studio';
 import { unwrap } from 'solid-js/store';
 import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
+import { removeEventFromPageStore } from 'src/stores/PageStore';
+import { articlesStore, fetchFeedTotals } from 'src/pages/Articles/Articles.data';
 
 
 const ReadsApproveDialog: Component<{
@@ -62,7 +64,19 @@ const ReadsApproveDialog: Component<{
       }
     }
 
-    deleteFromInbox(deletedDrafts);
+    await deleteFromInbox(deletedDrafts);
+
+    for (let i=0; i<deletedDrafts.length;i++) {
+      const id = deletedDrafts[i];
+      removeEventFromPageStore(id, 'drafts');
+    }
+
+    fetchFeedTotals(accountStore.pubkey, {
+      since: articlesStore.graphSpan.since,
+      until: articlesStore.graphSpan.until,
+      kind: 'articles',
+    });
+
     props.setOpen && props.setOpen(false);
     return;
   };

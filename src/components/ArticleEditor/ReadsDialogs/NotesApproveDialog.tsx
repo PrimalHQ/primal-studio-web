@@ -12,6 +12,8 @@ import { scheduleArticle, scheduleNote, sendArticle, sendNote } from 'src/primal
 import { deleteFromInbox } from 'src/primal_api/studio';
 import { unwrap } from 'solid-js/store';
 import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
+import { removeEventFromPageStore } from 'src/stores/PageStore';
+import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
 
 
 const NotesApproveDialog: Component<{
@@ -58,7 +60,19 @@ const NotesApproveDialog: Component<{
       }
     }
 
-    deleteFromInbox(deletedDrafts);
+    await deleteFromInbox(deletedDrafts);
+
+    for (let i=0; i<deletedDrafts.length;i++) {
+      const id = deletedDrafts[i];
+      removeEventFromPageStore(id, 'drafts');
+    }
+
+    fetchFeedTotals(accountStore.pubkey, {
+      since: notesStore.graphSpan.since,
+      until: notesStore.graphSpan.until,
+      kind: 'notes',
+    });
+
     props.setOpen && props.setOpen(false);
     return;
   };
