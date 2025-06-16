@@ -223,7 +223,7 @@ const Notes: Component = () => {
           </div>
         </div>
 
-        <Show when={['sent', 'inbox'].includes(notesStore.tab) && !pageStore.notes.isFetching}>
+        <Show when={['sent', 'inbox', 'scheduled'].includes(notesStore.tab) && !pageStore.notes.isFetching}>
           <div class={styles.bulkControls}>
             <button
               class={styles.bulkControlButton}
@@ -247,7 +247,7 @@ const Notes: Component = () => {
             <button
               class={styles.bulkControlButton}
               disabled={notesStore.selected.length === 0}
-              onClick={() => deleteSelected('drafts')}
+              onClick={() => deleteSelected(notesStore.tab === 'scheduled' ? 'notes' : 'drafts')}
             >
               Delete Selected
             </button>
@@ -421,6 +421,11 @@ const Notes: Component = () => {
                               });
                             }}
                           >
+                            <CheckBox
+                              checked={notesStore.selected.includes(note!.id)}
+                              onChange={(v) => toggleSelected(note!.id, v)}
+                              label=""
+                            />
                             <NotePreview
                               id={e}
                               note={note!}

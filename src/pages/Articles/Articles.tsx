@@ -31,6 +31,7 @@ import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs
 import { unwrap } from 'solid-js/store';
 import { scheduleArticle } from 'src/primal_api/nostr';
 import { storeGraphSpan } from 'src/utils/localStore';
+import CheckBox from 'src/components/CheckBox/CheckBox';
 
 const Articles: Component = () => {
   const params = useParams();
@@ -203,7 +204,7 @@ const Articles: Component = () => {
             onChange={(option) => setArticlesStore('criteria', (option?.value || 'score') as FeedCriteria)}
           />
         </div>
-        <Show when={['sent', 'inbox'].includes(articlesStore.tab) && !pageStore.articles.isFetching}>
+        <Show when={['sent', 'inbox', 'scheduled'].includes(articlesStore.tab) && !pageStore.articles.isFetching}>
           <div class={styles.bulkControls}>
             <button
               class={styles.bulkControlButton}
@@ -233,7 +234,9 @@ const Articles: Component = () => {
             <button
               class={styles.bulkControlButton}
               disabled={articlesStore.selected.length === 0}
-              onClick={() => deleteSelected('drafts')}
+              onClick={() =>
+                deleteSelected(articlesStore.tab === 'scheduled' ? 'reads' : 'drafts')
+              }
             >
               Delete Selected
             </button>
@@ -397,6 +400,11 @@ const Articles: Component = () => {
                               });
                             }}
                           >
+                            <CheckBox
+                              checked={articlesStore.selected.includes(article!.id)}
+                              onChange={(v) => toggleSelected(article!.id, v)}
+                              label=""
+                            />
                             <ArticlePreview
                               article={article!}
                               hideTime={true}

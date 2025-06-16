@@ -4,7 +4,7 @@ import { FeedRange, PrimalArticle, PrimalDraft } from "../../primal";
 import { Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { deleteFromInbox, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
+import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortReads } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore } from "../Home/Home.data";
@@ -100,6 +100,9 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
 
       if (articlesStore.tab === 'inbox') {
         await deleteFromInbox(selectedIds);
+      }
+      else if (articlesStore.tab === 'scheduled') {
+        await deleteScheduled(selectedIds)
       }
       else {
         let promisses: Promise<boolean>[] = []

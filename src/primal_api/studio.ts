@@ -833,7 +833,7 @@ export const deleteFromInbox = async (ids: string[]) => {
         resolve({ success: true, note: signedNote });
       },
       onNotice: () => {
-        resolve( {success: false, note: signedNote, reasons: ['failed_to_schedule']});
+        resolve( {success: false, note: signedNote, reasons: ['failed_to_delete_from_inbox']});
       }
     })
   });
@@ -884,6 +884,50 @@ export const getScheduledEvents = async (ids: string[]) => {
     })
   })
 };
+
+export const deleteScheduled = async (ids: string[]) => {
+  // {"op":"import_scheduled", "event": {...}}
+
+  const subId = `delete_scheduled_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: 'delete_scheduled',
+      event_ids: ids,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<SendNoteResult>((resolve, reject) => {
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+      },
+      onEose: () => {
+        resolve({ success: true, note: signedNote });
+      },
+      onNotice: () => {
+        resolve( {success: false, note: signedNote, reasons: ['failed_to_delete_scheduled']});
+      }
+    })
+  });
+}
 
 export const getStatWeights = async (
 ) => {

@@ -3,7 +3,7 @@ import { pageStore, removeEventFromPageStore, updatePageStore } from "../../stor
 import { PrimalArticle, PrimalDraft, PrimalNote } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { deleteFromInbox, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
+import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore, } from "../Home/Home.data";
@@ -86,6 +86,9 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
 
       if (notesStore.tab === 'inbox') {
         await deleteFromInbox(selectedIds);
+      }
+      else if (notesStore.tab === 'scheduled') {
+        await deleteScheduled(selectedIds)
       }
       else {
         let promisses: Promise<boolean>[] = []
