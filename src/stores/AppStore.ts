@@ -21,6 +21,7 @@ export type AppStore = {
   scoreBrakdownEvent: PrimalNote | PrimalArticle | PrimalDraft | undefined,
   showNewNoteEditor: boolean,
   editNote: PrimalNote | undefined,
+  editNoteDraft: PrimalDraft | undefined,
   mediaUsageUrl: string | undefined,
 };
 
@@ -38,6 +39,7 @@ export const emptyAppStore = (): AppStore => ({
   scoreBrakdownEvent: undefined,
   showNewNoteEditor: false,
   editNote: undefined,
+  editNoteDraft: undefined,
   mediaUsageUrl: undefined,
 });
 
@@ -151,16 +153,18 @@ export const addVerifiedUsers = (newVU: Record<string, string>) => {
   }))
 }
 
-export const openEditNote = (note?: PrimalNote) => {
+export const openEditNote = (note?: PrimalNote, draft?: PrimalDraft) => {
   batch(() => {
-    updateAppStore('editNote', () => note)
+    updateAppStore('editNote', () => note);
+    updateAppStore('editNoteDraft', () => draft);
     updateAppStore('showNewNoteEditor', true);
   });
 }
 
 export const closeEditNote = () => {
   batch(() => {
-    updateAppStore('editNote', () => undefined)
+    updateAppStore('editNote', () => undefined);
+    updateAppStore('editNoteDraft', () => undefined);
     updateAppStore('showNewNoteEditor', false);
   });
 }

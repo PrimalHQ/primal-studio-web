@@ -24,7 +24,7 @@ import { NAddrExtension } from "../ArticleEditor/nAddrMention";
 import { NProfileExtension } from "../ArticleEditor/nProfileMention";
 import { NEventExtension } from "../ArticleEditor/nEventMention";
 import { createTiptapEditor } from 'solid-tiptap';
-import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
+import { PrimalArticle, PrimalDraft, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { accountStore, activeUser, saveEmoji } from 'src/stores/AccountStore';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
@@ -55,12 +55,15 @@ import EmojiPickPopover from '../EmojiPicker/EmojiPickPopover';
 import MediaEmbed from '../ArticleEditor/MediaEmbedExtension';
 import dayjs from 'dayjs';
 import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
+import { deleteFromInbox } from 'src/primal_api/studio';
+import { removeEventFromPageStore } from 'src/stores/PageStore';
 
 
 const NoteEditor: Component<{
   id?: string,
   onDone?: () => void,
   note?: PrimalNote,
+  draft?: PrimalDraft,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -78,13 +81,14 @@ const NoteEditor: Component<{
   const [showMention, setShowMention] = createSignal(false);
   const [showAttach, setShowAttach] = createSignal(false);
 
-
   const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
   const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
   const [editScheduled, setEditScheduled] = createSignal(false);
 
   const [showProposeDiaglog, setShowProposeDialog] = createSignal(false);
   const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
+
+  const [isInboxDraft, setIsInboxDraft] = createSignal(false);
 
   const addMentionToEditor = (user: PrimalUser | undefined, editor?: Editor) => {
     if (!editor || ! user) return;
@@ -460,6 +464,15 @@ const NoteEditor: Component<{
 
   }));
 
+
+  createEffect(on( () => props.draft, async (draft) => {
+    if (!draft) return;
+
+    const isMyDraft = accountStore.pubkey === draft.sender.pubkey;
+
+    setIsInboxDraft(!isMyDraft);
+  }));
+
   createEffect(on( editorMode, async (mode, prev) => {
     if (prev === undefined || mode === prev) return;
 
@@ -538,6 +551,14 @@ const NoteEditor: Component<{
         until: notesStore.graphSpan.until,
         kind: 'notes'
       });
+
+      const draft = props.draft;
+      if (draft && isInboxDraft()) {
+        await deleteFromInbox([draft.id]);
+
+        removeEventFromPageStore(draft.id, 'drafts');
+      }
+
       // if (lastDraft.length > 0) {
       //   sendDeleteEvent(
       //     user.pubkey,
@@ -574,6 +595,12 @@ const NoteEditor: Component<{
         kind: 'notes'
       });
 
+      const draft = props.draft;
+      if (draft && isInboxDraft()) {
+        await deleteFromInbox([draft.id]);
+
+        removeEventFromPageStore(draft.id, 'drafts');
+      }
       // if (lastDraft.length > 0) {
       //   sendDeleteEvent(
       //     user.pubkey,
@@ -613,6 +640,14 @@ const NoteEditor: Component<{
         until: notesStore.graphSpan.until,
         kind: 'notes'
       });
+
+      const draft = props.draft;
+      if (draft && isInboxDraft()) {
+        await deleteFromInbox([draft.id]);
+
+        removeEventFromPageStore(draft.id, 'drafts');
+      }
+
       props.onDone && props.onDone();
     }
 

@@ -341,7 +341,7 @@ const Notes: Component = () => {
                               draft={draft!}
                               onEdit={() => {
                                 const note = JSON.parse(draft!.plain) as PrimalNote;
-                                openEditNote(note);
+                                openEditNote(note, draft);
                               }}
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');

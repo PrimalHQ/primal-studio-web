@@ -89,6 +89,7 @@ const App: Component = () => {
             open={appStore.showNewNoteEditor}
             setOpen={(v) => v ? openEditNote() : closeEditNote()}
             note={appStore.editNote}
+            draft={appStore.editNoteDraft}
           />
 
           <MediaUsesDialog

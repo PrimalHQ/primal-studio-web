@@ -27,7 +27,7 @@ import ReadsPublishSuccessDialog from 'src/components/ArticleEditor/ReadsDialogs
 import DatePicker from '@rnwonder/solid-date-picker';
 import utils from '@rnwonder/solid-date-picker/utilities';
 import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
-import { getScheduledEvents } from 'src/primal_api/studio';
+import { deleteFromInbox, getScheduledEvents } from 'src/primal_api/studio';
 import ReadsProposeDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsProposeDialog';
 import Avatar from 'src/components/Avatar/Avatar';
 import { userName } from 'src/utils/profile';
@@ -39,6 +39,7 @@ import ArticlePhoneReviewPreview from 'src/components/Event/ArticlePhoneReviewPr
 import ArticleSidebarReviewPreview from 'src/components/Event/ArticleSidebarReviewPreview';
 import StickySidebar from 'src/components/StickySidebar/StickySidebar';
 import ArticleEditorPreview from 'src/components/ArticleEditor/ArticleEditorPreview';
+import { removeEventFromPageStore } from 'src/stores/PageStore';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -67,6 +68,7 @@ const ReadsEditor: Component = () => {
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
+  const [isInboxDraft, setIsInboxDraft] = createSignal(false);
 
   const [showPublishSucess, setShowPublishSucess] = createSignal(false);
 
@@ -240,9 +242,14 @@ const ReadsEditor: Component = () => {
 
       if (!draft) return;
 
-      const pubkey = accountStore.pubkey === draft.sender.pubkey ?
-        draft.receiver.pubkey :
-        draft.sender.pubkey;
+      const isMyDraft = accountStore.pubkey === draft.sender.pubkey;
+
+      let pubkey = draft.receiver.pubkey;
+
+      if (!isMyDraft) {
+        pubkey = draft.sender.pubkey;
+        setIsInboxDraft(true);
+      }
 
       const rJson = await decrypt44(pubkey, draft.content);
 
@@ -329,7 +336,13 @@ const ReadsEditor: Component = () => {
           lastDraft,
           Kind.Draft,
         );
+
+        if (isInboxDraft()) {
+          await deleteFromInbox([lastDraft]);
+          removeEventFromPageStore(lastDraft, 'drafts');
+        }
       }
+
 
       setShowPublishArticle(false);
       navigate('/articles')
@@ -396,6 +409,11 @@ const ReadsEditor: Component = () => {
           lastDraft,
           Kind.Draft,
         );
+
+        if (isInboxDraft()) {
+          await deleteFromInbox([lastDraft]);
+          removeEventFromPageStore(lastDraft, 'drafts');
+        }
       }
 
       setShowPublishSucess(() => true);
@@ -513,6 +531,11 @@ const ReadsEditor: Component = () => {
           lastDraft,
           Kind.Draft,
         );
+
+        if (isInboxDraft()) {
+          await deleteFromInbox([lastDraft]);
+          removeEventFromPageStore(lastDraft, 'drafts');
+        }
       }
     }
     else {
