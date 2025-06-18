@@ -24,7 +24,7 @@ const PricingCardTeam: Component<{
       <div class={styles.features}>
         <div class={styles.featureItem}>
           <div class={styles.checkIcon}></div>
-          <div class={styles.label}>5 users <button class={styles.changeUsers} onClick={() => {}}>change</button></div>
+          <div class={styles.label}>5 users</div>
         </div>
         <div class={styles.featureItem}>
           <div class={styles.checkIcon}></div>
