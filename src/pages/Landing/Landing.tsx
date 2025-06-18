@@ -18,6 +18,7 @@ import SignInDialog from './SignInDialog';
 import PrimalProFAQ from './PrimalProFAQ';
 
 import { isIPhone, isAndroid } from '@kobalte/utils';
+import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { useBeforeLeave } from '@solidjs/router';
 import { settingsStore } from 'src/stores/SettingsStore';
 
@@ -61,24 +62,59 @@ const Landing: Component = () => {
               Get Started
             </button>
 
-            <div class={styles.dropdown}>
-              <input type="checkbox" id="dropdownToggle" class={styles.dropdownCheckbox} />
-              <label for="dropdownToggle" class={styles.dropdownToggle}>
-                <img src={menuImage} />
-              </label>
-              <div class={styles.dropdownContent}>
-                <button
-                  onClick={() => setShowSignIn(true)}
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => setShowGetStarted(true)}
-                >
-                  Get Started
-                </button>
-              </div>
-            </div>
+            <Show when={isPhone()}>
+              <DropdownMenu gutter={30}>
+                <DropdownMenu.Trigger class={styles.dropdownToggle}>
+                  <img src={menuImage} />
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content class={styles.dropdownContent}>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#authoring_tools', '_self')}
+                    >
+                      Authoring Tools
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#media_managment', '_self')}
+                    >
+                      Media Managment
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#content_imports', '_self')}
+                    >
+                      Content Imports
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#smart_scheduling', '_self')}
+                    >
+                      Smart Scheduling
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#team_collaboration', '_self')}
+                    >
+                      Team Collaboration
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#content_analytics', '_self')}
+                    >
+                      Content Analytics
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      class={styles.dropdownItem}
+                      onSelect={() => window.open('#pricing', '_self')}
+                    >
+                      Pricing
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu>
+            </Show>
           </div>
         </div>
 
@@ -103,7 +139,7 @@ const Landing: Component = () => {
         </div>
       </div>
 
-      <section class={styles.authoringSection}>
+      <section class={styles.authoringSection} id="authoring_tools">
         <img src={authoringImage} />
         <div>
           <h3>
@@ -115,7 +151,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.mediaSection}>
+      <section class={styles.mediaSection} id="media_managment">
         <img src={mediaImage} />
         <div>
           <h3>
@@ -127,7 +163,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.importSection}>
+      <section class={styles.importSection} id="content_imports">
         <img src={importImage} />
         <div>
           <h3>
@@ -139,7 +175,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.schedulingSection}>
+      <section class={styles.schedulingSection} id="smart_scheduling">
         <img src={schedulingImage} />
         <div>
           <h3>
@@ -151,7 +187,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.teamSection}>
+      <section class={styles.teamSection} id="team_collaboration">
         <img src={teamImage} />
         <div>
           <h3>
@@ -163,7 +199,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.analyticsSection}>
+      <section class={styles.analyticsSection} id="content_analytics">
         <img src={analyticsImage} />
         <div>
           <h3>
@@ -175,7 +211,7 @@ const Landing: Component = () => {
         </div>
       </section>
 
-      <section class={styles.pricingSection}>
+      <section class={styles.pricingSection} id="pricing">
         <Show
           when={isPhone()}
           fallback={<img src={pricingImage} />}

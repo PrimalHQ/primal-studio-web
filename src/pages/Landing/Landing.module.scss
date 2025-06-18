@@ -266,80 +266,6 @@
     }
   }
 
-  .dropdown {
-    position: relative;
-    display: none;
-
-    @media only screen and (max-width: 720px) {
-      display: inline-block;
-    }
-  }
-
-  .dropdownToggle {
-    background: none;
-    padding: 0;
-    margin: 0;
-    border: none;
-    outline: none;
-  }
-
-  .dropdownToggle:hover {
-  }
-
-  .dropdownToggle::after {
-  }
-
-  .dropdownContent {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: white;
-    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-    border-radius: 4px;
-    z-index: 1;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-  }
-
-  .dropdownContent button {
-    color: #333;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    width: 100%;
-    border-bottom: 1px solid #eee;
-    border-radius: 4px;
-    text-align: left;
-  }
-
-  .dropdownContent button:last-child {
-    border-bottom: none;
-  }
-
-  .dropdownContent button:hover {
-    background-color: #f1f1f1;
-  }
-
-  /* The magic happens here - using checkbox hack */
-  .dropdownCheckbox {
-    display: none;
-  }
-
-  .dropdownCheckbox:checked + .dropdownToggle::after {
-    transform: rotate(180deg);
-  }
-
-  .dropdownCheckbox:checked ~ .dropdownContent {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
   .introCopy {
     display: flex;
     flex-direction: column;
@@ -695,4 +621,37 @@
       width: calc(100dvw - 24px);
     }
   }
+}
+
+// PHONE MENU ----------------------------------
+
+.dropdownToggle {
+  background: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+}
+
+.dropdownContent {
+  background-color: white;
+  width: 100dvw;
+  margin-left: -8px;
+}
+
+.dropdownItem {
+  color: #000;
+  font-family: Nacelle;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 111.111% */
+
+  display: flex;
+  width: calc(100% - 32px);
+  padding: 13px 16px;
+  align-items: center;
+  flex-shrink: 0;
+
+  border-bottom: 1px solid #969696;
 }
