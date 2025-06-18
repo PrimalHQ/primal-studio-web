@@ -30,6 +30,7 @@
     width: 100%;
     flex-wrap: wrap;
 
+
     >div {
       display: flex;
       flex-direction: column;
@@ -103,9 +104,16 @@
     section {
       padding-top: 30px;
       padding-bottom: 30px;
+      gap: 8px;
 
       img {
         width: calc(100dvw - 40px);
+      }
+
+      &.importSection {
+        img {
+          margin-bottom: 12px;
+        }
       }
 
       >div {
@@ -173,7 +181,10 @@
   }
 
   .logo {
-
+    @media only screen and (max-width: 720px) {
+      width: 156px;
+      height: 40px;
+    }
   }
 
   .headerActions {
@@ -526,7 +537,7 @@
   }
 
   @media only screen and (max-width: 720px) {
-    width: calc(100dvw - 24px);
+    width: 100%;
     padding-left: 8px;
   }
 }
@@ -607,7 +618,7 @@
   }
 
   @media only screen and (max-width: 720px) {
-    width: calc(100dvw - 24px);
+    width: 100%;
     padding-left: 8px;
   }
 }

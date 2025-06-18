@@ -438,8 +438,12 @@
 
   @media only screen and (max-width: 720px) {
     .dialogContent {
-      width: 100dvw;
-      padding-inline: 4px;
+      width: calc(100dvw - 24px);
+      padding-inline: 8px;
+    }
+
+    .dialogHeader, .dialogDescription {
+      padding-inline: 8px;
     }
   }
 }
