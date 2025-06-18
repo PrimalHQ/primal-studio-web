@@ -9,8 +9,6 @@ import importImage from 'src/assets/images/landing/import_image.png';
 import intorImage from 'src/assets/images/landing/main_visual_1.png';
 import mediaImage from 'src/assets/images/landing/media_image.png';
 import menuImage from 'src/assets/images/landing/menu.svg';
-import pricingImage from 'src/assets/images/landing/pricing_image.png';
-import pricingImagePhone from 'src/assets/images/landing/pricing_image_phone.png';
 import schedulingImage from 'src/assets/images/landing/scheduling_image.png';
 import teamImage from 'src/assets/images/landing/team_image.png';
 import GetStartedDialog from './GetStartedDialog';
@@ -21,6 +19,8 @@ import { isIPhone, isAndroid } from '@kobalte/utils';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { useBeforeLeave } from '@solidjs/router';
 import { settingsStore } from 'src/stores/SettingsStore';
+import PricingCardPro from './PricingCardPro';
+import PricingCardTeam from './PricingCardTeam';
 
 const Landing: Component = () => {
 
@@ -212,16 +212,22 @@ const Landing: Component = () => {
       </section>
 
       <section class={styles.pricingSection} id="pricing">
-        <Show
-          when={isPhone()}
-          fallback={<img src={pricingImage} />}
-        >
-          <img src={pricingImagePhone}/>
-        </Show>
-        <div>
-          <h3>
+        <Show when={isPhone()}>
+          <h3 class={styles.phonePricing}>
             Pricing
           </h3>
+        </Show>
+
+        <div class={styles.pricingCards}>
+          <PricingCardPro />
+          <PricingCardTeam />
+        </div>
+        <div>
+          <Show when={!isPhone()}>
+            <h3>
+              Pricing
+            </h3>
+          </Show>
 
           <div class={styles.description}>
             <p>

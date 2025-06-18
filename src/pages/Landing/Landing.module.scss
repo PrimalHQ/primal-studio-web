@@ -370,6 +370,32 @@
   .pricingSection {
     background: linear-gradient(100deg, rgba(228, 124, 0, 0.00) 44.34%, rgba(228, 124, 0, 0.30) 115.91%), linear-gradient(0deg, #000 0%, #000 100%), linear-gradient(101deg, #E47C00 -1.7%, #FA3C3C 28.09%, #FA3C3C 77.47%, #BC1870 102.66%), #FFF;
 
+    h3.phonePricing {
+      color: #FFF;
+      font-family: Nacelle;
+      font-size: 28px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 40px; /* 142.857% */
+      letter-spacing: -0.56px;
+      text-align: left;
+      width: calc(100dvw - 20px);
+      max-width: 340px;
+    }
+
+    .pricingCards {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      width: 748px;
+
+      @media only screen and (max-width: 720px) {
+        width: calc(100dvw - 20px);
+        max-width: 340px;
+        flex-direction: column;
+      }
+    }
+
     button {
       color: #E47C00;
       font-family: Nacelle;
@@ -654,4 +680,197 @@
   flex-shrink: 0;
 
   border-bottom: 1px solid #969696;
+}
+
+// PRICING CARD --------------------------------
+
+.pricingCard {
+  display: flex;
+  // width: 320px;
+  // min-height: 416px;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+
+  border-radius: 16px;
+  background: #222;
+
+  // margin-top: auto;
+
+  .title {
+    color: #FFF;
+    font-family: Nacelle;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px; /* 100% */
+
+    >span {
+      color: #E47C00;
+      font-family: Nacelle;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 24px;
+    }
+  }
+
+  .price {
+    .monthly {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+
+      color: #FFF;
+      font-family: Nacelle;
+      font-size: 52px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 52px; /* 100% */
+
+      >span {
+        color: #FFF;
+        font-family: Nacelle;
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 32px; /* 133.333% */
+      }
+    }
+
+    .anual {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      color: rgba(255, 255, 255, 0.70);
+      font-family: Nacelle;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 20px; /* 125% */
+
+      >span {
+        color: #FFF;
+        font-family: Nacelle;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 20px; /* 142.857% */
+
+        display: flex;
+        padding: 1px 6px;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        border-radius: 99px;
+        background: rgba(228, 124, 0, 0.40);
+        width: fit-content;
+      }
+    }
+  }
+
+  .features {
+    display: flex;
+    padding-bottom: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+
+    .featureItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+
+      .label {
+        color: rgba(255, 255, 255, 0.70);
+        font-family: Nacelle;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 26px; /* 144.444% */
+
+        >span {
+          color: rgba(255, 255, 255, 0.30);
+          font-family: Nacelle;
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 26px;
+        }
+
+        button.changeUsers {
+          color: #E47C00;
+          font-family: Nacelle;
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 26px;
+        }
+      }
+    }
+
+  }
+
+  button.buyButton {
+    display: flex;
+    padding: 14px 62px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    border-radius: 36px;
+    background: #E47C00;
+
+    color: #FFF;
+    text-align: center;
+    font-family: Nacelle;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 100% */
+    letter-spacing: 0.4px;
+  }
+
+  @media only screen and (max-width: 720px) {
+
+    .price {
+      .anual {
+        font-size: 15px;
+
+        >span {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .features {
+      .featureItem {
+        .label {
+          font-size: 16px;
+
+          >span {
+            font-size: 16px;
+          }
+
+          button.changeUsers {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+.checkIcon {
+  width: 16px;
+  height: 16px;
+
+  background-color: rgba(255, 255, 255, 0.70);
+  -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
 }
