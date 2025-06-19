@@ -75,8 +75,10 @@ export const emptyStudioStats = () => ({
   quotes: 0,
   replies: 0,
   reposts: 0,
+  likes: 0,
   bookmarks: 0,
   reactions: 0,
+  mentions: 0,
   replies_long: 0,
   replies_short: 0,
   replies_medium: 0,
@@ -574,7 +576,7 @@ export const getArticleInPage = (
 
   const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
   const author = getUserInPage(page, read.pubkey!);
-  const stat = page.noteStats[read.id];
+  const stat = page.noteStats[read.id] || emptyStudioStats();
   const studioStats = page.studioNoteStats[coordinate] || emptyStudioStats();
   const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
   const wordCount = (page.wordCount || {})[read.id] || 0;
