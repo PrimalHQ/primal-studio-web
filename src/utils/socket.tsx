@@ -266,22 +266,43 @@ export type PrimalAPIConfig = {
   onEvent?: (content: NostrEventContent) => void,
   onEose?: () => void,
   onNotice?: () => void,
+  socket?: WebSocket,
 };
 
 export const primalAPI = (config: PrimalAPIConfig
 ) => {
-  const unsub = subsTo(config.subId, {
-    onEvent: (_, content) => {
-      config.onEvent && config.onEvent(content);
-    },
-    onEose: () => {
-      config.onEose && config.onEose();
-      unsub();
-    },
-    onNotice: () => {
-      config.onNotice && config.onNotice();
-    }
-  });
+  const unsub = config.socket ?
+    subTo(config.socket, config.subId, (type,_, content) => {
+
+      if (type === 'EVENT') {
+        if (!content) return;
+        config.onEvent && config.onEvent(content);
+        return;
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+        config.onEose && config.onEose();
+        return;
+      }
+
+      if (type === 'NOTICE') {
+        config.onNotice && config.onNotice();
+        return;
+      }
+    }) :
+    subsTo(config.subId, {
+      onEvent: (_, content) => {
+        config.onEvent && config.onEvent(content);
+      },
+      onEose: () => {
+        config.onEose && config.onEose();
+        unsub();
+      },
+      onNotice: () => {
+        config.onNotice && config.onNotice();
+      }
+    });
 
   config.action();
 }

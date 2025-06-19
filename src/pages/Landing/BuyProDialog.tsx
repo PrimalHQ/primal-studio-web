@@ -1,12 +1,11 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 import Dialog from 'src/components/Dialogs/Dialog';
 
-import branding from 'src/assets/images/primal_studio_dark.svg';
-import { useNavigate } from '@solidjs/router';
+import brandingDark from 'src/assets/images/primal_studio_dark.svg';
+import brandingLight from 'src/assets/images/primal_studio_light.svg';
 
-import { isIPhone, isAndroid } from '@kobalte/utils';
 import { RadioGroup } from '@kobalte/core/radio-group';
 
 const BuyProDialog: Component<{
@@ -14,16 +13,27 @@ const BuyProDialog: Component<{
   open: boolean,
   setOpen?: (v: boolean) => void,
 }> = (props) => {
-  const navigate = useNavigate();
 
   const [selection, setSelection] = createSignal('https://buy.stripe.com/eVqeVd7W31c25pJ9dV28801');
+  const [branding, setBranding] = createSignal(brandingDark);
+
+  createEffect(() => {
+    if (!props.open) return;
+
+    const html: HTMLElement | null = document.querySelector('html');
+    const theme = html?.getAttribute('data-theme');
+
+    const brand = theme === 'studio_dark' ? brandingDark : brandingLight;
+
+    setBranding(brand);
+  })
 
   return (
     <Dialog
       triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
-      title={<img src={branding} width={140} height={34} />}
+      title={<img src={branding()} width={140} height={34} />}
     >
       <div class={styles.buyProDialog}>
         <div class={styles.message}>

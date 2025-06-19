@@ -14,8 +14,10 @@ import { areUrlsSame } from "src/utils/blossom";
 import { getDefaultBlossomServers } from "src/primal_api/settings";
 import { sendBlossomEvent } from "src/primal_api/relays";
 import { parseUserMetadata } from "src/utils/profile";
-import { getMembershipStatus } from "src/primal_api/membership";
+import { getMembershipStatus, getPremiumStatus } from "src/primal_api/membership";
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
+import { createEffect } from "solid-js";
+import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -31,6 +33,13 @@ export type MembershipStatus = {
   primal_vip_profile?: string,
   used_storage?: number,
   expires_on?: number,
+
+  cohort_1?: string,
+  cohort_2?: string,
+  recurring?: boolean,
+  renews_on?: number | null,
+  edited_shoutout?: string,
+  donated_btc?: string,
 };
 
 export type AccountStore = {
@@ -41,7 +50,9 @@ export type AccountStore = {
   recomendedBlossomServers: string[],
   accountIsReady: boolean,
   membershipStatus: MembershipStatus,
+  premiumStatus: MembershipStatus,
   emojiHistory: EmojiOption[],
+  licenseStatus: LicenseStatus,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -52,10 +63,30 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   recomendedBlossomServers: [],
   accountIsReady: false,
   membershipStatus: {},
+  premiumStatus: {},
   emojiHistory: [],
+  licenseStatus: {
+    first_access: false,
+    trial_remaining_sec: 0,
+    licensed: false,
+    valid_until: null,
+  }
 });
 
 let extensionAttempt = 0;
+
+createEffect(() => {
+  if (accountStore.accountIsReady) {
+    loadLicenseStatus();
+    checkMembershipStatus();
+  }
+})
+
+const loadLicenseStatus = async () => {
+  const status = await getLicenceStatus();
+
+  updateAccountStore('licenseStatus', () => ({ ...status }));
+}
 
 const logout = () => {
   updateAccountStore('sec', () => undefined);
@@ -82,7 +113,6 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     if (pubkey !== accountStore.pubkey || force) {
       updateAccountStore('pubkey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
-      checkMembershipStatus();
     }
 
     updateAccountStore('accountIsReady', () => true);
@@ -306,29 +336,58 @@ export const checkMembershipStatus = () => {
   openMembershipSocket((memSocket) => {
     if (!memSocket || memSocket.readyState !== WebSocket.OPEN) return;
 
-    const subId = `ps_${APP_ID}`;
+    const subIdMemStatus = `member_status_${APP_ID}`;
 
-    let gotEvent = false;
+    let gotMemStatusEvent = false;
 
-    const unsub = subTo(memSocket, subId, (type, _, content) => {
+    const unsubMemStatus = subTo(memSocket, subIdMemStatus, (type, _, content) => {
       if (type === 'EVENT') {
         const status: MembershipStatus = JSON.parse(content?.content || '{}');
 
-        gotEvent = true;
+        gotMemStatusEvent = true;
         updateAccountStore('membershipStatus', () => ({ ...status }));
       }
 
       if (type === 'EOSE') {
-        unsub();
-        memSocket?.close();
+        unsubMemStatus();
+        if (gotMemStatusEvent && gotPremStatusEvent) {
+          memSocket?.close();
+        }
 
-        if (!gotEvent) {
+        if (!gotMemStatusEvent) {
           updateAccountStore('membershipStatus', () => ({ tier: 'none' }));
         }
       }
     });
 
-    getMembershipStatus(accountStore.pubkey, subId, memSocket);
+    getMembershipStatus(accountStore.pubkey, subIdMemStatus, memSocket);
+
+    const subIdPremStatus = `premium_status_${APP_ID}`;
+
+    let gotPremStatusEvent = false;
+
+    const unsubPremStatus = subTo(memSocket, subIdPremStatus, (type, _, content) => {
+      if (type === 'EVENT') {
+        const status: MembershipStatus = JSON.parse(content?.content || '{}');
+
+        gotPremStatusEvent = true;
+        updateAccountStore('premiumStatus', () => ({ ...status }));
+      }
+
+      if (type === 'EOSE') {
+        unsubPremStatus();
+        if (gotMemStatusEvent && gotPremStatusEvent) {
+          memSocket?.close();
+        }
+
+        if (!gotPremStatusEvent) {
+          updateAccountStore('premiumStatus', () => ({ tier: 'none' }));
+        }
+      }
+    });
+
+    getPremiumStatus(accountStore.pubkey, subIdPremStatus, memSocket);
+
   });
 };
 
@@ -352,3 +411,7 @@ export const saveEmoji = (emoji: EmojiOption) => {
 export const loadEmojiHistoryFromLocalStore = () => {
   updateAccountStore('emojiHistory', () => readEmojiHistory(accountStore.pubkey));
 }
+function checkPremiumStatus() {
+  throw new Error("Function not implemented.");
+}
+

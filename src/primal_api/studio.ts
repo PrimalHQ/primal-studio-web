@@ -1034,3 +1034,67 @@ export const getMediaUses = async (
     });
   });
 }
+
+export type LicenseStatus = {
+  first_access: boolean,
+  trial_remaining_sec: number,
+  valid_until: number | null,
+  licensed: boolean,
+}
+
+export const getLicenceStatus = async () => {
+  const subId = `license_status_${APP_ID}`;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      op: `license_status`,
+    }),
+  };
+
+  const signedNote = await signEvent(event);
+
+  return new Promise<LicenseStatus>((resolve, reject) => {
+
+    let status: LicenseStatus = {
+      first_access: false,
+      trial_remaining_sec: 0,
+      licensed: false,
+      valid_until: null,
+    }
+
+    primalAPI({
+      subId,
+      action: () => {
+        sendMessage(JSON.stringify([
+          "REQ",
+          subId,
+          {cache: [
+            "studio_operation",
+            {
+              event_from_user: signedNote,
+            }
+          ]},
+        ]))
+      },
+      onEvent: (event) => {
+        if (event.kind !== Kind.StudioLicenseStatus) return;
+        const content = JSON.parse(event.content || '{}')
+
+        status = {
+          first_access: content.first_access || true,
+          trial_remaining_sec: content.trial_remaining_sec || 0,
+          licensed: content.licensed || false,
+        }
+      },
+      onEose: () => {
+        resolve(status);
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_top_events');
+      }
+    });
+  });
+}

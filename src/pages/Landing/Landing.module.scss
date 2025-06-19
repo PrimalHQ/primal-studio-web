@@ -653,7 +653,7 @@
   width: 527px;
 
   .message {
-    color: #AAA;
+    color: var(--text-secondary);
     font-family: Nacelle;
     font-size: 16px;
     font-style: normal;
@@ -669,7 +669,7 @@
     }
 
     a {
-      color: #E47C00;
+      color: var(--accent-pro);
       font-family: Nacelle;
       font-size: 16px;
       font-style: normal;
@@ -722,7 +722,7 @@
         }
 
         .radioLabel {
-          color: #AAA;
+          color: var(--text-secondary);
           font-family: Nacelle;
           font-size: 16px;
           font-style: normal;
@@ -730,7 +730,7 @@
           line-height: 23px;
 
           span {
-            color: #757575;
+            color: var(--text-tertiary);
             font-family: Nacelle;
             font-size: 16px;
             font-style: normal;
