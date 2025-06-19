@@ -10,6 +10,7 @@ import { isIPhone, isAndroid } from '@kobalte/utils';
 
 const PricingCardPro: Component<{
   id?: string,
+  onClick?: () => void,
 }> = (props) => {
   const navigate = useNavigate();
 
@@ -53,7 +54,7 @@ const PricingCardPro: Component<{
 
       <button
         class={styles.buyButton}
-        onClick={() => {}}
+        onClick={props.onClick}
       >
         Buy Now
       </button>

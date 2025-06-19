@@ -4,6 +4,7 @@ import styles from './Landing.module.scss';
 
 const PricingCardTeam: Component<{
   id?: string,
+  onClick?: () => void,
 }> = (props) => {
 
   return (
@@ -46,7 +47,7 @@ const PricingCardTeam: Component<{
 
       <button
         class={styles.buyButton}
-        onClick={() => {}}
+        onClick={props.onClick}
       >
         Buy Now
       </button>

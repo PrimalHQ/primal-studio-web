@@ -21,12 +21,16 @@ import { useBeforeLeave } from '@solidjs/router';
 import { settingsStore } from 'src/stores/SettingsStore';
 import PricingCardPro from './PricingCardPro';
 import PricingCardTeam from './PricingCardTeam';
+import BuyProDialog from './BuyProDialog';
+import BuyTeamDialog from './BuyTeamDialog';
 
 const Landing: Component = () => {
 
   const [showGetStarted, setShowGetStarted] = createSignal(false);
   const [showSignIn, setShowSignIn] = createSignal(false);
   const [showFAQ, setShowFAQ] = createSignal(false);
+  const [showBuyPro, setShowBuyPro] = createSignal(false);
+  const [showBuyTeam, setShowBuyTeam] = createSignal(false);
 
   const isPhone = () => {
     return isIPhone() || isAndroid() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
@@ -219,8 +223,8 @@ const Landing: Component = () => {
         </Show>
 
         <div class={styles.pricingCards}>
-          <PricingCardPro />
-          <PricingCardTeam />
+          <PricingCardPro onClick={() => setShowBuyPro(true)} />
+          <PricingCardTeam onClick={() => setShowBuyTeam(true)} />
         </div>
         <div>
           <Show when={!isPhone()}>
@@ -264,6 +268,16 @@ const Landing: Component = () => {
       <PrimalProFAQ
         open={showFAQ()}
         setOpen={setShowFAQ}
+      />
+
+      <BuyProDialog
+        open={showBuyPro()}
+        setOpen={setShowBuyPro}
+      />
+
+      <BuyTeamDialog
+        open={showBuyTeam()}
+        setOpen={setShowBuyTeam}
       />
 
     </div>

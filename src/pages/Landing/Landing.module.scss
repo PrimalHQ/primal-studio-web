@@ -649,6 +649,152 @@
   }
 }
 
+.buyProDialog {
+  width: 527px;
+
+  .message {
+    color: #AAA;
+    font-family: Nacelle;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 23px; /* 143.75% */
+
+    p, ul {
+      margin: 0;
+    }
+
+    ul {
+      padding-left: 24px;
+    }
+
+    a {
+      color: #E47C00;
+      font-family: Nacelle;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 23px;
+    }
+  }
+
+  .choices {
+    margin-top: 24px;
+
+    .radioGroup {
+      .radioItems {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .radio {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+        }
+        .radioControl {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 16px;
+          width: 16px;
+          border-radius: 10px;
+          border: 1px solid #D9D9D9;
+          background-color: #D9D9D9;
+        }
+        .radioInput:focus-visible + .radioControl {
+          outline: 2px solid hsl(200 98% 39%);
+          outline-offset: 2px;
+        }
+        .radioControl[data-checked] {
+          border-color: #D9D9D9;
+          background-color: #D9D9D9;
+        }
+        .radioControl[data-checked][data-invalid] {
+          border-color: hsl(0 72% 51%);
+          background-color: hsl(0 72% 51%);
+        }
+        .radioIndicator {
+          height: 10px;
+          width: 10px;
+          border-radius: 5px;
+          background-color: #E47C00;
+        }
+
+        .radioLabel {
+          color: #AAA;
+          font-family: Nacelle;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 23px;
+
+          span {
+            color: #757575;
+            font-family: Nacelle;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 23px;
+            white-space: nowrap;
+          }
+        }
+
+      }
+    }
+  }
+
+  .actions {
+    margin-top: 30px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .newToNostr {
+      color: #757575;
+      font-family: Nacelle;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 23px; /* 164.286% */
+
+      a {
+        color: #E47C00;
+        font-family: Nacelle;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 23px;
+        text-decoration: none;
+      }
+    }
+
+    button {
+      display: inline-flex;
+      padding: 9px 14px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: 36px;
+      background: #E47C00;
+      color: #FFF;
+      text-align: center;
+      font-family: Nacelle;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 18px; /* 112.5% */
+      letter-spacing: 0.32px;
+    }
+  }
+
+  @media only screen and (max-width: 720px) {
+    width: 100%;
+    padding-left: 8px;
+  }
+}
+
 // PHONE MENU ----------------------------------
 
 .dropdownToggle {
