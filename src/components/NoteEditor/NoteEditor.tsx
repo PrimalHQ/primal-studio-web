@@ -57,6 +57,8 @@ import dayjs from 'dayjs';
 import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
 import { deleteFromInbox } from 'src/primal_api/studio';
 import { removeEventFromPageStore } from 'src/stores/PageStore';
+import { doRequestDelete } from 'src/primal_api/events';
+import { Kind } from 'src/constants';
 
 
 const NoteEditor: Component<{
@@ -635,18 +637,25 @@ const NoteEditor: Component<{
       await sendNote(content, tags);
 
     if (success && note) {
+
+      const draft = props.draft;
+
+      if (draft) {
+
+        if (isInboxDraft()) {
+          await deleteFromInbox([draft.id]);
+        }
+
+        await doRequestDelete(accountStore.pubkey, draft.id, Kind.Draft);
+
+        removeEventFromPageStore(draft.id, 'drafts');
+      }
+
       fetchFeedTotals(accountStore.pubkey, {
         since: notesStore.graphSpan.since,
         until: notesStore.graphSpan.until,
         kind: 'notes'
       });
-
-      const draft = props.draft;
-      if (draft && isInboxDraft()) {
-        await deleteFromInbox([draft.id]);
-
-        removeEventFromPageStore(draft.id, 'drafts');
-      }
 
       props.onDone && props.onDone();
     }
