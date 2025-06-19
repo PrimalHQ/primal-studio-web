@@ -608,6 +608,10 @@
     justify-content: space-between;
     width: 100%;
 
+    &.rightAlign {
+      justify-content: flex-end;
+    }
+
     >button {
       min-width: 178px;
     }

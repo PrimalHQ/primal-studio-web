@@ -1084,9 +1084,10 @@ export const getLicenceStatus = async () => {
         const content = JSON.parse(event.content || '{}')
 
         status = {
-          first_access: content.first_access || true,
+          first_access: content.first_access || false,
           trial_remaining_sec: content.trial_remaining_sec || 0,
           licensed: content.licensed || false,
+          valid_until: content.valid_until || null,
         }
       },
       onEose: () => {

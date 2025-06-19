@@ -8,7 +8,7 @@ import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu, setMediaUsageUrl } from './stores/AppStore';
-import { accountStore } from './stores/AccountStore';
+import { accountStore, updateAccountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
 import { mediaStore } from './stores/MediaStore';
@@ -20,6 +20,9 @@ import MediaContextMenu from './components/NoteContextMenu/MediaContexMenu';
 import ContentScoreBreakdownDialog from './components/Dialogs/ContentScoreBreakdownDialog';
 import MediaUsesDialog from './pages/Media/MediaUsesDialog';
 import { Navigator, Route, Router } from "@solidjs/router";
+import FirstTimeDialog from './components/Dialogs/FirstTimeDialog';
+import BuyProDialog from './pages/Landing/BuyProDialog';
+import TrialExpiredDialog from './components/Dialogs/TrialExpiredDialog';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -105,6 +108,16 @@ const App: Component = () => {
             open={!!appStore.mediaUsageUrl}
             setOpen={v => !v && setMediaUsageUrl(undefined)}
             url={appStore.mediaUsageUrl}
+          />
+
+          <FirstTimeDialog
+            open={accountStore.licenseStatus.first_access}
+            setOpen={(v) => updateAccountStore('licenseStatus', 'first_access', false)}
+            freeTrial={!accountStore.licenseStatus.licensed}
+          />
+
+          <TrialExpiredDialog
+            open={appStore.showTrialExpiredDialog}
           />
         </Toaster>
       </AppProvider>

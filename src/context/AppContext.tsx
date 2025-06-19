@@ -19,7 +19,7 @@ import {
 } from "../utils/socket";
 import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
-import { accountStore, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
+import { accountStore, checkMembershipStatus, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadLicenseStatus, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
@@ -74,6 +74,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     const html: HTMLElement | null = document.querySelector('html');
     html?.setAttribute('data-theme', settingsStore.theme);
   });
+
   createEffect(() => {
     if (appStore.isInactive) {
       updateAppStore('appState', () => 'sleep');
@@ -110,6 +111,13 @@ export const AppProvider = (props: { children: JSXElement }) => {
       connect();
     }
   })
+
+  createEffect(on(() => accountStore.accountIsReady, () => {
+    if (accountStore.accountIsReady) {
+      loadLicenseStatus();
+      checkMembershipStatus();
+    }
+  }))
 
   // Event handling ------------------------------------------------------------
 

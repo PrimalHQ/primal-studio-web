@@ -18,6 +18,7 @@ import { getMembershipStatus, getPremiumStatus } from "src/primal_api/membership
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { createEffect } from "solid-js";
 import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
+import { updateAppStore } from "./AppStore";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -75,18 +76,17 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
 
 let extensionAttempt = 0;
 
-createEffect(() => {
-  if (accountStore.accountIsReady) {
-    loadLicenseStatus();
-    checkMembershipStatus();
-  }
-})
-
-const loadLicenseStatus = async () => {
+export const loadLicenseStatus = async () => {
   const status = await getLicenceStatus();
 
   updateAccountStore('licenseStatus', () => ({ ...status }));
+
+
+  if (!accountStore.licenseStatus.licensed && accountStore.licenseStatus.trial_remaining_sec <= 0) {
+    updateAppStore('showTrialExpiredDialog', () => true);
+  }
 }
+
 
 const logout = () => {
   updateAccountStore('sec', () => undefined);

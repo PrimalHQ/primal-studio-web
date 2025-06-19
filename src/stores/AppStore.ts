@@ -23,6 +23,7 @@ export type AppStore = {
   editNote: PrimalNote | undefined,
   editNoteDraft: PrimalDraft | undefined,
   mediaUsageUrl: string | undefined,
+  showTrialExpiredDialog: boolean,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -41,6 +42,7 @@ export const emptyAppStore = (): AppStore => ({
   editNote: undefined,
   editNoteDraft: undefined,
   mediaUsageUrl: undefined,
+  showTrialExpiredDialog: false,
 });
 
 
