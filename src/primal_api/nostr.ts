@@ -337,7 +337,7 @@ export const sendArticleDraft = async (
       ["summary", article.summary],
       ["image", article.image],
       ["d", identifier],
-      ['client', 'primal-web'],
+      ['client', 'Primal Studio'],
       ['published_at', `${time}`],
       ...article.tags,
       ...keywords,
@@ -360,7 +360,7 @@ export const sendArticleDraft = async (
     tags: [
       ['d', identifier],
       ['k', `${Kind.LongForm}`],
-      ['client', 'primal-web'],
+      ['client', 'Primal Studio'],
       ...draftTags,
       // ["e", "<anchor event event id>", "<relay-url>"],
       // ["a", "<anchor event address>", "<relay-url>"],
@@ -382,7 +382,7 @@ export const sendNote = async (text: string, tags: string[][]) => {
   const event = {
     content: text,
     kind: Kind.Text,
-    tags,
+    tags: [ ...tags, ['client', 'Primal Studio']],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -458,7 +458,7 @@ export const sendNoteDraft = async (
     tags: [
       ['d', identifier],
       ['k', `${Kind.Text}`],
-      ['client', 'primal-web'],
+      ['client', 'Primal Studio'],
       ...draftTags,
       // ["e", "<anchor event event id>", "<relay-url>"],
       // ["a", "<anchor event address>", "<relay-url>"],

@@ -302,7 +302,7 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
-    // tags.push(['client', 'Primal']);
+    // tags.push(['client', 'Primal Studio']);
 
     // tags = [
     //   ...tags,
@@ -371,7 +371,7 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
-    tags.push(['client', 'Primal']);
+    tags.push(['client', 'Primal Studio']);
 
     let articleToPost = {
       ...article,
