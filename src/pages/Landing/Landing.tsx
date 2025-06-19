@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, onMount, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 
@@ -36,10 +36,12 @@ const Landing: Component = () => {
     return isIPhone() || isAndroid() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
   };
 
-  onMount(() => {
-    const html: HTMLElement | null = document.querySelector('html');
-    html?.setAttribute('data-theme', 'studio_dark');
-  });
+  createEffect(on(() => settingsStore.theme, () => {
+    setTimeout(() => {
+      const html: HTMLElement | null = document.querySelector('html');
+      html?.setAttribute('data-theme', 'studio_dark');
+    }, 10)
+  }));
 
   useBeforeLeave(() => {
     const html: HTMLElement | null = document.querySelector('html');
