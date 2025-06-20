@@ -1,9 +1,10 @@
-import { Component, createEffect, on, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 import Dialog from 'src/components/Dialogs/Dialog';
 
-import branding from 'src/assets/images/primal_studio_dark.svg';
+import brandingDark from 'src/assets/images/primal_studio_dark.svg';
+import brandingLight from 'src/assets/images/primal_studio_light.svg';
 
 import { isPhone } from 'src/utils/ui';
 import { globalNavigate } from 'src/App';
@@ -13,7 +14,18 @@ const GetStartedDialog: Component<{
   open: boolean,
   setOpen?: (v: boolean) => void,
 }> = (props) => {
+  const [branding, setBranding] = createSignal(brandingDark);
 
+  createEffect(() => {
+    if (!props.open) return;
+
+    const html: HTMLElement | null = document.querySelector('html');
+    const theme = html?.getAttribute('data-theme');
+
+    const brand = theme === 'studio_dark' ? brandingDark : brandingLight;
+
+    setBranding(brand);
+  })
 
   createEffect(on(() => props.open, (open, prev) => {
 
@@ -23,7 +35,6 @@ const GetStartedDialog: Component<{
 
     const navigate = globalNavigate();
 
-    console.log('NAV: ', navigate)
     if (isPhone()) {
       if (window.location.pathname === '/') return;
       navigate?.('/') || window.open('/', '_self');
@@ -38,7 +49,7 @@ const GetStartedDialog: Component<{
       triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
-      title={<img src={branding} width={140} height={34} />}
+      title={<img src={branding()} width={140} height={34} />}
     >
       <Show
         when={!isPhone()}
