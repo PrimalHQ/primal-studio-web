@@ -5,7 +5,7 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Dialog from './Dialog';
 import { translate } from 'src/translations/translate';
-
+import dayjs from 'dayjs';
 
 const FirstTimeDialog: Component<{
   id?: string,
@@ -13,6 +13,8 @@ const FirstTimeDialog: Component<{
   setOpen?: (v: boolean) => void,
   freeTrial?: boolean,
 }> = (props) => {
+
+  const endDate = () => dayjs().add(30, 'days').format('MMMM DD, YYYY');
 
   return (
     <Dialog
@@ -39,7 +41,7 @@ const FirstTimeDialog: Component<{
             }
           >
             <div>
-              Your 30-day free trial starts today and will end on June 15, 2025. All product features are enabled for you during the free trial period.
+              Your 30-day free trial starts today and will end on {endDate()}. All product features are enabled for you during the free trial period.
             </div>
           </Show>
         </div>
