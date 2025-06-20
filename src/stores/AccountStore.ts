@@ -19,6 +19,7 @@ import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { createEffect } from "solid-js";
 import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
 import { updateAppStore } from "./AppStore";
+import { isPhone } from "src/utils/ui";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -134,6 +135,10 @@ export const loadStoredPubkey = () => {
 };
 
 export const fetchNostrKey = async () => {
+  if (isPhone() && window.location.pathname !== '/') {
+    updateAppStore('showNoPhoneDialog', true);
+    return;
+  }
   const storedKey = localStorage.getItem('pubkey');
 
   if (storedKey) {

@@ -15,7 +15,6 @@ import GetStartedDialog from './GetStartedDialog';
 import SignInDialog from './SignInDialog';
 import PrimalProFAQ from './PrimalProFAQ';
 
-import { isIPhone, isAndroid } from '@kobalte/utils';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import { useBeforeLeave } from '@solidjs/router';
 import { settingsStore } from 'src/stores/SettingsStore';
@@ -23,6 +22,7 @@ import PricingCardPro from './PricingCardPro';
 import PricingCardTeam from './PricingCardTeam';
 import BuyProDialog from './BuyProDialog';
 import BuyTeamDialog from './BuyTeamDialog';
+import { isPhone } from 'src/utils/ui';
 
 const Landing: Component = () => {
 
@@ -32,9 +32,6 @@ const Landing: Component = () => {
   const [showBuyPro, setShowBuyPro] = createSignal(false);
   const [showBuyTeam, setShowBuyTeam] = createSignal(false);
 
-  const isPhone = () => {
-    return isIPhone() || isAndroid() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
-  };
 
   createEffect(on(() => settingsStore.theme, () => {
     setTimeout(() => {

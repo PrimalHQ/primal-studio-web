@@ -21,8 +21,9 @@ import ContentScoreBreakdownDialog from './components/Dialogs/ContentScoreBreakd
 import MediaUsesDialog from './pages/Media/MediaUsesDialog';
 import { Navigator, Route, Router } from "@solidjs/router";
 import FirstTimeDialog from './components/Dialogs/FirstTimeDialog';
-import BuyProDialog from './pages/Landing/BuyProDialog';
 import TrialExpiredDialog from './components/Dialogs/TrialExpiredDialog';
+import { isPhone } from './utils/ui';
+import GetStartedDialog from './pages/Landing/GetStartedDialog';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -111,13 +112,18 @@ const App: Component = () => {
           />
 
           <FirstTimeDialog
-            open={accountStore.licenseStatus.first_access}
+            open={accountStore.licenseStatus.first_access && !isPhone()}
             setOpen={(v) => updateAccountStore('licenseStatus', 'first_access', false)}
-            freeTrial={!accountStore.licenseStatus.licensed}
+            freeTrial={!accountStore.licenseStatus.licensed && !isPhone()}
           />
 
           <TrialExpiredDialog
-            open={appStore.showTrialExpiredDialog}
+            open={appStore.showTrialExpiredDialog && !isPhone()}
+          />
+
+          <GetStartedDialog
+            open={appStore.showNoPhoneDialog}
+            setOpen={(v) => updateAppStore('showNoPhoneDialog', v)}
           />
         </Toaster>
       </AppProvider>

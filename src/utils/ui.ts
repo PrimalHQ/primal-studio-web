@@ -1,4 +1,5 @@
 import { PrimalUser } from "src/primal";
+import { isIPhone, isAndroid } from '@kobalte/utils';
 
 export const runColorMode = (
   callback: (isDarkMode: boolean) => void,
@@ -180,3 +181,7 @@ export const humanizeFileType = (type: string | undefined) => {
 
   return ext;
 }
+
+export const isPhone = () => {
+  return isIPhone() || isAndroid() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
+};

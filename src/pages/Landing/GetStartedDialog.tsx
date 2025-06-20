@@ -1,23 +1,37 @@
-import { Component, Show } from 'solid-js';
+import { Component, createEffect, on, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 import Dialog from 'src/components/Dialogs/Dialog';
 
 import branding from 'src/assets/images/primal_studio_dark.svg';
-import { useNavigate } from '@solidjs/router';
 
-import { isIPhone, isAndroid } from '@kobalte/utils';
+import { isPhone } from 'src/utils/ui';
+import { globalNavigate } from 'src/App';
 
 const GetStartedDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
 }> = (props) => {
-  const navigate = useNavigate();
 
-  const isIOS = () => {
-    return isIPhone() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
-  };
+
+  createEffect(on(() => props.open, (open, prev) => {
+
+    console.log('open: ', open, prev)
+    if (prev=== undefined || open || open === prev) return;
+    console.log('open2: ', open, prev)
+
+    const navigate = globalNavigate();
+
+    console.log('NAV: ', navigate)
+    if (isPhone()) {
+      if (window.location.pathname === '/') return;
+      navigate?.('/') || window.open('/', '_self');
+      return;
+    }
+
+    navigate?.('/home');
+  }));
 
   return (
     <Dialog
@@ -27,11 +41,16 @@ const GetStartedDialog: Component<{
       title={<img src={branding} width={140} height={34} />}
     >
       <Show
-        when={!isIOS() && !isAndroid()}
+        when={!isPhone()}
         fallback={
           <div class={styles.getStartedDialog}>
             <div class={styles.message}>
               <p>To use Primal Studio, you need to be on a computer.</p>
+            </div>
+            <div class={styles.actions}>
+              <div class={styles.newToNostr}>
+              </div>
+              <button onClick={() => props.setOpen?.(false)}>OK</button>
             </div>
           </div>
         }
@@ -53,7 +72,7 @@ const GetStartedDialog: Component<{
             <div class={styles.newToNostr}>
               New to Nostr? <a href="https://primal.net/join" target="_blank">Join now</a>.
             </div>
-            <button onClick={() => navigate('/home')}>I am Ready, Let’s Go!</button>
+            <button onClick={() => props.setOpen?.(false)}>I am Ready, Let’s Go!</button>
           </div>
         </div>
       </Show>
