@@ -57,8 +57,6 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
   const [contentStyle, setContentStyle] = createSignal('T3');
 
   createEffect(() => {
-    const t = props.article.title;
-    const s = props.article.summary;
 
     const tt = articlePreview?.querySelector(`.${styles.title}`);
     const ss = articlePreview?.querySelector(`.${styles.summary}`);
@@ -66,7 +64,6 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
     if (!tt || !ss) return;
 
     const titleLines = countLines(tt);
-    const summaryLines = countLines(ss);
 
     if (titleLines === 1) setContentStyle('T1');
 
@@ -94,13 +91,13 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
         <div
           class={styles.userInfo}
         >
-          <Avatar user={props.article.user} size={22}/>
-          <div class={styles.userName}>{userName(props.article.user.pubkey)}</div>
-          <VerificationCheck user={props.article.user} />
-          <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
+          <Avatar user={props.article?.user} size={22}/>
+          <div class={styles.userName}>{userName(props.article?.user.pubkey)}</div>
+          <VerificationCheck user={props.article?.user} />
+          <div class={styles.nip05}>{props.article?.user?.nip05 || ''}</div>
         </div>
         <div class={styles.time}>
-          {shortDate(props.article.published_at)}
+          {shortDate(props.article?.published_at)}
         </div>
       </div>
 
@@ -108,24 +105,24 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
         <div class={styles.text}>
           <div class={`${styles.content} ${conetntStyles()}`}>
             <div class={styles.title}>
-              {props.article.title}
+              {props.article?.title || ''}
             </div>
             <div class={styles.summary}>
-              {props.article.summary}
+              {props.article?.summary || ''}
             </div>
           </div>
           <div class={styles.tags}>
             <div class={styles.estimate}>
-              {Math.ceil((props.article.wordCount || 0) / wordsPerMinute)} minute read
+              {Math.ceil((props.article?.wordCount || 0) / wordsPerMinute)} minute read
             </div>
-            <For each={props.article.keywords?.slice(0, 3)}>
+            <For each={props.article?.keywords?.slice(0, 3) || []}>
               {tag => (
                 <div class={styles.tag}>
                   {tag}
                 </div>
               )}
             </For>
-            <Show when={props.article.keywords?.length && props.article.keywords.length > 3}>
+            <Show when={props.article?.keywords?.length && props.article.keywords.length > 3}>
               <div class={styles.tag}>
                 + {props.article.keywords.length - 3}
               </div>
@@ -134,18 +131,18 @@ const ArticleReviewPreview: Component<ArticleProps> = (props) => {
         </div>
         <div class={styles.image}>
           <Show
-            when={props.article.image}
+            when={props.article?.image}
             fallback={
               <Show
-                when={props.article.user.picture}
+                when={props.article?.user.picture}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
-                <img src={props.article.user.picture} onerror={onImageError} />
+                <img src={props.article?.user.picture} onerror={onImageError} />
               </Show>
             }
           >
             <img
-              src={props.article.image}
+              src={props.article?.image}
               onerror={onImageError}
             />
           </Show>

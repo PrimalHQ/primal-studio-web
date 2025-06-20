@@ -41,6 +41,7 @@ export const parseDraftContent = async (drafts: PrimalDraft[]) => {
 export const parseDraftedEvent = (
   draft: PrimalDraft,
 ): PrimalArticle | PrimalNote | undefined => {
+  if (!draft) return;
 
   const event = draft.draftedEvent;
 

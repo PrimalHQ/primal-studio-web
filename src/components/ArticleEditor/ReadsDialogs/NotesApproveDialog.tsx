@@ -93,7 +93,7 @@ const NotesApproveDialog: Component<{
           </div>}
         >
           <div class={styles.previewHolder}>
-            {firstNote().content}
+            {firstNote()?.content}
           </div>
         </Show>
 
