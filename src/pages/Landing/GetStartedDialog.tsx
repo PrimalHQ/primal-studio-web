@@ -29,9 +29,7 @@ const GetStartedDialog: Component<{
 
   createEffect(on(() => props.open, (open, prev) => {
 
-    console.log('open: ', open, prev)
     if (prev=== undefined || open || open === prev) return;
-    console.log('open2: ', open, prev)
 
     const navigate = globalNavigate();
 

@@ -410,6 +410,7 @@ export const getUserInPage = (page: EventFeedPage, pubkey: string) => {
     tags: user.tags,
     userStats: stats ? { ...stats[user.pubkey!] } : undefined,
     event: { ...user },
+    legendConfig: page.legendCustomization[pubkey]
   } as PrimalUser;
 }
 

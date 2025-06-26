@@ -374,6 +374,7 @@ export type PrimalUser = {
   tags: string[][],
   userStats?: UserStats,
   event?: NostrEventContent,
+  legendConfig?: LegendCustomizationConfig,
 };
 
 export type PrimalNote = {

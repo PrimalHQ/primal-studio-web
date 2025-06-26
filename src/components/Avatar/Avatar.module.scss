@@ -1,14 +1,13 @@
 @mixin avatar {
   position: relative;
   border-radius: 50%;
-  padding: 1px;
+  // padding: 1px;
 
   img {
     border-radius: 50%;
-    width: 100%;
-    height: 100%;
     object-fit: cover;
     vertical-align: top;
+    border: 1px solid var(--background-site);
   }
 }
 
@@ -23,6 +22,76 @@
 
 .avatarResponsive {
   @include avatar;
+}
+
+@mixin highlight {
+  border-radius: 99999px;
+  overflow: hidden
+}
+
+.legend_GOLD {
+  @include highlight;
+  background: var(--legend-gold) !important;
+}
+.legend_AQUA {
+  @include highlight;
+  background: var(--legend-aqua) !important;
+}
+.legend_SILVER {
+  @include highlight;
+  background: var(--legend-silver) !important;
+}
+.legend_PURPLE {
+  @include highlight;
+  background: var(--legend-purple) !important;
+}
+.legend_PURPLEHAZE {
+  @include highlight;
+  background: var(--legend-purplehaze) !important;
+}
+.legend_TEAL {
+  @include highlight;
+  background: var(--legend-teal) !important;
+}
+.legend_BROWN {
+  @include highlight;
+  background: var(--legend-brown) !important;
+}
+.legend_BLUE {
+  @include highlight;
+  background: var(--legend-blue) !important;
+}
+.legend_SUNFIRE {
+  @include highlight;
+  background: var(--legend-sunfire) !important;
+}
+
+.legend_glow_GOLD {
+  --glow-color: var(--legend-glow-gold);
+}
+.legend_glow_AQUA {
+  --glow-color: var(--legend-glow-aqua);
+}
+.legend_glow_SILVER {
+  --glow-color: var(--legend-glow-silver);
+}
+.legend_glow_PURPLE {
+  --glow-color: var(--legend-glow-purple);
+}
+.legend_glow_PURPLEHAZE {
+  --glow-color: var(--legend-glow-purplehaze);
+}
+.legend_glow_TEAL {
+  --glow-color: var(--legend-glow-teal);
+}
+.legend_glow_BROWN {
+  --glow-color: var(--legend-glow-brown);
+}
+.legend_glow_BLUE {
+  --glow-color: var(--legend-glow-blue);
+}
+.legend_glow_SUNFIRE {
+  --glow-color: var(--legend-glow-sunfire);
 }
 
 .vvsAvatar {

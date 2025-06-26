@@ -60,7 +60,7 @@ const VerificationCheck: Component<{
 
     if (!pubkey) return undefined;
 
-    return props.legendConfig || membershipStore.legendCustomization[pubkey];
+    return props.user?.legendConfig || membershipStore.legendCustomization[pubkey];
   }
 
   const primalCheckKlass = () => {

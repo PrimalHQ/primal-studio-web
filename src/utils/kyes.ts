@@ -1,4 +1,4 @@
-import { logWarning } from "./logger";
+import { logError, logWarning } from "./logger";
 import { nip19 } from "./nTools";
 
 
@@ -67,7 +67,7 @@ export const noteIdToHex = (noteId: string) => {
         break;
     }
   } catch (e) {
-    console.log('Error decoding: ', noteId, e)
+    logError('Error decoding: ', noteId, e)
   }
 
   return id;

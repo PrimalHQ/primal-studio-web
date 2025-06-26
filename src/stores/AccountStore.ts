@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { NostrEventContent, NostrWindow } from "../primal";
+import { LegendCustomizationConfig, NostrEventContent, NostrWindow } from "../primal";
 import { logError, logInfo } from "../utils/logger";
 import { readEmojiHistory, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storePubkey, storeRelaySettings } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
@@ -55,6 +55,7 @@ export type AccountStore = {
   premiumStatus: MembershipStatus,
   emojiHistory: EmojiOption[],
   licenseStatus: LicenseStatus,
+  legendConfig: LegendCustomizationConfig | undefined,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -72,7 +73,8 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
     trial_remaining_sec: 0,
     licensed: false,
     valid_until: null,
-  }
+  },
+  legendConfig: undefined,
 });
 
 let extensionAttempt = 0;
@@ -123,7 +125,7 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     // Fetch profile, maybe there is an update
   }
 
-  console.error('BAD SEC: ', sec);
+  logError('BAD SEC: ', sec);
 }
 
 export const loadStoredPubkey = () => {
@@ -220,9 +222,18 @@ export const updateAccountProfile = (pubkey: string) => {
     subId,
     action: () => getUserMetadata([pubkey], subId),
     onEvent: (content: NostrEventContent) => {
-      if (content.kind !== Kind.Metadata) return;
 
-      updateAccountStore('metadata', () => content);
+      if (content.kind === Kind.LegendCustomization) {
+        const config = JSON.parse(content.content || '{}');
+
+        updateAccountStore('legendConfig', () => config[pubkey]);
+
+      }
+
+      if (content.kind === Kind.Metadata) {
+        updateAccountStore('metadata', () => content);
+      }
+
     },
   });
 };
@@ -320,7 +331,7 @@ export const getRecomendedBlossomServers = async () => {
 
 export const activeUser = () => {
   if (!accountStore.metadata) return;
-  return parseUserMetadata(accountStore.metadata);
+  return parseUserMetadata(accountStore.metadata, accountStore.legendConfig);
 }
 
 

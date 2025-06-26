@@ -1,6 +1,6 @@
 import { nip19 } from "nostr-tools";
 import { eventStore } from "../stores/EventStore";
-import { NostrEventContent, PrimalUser, UserMetadata, UserMetadataContent, VanityProfiles } from "../primal";
+import { LegendCustomizationConfig, NostrEventContent, PrimalUser, UserMetadata, UserMetadataContent, VanityProfiles } from "../primal";
 import { logError } from "./logger";
 import { Kind, minKnownProfiles } from "src/constants";
 
@@ -67,7 +67,7 @@ export const userName = (pubkey: string | undefined) => {
   return name || truncateNpub(npub);
 };
 
-export const parseUserMetadata = (metadata: NostrEventContent) => {
+export const parseUserMetadata = (metadata: NostrEventContent, legendConfig?: LegendCustomizationConfig) => {
   if (metadata.kind !== Kind.Metadata) return;
 
   let userMeta: UserMetadataContent = {};
@@ -94,6 +94,7 @@ export const parseUserMetadata = (metadata: NostrEventContent) => {
     lud16: (userMeta.lud16 || ''),
     website: (userMeta.website || ''),
     event: { ...metadata },
+    legendConfig: legendConfig ? { ...legendConfig } : undefined,
   } as PrimalUser;
 }
 
