@@ -12,7 +12,7 @@ import { batch } from "solid-js";
 export const uploadLimit = {
   regular: 100,
   premium: 1024,
-  premiumLegend: 1024,
+  premiumLegend: 10 * 1024,
 }
 
 export type UploadCallbacks = {
