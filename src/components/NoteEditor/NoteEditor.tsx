@@ -32,7 +32,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from 'src/App';
 import tippy, { Instance } from 'tippy.js';
 import SearchOption from '../Search/SearchOptions';
-import { insertIntoTextArea, nip05Verification } from 'src/utils/ui';
+import { insertIntoTextArea, isPhone, nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
@@ -732,11 +732,28 @@ const NoteEditor: Component<{
         </div>
       </div>
       <div class={`${styles.editorHtmlHolder} ${styles[`mode_${editorMode()}`]} ${editorMode() === 'text' ? 'displayNone' : ''}`}>
-        <div
-          id="tiptapNoteEditor"
-          ref={tiptapEditor}
-          class={`${styles.editorNote}  ${styles[`mode_${editorMode()}`]}`}
-        ></div>
+        <div>
+          <Show
+            when={editorMode() === 'phone'}
+            fallback={<Avatar user={activeUser()} size={42} />}
+          >
+            <div class={styles.phoneHeader}>
+              <Avatar user={activeUser()} size={36} />
+              <div class={styles.authorInfo}>
+                <div class={styles.userName}>{userName(accountStore.pubkey)}</div>
+                <VerificationCheck user={activeUser()} />
+                <div class={styles.nip05}>{nip05Verification(activeUser())}</div>
+                <div class={styles.nip05}>&middot;</div>
+                <div class={styles.nip05}>now</div>
+              </div>
+            </div>
+          </Show>
+          <div
+            id="tiptapNoteEditor"
+            ref={tiptapEditor}
+            class={`${styles.editorNote} ${styles[`mode_${editorMode()}`]}`}
+          ></div>
+        </div>
       </div>
 
       <div class={`${styles.editorPlainHolder} ${editorMode() !== 'text' ? 'displayNone' : ''}`}>
