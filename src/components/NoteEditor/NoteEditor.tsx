@@ -6,11 +6,9 @@ import { Editor, generateHTML, JSONContent } from '@tiptap/core';
 import Document from '@tiptap/extension-document'
 import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
-import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Mention from '@tiptap/extension-mention';
 import Image from '@tiptap/extension-image';
-import BubbleMenu from '@tiptap/extension-bubble-menu';
 import Underline from '@tiptap/extension-underline';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
@@ -32,11 +30,11 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from 'src/App';
 import tippy, { Instance } from 'tippy.js';
 import SearchOption from '../Search/SearchOptions';
-import { insertIntoTextArea, isPhone, nip05Verification } from 'src/utils/ui';
+import { insertIntoTextArea, nip05Verification } from 'src/utils/ui';
 import Avatar from '../Avatar/Avatar';
 import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
-import { extendMarkdownEditor, MarkdownPlugin, mdToHtml, processHTMLForNostr, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
+import { MarkdownPlugin, mdToHtml, processHTMLForNostr, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
 import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
 import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
 import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
@@ -44,14 +42,13 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { referencesToTags } from 'src/utils/feeds';
 import { getRelayTags, relayStore } from 'src/stores/RelayStore';
-import { scheduleNote, sendArticleDraft, sendNote, sendNoteDraft } from 'src/primal_api/nostr';
+import { scheduleNote, sendNote, sendNoteDraft } from 'src/primal_api/nostr';
 import ReadsPublishingDateDialog from '../ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
 import ReadsProposeDialog from '../ArticleEditor/ReadsDialogs/ReadsProposeDialog';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { longDate } from 'src/utils/date';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 import EmojiButton from '../EmojiPicker/EmojiButton';
-import EmojiPickPopover from '../EmojiPicker/EmojiPickPopover';
 import MediaEmbed from '../ArticleEditor/MediaEmbedExtension';
 import dayjs from 'dayjs';
 import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
@@ -59,8 +56,12 @@ import { deleteFromInbox } from 'src/primal_api/studio';
 import { removeEventFromPageStore } from 'src/stores/PageStore';
 import { doRequestDelete } from 'src/primal_api/events';
 import { Kind } from 'src/constants';
+import { ImageGrid } from '../ArticleEditor/ImageGrid';
+import { autoGroupImages, autoUngroupImages, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
 import { Video } from '../ArticleEditor/VideoPlugin';
 
+let groupingTimeout: number | null = null;
+let classUpdateTimeout: number | null = null;
 
 const NoteEditor: Component<{
   id?: string,
@@ -189,6 +190,7 @@ const NoteEditor: Component<{
     }),
     Video,
     Image.configure({ inline: true }),
+    ImageGrid,
     CodeBlock,
     // Markdown.configure({
     //   html: true,
@@ -474,6 +476,30 @@ const NoteEditor: Component<{
 
       // props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
+    onTransaction: ({ transaction, editor }) => {
+       if (transaction.docChanged) {
+        // Handle auto-grouping
+        if (groupingTimeout) {
+          clearTimeout(groupingTimeout)
+        }
+
+        groupingTimeout = setTimeout(() => {
+          autoUngroupImages(editor);
+          autoGroupImages(editor)
+          groupingTimeout = null
+        }, 100)
+
+        // Handle class updates independently
+        if (classUpdateTimeout) {
+          clearTimeout(classUpdateTimeout)
+        }
+
+        classUpdateTimeout = setTimeout(() => {
+          updateGridClassesDirectly(editor)
+          classUpdateTimeout = null
+        }, 150) // Slightly longer delay
+      }
+    }
   }));
 
   createEffect(on( () => [props.note, editorTipTap()], async (changes) => {
@@ -507,12 +533,17 @@ const NoteEditor: Component<{
     setIsInboxDraft(!isMyDraft);
   }));
 
-  createEffect(on( editorMode, async (mode, prev) => {
+  createEffect(on(editorMode, async (mode, prev) => {
+      console.log('MODE: ', mode, prev)
     if (prev === undefined || mode === prev) return;
 
     if (
       ['html', 'phone'].includes(prev) &&
-      ['html', 'phone'].includes(mode) ) return;
+      ['html', 'phone'].includes(mode)
+    ) {
+      editorTipTap()?.commands.focus();
+      return;
+    }
 
     const json: JSONContent = prev === 'text' ?
       plainTextToTiptapJson(plainContent()) :

@@ -1,0 +1,205 @@
+import { Editor } from '@tiptap/core'
+
+export const areNodesConsecutive = (node1, node2, state) => {
+  const between = state.doc.slice(
+    node1.pos + node1.node.nodeSize,
+    node2.pos
+  )
+
+  // Consider nodes consecutive if there's only whitespace or empty paragraphs between
+  let hasOnlyWhitespace = true
+  between.content.forEach(node => {
+    if (node.type.name === 'paragraph' && (node.content.size === 0 || node.textContent.trim().length === 0)) {
+      return // Empty paragraph is OK
+    }
+    if (node.type.name === 'text' && /^\s*$/.test(node.text)) {
+      return // Whitespace-only text is OK
+    }
+    hasOnlyWhitespace = false
+  })
+
+  return hasOnlyWhitespace
+}
+
+export const autoGroupImages = (editor: Editor) => {
+  const { state } = editor
+  const tr = state.tr
+  let modified = false
+
+  // Find all image and imageGrid nodes with their positions
+  const nodes: any[] = []
+  state.doc.descendants((node, pos) => {
+    if (node.type.name === 'image' || node.type.name === 'imageGrid') {
+      nodes.push({ node, pos, type: node.type.name })
+    }
+
+    return node.type.name !== 'imageGrid';
+  })
+
+  // Process nodes to find grouping opportunities
+  for (let i = 0; i < nodes.length; i++) {
+    const current = nodes[i];
+    const next = nodes[i + 1];
+
+    if (!next) continue;
+
+    // Case 1: imageGrid + image -> add image to grid
+    if (current.type === 'imageGrid' && next.type === 'image') {
+      if (areNodesConsecutive(current, next, state)) {
+        const newImages = [
+          {
+            src: next.node.attrs.src,
+            alt: next.node.attrs.alt || '',
+            title: next.node.attrs.title || ''
+          },
+          ...current.node.attrs.images
+        ]
+        // Add the image to the existing grid
+        const newContent = [...current.node.content.content, next.node]
+        const newGrid = state.schema.nodes.imageGrid.create(
+          { ...current.node.attrs, images: newImages},
+          newContent
+        )
+
+        tr.replaceRangeWith(
+          current.pos,
+          next.pos + next.node.nodeSize,
+          newGrid
+        )
+        modified = true
+        break // Process one change at a time
+      }
+    }
+
+    // Case 2: image + imageGrid -> add image to beginning of grid
+    else if (current.type === 'image' && next.type === 'imageGrid') {
+      if (areNodesConsecutive(current, next, state)) {
+        const newContent = [current.node, ...next.node.content.content]
+        const newImages = [
+          {
+            src: current.node.attrs.src,
+            alt: current.node.attrs.alt || '',
+            title: current.node.attrs.title || ''
+          },
+          ...next.node.attrs.images
+        ]
+
+        const newGrid = state.schema.nodes.imageGrid.create(
+          { ...next.node.attrs, images: newImages, },
+          newContent
+        )
+
+        tr.replaceRangeWith(
+          current.pos,
+          next.pos + next.node.nodeSize,
+          newGrid
+        )
+        modified = true
+        break
+      }
+    }
+
+    // Case 3: imageGrid + imageGrid -> merge grids
+    else if (current.type === 'imageGrid' && next.type === 'imageGrid') {
+      if (areNodesConsecutive(current, next, state)) {
+        const newImages = [
+          ...current.node.attrs.images,
+          {
+            src: next.node.attrs.src,
+            alt: next.node.attrs.alt || '',
+            title: next.node.attrs.title || ''
+          }
+        ]
+
+        const newContent = [
+          ...current.node.content.content,
+          ...next.node.content.content
+        ]
+        const newGrid = state.schema.nodes.imageGrid.create(
+          { ...current.node.attrs, images: newImages, },
+          newContent
+        )
+
+        tr.replaceRangeWith(
+          current.pos,
+          next.pos + next.node.nodeSize,
+          newGrid
+        )
+        modified = true
+        break
+      }
+    }
+
+    // Case 4: image + image -> create new grid (original logic)
+    else if (current.type === 'image' && next.type === 'image') {
+      if (areNodesConsecutive(current, next, state)) {
+        const images = [
+          {
+            src: current.node.attrs.src,
+            alt: current.node.attrs.alt || '',
+            title: current.node.attrs.title || ''
+          },
+          {
+            src: next.node.attrs.src,
+            alt: next.node.attrs.alt || '',
+            title: next.node.attrs.title || ''
+          }
+        ]
+
+        const newGrid = state.schema.nodes.imageGrid.create(
+          { columns: 2, images },
+          [current.node, next.node]
+        )
+
+        tr.replaceRangeWith(
+          current.pos,
+          next.pos + next.node.nodeSize,
+          newGrid
+        )
+        modified = true
+        break
+      }
+    }
+  }
+
+  if (modified) {
+    editor.view.dispatch(tr)
+  }
+}
+
+export const updateGridClassesDirectly = (editor: Editor) => {
+  const gridElements = editor.view.dom.querySelectorAll('[data-type="image-grid"]')
+
+  gridElements.forEach(gridEl => {
+    const images = gridEl.querySelectorAll('img')
+    const imageCount = images.length
+
+    // Remove old grid-* classes and add new one
+    gridEl.className = gridEl.className.replace(/grid-\d+/g, '') + ` grid-${imageCount}`
+    gridEl.setAttribute('data-image-count', `${imageCount}`)
+  })
+}
+
+export const autoUngroupImages = (editor: Editor) => {
+  const { state } = editor
+  const tr = state.tr
+  let modified = false
+
+  // Find all imageGrid nodes with only one image
+  state.doc.descendants((node, pos) => {
+    if (node.type.name === 'imageGrid' && node.content.childCount === 1) {
+      // Get the single image from the grid
+      const singleImage = node.content.firstChild
+
+      if (singleImage && singleImage.type.name === 'image') {
+        // Replace the grid with just the image
+        tr.replaceWith(pos, pos + node.nodeSize, singleImage)
+        modified = true
+      }
+    }
+  })
+
+  if (modified) {
+    editor.view.dispatch(tr)
+  }
+}

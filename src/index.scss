@@ -463,3 +463,73 @@ th.selectedCell, td.selectedCell {
 [data-popper-positioner] {
   z-index: 99 !important;
 }
+
+// ----------------------------------------------------
+
+.image-grid-editor {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  width: min(500px, 100%) !important;
+
+  img {
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    width: min(250px, 100%) !important;
+    aspect-ratio: 1;
+    object-fit: cover;
+
+    &:first-child {
+      border-radius: 12px 0 0 0;
+
+      &:nth-last-child(4) {
+        border-radius: 12px 0 0 12px !important;
+      }
+    }
+
+    &:nth-child(2) {
+      border-radius: 0 12px 0 0 !important;
+
+      &:nth-last-child(3) {
+        border-radius: 0 12px 12px 0 !important;
+      }
+    }
+
+    &:nth-child(3) {
+      border-radius: 0 0 0 12px !important;
+    }
+
+    &:nth-child(4) {
+      border-radius: 0 0 12px 0 !important;
+    }
+  }
+
+  &.gallery-3 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      "cell1 cell1"
+      "cell2 cell3";
+
+    img {
+      &:first-child {
+        grid-area: cell1;
+        width: min(500px, 100%) !important;
+        border-radius: 12px 12px 0 0 !important;
+      }
+
+      &:nth-child(2) {
+        grid-area: cell2;
+        border-radius: 0 0 0 12px !important;
+      }
+
+      &:nth-child(3) {
+        grid-area: cell3;
+        border-radius: 0 0 12px 0 !important;
+      }
+    }
+  }
+}

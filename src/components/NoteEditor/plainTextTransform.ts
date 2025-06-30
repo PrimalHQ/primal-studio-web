@@ -148,6 +148,11 @@ export const tiptapJsonToPlainText = (json: any) => {
     return json.attrs?.originalUrl || json.attrs?.src || '';
   }
 
+  if (json.type === 'imageGrid') {
+    // @ts-ignore
+    return json.content.reduce<string>((acc, img) => img.type === 'image' ? `${acc}${img.attrs.src} ` : acc, '');
+  }
+
   // Handle other media types that might have URLs
   if (json.attrs?.src) {
     return json.attrs.src;
