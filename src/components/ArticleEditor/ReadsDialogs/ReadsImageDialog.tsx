@@ -12,13 +12,20 @@ import { accountStore, activeUser } from 'src/stores/AccountStore';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
 import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
 
+export type MediaDataState = {
+  alt: string,
+  title: string,
+  image: string,
+  fileType: string,
+  metadata: any,
+}
 
 const ReadsImageDialog: Component<{
   id?: string,
   open: boolean,
   editor: Editor | undefined,
   setOpen?: (v: boolean) => void,
-  onSubmit: (url: string, title: string, alt: string) => void,
+  onSubmit: (url: string, title: string, alt: string, fileType: string, metadata: any) => void,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -26,6 +33,8 @@ const ReadsImageDialog: Component<{
     alt: '',
     title: '',
     image: '',
+    fileType: '',
+    metadata: {},
   });
 
   const [isUploading, setIsUploading] = createSignal(false);
@@ -113,11 +122,38 @@ const ReadsImageDialog: Component<{
                 <div
                   class={styles.uploadButton}
                 >
+                  <Switch>
+                    <Match when={state.fileType.startsWith('video')}>
+                      <div id='videoPreview' class={styles.videoPreview}>
+                        <video
+                          src={state.image}
+                          class={styles.titleImage}
+                          onloadedmetadata={(event) => {
+                            const v = event.target as HTMLVideoElement;
+                            setImageLoaded(true)
+                            console.log('LOADED: ', imageLoaded())
+                            setState({ metadata: {
+                              duration: v.duration,
+                              videoWidth: v.videoWidth,
+                              videoHeight: v.videoHeight,
+                            }})
+                          }}
+                        />
+                      </div>
+                    </Match>
+                    <Match when={state.fileType.startsWith('image')}>
+                      <img
+                        class={styles.titleImage}
+                        src={state.image}
+                        onload={() => setImageLoaded(true)}
+                      />
+                    </Match>
+                  </Switch>
                   <Show when={imageLoaded()}>
                     <div
                       class={styles.uploadOverlay}
                       onClick={() => {
-                        document.getElementById('upload-title-image')?.click();
+                        // document.getElementById('upload-title-image')?.click();
                       }}
                     >
                       <div
@@ -125,9 +161,9 @@ const ReadsImageDialog: Component<{
                         onClick={(e: MouseEvent) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setState(() => ({ image: '' }));
+                          setState(() => ({ image: '', fileType: '' }));
                           setImageLoaded(false);
-                          document.getElementById('upload-title-image')?.click();
+                          // document.getElementById('upload-title-image')?.click();
                         }}
                       >
                         <div class={styles.closeIcon}></div>
@@ -135,11 +171,6 @@ const ReadsImageDialog: Component<{
                       <div>Chage hero Image</div>
                     </div>
                   </Show>
-                  <img
-                    class={styles.titleImage}
-                    src={state.image}
-                    onload={() => setImageLoaded(true)}
-                  />
                 </div>
               </Match>
 
@@ -150,7 +181,7 @@ const ReadsImageDialog: Component<{
                   <div class={styles.uploadPlaceholder}>
                     <div class={styles.attachIcon}></div>
                     <div class={styles.attachLabel}>
-                      upload image
+                      upload media
                     </div>
                   </div>
                 </div>
@@ -188,8 +219,8 @@ const ReadsImageDialog: Component<{
               onCancel={() => {
                 resetUpload();
               }}
-              onSuccsess={(url:string) => {
-                setState(() => ({ image: url }))
+              onSuccess={(url:string, uploadId?: string, file?: File) => {
+                setState(() => ({ image: url, fileType: file?.type || '' }))
 
                 resetUpload();
               }}
@@ -215,45 +246,48 @@ const ReadsImageDialog: Component<{
 
           </div>
         </div>
-        <div class={styles.inputHolder}>
-          <label for="input_title">Image Title <span>Describe the image</span></label>
-          <input
-            id="input_title"
-            class={styles.textInput}
-            autocomplete="off"
-            value={state.title}
-            onInput={(e) => setState(() => ({ title: e.target.value}))}
-          />
 
-          <label for="input_alt">Image Alt Text <span>Shown if the image doesn’t load</span></label>
-          <input
-            id="input_alt"
-            class={styles.textInput}
-            autocomplete="off"
-            value={state.alt}
-            onInput={(e) => setState(() => ({ alt: e.target.value}))}
-          />
+          <div class={styles.inputHolder}>
+            <label for="input_title">Image Title <span>Describe the image</span></label>
+            <input
+              id="input_title"
+              class={styles.textInput}
+              autocomplete="off"
+              value={state.title}
+              onInput={(e) => setState(() => ({ title: e.target.value}))}
+              disabled={!state.fileType.startsWith('image')}
+            />
 
-          <div class={styles.actions}>
-            <ButtonSecondary
-              onClick={() => {
-                props.setOpen && props.setOpen(false);
-              }}
-              light={true}
-              shrink={true}
-            >
-              Cancel
-            </ButtonSecondary>
-            <ButtonPrimary
-              disabled={state.image.length === 0}
-              onClick={() => {
-                props.onSubmit(state.image, state.title, state.alt)
-              }}
-            >
-              Insert
-            </ButtonPrimary>
+            <label for="input_alt">Image Alt Text <span>Shown if the image doesn’t load</span></label>
+            <input
+              id="input_alt"
+              class={styles.textInput}
+              autocomplete="off"
+              value={state.alt}
+              onInput={(e) => setState(() => ({ alt: e.target.value}))}
+              disabled={!state.fileType.startsWith('image')}
+            />
+
+            <div class={styles.actions}>
+              <ButtonSecondary
+                onClick={() => {
+                  props.setOpen && props.setOpen(false);
+                }}
+                light={true}
+                shrink={true}
+              >
+                Cancel
+              </ButtonSecondary>
+              <ButtonPrimary
+                disabled={state.image.length === 0}
+                onClick={() => {
+                  props.onSubmit(state.image, state.title, state.alt, state.fileType, state.metadata)
+                }}
+              >
+                Insert
+              </ButtonPrimary>
+            </div>
           </div>
-        </div>
 
       </div>
     </Dialog>

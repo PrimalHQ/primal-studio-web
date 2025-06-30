@@ -382,6 +382,14 @@
     margin-top: -6px;
   }
 
+  video {
+    width: 100%;
+
+    &[ratio=portrait] {
+      width: 80%;
+    }
+  }
+
   blockquote {
     color: var(--brand-text);
     font-size: 16px;

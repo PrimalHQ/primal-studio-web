@@ -24,7 +24,7 @@ const UploaderBlossom: Component<{
   onFail?: (reason: string, uploadId?: string) => void,
   onRefuse?: (reason: string, uploadId?: string) => void,
   onCancel?: (uploadId?: string) => void,
-  onSuccsess?: (url: string, uploadId?: string) => void,
+  onSuccess?: (url: string, uploadId?: string, file?: File) => void,
   onStart?: (uploadId: string | undefined, cancelUpload: () => void) => void,
   progressBar?: (state: UploadState, resetUpload: () => void) => JSXElement,
 }> = (props) => {
@@ -53,7 +53,7 @@ const UploaderBlossom: Component<{
   const xhrOnLoad = (e: ProgressEvent) => {
     if ((uploadState.xhr?.status || 200) < 300) {
       const response = JSON.parse(uploadState.xhr?.responseText || '{}');
-      props.onSuccsess && props.onSuccsess(response.url, props.uploadId);
+      props.onSuccess && props.onSuccess(response.url, props.uploadId, props.file);
 
       mirrorUpload(response);
       resetUpload();

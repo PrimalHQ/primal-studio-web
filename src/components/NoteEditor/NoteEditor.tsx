@@ -59,6 +59,7 @@ import { deleteFromInbox } from 'src/primal_api/studio';
 import { removeEventFromPageStore } from 'src/stores/PageStore';
 import { doRequestDelete } from 'src/primal_api/events';
 import { Kind } from 'src/constants';
+import { Video } from '../ArticleEditor/VideoPlugin';
 
 
 const NoteEditor: Component<{
@@ -148,6 +149,36 @@ const NoteEditor: Component<{
     el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
   }
 
+  const attachVideo = (src: string, metadata: any) => {
+    const editor = editorTipTap();
+
+    if (!editor || src.length === 0) return;
+
+    let opts: any = {
+      src,
+      controls: true,
+    }
+
+    if (metadata.videoWidth && metadata.videoHeight) {
+      let w = metadata.videoWidth;
+      let h = metadata.videoHeight;
+
+      let ratio = w / h;
+
+      opts.ratio = ratio < 1 ? 'portrait' : 'landscape';
+    }
+
+    editor.
+      chain().
+      focus().
+      setVideo(opts).
+      run();
+
+    // Move cursor one space to the right to avoid overwriting the image.
+    const el = document.querySelector('.tiptap.ProseMirror');
+    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+  }
+
   const extensions = [
     Document, Paragraph, Text,
     Link.configure({
@@ -156,6 +187,7 @@ const NoteEditor: Component<{
       defaultProtocol: 'https',
       protocols: ['http', 'https'],
     }),
+    Video,
     Image.configure({ inline: true }),
     CodeBlock,
     // Markdown.configure({
@@ -884,8 +916,15 @@ const NoteEditor: Component<{
         open={showAttach()}
         setOpen={(v: boolean) => setShowAttach(() => v)}
         editor={editorTipTap()}
-        onSubmit={(url: string, title:string, alt: string) => {
-          attachImage(url, title, alt);
+        onSubmit={(url: string, title:string, alt: string, fileType: string, metadata: any) => {
+          if (fileType.startsWith('image')) {
+            attachImage(url, title, alt);
+          }
+
+          if (fileType.startsWith('video')) {
+            attachVideo(url, metadata);
+          }
+
           setShowAttach(false);
         }}
       />

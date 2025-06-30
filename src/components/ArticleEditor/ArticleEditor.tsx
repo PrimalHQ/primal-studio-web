@@ -605,7 +605,7 @@ const ArticleEditor: Component<{
                   onCancel={(uploadId?: string) => {
                     resetUpload(uploadId);
                   }}
-                  onSuccsess={(url:string, uploadId?: string) => {
+                  onSuccess={(url:string, uploadId?: string) => {
                     if (uploadId === titleImageUploadId) {
                       props.setArticle('image', () => url);
                     }
