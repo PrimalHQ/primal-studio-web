@@ -1,4 +1,5 @@
-import { Editor } from '@tiptap/core'
+import { Editor } from '@tiptap/core';
+import styles from './ImageGrid.module.scss';
 
 export const areNodesConsecutive = (node1: any, node2: any, state: any) => {
   const between = state.doc.slice(
@@ -249,4 +250,25 @@ export const removeImageFromGrid = (editor: Editor, gridPos: number, imageIndex:
 
   editor.view.dispatch(tr)
   return true
+}
+
+export const refreshGalleryLayout = () => {
+  const containers = document.querySelectorAll(`div.${styles.imageGridEditor}`);
+
+  containers.forEach(c => {
+    const container = c as HTMLDivElement;
+    let containerW = container.getBoundingClientRect().width;
+    let containerH = containerW;
+    container.style.maxHeight = `${containerH}px`;
+    container.style.overflow = 'hidden';
+
+    const scrollIndicator = container.querySelector(`.${styles.scrollIndicator}`) as HTMLDivElement;
+
+    const indicatorDim = containerW/2;
+    scrollIndicator.style.top = `${indicatorDim+0.5}px`;
+    scrollIndicator.style.left = `${indicatorDim+0.5}px`;
+    scrollIndicator.style.width = `${indicatorDim-0.5}px`;
+    scrollIndicator.style.height = `${indicatorDim-0.5}px`;
+
+  })
 }

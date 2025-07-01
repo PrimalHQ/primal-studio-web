@@ -108,14 +108,14 @@ export const ImageGrid = Node.create({
 
       // Render images
       node.content.forEach((imageNode, index) => {
-        const imgWrapper = document.createElement('div')
+        const imgWrapper = document.createElement('div');
         imgWrapper.className = styles.imgWrapper;
 
-        const imgOverlay = document.createElement('div')
+        const imgOverlay = document.createElement('div');
         imgOverlay.className = styles.imgOverlay;
         imgOverlay.textContent = 'Remove this image';
 
-        const removeImageIcon = document.createElement('div')
+        const removeImageIcon = document.createElement('div');
         removeImageIcon.className = styles.closeIcon;
 
         // // Special positioning for 3 images
@@ -162,41 +162,57 @@ export const ImageGrid = Node.create({
       })
 
       setTimeout(() => {
-// Create scrollable container if needed
+      // Create scrollable container if needed
       if (hasOverflow) {
-        const containerW = container.getBoundingClientRect().width;
-        const containerH = containerW;
+        let containerW = container.getBoundingClientRect().width;
+        let containerH = containerW;
         container.style.maxHeight = `${containerH}px`;
         container.style.overflow = 'hidden';
-        // container.style.overflowY = 'auto'
+        // container.style.overflowY = 'scroll';
 
         // Add scroll indicator
         const scrollIndicator = document.createElement('div')
         scrollIndicator.className = styles.scrollIndicator;
         scrollIndicator.textContent = `+${totalImages - maxVisible}`;
 
+        const indicatorDim = containerW/2;
+        scrollIndicator.style.top = `${indicatorDim+0.5}px`;
+        scrollIndicator.style.left = `${indicatorDim+0.5}px`;
+        scrollIndicator.style.width = `${indicatorDim-0.5}px`;
+        scrollIndicator.style.height = `${indicatorDim-0.5}px`;
+
         container.appendChild(scrollIndicator)
 
-        container.addEventListener('mouseover', () => {
-          container.style.width = `${containerW + 6}px`;
-          container.style.overflowY = 'scroll';
-          container.style.paddingRight = '6px';
+        container.addEventListener('mouseenter', (event: MouseEvent) => {
+          const c = event.target as HTMLDivElement | null;
+          if (!c) return;
+
+          const cW = c.getBoundingClientRect().width;
+          c.style.width = `${cW + 6}px`;
+          c.style.overflowY = 'scroll';
+          c.style.paddingRight = '6px';
           scrollIndicator.style.opacity = '0';
         })
 
-        container.addEventListener('mouseout', () => {
-          container.style.width = 'min(100%, 500px)';
-          container.style.overflowY = 'hidden';
-          container.style.paddingRight = '0px';
+        container.addEventListener('mouseleave', (event: MouseEvent) => {
+          const c = event.target as HTMLDivElement | null;
+          if (!c) return;
 
-          const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+          c.style.width = 'min(100%, 500px)';
+          c.style.overflowY = 'hidden';
+          c.style.paddingRight = '0px';
+
+          const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
 
           scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
         })
 
         // Hide indicator when scrolled to bottom
-        container.addEventListener('scroll', () => {
-          const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+        container.addEventListener('scroll', (event: Event) => {
+          const c = event.target as HTMLDivElement | null;
+          if (!c) return;
+
+          const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
 
           if (isAtBottom && scrollIndicator.style.opacity === '1')
           scrollIndicator.style.opacity = '0';
@@ -222,10 +238,10 @@ export const ImageGrid = Node.create({
 
             // You might want to re-render the entire view here
             // For simplicity, return false to trigger a full re-render
-            return false
+            return false;
           }
 
-          return true
+          return true;
         },
         destroy: () => {
           // Cleanup if needed

@@ -57,7 +57,7 @@ import { removeEventFromPageStore } from 'src/stores/PageStore';
 import { doRequestDelete } from 'src/primal_api/events';
 import { Kind } from 'src/constants';
 import { ImageGrid } from '../ArticleEditor/ImageGrid';
-import { autoGroupImages, autoUngroupImages, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
+import { autoGroupImages, autoUngroupImages, refreshGalleryLayout, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
 import { Video } from '../ArticleEditor/VideoPlugin';
 
 let groupingTimeout: number | null = null;
@@ -534,13 +534,13 @@ const NoteEditor: Component<{
   }));
 
   createEffect(on(editorMode, async (mode, prev) => {
-      console.log('MODE: ', mode, prev)
     if (prev === undefined || mode === prev) return;
 
     if (
       ['html', 'phone'].includes(prev) &&
       ['html', 'phone'].includes(mode)
     ) {
+      refreshGalleryLayout();
       editorTipTap()?.commands.focus();
       return;
     }
@@ -563,6 +563,7 @@ const NoteEditor: Component<{
     html = html.replaceAll('<p></p>', '');
     html += '<p></p>';
     editorTipTap()?.chain().setContent(html, false).focus().run();
+
   }));
 
   const getEditorContent = async (mode: 'html' | 'text' | 'phone') => {

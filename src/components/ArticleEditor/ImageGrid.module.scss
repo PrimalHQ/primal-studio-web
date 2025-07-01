@@ -15,10 +15,10 @@
     font-size: 12px;
 
     position: absolute;
-    top: min(250.5px, 50%);
-    left: min(250.5px, 50%);
-    width: min(249.5px, 50%);
-    height: min(249.5px, 50%);
+    // top: min(250.5px, 50%);
+    // left: min(250.5px, 50%);
+    // width: min(249.5px, 50%);
+    // height: min(249.5px, 50%);
     z-index: 5;
     opacity: 1;
 
@@ -131,4 +131,5 @@
       }
     }
   }
+
 }
