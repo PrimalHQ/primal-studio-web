@@ -487,7 +487,7 @@ const NoteEditor: Component<{
           autoUngroupImages(editor);
           autoGroupImages(editor)
           groupingTimeout = null
-        }, 100)
+        }, 10)
 
         // Handle class updates independently
         if (classUpdateTimeout) {
@@ -497,9 +497,9 @@ const NoteEditor: Component<{
         classUpdateTimeout = setTimeout(() => {
           updateGridClassesDirectly(editor)
           classUpdateTimeout = null
-        }, 150) // Slightly longer delay
+        }, 50) // Slightly longer delay
       }
-    }
+    },
   }));
 
   createEffect(on( () => [props.note, editorTipTap()], async (changes) => {
