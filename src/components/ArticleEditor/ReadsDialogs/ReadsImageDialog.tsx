@@ -130,8 +130,7 @@ const ReadsImageDialog: Component<{
                           class={styles.titleImage}
                           onloadedmetadata={(event) => {
                             const v = event.target as HTMLVideoElement;
-                            setImageLoaded(true)
-                            console.log('LOADED: ', imageLoaded())
+                            setImageLoaded(true);
                             setState({ metadata: {
                               duration: v.duration,
                               videoWidth: v.videoWidth,

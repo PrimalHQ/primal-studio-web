@@ -180,3 +180,8 @@ export const headerSortOptions = (tab: string): SelectOption[] => {
 }
 
 export const wordsPerMinute = 238;
+
+export const mimetypes = {
+  img: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+  vid: ['image/webp', 'video/mp4', 'video/quicktime', 'video/ogg', 'video/webm'],
+};

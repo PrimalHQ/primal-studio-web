@@ -8,7 +8,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 import Text from '@tiptap/extension-text'
 import Link from '@tiptap/extension-link';
 import Mention from '@tiptap/extension-mention';
-import Image from '@tiptap/extension-image';
+// import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
@@ -55,10 +55,11 @@ import { fetchFeedTotals, notesStore } from 'src/pages/Notes/Notes.data';
 import { deleteFromInbox } from 'src/primal_api/studio';
 import { removeEventFromPageStore } from 'src/stores/PageStore';
 import { doRequestDelete } from 'src/primal_api/events';
-import { Kind } from 'src/constants';
+import { Kind, mimetypes } from 'src/constants';
 import { ImageGrid } from '../ArticleEditor/ImageGrid';
 import { autoGroupImages, autoUngroupImages, refreshGalleryLayout, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
 import { Video } from '../ArticleEditor/VideoPlugin';
+import Image from '../ArticleEditor/UrlPasteHandlePlugin';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -451,30 +452,12 @@ const NoteEditor: Component<{
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions,
-    editorProps: { handleDOMEvents: {
-      drop: (view, e) => { e.preventDefault(); },
-    } },
+    // editorProps: { handleDOMEvents: {
+    //   drop: (view, e) => { e.preventDefault(); },
+    // } },
     content: '',
     onCreate({ editor }) {
       editor.chain().focus().run();
-      // setEditorContent(editor, props.markdownContent);
-      // props.setEditor(editor);
-      // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
-    },
-    onUpdate({ editor, transaction }) {
-      // let content = editor.getHTML();
-      // content = content.replaceAll('<p></p>', '');
-      // editor.commands.setContent(content, false);
-      // console.log('UPDATED: ', content)
-      // let json = editor.getJSON().content;
-
-      // if (Array.isArray(json) && json.length === 1 && !json[0].hasOwnProperty("content")) {
-      //   content = null;
-      // }
-
-      // editor.emit('')
-
-      // props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
     onTransaction: ({ transaction, editor }) => {
        if (transaction.docChanged) {
@@ -485,8 +468,8 @@ const NoteEditor: Component<{
 
         groupingTimeout = setTimeout(() => {
           autoUngroupImages(editor);
-          autoGroupImages(editor)
-          groupingTimeout = null
+          autoGroupImages(editor);
+          groupingTimeout = null;
         }, 10)
 
         // Handle class updates independently
