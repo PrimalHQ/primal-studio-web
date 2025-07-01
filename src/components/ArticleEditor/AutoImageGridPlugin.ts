@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/core'
 
-export const areNodesConsecutive = (node1, node2, state) => {
+export const areNodesConsecutive = (node1: any, node2: any, state: any) => {
   const between = state.doc.slice(
     node1.pos + node1.node.nodeSize,
     node2.pos
@@ -8,7 +8,7 @@ export const areNodesConsecutive = (node1, node2, state) => {
 
   // Consider nodes consecutive if there's only whitespace or empty paragraphs between
   let hasOnlyWhitespace = true
-  between.content.forEach(node => {
+  between.content.forEach((node: any) => {
     if (node.type.name === 'paragraph' && (node.content.size === 0 || node.textContent.trim().length === 0)) {
       return // Empty paragraph is OK
     }
@@ -202,4 +202,51 @@ export const autoUngroupImages = (editor: Editor) => {
   if (modified) {
     editor.view.dispatch(tr)
   }
+}
+
+
+// Function to remove an image from a grid by index
+export const removeImageFromGrid = (editor: Editor, gridPos: number, imageIndex: number) => {
+  const { state } = editor
+  const tr = state.tr
+  const gridNode = state.doc.nodeAt(gridPos)
+
+  if (!gridNode || gridNode.type.name !== 'imageGrid') {
+    return false
+  }
+
+  // Get all images except the one to remove
+  const newContent: any[] = []
+  const newImages: any[] = []
+
+  gridNode.content.forEach((imageNode, index) => {
+    if (index !== imageIndex) {
+      newContent.push(imageNode)
+      newImages.push({
+        src: imageNode.attrs.src,
+        alt: imageNode.attrs.alt || '',
+        title: imageNode.attrs.title || ''
+      })
+    }
+  })
+
+  // If only one image left, convert back to single image
+  if (newContent.length === 1) {
+    tr.replaceWith(gridPos, gridPos + gridNode.nodeSize, newContent[0])
+  }
+  // If no images left, remove the grid entirely
+  else if (newContent.length === 0) {
+    tr.delete(gridPos, gridPos + gridNode.nodeSize)
+  }
+  // Otherwise, update the grid with remaining images
+  else {
+    const newGrid = state.schema.nodes.imageGrid.create(
+      { ...gridNode.attrs, images: newImages },
+      newContent
+    )
+    tr.replaceWith(gridPos, gridPos + gridNode.nodeSize, newGrid)
+  }
+
+  editor.view.dispatch(tr)
+  return true
 }

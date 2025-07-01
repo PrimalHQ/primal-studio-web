@@ -1,4 +1,15 @@
 import { Editor, Node, mergeAttributes } from '@tiptap/core'
+import styles from './ImageGrid.module.scss';
+import { removeImageFromGrid } from './AutoImageGridPlugin';
+
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    imageGrid: {
+      createImageGrid: (options: any) => ReturnType,
+    }
+  }
+}
 
 export const ImageGrid = Node.create({
   name: 'imageGrid',
@@ -24,6 +35,9 @@ export const ImageGrid = Node.create({
           return images
         },
       },
+      maxVisible: {
+        default: 4,
+      },
     }
   },
 
@@ -36,12 +50,18 @@ export const ImageGrid = Node.create({
   },
 
   renderHTML({ HTMLAttributes, node }) {
+
     const items = node.content.childCount;
+    const maxVisible = node.attrs.maxVisible || 4;
+    const hasOverflow = items > maxVisible;
 
     return ['div', mergeAttributes(HTMLAttributes, {
       'data-type': 'image-grid',
-      class: `image-grid-editor gallery-${items}`,
-      items,
+      'data-image-count': items,
+      'data-max-visible': maxVisible,
+      'data-has-overflow': hasOverflow,
+      class: `image-grid-editor ${hasOverflow ? 'scrollable' : ''} gallery-${Math.min(items, maxVisible)}`,
+      style: hasOverflow ? 'max-height: 400px; overflow-y: auto;' : '',
     }), 0]
   },
 
@@ -53,6 +73,164 @@ export const ImageGrid = Node.create({
           attrs: attributes,
         })
       },
+    }
+  },
+
+  addNodeView() {
+    return ({ node, HTMLAttributes, getPos, editor }) => {
+      const container = document.createElement('div');
+      const maxVisible = node.attrs.maxVisible || 4;
+      const totalImages = node.content.childCount;
+      const hasOverflow = totalImages > maxVisible;
+
+      const gridClass = styles[`gallery-${Math.min(totalImages, maxVisible)}`];
+
+      // Apply attributes
+      Object.entries(mergeAttributes(HTMLAttributes, {
+        'data-type': 'image-grid',
+        'data-image-count': totalImages,
+        'data-max-visible': maxVisible,
+        'data-has-overflow': hasOverflow,
+        class: `${styles.imageGridEditor} ${hasOverflow ? styles.scrollable : ''} ${gridClass}`,
+      })).forEach(([key, value]) => {
+        if (key === 'class') {
+          container.className = value
+        } else {
+          container.setAttribute(key, value)
+        }
+      })
+
+      container.style.width = 'min(500px, 100%)';
+
+
+      const visibleCount = Math.min(totalImages, maxVisible)
+
+
+      // Render images
+      node.content.forEach((imageNode, index) => {
+        const imgWrapper = document.createElement('div')
+        imgWrapper.className = styles.imgWrapper;
+
+        const imgOverlay = document.createElement('div')
+        imgOverlay.className = styles.imgOverlay;
+        imgOverlay.textContent = 'Remove this image';
+
+        const removeImageIcon = document.createElement('div')
+        removeImageIcon.className = styles.closeIcon;
+
+        // // Special positioning for 3 images
+        if (visibleCount === 3) {
+          if (index === 0) {
+            imgWrapper.style.gridColumn = '1 / -1'
+          }
+        }
+
+        const img = document.createElement('img')
+        img.src = imageNode.attrs.src
+        img.alt = imageNode.attrs.alt || ''
+        img.title = imageNode.attrs.title || ''
+        img.style.cssText = `
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        `
+
+        img.addEventListener('mouseenter', () => {
+          // img.style.transform = 'scale(1.05)'
+        })
+
+        img.addEventListener('mouseleave', () => {
+          // img.style.transform = 'scale(1)'
+        })
+
+        // Add click handler for image actions (optional)
+        img.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (typeof getPos === 'function') {
+            const pos = getPos();
+            if (pos !== undefined) {
+              removeImageFromGrid(editor, pos, index);
+            }
+          }
+        })
+
+        imgOverlay.appendChild(removeImageIcon);
+        imgWrapper.appendChild(img);
+        imgWrapper.appendChild(imgOverlay);
+        container.appendChild(imgWrapper);
+      })
+
+      setTimeout(() => {
+// Create scrollable container if needed
+      if (hasOverflow) {
+        const containerW = container.getBoundingClientRect().width;
+        const containerH = containerW;
+        container.style.maxHeight = `${containerH}px`;
+        container.style.overflow = 'hidden';
+        // container.style.overflowY = 'auto'
+
+        // Add scroll indicator
+        const scrollIndicator = document.createElement('div')
+        scrollIndicator.className = styles.scrollIndicator;
+        scrollIndicator.textContent = `+${totalImages - maxVisible}`;
+
+        container.appendChild(scrollIndicator)
+
+        container.addEventListener('mouseover', () => {
+          container.style.width = `${containerW + 6}px`;
+          container.style.overflowY = 'scroll';
+          container.style.paddingRight = '6px';
+          scrollIndicator.style.opacity = '0';
+        })
+
+        container.addEventListener('mouseout', () => {
+          container.style.width = 'min(100%, 500px)';
+          container.style.overflowY = 'hidden';
+          container.style.paddingRight = '0px';
+
+          const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+
+          scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
+        })
+
+        // Hide indicator when scrolled to bottom
+        container.addEventListener('scroll', () => {
+          const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 10;
+
+          if (isAtBottom && scrollIndicator.style.opacity === '1')
+          scrollIndicator.style.opacity = '0';
+        })
+      }
+
+      }, 100)
+
+      return {
+        dom: container,
+        contentDOM: null, // We're handling content rendering ourselves
+        update: (updatedNode) => {
+          if (updatedNode.type !== node.type) return false
+
+          // Re-render if content changed
+          if (updatedNode.content.childCount !== node.content.childCount) {
+            // Update the view
+            const newTotalImages = updatedNode.content.childCount;
+            const newHasOverflow = newTotalImages > maxVisible;
+
+            container.setAttribute('data-image-count', `${newTotalImages}`)
+            container.setAttribute('data-has-overflow', `${newHasOverflow}`)
+
+            // You might want to re-render the entire view here
+            // For simplicity, return false to trigger a full re-render
+            return false
+          }
+
+          return true
+        },
+        destroy: () => {
+          // Cleanup if needed
+        }
+      }
     }
   },
 })
