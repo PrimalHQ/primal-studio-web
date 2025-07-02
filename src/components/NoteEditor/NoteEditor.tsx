@@ -59,7 +59,7 @@ import { Kind, mimetypes } from 'src/constants';
 import { ImageGrid } from '../ArticleEditor/ImageGrid';
 import { autoGroupImages, autoUngroupImages, refreshGalleryLayout, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
 import { Video } from '../ArticleEditor/VideoPlugin';
-import Image from '../ArticleEditor/UrlPasteHandlePlugin';
+import { EnhancedImage, SmartImagePasteHandler } from '../ArticleEditor/UrlPasteHandlePlugin';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -190,7 +190,8 @@ const NoteEditor: Component<{
       protocols: ['http', 'https'],
     }),
     Video,
-    Image.configure({ inline: true }),
+    EnhancedImage.configure({ inline: true }),
+    SmartImagePasteHandler,
     ImageGrid,
     CodeBlock,
     // Markdown.configure({

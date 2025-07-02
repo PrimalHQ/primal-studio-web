@@ -1,23 +1,140 @@
 import { Image } from '@tiptap/extension-image'
+import { Plugin } from 'prosemirror-state'
+import { Extension } from '@tiptap/core'
 
-export default Image.extend({
+
+export const isImageUrl = (text) => {
+  return /^https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?$/i.test(text.trim())
+};
+
+
+export const containsImageUrls = (text) => {
+  return /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi.test(text)
+};
+
+export const processTextWithImages = (view, text) => {
+  const { schema } = view.state
+  let tr = view.state.tr.deleteSelection()
+  let insertPos = tr.selection.from
+
+  // Split by lines first
+  const lines = text.split(/\r?\n/)
+
+  lines.forEach((line, lineIndex) => {
+    if (!line.trim()) {
+      // Empty line - add paragraph
+      if (lineIndex < lines.length - 1) {
+        const emptyParagraph = schema.nodes.paragraph.create()
+        tr = tr.insert(insertPos, emptyParagraph)
+        insertPos += emptyParagraph.nodeSize
+      }
+      return
+    }
+
+    // Process each line for URLs
+    const urlRegex = /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi
+    const parts = splitTextByUrls(line, urlRegex)
+
+    let lineContent = []
+
+    parts.forEach(part => {
+      if (isImageUrl(part)) {
+        // Add any accumulated text first
+        if (lineContent.length > 0) {
+          const textContent = lineContent.join(' ').trim()
+          if (textContent) {
+            const textNode = schema.text(textContent)
+            const paragraph = schema.nodes.paragraph.create({}, textNode)
+            tr = tr.insert(insertPos, paragraph)
+            insertPos += paragraph.nodeSize
+          }
+          lineContent = []
+        }
+
+        // Add image
+        const imageNode = schema.nodes.image.create({ src: part })
+        tr = tr.insert(insertPos, imageNode)
+        insertPos += imageNode.nodeSize
+      } else {
+        lineContent.push(part)
+      }
+    })
+
+    // Add any remaining text
+    if (lineContent.length > 0) {
+      const textContent = lineContent.join(' ').trim()
+      if (textContent) {
+        const textNode = schema.text(textContent)
+        const paragraph = schema.nodes.paragraph.create({}, textNode)
+        tr = tr.insert(insertPos, paragraph)
+        insertPos += paragraph.nodeSize
+      }
+    }
+  })
+
+  view.dispatch(tr)
+};
+
+export const splitTextByUrls = (text, urlRegex) => {
+  const parts = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Add text before URL
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index))
+    }
+
+    // Add URL
+    parts.push(match[0])
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex))
+  }
+
+  return parts.filter(part => part.trim())
+};
+
+export const SmartImagePasteHandler = Extension.create({
+  name: 'smartImagePasteHandler',
+  priority: 1000,
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        props: {
+          handlePaste: (view, event, slice) => {
+            const text = event.clipboardData?.getData('text/plain')
+
+            if (text && containsImageUrls(text)) {
+              processTextWithImages(view, text)
+              return true
+            }
+
+            return false
+          },
+        },
+      }),
+    ]
+  },
+})
+
+// Keep the paste rules as fallback
+export const EnhancedImage = Image.extend({
   addPasteRules() {
     return [
       {
-        find: /(?:https?:\/\/)?(?:www\.)?[\w\-\.]+\.[\w]{2,}\/[\w\-\.\/]*\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[\w\-\.=&]*)?/gi,
+        find: /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi,
         handler: ({ state, range, match }) => {
-          let url = match[0]
-
-          // Add protocol if missing
-          if (!url.startsWith('http')) {
-            url = 'https://' + url
-          }
-
-          const node = state.schema.nodes.image.create({ src: url })
-          const transaction = state.tr.replaceRangeWith(range.from, range.to, node)
-          return transaction
+          const url = match[0]
+          const imageNode = state.schema.nodes.image.create({ src: url })
+          return state.tr.replaceRangeWith(range.from, range.to, imageNode)
         },
-        priority: 102,
+        priority: 1000,
       },
     ]
   },
