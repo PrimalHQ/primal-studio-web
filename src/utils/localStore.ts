@@ -21,6 +21,7 @@ export type LocalStore = {
   emojiHistory: EmojiOption[],
   graphSpans: Record<string, GraphSpan>,
   mediaPageConfig: MediaPageConfig,
+  emergencyNoteDraft: string,
 };
 
 
@@ -34,7 +35,8 @@ export const emptyStorage: LocalStore = {
   connectToPrimaryRelays: false,
   emojiHistory: [],
   graphSpans: {},
-  mediaPageConfig: {}
+  mediaPageConfig: {},
+  emergencyNoteDraft: '',
 }
 
 export const storageName = (pubkey?: string) => {
@@ -330,4 +332,28 @@ export const readMediaPageConfig  = (
   const store = getStorage(pubkey);
 
   return store.mediaPageConfig;
+}
+
+
+export const storeEmergencyNoteDraft = (
+  pubkey: string | undefined,
+  json: string,
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.emergencyNoteDraft = json;
+
+  setStorage(pubkey, store);
+}
+
+export const readEmergencyNoteDraft  = (
+  pubkey: string | undefined,
+) => {
+  if (!pubkey) return '';
+
+  const store = getStorage(pubkey);
+
+  return store.emergencyNoteDraft;
 }

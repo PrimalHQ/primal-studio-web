@@ -63,6 +63,7 @@ import { Video } from '../ArticleEditor/VideoPlugin';
 import { EnhancedImage, SmartImagePasteHandler } from '../ArticleEditor/UrlPasteHandlePlugin';
 import UploaderBlossom from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
+import { readEmergencyNoteDraft, storeEmergencyNoteDraft } from 'src/utils/localStore';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -479,8 +480,12 @@ const NoteEditor: Component<{
     //   drop: (view, e) => { e.preventDefault(); },
     // } },
     content: '',
-    onCreate({ editor }) {
+    onCreate: ({ editor }) => {
       editor.chain().focus().run();
+    },
+    onUpdate: ({ editor }) => {
+      const json = editor.getJSON();
+      storeEmergencyNoteDraft(accountStore.pubkey, JSON.stringify(json));
     },
     onTransaction: ({ transaction, editor }) => {
        if (transaction.docChanged) {
@@ -508,6 +513,22 @@ const NoteEditor: Component<{
     },
   }));
 
+  createEffect(on(() => [props.open, editorTipTap()], async (changes) => {
+    const open = changes[0] as boolean;
+    const editor = changes[1] as Editor;
+
+    if (!open || props.note || !editor) return;
+
+    const jsonString = readEmergencyNoteDraft(accountStore.pubkey);
+
+    if (jsonString === '') return;
+
+    const json = JSON.parse(jsonString);
+    let html = generateHTML(json, extensions);
+    html = await processMarkdownForNostr(html);
+    editor.chain().setContent(html).run();
+  }));
+
   createEffect(on( () => [props.note, editorTipTap()], async (changes) => {
     const note = changes[0] as PrimalNote;
     const editor = changes[1] as Editor;
@@ -529,7 +550,6 @@ const NoteEditor: Component<{
     }
 
   }));
-
 
   createEffect(on( () => props.draft, async (draft) => {
     if (!draft) return;
@@ -999,6 +1019,10 @@ const NoteEditor: Component<{
             <ButtonSecondary
               onClick={() => {
                 props.onDone && props.onDone();
+
+                setTimeout(() => {
+                  storeEmergencyNoteDraft(accountStore.pubkey, '');
+                }, 0);
               }}
             >
               Cancel
