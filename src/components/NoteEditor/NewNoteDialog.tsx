@@ -26,6 +26,7 @@ const NewNoteDialog: Component<{
                 onDone={() => props.setOpen && props.setOpen(false)}
                 note={props.note}
                 draft={props.draft}
+                open={props.open}
               />
             </KobalteDialog.Description>
           </KobalteDialog.Content>

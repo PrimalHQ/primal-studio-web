@@ -31,6 +31,7 @@
     "@solidjs/router": "0.15.2",
     "@tiptap/extension-bubble-menu": "2.12.0",
     "@tiptap/extension-code-block": "2.12.0",
+    "@tiptap/extension-file-handler": "2.23.1",
     "@tiptap/extension-gapcursor": "2.12.0",
     "@tiptap/extension-image": "2.12.0",
     "@tiptap/extension-link": "2.12.0",

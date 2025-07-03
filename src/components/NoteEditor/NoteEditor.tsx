@@ -16,6 +16,7 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import Gapcursor from '@tiptap/extension-gapcursor';
 import CodeBlock from '@tiptap/extension-code-block';
+import FileHandler from '@tiptap/extension-file-handler';
 import { PluginKey } from '@tiptap/pm/state';
 
 import { NAddrExtension } from "../ArticleEditor/nAddrMention";
@@ -60,6 +61,8 @@ import { ImageGrid } from '../ArticleEditor/ImageGrid';
 import { autoGroupImages, autoUngroupImages, refreshGalleryLayout, updateGridClassesDirectly } from '../ArticleEditor/AutoImageGridPlugin';
 import { Video } from '../ArticleEditor/VideoPlugin';
 import { EnhancedImage, SmartImagePasteHandler } from '../ArticleEditor/UrlPasteHandlePlugin';
+import UploaderBlossom from '../Uploader/UploaderBlossom';
+import { Progress } from '@kobalte/core/progress';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -69,6 +72,7 @@ const NoteEditor: Component<{
   onDone?: () => void,
   note?: PrimalNote,
   draft?: PrimalDraft,
+  open?: boolean,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -94,6 +98,12 @@ const NoteEditor: Component<{
   const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
 
   const [isInboxDraft, setIsInboxDraft] = createSignal(false);
+
+  createEffect(() => {
+    if (!props.open) {
+      resetUpload();
+    }
+  })
 
   const addMentionToEditor = (user: PrimalUser | undefined, editor?: Editor) => {
     if (!editor || ! user) return;
@@ -194,6 +204,18 @@ const NoteEditor: Component<{
     SmartImagePasteHandler,
     ImageGrid,
     CodeBlock,
+    FileHandler.configure({
+      allowedMimeTypes: [
+        ...mimetypes.img,
+        ...mimetypes.vid,
+      ],
+      onDrop: (editor, files, pos) => {
+        uploadFile(files);
+      },
+      onPaste: (currentEditor, files, htmlContent) => {
+        uploadFile(files);
+      },
+    }),
     // Markdown.configure({
     //   html: true,
     //   breaks: false,
@@ -710,6 +732,25 @@ const NoteEditor: Component<{
 
   };
 
+  let contentFileUpload: HTMLInputElement | undefined;
+
+  const [fileToUpload, setFileToUpload] = createSignal<File>();
+  const [isUploading, setIsUploading] = createSignal(false);
+  const [cancelUploading, setCancelUploading] = createSignal<() => void>();
+  const [imageLoaded, setImageLoaded] = createSignal(false);
+
+  const uploadFile = (filesToUpload?: File[]) => {
+    const files = filesToUpload || contentFileUpload?.files;
+    if (!files || files.length === 0) return;
+
+    setFileToUpload(files[0]);
+  }
+
+  const resetUpload = () => {
+    setFileToUpload(undefined);
+    setIsUploading(false);
+  };
+
   return (
     <>
       <div class={styles.editorNoteToolbar}>
@@ -717,9 +758,19 @@ const NoteEditor: Component<{
           <button
             id="attachFile"
             class={styles.mdToolButton}
-            onClick={() => setShowAttach(true)}
+            onClick={() => contentFileUpload?.click()}
             title={'attach a file'}
           >
+
+            <input
+              id="upload-new-media"
+              type="file"
+              onChange={() => uploadFile()}
+              ref={contentFileUpload}
+              hidden={true}
+              accept="image/*,video/*,audio/*"
+            />
+
             <div class={`${styles.attachIcon} ${styles.active}`}></div>
           </button>
 
@@ -817,6 +868,65 @@ const NoteEditor: Component<{
             autoResize={true}
           />
         </TextField>
+      </div>
+
+      <div class={styles.editorNoteUploader}>
+        <UploaderBlossom
+          uploadId="upload_content_image"
+          hideLabel={false}
+          publicKey={accountStore.pubkey}
+          nip05={activeUser()?.nip05}
+          file={fileToUpload()}
+          cancelSignal={!props.open}
+          onFail={() => {
+            toast?.sendWarning(`upload_fail ${fileToUpload()?.name}`);
+            resetUpload();
+          }}
+          onRefuse={(reason: string) => {
+            if (reason === 'file_too_big_100') {
+              toast?.sendWarning('file_too_big_100');
+            }
+            if (reason === 'file_too_big_1024') {
+              toast?.sendWarning('file_too_big_1024');
+            }
+            resetUpload();
+          }}
+          onCancel={() => {
+            resetUpload();
+          }}
+          onSuccess={(url:string, uploadId?: string, file?: File) => {
+            resetUpload();
+
+            if (!file) return;
+
+            if (file.type.startsWith('image')) {
+              editorTipTap()?.chain().focus().setImage({ src: url }).run();
+            }
+
+            if (file.type.startsWith('video')) {
+              editorTipTap()?.chain().focus().setVideo({ src: url }).run();
+            }
+
+          }}
+          onStart={(_, cancelUpload) => {
+            setIsUploading(true);
+            setImageLoaded(false);
+            setCancelUploading(() => cancelUpload);
+          }}
+          progressBar={(uploadState) => {
+            return (
+              <Progress value={uploadState.progress} class={styles.uploadProgress}>
+                <div class={styles.progressTrackContainer}>
+                  <Progress.Track class={styles.progressTrack}>
+                    <Progress.Fill
+                      class={`${styles.progressFill}`}
+                    />
+                  </Progress.Track>
+                </div>
+              </Progress>
+            );
+          }}
+        />
       </div>
 
       <div class={styles.editorNoteFooter}>
@@ -928,7 +1038,7 @@ const NoteEditor: Component<{
         }}
       />
 
-      <ReadsImageDialog
+      {/* <ReadsImageDialog
         open={showAttach()}
         setOpen={(v: boolean) => setShowAttach(() => v)}
         editor={editorTipTap()}
@@ -943,7 +1053,7 @@ const NoteEditor: Component<{
 
           setShowAttach(false);
         }}
-      />
+      /> */}
 
       <ReadsPublishingDateDialog
         open={showPublishDateDialog()}

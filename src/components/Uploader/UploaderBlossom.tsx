@@ -21,6 +21,7 @@ const UploaderBlossom: Component<{
   nip05?: string,
   hideLabel?: boolean,
   file: File | undefined,
+  cancelSignal?: boolean,
   onFail?: (reason: string, uploadId?: string) => void,
   onRefuse?: (reason: string, uploadId?: string) => void,
   onCancel?: (uploadId?: string) => void,
@@ -253,6 +254,19 @@ const UploaderBlossom: Component<{
     }
   }))
 
+
+  createEffect(() => {
+    if (props.cancelSignal) {
+      cancelUpload();
+    }
+  });
+
+  const cancelUpload = () => {
+    uploadState.xhr?.abort();
+    resetUpload();
+    props.onCancel && props.onCancel(props.uploadId);
+  }
+
   return (
     <Show when={uploadState.id}>
       <Show
@@ -274,11 +288,7 @@ const UploaderBlossom: Component<{
             </Progress.Track>
 
             <ButtonGhost
-              onClick={() => {
-                uploadState.xhr?.abort();
-                resetUpload();
-                props.onCancel && props.onCancel(props.uploadId);
-              }}
+              onClick={cancelUpload}
               disabled={uploadState.progress >= 100}
             >
               <Show
