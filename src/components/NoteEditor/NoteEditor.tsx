@@ -681,6 +681,9 @@ const NoteEditor: Component<{
 
     if (success && note) {
       toast?.sendSuccess('Proposal sent');
+
+      storeEmergencyNoteDraft(accountStore.pubkey, '');
+
       fetchFeedTotals(accountStore.pubkey, {
         since: notesStore.graphSpan.since(),
         until: notesStore.graphSpan.until(),
@@ -727,6 +730,8 @@ const NoteEditor: Component<{
       await sendNote(content, tags);
 
     if (success && note) {
+
+      storeEmergencyNoteDraft(accountStore.pubkey, '');
 
       const draft = props.draft;
 
