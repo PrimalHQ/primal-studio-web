@@ -227,7 +227,7 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
     pageStore.notes.feedPages.length > 0
   ) return;
 
-  query(fetchNotes, 'fetchNotes')(pk, { since, until, limit: 30, offset: 0 });
-    query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'notes' });
+  query(fetchNotes, 'fetchNotes')(pk, { since, until, limit: 30, offset: 0, criteria: notesStore.tabCriteriaOptions[notesStore.tab] });
+  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'notes' });
   // fetchNotes(pk, { since, until, limit: 30, offset: 0 });
 }

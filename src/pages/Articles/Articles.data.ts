@@ -239,7 +239,7 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
     pageStore.articles.feedPages.length > 0
   ) return;
 
-  query(fetchArticles, 'fetchArticles')(pk, { since, until, limit: 30, offset: 0 });
+  query(fetchArticles, 'fetchArticles')(pk, { since, until, limit: 30, offset: 0, criteria: articlesStore.tabCriteriaOptions[articlesStore.tab] });
   query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'articles' });
   // fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }
