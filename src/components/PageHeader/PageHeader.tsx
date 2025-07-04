@@ -7,6 +7,8 @@ import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
 import DatePicker from '@rnwonder/solid-date-picker';
 import utils from "@rnwonder/solid-date-picker/utilities";
 import dayjs from 'dayjs';
+import { availableSpans } from 'src/constants';
+
 
 const PageHeader: Component<{
   id?: string,
@@ -25,78 +27,57 @@ const PageHeader: Component<{
         <div class={styles.graphSpans}>
           <button
             class={`${props.selection === '7d' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: '7d',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor((new Date()).getTime() / 1_000) - 7 * 24 * 60 * 60,
-              resolution: 'day',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[0]
+            )}
           >
             7D
           </button>
           <button
             class={`${props.selection === '2w' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: '2w',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor((new Date()).getTime() / 1_000) - 14 * 24 * 60 * 60,
-              resolution: 'day',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[1]
+            )}
           >
             2W
           </button>
           <button
             class={`${props.selection === '1m' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: '1m',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
-              resolution: 'day',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[2]
+            )}
           >
             1M
           </button>
           <button
             class={`${props.selection === '3m' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: '3m',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
-              resolution: 'day',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[3]
+            )}
           >
             3M
           </button>
           <button
             class={`${props.selection === 'ytd' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: 'ytd',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1_000),
-              resolution: 'month',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[4]
+            )}
           >
             YTD
           </button>
           <button
             class={`${props.selection === '1y' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: '1y',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: Math.floor((new Date()).getTime() / 1_000) - 365 * 24 * 60 * 60,
-              resolution: 'month',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[5]
+            )}
           >
             1Y
           </button>
           <button
             class={`${props.selection === 'all' ? styles.active : ''}`}
-            onClick={() => props.onSpanSelect && props.onSpanSelect({
-              name: 'all',
-              until: Math.floor((new Date()).getTime() / 1_000),
-              since: 0,
-              resolution: 'month',
-            })}
+            onClick={() => props.onSpanSelect && props.onSpanSelect(
+              availableSpans[6]
+            )}
           >
             All
           </button>
@@ -127,8 +108,8 @@ const PageHeader: Component<{
 
                   props.onSpanSelect && props.onSpanSelect({
                     name: 'custom',
-                    since: sd.unix(),
-                    until: ed.unix(),
+                    since: () => sd.unix(),
+                    until: () => ed.unix(),
                     resolution,
                   })
                 }

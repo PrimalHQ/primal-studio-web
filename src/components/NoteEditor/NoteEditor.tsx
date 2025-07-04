@@ -639,8 +639,8 @@ const NoteEditor: Component<{
       toast?.sendSuccess('Saved draft');
 
       fetchFeedTotals(accountStore.pubkey, {
-        since: notesStore.graphSpan.since,
-        until: notesStore.graphSpan.until,
+        since: notesStore.graphSpan.since(),
+        until: notesStore.graphSpan.until(),
         kind: 'notes'
       });
 
@@ -682,8 +682,8 @@ const NoteEditor: Component<{
     if (success && note) {
       toast?.sendSuccess('Proposal sent');
       fetchFeedTotals(accountStore.pubkey, {
-        since: notesStore.graphSpan.since,
-        until: notesStore.graphSpan.until,
+        since: notesStore.graphSpan.since(),
+        until: notesStore.graphSpan.until(),
         kind: 'notes'
       });
 
@@ -742,8 +742,8 @@ const NoteEditor: Component<{
       }
 
       fetchFeedTotals(accountStore.pubkey, {
-        since: notesStore.graphSpan.since,
-        until: notesStore.graphSpan.until,
+        since: notesStore.graphSpan.since(),
+        until: notesStore.graphSpan.until(),
         kind: 'notes'
       });
 

@@ -14,15 +14,15 @@ import { readGraphSpan } from "src/utils/localStore";
 
 export type GraphSpan = {
   name: string,
-  since: number,
-  until: number,
+  since: () => number,
+  until: () => number,
   resolution: 'day' | 'month' | 'hour',
 }
 
 export const defaultSpan = (): GraphSpan => ({
   name: '1m',
-  until: Math.floor((new Date()).getTime() / 1_000),
-  since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+  until: () => Math.floor((new Date()).getTime() / 1_000),
+  since: () => Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
   resolution: 'day',
 });
 
@@ -195,10 +195,10 @@ export const preloadHome = (args: RoutePreloadFuncArgs) => {
     pageStore.homeNotes.feedPages.length > 0
   ) return;
 
-  query(fetchHomeTotals, 'fetchHomeTotals')(pk, { since, until });
-  query(fetchHomeGraph, 'fetchHomeGraph')(pk, { since, until, resolution });
-  query(fetchHomeNotes, 'fetchHomeNotes')(pk, { since, until, limit: 30, offset: 0 });
-  query(fetchHomeArticles, 'fetchHomeArticles')(pk, { since, until, limit: 30, offset: 0 });
+  query(fetchHomeTotals, 'fetchHomeTotals')(pk, { since: since(), until: until() });
+  query(fetchHomeGraph, 'fetchHomeGraph')(pk, { since: since(), until: until(), resolution });
+  query(fetchHomeNotes, 'fetchHomeNotes')(pk, { since: since(), until: until(), limit: 30, offset: 0 });
+  query(fetchHomeArticles, 'fetchHomeArticles')(pk, { since: since(), until: until(), limit: 30, offset: 0 });
 
   // fetchHomeTotals(pk, { since, until });
   // fetchHomeGraph(pk, { since, until, resolution });

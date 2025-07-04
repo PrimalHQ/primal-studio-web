@@ -80,8 +80,8 @@ const Articles: Component = () => {
     fetchArticles(
       params.pubkey || accountStore.pubkey,
       {
-        since,
-        until,
+        since: since(),
+        until: until(),
         offset,
         limit: 30,
         criteria: articlesStore.tabCriteriaOptions[articlesStore.tab],
@@ -112,7 +112,7 @@ const Articles: Component = () => {
   }
 
   createEffect(on(
-    () => [articlesStore.graphSpan.since, articlesStore.graphSpan.until],
+    () => [articlesStore.graphSpan.since(), articlesStore.graphSpan.until()],
     (changes, prev) => {
       if (!prev) return;
       // When graph span changes
@@ -133,7 +133,7 @@ const Articles: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetArticleLists(pubkey, { since, until, criteria });
+    resetArticleLists(pubkey, { since: since(), until: until(), criteria });
   }));
 
   createEffect(on(() => articlesStore.tab, (state, prev) => {
@@ -143,7 +143,7 @@ const Articles: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetArticleLists(pubkey, { since, until, state });
+    resetArticleLists(pubkey, { since: since(), until: until(), state });
   }));
 
 
@@ -277,8 +277,8 @@ const Articles: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'drafts');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: articlesStore.graphSpan.since,
-                                until: articlesStore.graphSpan.until,
+                                since: articlesStore.graphSpan.since(),
+                                until: articlesStore.graphSpan.until(),
                                 kind: 'articles'
                               });
                             }}
@@ -312,8 +312,8 @@ const Articles: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'drafts');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: articlesStore.graphSpan.since,
-                                until: articlesStore.graphSpan.until,
+                                since: articlesStore.graphSpan.since(),
+                                until: articlesStore.graphSpan.until(),
                                 kind: 'articles'
                               });
                             }}
@@ -326,8 +326,8 @@ const Articles: Component = () => {
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');
                                 fetchFeedTotals(accountStore.pubkey, {
-                                  since: articlesStore.graphSpan.since,
-                                  until: articlesStore.graphSpan.until,
+                                  since: articlesStore.graphSpan.since(),
+                                  until: articlesStore.graphSpan.until(),
                                   kind: 'articles'
                                 });
                               }}
@@ -356,8 +356,8 @@ const Articles: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'drafts');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: articlesStore.graphSpan.since,
-                                until: articlesStore.graphSpan.until,
+                                since: articlesStore.graphSpan.since(),
+                                until: articlesStore.graphSpan.until(),
                                 kind: 'articles'
                               });
                             }}
@@ -370,8 +370,8 @@ const Articles: Component = () => {
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');
                                 fetchFeedTotals(accountStore.pubkey, {
-                                  since: articlesStore.graphSpan.since,
-                                  until: articlesStore.graphSpan.until,
+                                  since: articlesStore.graphSpan.since(),
+                                  until: articlesStore.graphSpan.until(),
                                   kind: 'articles'
                                 });
                               }}
@@ -394,8 +394,8 @@ const Articles: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'reads');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: articlesStore.graphSpan.since,
-                                until: articlesStore.graphSpan.until,
+                                since: articlesStore.graphSpan.since(),
+                                until: articlesStore.graphSpan.until(),
                                 kind: 'articles'
                               });
                             }}
@@ -434,8 +434,8 @@ const Articles: Component = () => {
                           onDelete={(id: string) => {
                             removeEventFromPageStore(id, 'reads');
                             fetchFeedTotals(accountStore.pubkey, {
-                              since: articlesStore.graphSpan.since,
-                              until: articlesStore.graphSpan.until,
+                              since: articlesStore.graphSpan.since(),
+                              until: articlesStore.graphSpan.until(),
                               kind: 'articles'
                             });
                           }}

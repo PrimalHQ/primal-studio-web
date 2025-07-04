@@ -1,5 +1,5 @@
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
-import { Kind } from "src/constants";
+import { availableSpans, Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
 import { mediaSortOptions } from "src/pages/Media/Media.data";
 import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
@@ -19,7 +19,7 @@ export type LocalStore = {
   proxyThroughPrimal: boolean,
   connectToPrimaryRelays: boolean,
   emojiHistory: EmojiOption[],
-  graphSpans: Record<string, GraphSpan>,
+  graphSpans: Record<string, { name: string, resolution: 'day' | 'month' | 'hour', since: number, until: number}>,
   mediaPageConfig: MediaPageConfig,
   emergencyNoteDraft: string,
 };
@@ -257,20 +257,20 @@ export const readEmojiHistory = (pubkey: string | undefined) => {
 export const defaultSpans = (): Record<string, GraphSpan> => ({
   home: {
     name: '1m',
-    until: Math.floor((new Date()).getTime() / 1_000),
-    since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
     resolution: 'day',
   },
   notes: {
     name: '3m',
-    until: Math.floor((new Date()).getTime() / 1_000),
-    since: Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
     resolution: 'day',
   },
   articles: {
     name: 'all',
-    until: Math.floor((new Date()).getTime() / 1_000),
-    since: 0,
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => 0,
     resolution: 'month',
   },
 })
@@ -286,7 +286,12 @@ export const storeGraphSpan = (
 
   store.graphSpans = {
     ...store.graphSpans,
-    [page]: { ...span },
+    [page]: {
+      name: span.name,
+      resolution: span.resolution,
+      since: span.since(),
+      until: span.until(),
+     },
   }
 
   setStorage(pubkey, store);
@@ -295,17 +300,29 @@ export const storeGraphSpan = (
 export const readGraphSpan = (
   pubkey: string | undefined,
   page: string,
-) => {
-  if (!pubkey) return {};
+): GraphSpan => {
+  if (!pubkey) return defaultSpans()[page] || availableSpans[2];
 
   const store = getStorage(pubkey);
 
-  return (store.graphSpans[page] || defaultSpans()[page] || {
-    name: '1m',
-    until: Math.floor((new Date()).getTime() / 1_000),
-    since: Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
-    resolution: 'day',
-  }) as GraphSpan;
+  const storedSpan = store.graphSpans[page];
+
+  if (storedSpan) {
+    if (storedSpan.name === 'custom') {
+      return {
+        name: storedSpan.name,
+        resolution: storedSpan.resolution,
+        since: () => storedSpan.since,
+        until: () => storedSpan.until,
+      }
+    }
+
+    const available = availableSpans.find(span => span.name === storedSpan.name);
+
+    return available || availableSpans[0];
+  }
+
+  return defaultSpans()[page] || availableSpans[2];
 }
 
 export const storeMediaPageConfig = (

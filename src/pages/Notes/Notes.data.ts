@@ -115,8 +115,8 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
       }
 
       fetchFeedTotals(accountStore.pubkey, {
-        since: notesStore.graphSpan.since,
-        until: notesStore.graphSpan.until,
+        since: notesStore.graphSpan.since(),
+        until: notesStore.graphSpan.until(),
         kind: 'notes',
       });
     },
@@ -154,8 +154,8 @@ export const fetchNotes = async (
   'published-replied' :
   (options?.state || notesStore.tab);
 
-  let since = options?.since || notesStore.graphSpan.since;
-  let until = options?.until || notesStore.graphSpan.until;
+  let since = options?.since || notesStore.graphSpan.since();
+  let until = options?.until || notesStore.graphSpan.until();
 
   if (!['published', 'published-replied'].includes(state)) {
     since = 0;
@@ -217,7 +217,7 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
 
   if (!pk) return;
 
-  const span = readGraphSpan(accountStore.pubkey, 'notes');
+  let span = readGraphSpan(accountStore.pubkey, 'notes');
 
   setNotesStore('graphSpan', () => ({ ...span }));
 
@@ -227,7 +227,7 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
     pageStore.notes.feedPages.length > 0
   ) return;
 
-  query(fetchNotes, 'fetchNotes')(pk, { since, until, limit: 30, offset: 0, criteria: notesStore.tabCriteriaOptions[notesStore.tab] });
-  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'notes' });
+  query(fetchNotes, 'fetchNotes')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria: notesStore.tabCriteriaOptions[notesStore.tab] });
+  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since: since(), until: until(), kind: 'notes' });
   // fetchNotes(pk, { since, until, limit: 30, offset: 0 });
 }

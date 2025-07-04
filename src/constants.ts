@@ -1,4 +1,5 @@
 import { SelectOption } from "./components/SelectBox/SelectBox";
+import { GraphSpan } from "./pages/Home/Home.data";
 
 export const THEMES = ['studio_dark', 'studio_light'];
 
@@ -185,3 +186,48 @@ export const mimetypes = {
   img: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
   vid: ['image/webp', 'video/mp4', 'video/quicktime', 'video/ogg', 'video/webm'],
 };
+
+export const availableSpans: GraphSpan[] = [
+  {
+    name: '7d',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 7 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  {
+    name: '2w',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 14 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  {
+    name: '1m',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 30 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  {
+    name: '3m',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 3 * 30 * 24 * 60 * 60,
+    resolution: 'day',
+  },
+  {
+    name: 'ytd',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1_000),
+    resolution: 'month',
+  },
+  {
+    name: '1y',
+    until: () => Math.floor((new Date()).getTime() / 1_000),
+    since: () => Math.floor((new Date()).getTime() / 1_000) - 365 * 24 * 60 * 60,
+    resolution: 'month',
+  },
+  {
+    name: 'all',
+    until: () => 0,
+    since: () => 0,
+    resolution: 'month',
+  },
+];

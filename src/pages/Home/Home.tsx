@@ -78,7 +78,7 @@ const Home: Component = () => {
   }
 
   createEffect(on(
-    () => [homeStore.graphSpan.since, homeStore.graphSpan.until, homeStore.graphSpan.resolution],
+    () => [homeStore.graphSpan.since(), homeStore.graphSpan.until(), homeStore.graphSpan.resolution],
     (changes, prev) => {
       if (!prev) return;
       // When graph span changes
@@ -104,7 +104,7 @@ const Home: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetNoteLists(pubkey, { since, until, criteria });
+    resetNoteLists(pubkey, { since: since(), until: until(), criteria });
   }));
 
   createEffect(on(() => homeStore.articleSort, (criteria, prev) => {
@@ -113,7 +113,7 @@ const Home: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetArticleLists(pubkey, { since, until, criteria });
+    resetArticleLists(pubkey, { since: since(), until: until(), criteria });
   }));
 
   const loadNextNotesPage = () => {
@@ -126,8 +126,8 @@ const Home: Component = () => {
     fetchHomeNotes(
       params.pubkey || accountStore.pubkey,
       {
-        since,
-        until,
+        since: since(),
+        until: until(),
         offset,
         limit: 30,
         pubkey: params.pubkey,
@@ -146,8 +146,8 @@ const Home: Component = () => {
     fetchHomeArticles(
       params.pubkey || accountStore.pubkey,
       {
-        since,
-        until,
+        since: since(),
+        until: until(),
         offset,
         limit: 30,
         criteria: homeStore.articleSort,

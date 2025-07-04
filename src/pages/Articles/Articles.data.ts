@@ -129,8 +129,8 @@ export const deleteSelected = async (type: 'notes' | 'reads' | 'users' | 'drafts
       }
 
       fetchFeedTotals(accountStore.pubkey, {
-        since: articlesStore.graphSpan.since,
-        until: articlesStore.graphSpan.until,
+        since: articlesStore.graphSpan.since(),
+        until: articlesStore.graphSpan.until(),
         kind: 'articles',
       });
     },
@@ -166,8 +166,8 @@ export const fetchArticles = async (
 
     const state = options?.state || articlesStore.tab;
 
-    let since = options?.since || articlesStore.graphSpan.since;
-    let until = options?.until || articlesStore.graphSpan.until;
+    let since = options?.since || articlesStore.graphSpan.since();
+    let until = options?.until || articlesStore.graphSpan.until();
 
     if (!['published'].includes(state)) {
       since = 0;
@@ -239,7 +239,7 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
     pageStore.articles.feedPages.length > 0
   ) return;
 
-  query(fetchArticles, 'fetchArticles')(pk, { since, until, limit: 30, offset: 0, criteria: articlesStore.tabCriteriaOptions[articlesStore.tab] });
-  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since, until, kind: 'articles' });
+  query(fetchArticles, 'fetchArticles')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria: articlesStore.tabCriteriaOptions[articlesStore.tab] });
+  query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since: since(), until: until(), kind: 'articles' });
   // fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }

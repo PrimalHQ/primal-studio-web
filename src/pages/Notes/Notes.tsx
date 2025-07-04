@@ -80,8 +80,8 @@ const Notes: Component = () => {
     fetchNotes(
       params.pubkey || accountStore.pubkey,
       {
-        since,
-        until,
+        since: since(),
+        until: until(),
         offset,
         limit: 30,
         criteria: notesStore.tabCriteriaOptions[notesStore.tab],
@@ -116,13 +116,13 @@ const Notes: Component = () => {
   }
 
   createEffect(on(
-    () => [notesStore.graphSpan.since, notesStore.graphSpan.until],
+    () => [notesStore.graphSpan.since(), notesStore.graphSpan.until()],
     (changes, prev) => {
       if (!prev) return;
       // When graph span changes
 
-      const since = changes[0] as number;
-      const until = changes[1] as number;
+      const since = changes[0] || 0;
+      const until = changes[1] || 0;
 
       if (since === prev[0] && until === prev[1]) return;
 
@@ -138,7 +138,7 @@ const Notes: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetNotesLists(pubkey, { since, until, criteria });
+    resetNotesLists(pubkey, { since: since(), until: until(), criteria });
   }));
 
   createEffect(on(() => notesStore.tab, (state, prev) => {
@@ -148,7 +148,7 @@ const Notes: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetNotesLists(pubkey, { since, until, state });
+    resetNotesLists(pubkey, { since: since(), until: until(), state });
   }));
 
 
@@ -158,7 +158,7 @@ const Notes: Component = () => {
 
     const pubkey = params.pubkey || accountStore.pubkey;
 
-    resetNotesLists(pubkey, { since, until, showReplies });
+    resetNotesLists(pubkey, { since: since(), until: until(), showReplies });
   }));
 
 
@@ -290,8 +290,8 @@ const Notes: Component = () => {
                               removeEventFromPageStore(id, 'drafts');
 
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: notesStore.graphSpan.since,
-                                until: notesStore.graphSpan.until,
+                                since: notesStore.graphSpan.since(),
+                                until: notesStore.graphSpan.until(),
                                 kind: 'notes'
                               });
                             }}
@@ -305,8 +305,8 @@ const Notes: Component = () => {
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');
                                 fetchFeedTotals(accountStore.pubkey, {
-                                  since: notesStore.graphSpan.since,
-                                  until: notesStore.graphSpan.until,
+                                  since: notesStore.graphSpan.since(),
+                                  until: notesStore.graphSpan.until(),
                                   kind: 'notes'
                                 });
                               }}
@@ -331,8 +331,8 @@ const Notes: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'drafts');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: notesStore.graphSpan.since,
-                                until: notesStore.graphSpan.until,
+                                since: notesStore.graphSpan.since(),
+                                until: notesStore.graphSpan.until(),
                                 kind: 'notes'
                               });
                             }}
@@ -346,8 +346,8 @@ const Notes: Component = () => {
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');
                                 fetchFeedTotals(accountStore.pubkey, {
-                                  since: notesStore.graphSpan.since,
-                                  until: notesStore.graphSpan.until,
+                                  since: notesStore.graphSpan.since(),
+                                  until: notesStore.graphSpan.until(),
                                   kind: 'notes'
                                 });
                               }}
@@ -376,8 +376,8 @@ const Notes: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'drafts');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: notesStore.graphSpan.since,
-                                until: notesStore.graphSpan.until,
+                                since: notesStore.graphSpan.since(),
+                                until: notesStore.graphSpan.until(),
                                 kind: 'notes'
                               });
                             }}
@@ -391,8 +391,8 @@ const Notes: Component = () => {
                               onDelete={(id: string) => {
                                 removeEventFromPageStore(id, 'drafts');
                                 fetchFeedTotals(accountStore.pubkey, {
-                                  since: notesStore.graphSpan.since,
-                                  until: notesStore.graphSpan.until,
+                                  since: notesStore.graphSpan.since(),
+                                  until: notesStore.graphSpan.until(),
                                   kind: 'notes'
                                 });
                               }}
@@ -415,8 +415,8 @@ const Notes: Component = () => {
                             onDelete={(id: string) => {
                               removeEventFromPageStore(id, 'notes');
                               fetchFeedTotals(accountStore.pubkey, {
-                                since: notesStore.graphSpan.since,
-                                until: notesStore.graphSpan.until,
+                                since: notesStore.graphSpan.since(),
+                                until: notesStore.graphSpan.until(),
                                 kind: 'notes'
                               });
                             }}
@@ -456,8 +456,8 @@ const Notes: Component = () => {
                           onDelete={(id: string) => {
                             removeEventFromPageStore(id, 'notes');
                             fetchFeedTotals(accountStore.pubkey, {
-                              since: notesStore.graphSpan.since,
-                              until: notesStore.graphSpan.until,
+                              since: notesStore.graphSpan.since(),
+                              until: notesStore.graphSpan.until(),
                               kind: 'notes'
                             });
                           }}
