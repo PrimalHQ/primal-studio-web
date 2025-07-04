@@ -23,8 +23,11 @@ import PricingCardTeam from './PricingCardTeam';
 import BuyProDialog from './BuyProDialog';
 import BuyTeamDialog from './BuyTeamDialog';
 import { isPhone } from 'src/utils/ui';
+import { accountStore } from 'src/stores/AccountStore';
+import { globalNavigate } from 'src/App';
 
 const Landing: Component = () => {
+  const navigate = globalNavigate();
 
   const [showGetStarted, setShowGetStarted] = createSignal(false);
   const [showSignIn, setShowSignIn] = createSignal(false);
@@ -47,20 +50,31 @@ const Landing: Component = () => {
 
   return (
     <div class={styles.landing}>
-
       <div class={styles.introSection}>
         <div class={styles.header}>
           <img class={styles.logo} src={logo} />
           <div class={styles.headerActions}>
             <button
               class={styles.signInButton}
-              onClick={() => setShowSignIn(true)}
+              onClick={() => {
+                if (accountStore.accountIsReady) {
+                  navigate('/home');
+                  return;
+                }
+                setShowSignIn(true);
+              }}
             >
               Sign In
             </button>
             <button
               class={styles.getStartedButton}
-              onClick={() => setShowGetStarted(true)}
+              onClick={() => {
+                if (accountStore.accountIsReady) {
+                  navigate('/home');
+                  return;
+                }
+                setShowGetStarted(true);
+              }}
             >
               Get Started
             </button>

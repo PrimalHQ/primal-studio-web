@@ -1,4 +1,4 @@
-import { Component, createSignal, lazy, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, lazy, on, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './App.module.scss';
 import { AppProvider } from './context/AppContext';
@@ -40,6 +40,15 @@ const App: Component = () => {
   onCleanup(() => {
     disconnect();
   });
+
+  createEffect(on(() => accountStore.accountIsReady, (ready, prev) => {
+    if (window.location.pathname === '/') return;
+
+    if (ready === false && prev === undefined) {
+      window.open('/', '_self');
+    }
+
+  }));
 
 
   const primalWindow = window as PrimalWindow;

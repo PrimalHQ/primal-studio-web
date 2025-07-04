@@ -50,7 +50,7 @@ export type AccountStore = {
   metadata: NostrEventContent | undefined,
   blossomServers: string[],
   recomendedBlossomServers: string[],
-  accountIsReady: boolean,
+  accountIsReady: boolean | undefined,
   membershipStatus: MembershipStatus,
   premiumStatus: MembershipStatus,
   emojiHistory: EmojiOption[],
@@ -64,7 +64,7 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   metadata: undefined,
   blossomServers: [],
   recomendedBlossomServers: [],
-  accountIsReady: false,
+  accountIsReady: undefined,
   membershipStatus: {},
   premiumStatus: {},
   emojiHistory: [],
@@ -126,6 +126,7 @@ const setSec = (sec: string | undefined, force?: boolean) => {
   }
 
   logError('BAD SEC: ', sec);
+  updateAccountStore('accountIsReady', () => false);
 }
 
 export const loadStoredPubkey = () => {
@@ -174,6 +175,7 @@ export const fetchNostrKey = async () => {
     if (!sec) {
       updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
       localStorage.removeItem('pubkey');
+      updateAccountStore('accountIsReady', () => false);
       return;
     }
 
@@ -210,6 +212,7 @@ export const fetchNostrKey = async () => {
     updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
     localStorage.removeItem('pubkey');
     logError('error fetching public key: ', e);
+  updateAccountStore('accountIsReady', () => false);
   }
 }
 
