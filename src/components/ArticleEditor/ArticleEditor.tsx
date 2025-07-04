@@ -337,22 +337,22 @@ const ArticleEditor: Component<{
   }));
 
   const setEditorContent = async (editor: Editor, content: string) => {
-    let c = await mdToHtml(content.replaceAll('\n\n', '\n'));
+    let c = await mdToHtml(content);
 
-    c = c.replaceAll('<p></p>', '');
-    c += '<p></p>';
-
-    editor.chain().
-      setContent(c, false).
-      focus().run();
-
-
-    c = c.replaceAll('<p></p>', '');
-    c += '<p></p>';
+    // c = c.replaceAll('<p></p>', '');
+    // c += '<p></p>';
 
     editor.chain().
       setContent(c, false).
       focus().run();
+
+
+    // c = c.replaceAll('<p></p>', '');
+    // c += '<p></p>';
+
+    // editor.chain().
+    //   setContent(c, false).
+    //   focus().run();
   }
 
 
