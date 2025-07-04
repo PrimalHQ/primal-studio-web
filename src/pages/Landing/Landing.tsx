@@ -58,7 +58,7 @@ const Landing: Component = () => {
               class={styles.signInButton}
               onClick={() => {
                 if (accountStore.accountIsReady) {
-                  navigate('/home');
+                  navigate?.('/home');
                   return;
                 }
                 setShowSignIn(true);
@@ -70,7 +70,7 @@ const Landing: Component = () => {
               class={styles.getStartedButton}
               onClick={() => {
                 if (accountStore.accountIsReady) {
-                  navigate('/home');
+                  navigate?.('/home');
                   return;
                 }
                 setShowGetStarted(true);

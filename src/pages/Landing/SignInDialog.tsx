@@ -76,7 +76,7 @@ const SignInDialog: Component<{
             <div class={styles.newToNostr}>
               Pro tip: bookmark the Primal Studio home page to sign in automatically.
             </div>
-            <button onClick={() => props.setOpen?.(false)}>I am Ready, Let’s Go!</button>
+            <button onClick={() => props.setOpen?.(false)}>I Understand</button>
           </div>
         </div>
       </Show>

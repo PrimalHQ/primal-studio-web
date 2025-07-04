@@ -81,7 +81,7 @@ const GetStartedDialog: Component<{
             <div class={styles.newToNostr}>
               New to Nostr? <a href="https://primal.net/join" target="_blank">Join now</a>.
             </div>
-            <button onClick={() => props.setOpen?.(false)}>I am Ready, Let’s Go!</button>
+            <button onClick={() => props.setOpen?.(false)}>I Understand</button>
           </div>
         </div>
       </Show>
