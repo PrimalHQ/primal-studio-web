@@ -1,32 +1,56 @@
-import { Component, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 
 import styles from './Landing.module.scss';
 import Dialog from 'src/components/Dialogs/Dialog';
 
-import branding from 'src/assets/images/primal_studio_dark.svg';
-import { useNavigate } from '@solidjs/router';
-import { isIPhone, isAndroid } from '@kobalte/utils';
+import brandingDark from 'src/assets/images/primal_studio_dark.svg';
+import brandingLight from 'src/assets/images/primal_studio_light.svg';
+
+import { isPhone } from 'src/utils/ui';
+import { globalNavigate } from 'src/App';
+
 
 const SignInDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
 }> = (props) => {
-  const navigate = useNavigate();
+  const [branding, setBranding] = createSignal(brandingDark);
 
-  const isIOS = () => {
-    return isIPhone() || /(iPad|iPhone|iPod)/.test(navigator.userAgent);
-  };
+  createEffect(() => {
+    if (!props.open) return;
 
+    const html: HTMLElement | null = document.querySelector('html');
+    const theme = html?.getAttribute('data-theme');
+
+    const brand = theme === 'studio_dark' ? brandingDark : brandingLight;
+
+    setBranding(brand);
+  })
+
+  createEffect(on(() => props.open, (open, prev) => {
+
+    if (prev=== undefined || open || open === prev) return;
+
+    const navigate = globalNavigate();
+
+    if (isPhone()) {
+      if (window.location.pathname === '/') return;
+      navigate?.('/') || window.open('/', '_self');
+      return;
+    }
+
+    navigate?.('/home');
+  }));
   return (
     <Dialog
       triggerClass="displayNone"
       open={props.open}
       setOpen={props.setOpen}
-      title={<img src={branding} width={140} height={34} />}
+      title={<img src={branding()} width={140} height={34} />}
     >
       <Show
-        when={!isIOS() && !isAndroid()}
+        when={!isPhone()}
         fallback={
           <div class={styles.signInDialog}>
             <div class={styles.message}>
@@ -52,7 +76,7 @@ const SignInDialog: Component<{
             <div class={styles.newToNostr}>
               Pro tip: bookmark the Primal Studio home page to sign in automatically.
             </div>
-            <button onClick={() => navigate('/home')}>I am Ready, Let’s Go!</button>
+            <button onClick={() => props.setOpen?.(false)}>I am Ready, Let’s Go!</button>
           </div>
         </div>
       </Show>
