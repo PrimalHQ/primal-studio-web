@@ -5,6 +5,7 @@ import { APP_ID } from "src/App";
 import { extractRelayConfigFromTags } from "src/utils/relays";
 import { NostrRelaySettings } from "src/primal";
 import { Relay } from "src/utils/nTools";
+import { importEvents, triggerImportEvents } from "./events";
 
 export const getDefaultRelays = async (subId: string) => {
   let relayList: string[] = [];
@@ -86,7 +87,13 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelaySetti
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, { relays });
+  const result = await sendEvent(event, { relays });
+
+  if (result.success && result.note) {
+    triggerImportEvents([result.note]);
+  }
+
+  return result
 };
 
 export const sendBlossomEvent = async (list: string[]) => {
