@@ -1,5 +1,5 @@
 
-import { mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range } from '@tiptap/core';
+import { mergeAttributes, Node, nodePasteRule, NodeViewRenderer, PasteRuleMatch, Range } from '@tiptap/core';
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 
@@ -31,14 +31,14 @@ export const findMissingUser = async (nprofile: string) => {
   if (!user) {
     const users = await getUsers([pubkey]);
     updateMentionStore('users', () => ({ [pubkey]: { ...users[0] } }));
+
   }
 
   setTimeout(() => {
-    const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
-    mention && (mention.innerHTML = `@${userName(user.pubkey)}`);
+    const mention = document.querySelector(`span[data-type=${decode.type}][data-bech32=${nprofile}]`);
+    mention && (mention.innerHTML = `@${userName(pubkey)}`);
   }, 0);
 }
-
 
 export type NProfileAttributes = {
   type: 'nprofile' | 'npub'
@@ -128,6 +128,28 @@ export const NProfileExtension = Node.create({
   inline: true,
   group: 'inline',
   priority: 1000,
+
+
+  addNodeView(): NodeViewRenderer {
+    return ({ node, editor, getPos, HTMLAttributes, decorations, extension }) => {
+      const dom = document.createElement('span');
+      dom.classList.add('linkish_editor');
+
+      // Set attributes on the main div
+      Object.entries(node.attrs).forEach(([attr, value]) => {
+        dom.setAttribute(`data-${attr}`, String(value));
+      });
+
+      // Set the text content
+      dom.innerText = `@${node.attrs.bech32}`;
+
+      findMissingUser(node.attrs.bech32);
+
+      return {
+        dom,
+      }
+    }
+  },
 
   addStorage() {
     return {
