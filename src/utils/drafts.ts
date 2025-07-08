@@ -1,11 +1,14 @@
-import { PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
+import { NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { decrypt44 } from "./nostrApi";
 import { logError, logWarning } from "./logger";
-import { emptyMentions, extractReplyToFromTags, noActions } from "./feeds";
+import { emptyMentions, encodeCoordinate, extractReplyToFromTags, noActions } from "./feeds";
 import { Kind } from "src/constants";
 import DOMPurify from 'dompurify';
 import { nip19 } from "./nTools";
 import { accountStore } from "src/stores/AccountStore";
+import { getUsers } from "src/primal_api/profile";
+import { fetchArticles, fetchNotes } from "src/primal_api/events";
+import { APP_ID } from "src/App";
 
 export const parseDraftContent = async (drafts: PrimalDraft[]) => {
   let parsedDrafts: PrimalDraft[] = [];
@@ -38,14 +41,17 @@ export const parseDraftContent = async (drafts: PrimalDraft[]) => {
 }
 
 
-export const parseDraftedEvent = (
+export const parseDraftedEvent = async (
   draft: PrimalDraft,
-): PrimalArticle | PrimalNote | undefined => {
+): Promise<PrimalArticle | PrimalNote | undefined> => {
   if (!draft) return;
 
   const event = draft.draftedEvent;
 
   if (!event) return;
+
+
+  const mentions = await parseEventForMentions(event);
 
   if ([Kind.LongForm].includes(draft.contentKind)) {
     // const { coordinate, naddr } = encodeCoordinate(event, Kind.LongForm);
@@ -63,6 +69,10 @@ export const parseDraftedEvent = (
       mentionedHighlights,
       mentionedZaps,
     } = emptyMentions();
+
+    mentionedUsers = [...mentions.users];
+    mentionedNotes = [...mentions.users];
+    mentionedArticles = [...mentions.users];
 
     let newRead = {
       id: event.id,
@@ -107,7 +117,16 @@ export const parseDraftedEvent = (
       studioStats: {
         satszapped: 0,
         score: 0,
-        sentiment: "neutral"
+        sentiment: "neutral",
+        zaps: 0,
+        quotes: 0,
+        replies: 0,
+        replies_long: 0,
+        replies_short: 0,
+        replies_medium: 0,
+        reposts: 0,
+        bookmarks: 0,
+        reactions: 0,
       },
       relayHints,
     } as PrimalArticle;
@@ -160,6 +179,10 @@ export const parseDraftedEvent = (
       mentionedZaps,
     } = emptyMentions();
 
+    mentionedUsers = [...mentions.users];
+    mentionedNotes = [...mentions.users];
+    mentionedArticles = [...mentions.users];
+
     const eventPointer: nip19.EventPointer = {
       id: note.id,
       author: note.pubkey,
@@ -199,7 +222,16 @@ export const parseDraftedEvent = (
       studioStats: {
         satszapped: 0,
         score: 0,
-        sentiment: "neutral"
+        sentiment: "neutral",
+        zaps: 0,
+        quotes: 0,
+        replies: 0,
+        replies_long: 0,
+        replies_short: 0,
+        replies_medium: 0,
+        reposts: 0,
+        bookmarks: 0,
+        reactions: 0,
       },
 
       created_at: note.created_at || 0,
@@ -230,5 +262,96 @@ export const parseDraftedEvent = (
   }
 
   return;
+
+}
+
+export const parseEventForMentions = async (event: NostrEventContent) => {
+
+  let pubkeys: string[] = [];
+  let eventIds: string[] = [];
+  let adresses: string[] = [];
+
+  // Get ids from tags
+  pubkeys = (event.tags || []).reduce((acc, t) => {
+    if (t[0] === 'p') return [...acc, t[1]];
+
+    return acc;
+  }, []);
+
+  eventIds = (event.tags || []).reduce((acc, t) => {
+    if (t[0] === 'e') return [...acc, t[1]];
+
+    return acc;
+  }, []);
+
+  adresses = (event.tags || []).reduce((acc, t) => {
+    if (t[0] === 'a') {
+      const [kind, pubkey, identifier] = t[1].split(':');
+
+      const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+
+      return [...acc, naddr];
+    }
+
+    return acc;
+  }, []);
+
+  // get ids from content, just in case
+  const content = event.content || '';
+
+  const patterns = {
+    npub: /npub1[a-zA-Z0-9]+/g,
+    nprofile: /nprofile1[a-zA-Z0-9]+/g,
+    note: /note1[a-zA-Z0-9]+/g,
+    nevent: /nevent1[a-zA-Z0-9]+/g,
+    naddr: /naddr1[a-zA-Z0-9]+/g
+  };
+
+  for (const pattern of Object.values(patterns)) {
+    const matches = content.match(pattern);
+    if (!matches) continue;
+
+    for (let i =0; i< matches.length; i++) {
+      const decoded = nip19.decode(matches[i]);
+
+      if (decoded.type === 'npub' && !pubkeys.includes(decoded.data)) {
+        pubkeys.push(decoded.data);
+        continue;
+      }
+
+      if (decoded.type === 'nprofile' && !pubkeys.includes(decoded.data.pubkey)) {
+        pubkeys.push(decoded.data.pubkey);
+        continue;
+      }
+
+      if (decoded.type === 'nevent' && !eventIds.includes(decoded.data.id)) {
+        eventIds.push(decoded.data.id);
+        continue;
+      }
+
+      if (decoded.type === 'note' && !eventIds.includes(decoded.data)) {
+        eventIds.push(decoded.data);
+        continue;
+      }
+
+      if (decoded.type === 'naddr') {
+        const naddr = nip19.naddrEncode({
+          kind: decoded.data.kind,
+          identifier: decoded.data.identifier,
+          pubkey: decoded.data.pubkey,
+          relays: decoded.data.relays,
+        })
+        !adresses.includes(naddr) && adresses.push(naddr);
+        continue;
+      }
+    }
+
+  }
+
+  const users = await getUsers(pubkeys);
+  const notes = await fetchNotes(accountStore.pubkey, eventIds, `get_notes_${APP_ID}`);
+  const articles = await fetchArticles(adresses, `get_articles_${APP_ID}`);
+
+  return  { users, notes, articles };
 
 }
