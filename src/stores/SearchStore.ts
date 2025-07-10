@@ -228,19 +228,23 @@ export const getRecomendedUsers = (profiles?: PrimalUser[]) => {
     },
     onEose: () => {
 
-      let sorted: PrimalUser[] = [];
+      // let sorted: PrimalUser[] = [];
 
-      users.forEach((user) => {
-        const index = recomendedUsers.indexOf(user.pubkey);
-        sorted[index] = { ...user };
-      });
+      const known = profiles?.map(p => p.pubkey) || [];
+
+      users = users.filter(u => !known.includes(u.pubkey))
+
+      // users.forEach((user) => {
+      //   const index = recomendedUsers.indexOf(user.pubkey);
+      //   sorted[index] = { ...user };
+      // });
 
       if (profiles) {
-        sorted = [...profiles, ...sorted].slice(0, 9);
+        users = [...profiles, ...users].slice(0, 9);
       }
 
       batch(() => {
-        updateSearchStore('users', () => sorted);
+        updateSearchStore('users', () => users);
         updateSearchStore('isFetchingUsers', () => false);
       })
 
@@ -402,7 +406,11 @@ export const fetchUserSearch = (pubkey: string | undefined, subId: string, query
 
 
 export const fetchRecomendedUsersAsync = async (profiles?: PrimalUser[]) => {
-  const recomended = await getUsers(recomendedUsers);
+  let recomended = await getUsers(recomendedUsers);
+
+  const known = searchStore.userHistory.profiles.map(p => p.pubkey);
+
+  recomended = recomended.filter(u => !known.includes(u.pubkey));
 
   return [...searchStore.userHistory.profiles, ...recomended].slice(0, 9);
 };

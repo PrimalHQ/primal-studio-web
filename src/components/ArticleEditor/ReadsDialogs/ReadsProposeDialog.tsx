@@ -288,7 +288,7 @@ const ReadsProposeDialog: Component<{
                   title={userName(user.pubkey)}
                   description={nip05Verification(user)}
                   icon={<Avatar user={user} size={36} />}
-                  statNumber={searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
+                  statNumber={user.userStats?.followers_count || searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
                   statLabel={'Followers'}
                   onClick={() => selectUser(user)}
                 />
