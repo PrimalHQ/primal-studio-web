@@ -10,6 +10,8 @@ import { nip19 } from "src/utils/nTools";
 import { primalAPI, subsTo } from "src/utils/socket";
 import { accountStore } from "./AccountStore";
 import { logError } from "src/utils/logger";
+import { batch } from "solid-js";
+import { readUserHistory, storeUserHistory } from "src/utils/localStore";
 
 export type SearchStore = {
   users: PrimalUser[],
@@ -237,8 +239,10 @@ export const getRecomendedUsers = (profiles?: PrimalUser[]) => {
         sorted = [...profiles, ...sorted].slice(0, 9);
       }
 
-      updateSearchStore('users', () => sorted);
-      updateSearchStore('isFetchingUsers', () => false);
+      batch(() => {
+        updateSearchStore('users', () => sorted);
+        updateSearchStore('isFetchingUsers', () => false);
+      })
 
       unsub();
     },
@@ -369,41 +373,66 @@ export const fetchUserSearch = (pubkey: string | undefined, subId: string, query
     let users: PrimalUser[] = [];
     let scores: Record<string, number> = {};
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        if (!content) return;
+    let page = { ...emptyEventFeedPage() };
 
-        if (content.kind === Kind.Metadata) {
-          users.push(convertToUser(content, content.pubkey!));
-          return;
-        }
-
-        if (content.kind === Kind.UserScore) {
-          scores = JSON.parse(content.content!);
-          return;
-        }
+    primalAPI({
+      subId,
+      action: () => searchUsers(pubkey, subId, query),
+      onEvent: (event) => {
+        updateFeedPage(page, event);
       },
       onEose: () => {
-        unsub();
+        const { users } = pageResolve(page);
 
         const sorted = users.sort((a, b) => {
-          const aScore = scores[a.pubkey];
-          const bScore = scores[b.pubkey];
+          const aScore = a.userStats?.followers_count || 0;
+          const bScore = b.userStats?.followers_count || 0;
 
           return bScore - aScore;
         });
 
-        users = sorted.slice(0, 10);
-
-        resolve(users);
+        resolve(sorted.slice(0, 10));
       },
+      onNotice: () => {
+        reject('failed_to_fetch_users');
+      }
     });
-
-    searchUsers(pubkey, subId, query);
   });
 };
 
 
 export const fetchRecomendedUsersAsync = async (profiles?: PrimalUser[]) => {
-  return await getUsers(recomendedUsers);
+  const recomended = await getUsers(recomendedUsers);
+
+  return [...searchStore.userHistory.profiles, ...recomended].slice(0, 9);
 };
+
+export const addToUserHistory = (user: PrimalUser) => {
+  const stats = user.userStats;
+
+  let history = searchStore.userHistory.profiles;
+
+  if (history.map(p => p.pubkey).includes(user.pubkey)) {
+    history = [ {...user }, ...history.filter(p => p.pubkey !== user.pubkey)];
+    return;
+  }
+
+  history = [{...user }, ...history];
+
+  batch(() => {
+    updateSearchStore('userHistory', 'profiles', profiles => [{ ...user}, ...profiles] );
+    if (stats) {
+      updateSearchStore('userHistory', 'stats', hStats => ({...hStats, [user.pubkey]: { ...stats }}));
+    }
+  });
+
+  storeUserHistory(accountStore.pubkey, history);
+}
+
+export const loadUserHistory = async () => {
+  const history = readUserHistory(accountStore.pubkey);
+
+  const users = await getUsers(history);
+
+  updateSearchStore('userHistory', 'profiles', () => [...users]);
+}

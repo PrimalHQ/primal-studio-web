@@ -25,6 +25,7 @@ import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
 import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings, settingsStore } from "src/stores/SettingsStore";
 import { updateRelays } from "src/stores/RelayStore";
+import { loadUserHistory } from "src/stores/SearchStore";
 
 
 export type AppContextStore = {
@@ -148,6 +149,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     getRecomendedBlossomServers();
 
     loadEmojiHistoryFromLocalStore();
+    loadUserHistory();
   })
 
   // Handle fetching users identity --------------------------------------------

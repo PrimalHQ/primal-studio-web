@@ -26,7 +26,7 @@ import { createTiptapEditor } from 'solid-tiptap';
 import { PrimalArticle, PrimalDraft, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { accountStore, activeUser, saveEmoji } from 'src/stores/AccountStore';
-import { fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
+import { addToUserHistory, fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from 'src/App';
 import tippy, { Instance } from 'tippy.js';
@@ -296,6 +296,8 @@ const NoteEditor: Component<{
           };
 
           setSearchQuery(() => '');
+
+          addToUserHistory(user)
 
           editor
             .chain()

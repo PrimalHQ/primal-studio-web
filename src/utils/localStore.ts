@@ -2,7 +2,7 @@ import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { availableSpans, Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
 import { mediaSortOptions } from "src/pages/Media/Media.data";
-import { NostrEventContent, NostrRelaySettings, PrimalTheme, UserMetadataContent } from "src/primal";
+import { NostrEventContent, NostrRelaySettings, PrimalTheme, PrimalUser, UserMetadataContent } from "src/primal";
 
 export type MediaPageConfig = {
   server?: string,
@@ -22,6 +22,7 @@ export type LocalStore = {
   graphSpans: Record<string, { name: string, resolution: 'day' | 'month' | 'hour', since: number, until: number}>,
   mediaPageConfig: MediaPageConfig,
   emergencyNoteDraft: string,
+  userHistory: string[],
 };
 
 
@@ -37,6 +38,7 @@ export const emptyStorage: LocalStore = {
   graphSpans: {},
   mediaPageConfig: {},
   emergencyNoteDraft: '',
+  userHistory: [],
 }
 
 export const storageName = (pubkey?: string) => {
@@ -351,7 +353,6 @@ export const readMediaPageConfig  = (
   return store.mediaPageConfig;
 }
 
-
 export const storeEmergencyNoteDraft = (
   pubkey: string | undefined,
   json: string,
@@ -373,4 +374,27 @@ export const readEmergencyNoteDraft  = (
   const store = getStorage(pubkey);
 
   return store.emergencyNoteDraft;
+}
+
+export const storeUserHistory = (
+  pubkey: string | undefined,
+  userHistory: PrimalUser[],
+) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.userHistory = userHistory.map(u => u.pubkey);
+
+  setStorage(pubkey, store);
+}
+
+export const readUserHistory  = (
+  pubkey: string | undefined,
+) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey);
+
+  return store.userHistory;
 }

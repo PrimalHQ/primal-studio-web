@@ -64,8 +64,21 @@ export const userName = (pubkey: string | undefined) => {
     user.name ||
     truncateNpub(npub);
 
-  return name || truncateNpub(npub);
+  return name;
 };
+
+export const nameFromUser = (user: PrimalUser) => {
+  if (!user) {
+    return '';
+  }
+
+  const name = user.displayName ||
+    user.displayName ||
+    user.name ||
+    truncateNpub(user.npub);
+
+  return name;
+}
 
 export const parseUserMetadata = (metadata: NostrEventContent, legendConfig?: LegendCustomizationConfig) => {
   if (metadata.kind !== Kind.Metadata) return;

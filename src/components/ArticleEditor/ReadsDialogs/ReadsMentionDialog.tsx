@@ -15,7 +15,7 @@ import { PrimalUser, PrimalNote, PrimalArticle } from 'src/primal';
 import { userName } from 'src/utils/profile';
 import { subsTo } from 'src/utils/socket';
 import { previousWord, nip05Verification } from 'src/utils/ui';
-import { clearSearch, findContent, findUserByNupub, findUsers, getRecomendedUsers, removeEvent, searchStore } from 'src/stores/SearchStore';
+import { addToUserHistory, clearSearch, findContent, findUserByNupub, findUsers, getRecomendedUsers, removeEvent, searchStore } from 'src/stores/SearchStore';
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Dialog from 'src/components/Dialogs/Dialog';
 import ArticlePreviewSuggestion, { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
@@ -232,6 +232,7 @@ const ReadsMentionDialog: Component<{
                   // @ts-ignore
                   onClick={() => {
                     if (!searchInput) return;
+
                     pop?.hide()
                     let v = searchInput.value;
                     const filter = suggestedTerm().split(':')[0] || '';
@@ -295,7 +296,9 @@ const ReadsMentionDialog: Component<{
   };
 
   const selectUser = (user: PrimalUser) => {
+    addToUserHistory(user)
     props.onAddUser(user, userRelays[user.pubkey]);
+
     resetQuery();
   }
 
@@ -363,7 +366,7 @@ const ReadsMentionDialog: Component<{
                       title={userName(user.pubkey)}
                       description={nip05Verification(user)}
                       icon={<Avatar user={user} size={36} />}
-                      statNumber={searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
+                      statNumber={user.userStats?.followers_count || searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
                       statLabel={'Followers'}
                       onClick={() => selectUser(user)}
                     />
