@@ -961,9 +961,9 @@ const NoteEditor: Component<{
             <Show
               when={!proposedUser()}
               fallback={
-                <div class={styles.advSelection}>
+                <div class={styles.advSelection} title={userName(proposedUser()!.pubkey)}>
                   <Avatar user={proposedUser()} size={16} />
-                  <div class={styles.label}>
+                  <div class={styles.labelUser}>
                     {userName(proposedUser()!.pubkey)}
                   </div>
                   <VerificationCheck user={proposedUser()} />

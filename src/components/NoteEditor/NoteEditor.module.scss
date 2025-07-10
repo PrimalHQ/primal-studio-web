@@ -826,12 +826,15 @@
 
   .advActions {
     display: flex;
+    max-width: 412px;
 
     .linkLike {
       color: var(--accent-links);
       font-size: 13px;
       font-weight: 400;
       line-height: 15px;
+
+      flex: 0 0 auto;
 
       padding-inline: 8px;
 
@@ -883,15 +886,34 @@
 
   border-right: 1px solid var(--subtile-devider);
 
-  &:last-child {
-    border-right: none;
+  &:first-child {
+    flex: 1 1 0;
+    min-width: 50px;
   }
 
+  &:last-child {
+    border-right: none;
+    flex: 0 1 auto;
+    min-width: 50px;
+  }
+
+  .labelUser {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .label {
     color: var(--text-primary);
     font-size: 12px;
     font-weight: 600;
     line-height: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .advEditButton {
