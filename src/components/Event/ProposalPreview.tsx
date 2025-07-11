@@ -1,4 +1,4 @@
-import { Component, createEffect, Match, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Match, Switch } from 'solid-js';
 import { Kind } from '../../constants';
 import { PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
@@ -19,7 +19,16 @@ const ProposalPreview: Component<{
   onCheck?: (id: string, checked: boolean) => void,
 }> = (props) => {
 
-  const event = () => parseDraftedEvent(props.draft);
+  const [event, setEvent] = createSignal<PrimalArticle | PrimalNote>();
+
+  const resolveEvent = async (draft: PrimalDraft) => {
+    const e = await parseDraftedEvent(draft);
+    setEvent(e);
+  }
+
+  createEffect(() => {
+    resolveEvent(props.draft)
+  })
 
   return (
     <Switch>
