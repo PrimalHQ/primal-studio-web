@@ -204,42 +204,44 @@ const Articles: Component = () => {
             onChange={(option) => setArticlesStore('tabCriteriaOptions', articlesStore.tab, (option?.value || 'score') as FeedCriteria)}
           />
         </div>
-        <Show when={['sent', 'inbox', 'scheduled'].includes(articlesStore.tab) && !pageStore.articles.isFetching}>
+        <Show when={['sent', 'inbox', 'scheduled'].includes(articlesStore.tab)}>
           <div class={styles.bulkControls}>
-            <button
-              class={styles.bulkControlButton}
-              onClick={toggleSelectAll}
-            >
-              <Show
-                when={isAllSelected()}
-                fallback={<>Select All</>}
+            <Show when={!pageStore.articles.isFetching}>
+              <button
+                class={styles.bulkControlButton}
+                onClick={toggleSelectAll}
               >
-                <>Deselect All</>
+                <Show
+                  when={isAllSelected()}
+                  fallback={<>Select All</>}
+                >
+                  <>Deselect All</>
+                </Show>
+              </button>
+              <Show when={['inbox'].includes(articlesStore.tab)}>
+                <button
+                  class={styles.bulkControlButton}
+                  disabled={articlesStore.selected.length === 0}
+                  onClick={() => {
+                    const drafts = pageStore.articles.feedPages.flatMap(page => page.drafts.filter(d => articlesStore.selected.includes(d.id)))
+
+                    setArticlesStore('approvedEvents', drafts);
+                    setArticlesStore('showApproveDialog', true);
+                  }}
+                >
+                  Approve Selected
+                </button>
               </Show>
-            </button>
-            <Show when={['inbox'].includes(articlesStore.tab)}>
               <button
                 class={styles.bulkControlButton}
                 disabled={articlesStore.selected.length === 0}
-                onClick={() => {
-                  const drafts = pageStore.articles.feedPages.flatMap(page => page.drafts.filter(d => articlesStore.selected.includes(d.id)))
-
-                  setArticlesStore('approvedEvents', drafts);
-                  setArticlesStore('showApproveDialog', true);
-                }}
+                onClick={() =>
+                  deleteSelected(articlesStore.tab === 'scheduled' ? 'reads' : 'drafts')
+                }
               >
-                Approve Selected
+                Delete Selected
               </button>
             </Show>
-            <button
-              class={styles.bulkControlButton}
-              disabled={articlesStore.selected.length === 0}
-              onClick={() =>
-                deleteSelected(articlesStore.tab === 'scheduled' ? 'reads' : 'drafts')
-              }
-            >
-              Delete Selected
-            </button>
           </div>
         </Show>
         <div class={styles.feedContent}>

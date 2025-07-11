@@ -7,6 +7,7 @@ import DraftOtherParty from './DraftOtherParty';
 import ArticleProposalPreview from './ArticleProposalPreview';
 import NoteProposalPreview from './NoteProposalPreview';
 
+import styles from './Event.module.scss';
 
 const ProposalPreview: Component<{
   draft: PrimalDraft,
@@ -33,7 +34,7 @@ const ProposalPreview: Component<{
   return (
     <Switch>
       <Match when={!event()}>
-        <div></div>
+        <div class={styles.emptyFeedItem}></div>
       </Match>
 
       <Match when={event()!.kind === Kind.LongForm}>

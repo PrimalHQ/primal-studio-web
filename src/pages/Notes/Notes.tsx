@@ -223,34 +223,36 @@ const Notes: Component = () => {
           </div>
         </div>
 
-        <Show when={['sent', 'inbox', 'scheduled'].includes(notesStore.tab) && !pageStore.notes.isFetching}>
+        <Show when={['sent', 'inbox', 'scheduled'].includes(notesStore.tab)}>
           <div class={styles.bulkControls}>
-            <button
-              class={styles.bulkControlButton}
-              onClick={toggleSelectAll}
-            >
-              <Show
-                when={isAllSelected()}
-                fallback={<>Select All</>}
+            <Show when={!pageStore.notes.isFetching}>
+              <button
+                class={styles.bulkControlButton}
+                onClick={toggleSelectAll}
               >
-                <>Deselect All</>
+                <Show
+                  when={isAllSelected()}
+                  fallback={<>Select All</>}
+                >
+                  <>Deselect All</>
+                </Show>
+              </button>
+              <Show when={['inbox'].includes(notesStore.tab)}>
+                <button
+                  class={styles.bulkControlButton}
+                  disabled={notesStore.selected.length === 0}
+                >
+                  Approve Selected
+                </button>
               </Show>
-            </button>
-            <Show when={['inbox'].includes(notesStore.tab)}>
               <button
                 class={styles.bulkControlButton}
                 disabled={notesStore.selected.length === 0}
+                onClick={() => deleteSelected(notesStore.tab === 'scheduled' ? 'notes' : 'drafts')}
               >
-                Approve Selected
+                Delete Selected
               </button>
             </Show>
-            <button
-              class={styles.bulkControlButton}
-              disabled={notesStore.selected.length === 0}
-              onClick={() => deleteSelected(notesStore.tab === 'scheduled' ? 'notes' : 'drafts')}
-            >
-              Delete Selected
-            </button>
           </div>
         </Show>
 
