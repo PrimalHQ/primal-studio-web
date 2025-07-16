@@ -1,6 +1,6 @@
 import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
-import { EventCoordinate, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, } from "src/primal";
+import { EventCoordinate, EventFeedResult, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { decodeIdentifier } from "src/utils/kyes";
 import { primalAPI, sendMessage, subsTo } from "src/utils/socket";
@@ -112,6 +112,28 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
       },
       onNotice: () => {
         reject('failed_to_fetch_articles');
+      }
+    });
+  });
+};
+
+export const fetchEvents = (pubkey: string | undefined, eventIds: string[], subId: string, extendedResponse?: boolean) => {
+  return new Promise<EventFeedResult>((resolve, reject) => {
+
+    let page = { ...emptyEventFeedPage() };
+
+    primalAPI({
+      subId,
+      action: () => getEvents(pubkey, eventIds, subId, extendedResponse),
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        const result = pageResolve(page);
+        resolve(result);
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_notes');
       }
     });
   });

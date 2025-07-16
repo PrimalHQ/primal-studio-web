@@ -19,15 +19,17 @@ import remarkGfm from 'remark-gfm';
 import { nip19 } from 'src/utils/nTools';
 import { APP_ID } from 'src/App';
 import { Kind } from 'src/constants';
-import { PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
+import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from 'src/primal';
 import { userName } from 'src/utils/profile';
-import { fetchArticles, fetchNotes } from 'src/primal_api/events';
+import { fetchArticles, fetchEvents, fetchNotes } from 'src/primal_api/events';
 import { getUsers } from 'src/primal_api/profile';
 import { renderEmbeddedNote } from '../Event/Note';
 import { mentionStore, updateMentionStore } from 'src/stores/MentionStore';
 import { convertConfig } from '../NoteEditor/plainTextTransform';
 import { renderArticlePreview } from '../Event/ArticlePreviewPublish';
 import { renderArticleReviewPreview } from '../Event/ArticleReviewPreview';
+import { extractSubjectFromZap } from 'src/utils/zaps';
+import { renderEmbeddedZap } from '../ProfileNoteZap/ProfileNoteZap';
 
 // import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 // import { fetchUserProfile } from '../handleFeeds';
@@ -94,9 +96,7 @@ const findMissingEvent = async (nevent: string) => {
 
   if (id.length === 0) return;
 
-  const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`);
-
-  return events[0];
+  return await fetchEvents(undefined, [id], `event_missing_${nevent}${APP_ID}`, true);
 }
 
 
@@ -295,12 +295,14 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
   let foundUsers: Record<string, PrimalUser> = {};
   let foundNotes: Record<string, PrimalNote> = {};
   let foundArticles: Record<string, PrimalArticle> = {};
+  let foundZaps: Record<string, PrimalZap> = {};
+  let zapSubjects: Record<string, PrimalArticle | PrimalNote | PrimalUser | undefined> = {};
 
   for (let i = 0; i < nostrIds.length;i++) {
     const nId = nostrIds[i];
     const bech32 = nId.startsWith('nostr:') ? nId.slice(6) : nId;
 
-    const { type } = nip19.decode(bech32);
+    const { type, data } = nip19.decode(bech32);
 
     if (['npub', 'nprofile'].includes(type)) {
       const user = await findMissingUser(bech32);
@@ -311,10 +313,23 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
     }
 
     if (['note', 'nevent'].includes(type)) {
-      const note = await findMissingEvent(bech32);
+      const result = await findMissingEvent(bech32);
 
-      if (note) {
-        foundNotes[bech32] = { ...note };
+      if (!result) continue;
+
+      // @ts-ignore
+      const id: string = typeof data === 'string' ? data : data.id;
+
+      const { notes, reads, zaps, users } = result;
+
+      if (notes.find(n => n.id === id)) {
+        foundNotes[bech32] = { ...notes[0] };
+      }
+
+      if (zaps.find(n => n.id === id)) {
+        foundZaps[bech32] = { ...zaps[0] };
+        const sub = extractSubjectFromZap(zaps[0], { notes, reads, users });
+        zapSubjects[bech32] = sub;
       }
     }
 
@@ -348,30 +363,60 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
       const relays: string[] = [];
       const note = foundNotes[bech32];
 
-      const el = renderEmbeddedNote({
-        note: note,
-        // mentionedUsers: note.mentionedUsers,
-        // includeEmbeds: true,
-        // hideFooter: true,
-        // noLinks: "links",
-      })
+      let el: any;
 
-      const mention = document.createElement('div');
-      mention.setAttribute('data-type', type);
-      mention.setAttribute('data-bech32', bech32);
-      mention.setAttribute('data-relays', '');
-      mention.setAttribute('data-id', note.id);
-      mention.setAttribute('data-kind', `${Kind.Text}`);
-      mention.setAttribute('data-author', note.user.npub);
-      mention.setAttribute('type', type);
-      mention.setAttribute('bech32', bech32);
-      mention.setAttribute('relays', '');
-      mention.setAttribute('id', note.id);
-      mention.setAttribute('kind', `${Kind.Text}`);
-      mention.setAttribute('author', note.user.npub);
-      mention.innerHTML = el;
+      if (note) {
+        el = renderEmbeddedNote({
+          note: note,
+          // mentionedUsers: note.mentionedUsers,
+          // includeEmbeds: true,
+          // hideFooter: true,
+          // noLinks: "links",
+        });
 
-      return mention.outerHTML;
+        const mention = document.createElement('div');
+        mention.setAttribute('data-type', type);
+        mention.setAttribute('data-bech32', bech32);
+        mention.setAttribute('data-relays', '');
+        mention.setAttribute('data-id', note.id);
+        mention.setAttribute('data-kind', `${Kind.Text}`);
+        mention.setAttribute('data-author', note.user.npub);
+        mention.setAttribute('type', type);
+        mention.setAttribute('bech32', bech32);
+        mention.setAttribute('relays', '');
+        mention.setAttribute('id', note.id);
+        mention.setAttribute('kind', `${Kind.Text}`);
+        mention.setAttribute('author', note.user.npub);
+        mention.innerHTML = el;
+
+        return mention.outerHTML;
+      }
+
+      const zap = foundZaps[bech32];
+
+      if (zap) {
+        el = renderEmbeddedZap({
+          zap,
+          subject: zapSubjects[bech32],
+        })
+
+        const mention = document.createElement('div');
+        mention.setAttribute('data-type', type);
+        mention.setAttribute('data-bech32', bech32);
+        mention.setAttribute('data-relays', '');
+        mention.setAttribute('data-id', zap.id);
+        mention.setAttribute('data-kind', `${Kind.Zap}`);
+        mention.setAttribute('data-author', typeof zap.sender === 'string' ? zap.sender : (zap.sender?.pubkey || ''));
+        mention.setAttribute('type', type);
+        mention.setAttribute('bech32', bech32);
+        mention.setAttribute('relays', '');
+        mention.setAttribute('id', zap.id);
+        mention.setAttribute('kind', `${Kind.Zap}`);
+        mention.setAttribute('author', typeof zap.sender === 'string' ? zap.sender : (zap.sender?.pubkey || ''));
+        mention.innerHTML = el;
+
+        return mention.outerHTML;
+      }
     }
 
     if (['naddr'].includes(type)) {

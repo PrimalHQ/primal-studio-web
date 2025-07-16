@@ -1,3 +1,5 @@
+import { Kind } from "src/constants";
+import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from "src/primal";
 
 export const parseBolt11 = (bolt11: string) => {
   if (!bolt11.startsWith('lnbc')) return;
@@ -40,4 +42,27 @@ export const parseBolt11 = (bolt11: string) => {
   }
 
   return amount;
+}
+
+export const extractSubjectFromZap = (
+  zap: PrimalZap,
+  mentions: {
+    notes: PrimalNote[],
+    reads: PrimalArticle[],
+    users: PrimalUser[],
+  },
+): PrimalNote | PrimalArticle |  PrimalUser | undefined => {
+    let zapSubject: PrimalNote | PrimalArticle | PrimalUser | undefined;
+
+    if (zap.zappedKind === Kind.LongForm) {
+      zapSubject = mentions.reads.find(r => r.id === zap.zappedId);
+    }
+    if (zap.zappedKind === Kind.Text) {
+      zapSubject = mentions.notes.find(n => n.id === zap.zappedId);
+    }
+    if (zap.zappedKind === Kind.Metadata) {
+      zapSubject = mentions.users.find(u => u.pubkey === zap.zappedId);
+    }
+
+    return zapSubject;
 }

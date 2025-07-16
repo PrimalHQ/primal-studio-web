@@ -442,6 +442,7 @@ export type PrimalZap = {
   id: string,
   zappedId?: string,
   zappedKind?: number,
+  zappedContent?: string,
 };
 
 export type PrimalRepost = {

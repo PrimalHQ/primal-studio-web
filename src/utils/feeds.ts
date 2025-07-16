@@ -748,6 +748,7 @@ export const getZapInPage = (page: EventFeedPage, eventOrId: string | NostrEvent
 
   let zappedId = '';
   let zappedKind: number = 0;
+  let zappedContent = '';
 
   const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
   const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
@@ -757,19 +758,20 @@ export const getZapInPage = (page: EventFeedPage, eventOrId: string | NostrEvent
 
     zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
 
-    const article = page.reads.find(a => a.id === zappedId);
+    const article = page.reads.find(a => a.id === zappedId) || page.mentions.find(n => n.id === zappedId);
     zappedKind = article?.kind || 0;
   }
   else if (zapTagE) {
     zappedId = zapTagE[1];
 
-    const article = page.reads.find(a => a.id === zappedId);
-    const note = page.notes.find(n => n.id === zappedId);
+    const article = page.reads.find(a => a.id === zappedId) || page.mentions.find(n => n.id === zappedId);
+    const note = page.notes.find(n => n.id === zappedId) || page.mentions.find(n => n.id === zappedId);
 
     zappedKind = article?.kind || note?.kind || 0;
+    zappedContent = article?.content || note?.content || '';
   }
 
-  if (![Kind.Text, Kind.LongForm].includes(zappedKind)) return;
+  if (![Kind.Text, Kind.LongForm, Kind.Metadata].includes(zappedKind)) return;
 
   const sender = page.users[senderPubkey] ? getUserInPage(page, senderPubkey) : senderPubkey;
   const reciver = page.users[receiverPubkey] ? getUserInPage(page, receiverPubkey) : receiverPubkey;
@@ -783,6 +785,7 @@ export const getZapInPage = (page: EventFeedPage, eventOrId: string | NostrEvent
     created_at: zapContent.created_at,
     zappedId,
     zappedKind,
+    zappedContent,
   };
 
   return zap;
@@ -811,6 +814,7 @@ export const pageResolve = (
   opts?: {
     offset?: number,
   }): EventFeedResult => {
+
 
   const identifier = uuidv4();
 
