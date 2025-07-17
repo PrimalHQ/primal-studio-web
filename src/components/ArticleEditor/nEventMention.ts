@@ -6,11 +6,12 @@ import type { MarkdownSerializerState } from 'prosemirror-markdown';
 import { APP_ID } from 'src/App';
 import { nip19 } from 'src/utils/nTools';
 import { PrimalNote, PrimalZap } from 'src/primal';
-import { fetchEvents, fetchNotes } from 'src/primal_api/events';
+import { fetchEvents } from 'src/primal_api/events';
 import { renderEmbeddedNote } from '../Event/Note';
 import { updateMentionStore } from 'src/stores/MentionStore';
 import { renderEmbeddedZap } from '../ProfileNoteZap/ProfileNoteZap';
 import { extractSubjectFromZap } from 'src/utils/zaps';
+import { renderEmbeddedHighlight } from '../PrimalNoteHighlight/ProfileNoteHighlight';
 
 export const createInputRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
@@ -34,10 +35,9 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
 
   if (id.length === 0) return;
 
-  const { notes, zaps, reads, users } = await fetchEvents(undefined, [id], `event_missing_${nevent}${APP_ID}`, true);
+  const { notes, zaps, reads, users, highlights } = await fetchEvents(undefined, [id], `event_missing_${nevent}${APP_ID}`, true);
 
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
-
 
   if (mentions.length > 0 && notes.find(n => n.id === id)) {
     updateMentionStore('notes', () => ({ [id]: { ...notes[0] } }));
@@ -58,6 +58,7 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
     })
 
   }
+
   if (mentions.length > 0 && zaps.find(n => n.id === id)) {
     updateMentionStore('zaps', () => ({ [id]: { ...zaps[0] } }));
 
@@ -72,6 +73,21 @@ export const findMissingEvent = async (nevent: string, editor: Editor) => {
       // noLinks: "links",
       // noPlaceholders: true,
       // noLightbox: true,
+    })
+
+    mentions.forEach(mention => {
+      mention.classList.remove('nevent-node');
+      mention.innerHTML = el;
+    })
+
+  }
+
+
+  if (mentions.length > 0 && highlights.find(n => n.event?.id === id)) {
+    updateMentionStore('highlights', () => ({ [id]: { ...highlights[0] } }));
+
+    const el = renderEmbeddedHighlight({
+      highlight: highlights[0],
     })
 
     mentions.forEach(mention => {

@@ -112,6 +112,7 @@ export const emptyEventFeedPage: () => EventFeedPage = () => ({
   memberCohortInfo: {},
   leaderboard: [],
   studioNoteStats: {},
+  highlights: [],
 });
 
 export const emptyPaging = (): PaginationInfo => ({
@@ -809,6 +810,29 @@ export const getContactsInPage = (page: EventFeedPage) => {
   })) as DMContact[];
 }
 
+export const getHighlightsInPage = (page: EventFeedPage) => {
+  const pageHighlights = page.highlights;
+
+  let highlights: PrimalHighlight[] = [];
+
+  for (let i=0; i< pageHighlights.length; i++) {
+    const highlight = pageHighlights[i];
+
+    if (
+      highlight &&
+      highlights.find(z => z.event?.id === highlight.id) === undefined &&
+      highlight.pubkey
+  ) {
+      highlights.push({
+        user: getUserInPage(page, highlight.pubkey),
+        event: { ...highlight },
+      });
+    }
+  }
+
+  return highlights;
+}
+
 export const pageResolve = (
   page: EventFeedPage,
   opts?: {
@@ -847,6 +871,7 @@ export const pageResolve = (
   const reads = getArticlesInPage(page);
   const drafts = getDraftsInPage(page);
   const zaps = getZapsInPage(page);
+  const highlights = getHighlightsInPage(page);
   const topicStats = getTopicStatsInPage(page);
   const dmContacts = getContactsInPage(page);
   const encryptedMessages = [...page.encryptedMessages];
@@ -870,6 +895,7 @@ export const pageResolve = (
     paging,
     page,
     identifier,
+    highlights,
   };
 }
 
@@ -955,6 +981,10 @@ export const updateFeedPage = (page: EventFeedPage, content: NostrEventContent) 
   if (content.kind === Kind.LinkMetadata) {
     parseLinkPreviews(JSON.parse(content.content || '{}'));
     return;
+  }
+
+  if (content.kind === Kind.Highlight) {
+    page.highlights.push(content);
   }
 
   if (content.kind === Kind.Zap) {

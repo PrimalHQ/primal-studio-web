@@ -1,5 +1,4 @@
 import { Component, Match, Show, Switch } from "solid-js";
-import { Kind } from "../../constants";
 import styles from  "./ProfileNoteZap.module.scss";
 import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from "src/primal";
 import { date } from "src/utils/date";

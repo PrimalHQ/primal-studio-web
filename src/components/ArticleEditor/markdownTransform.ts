@@ -19,7 +19,7 @@ import remarkGfm from 'remark-gfm';
 import { nip19 } from 'src/utils/nTools';
 import { APP_ID } from 'src/App';
 import { Kind } from 'src/constants';
-import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from 'src/primal';
+import { PrimalArticle, PrimalHighlight, PrimalNote, PrimalUser, PrimalZap } from 'src/primal';
 import { userName } from 'src/utils/profile';
 import { fetchArticles, fetchEvents, fetchNotes } from 'src/primal_api/events';
 import { getUsers } from 'src/primal_api/profile';
@@ -30,6 +30,7 @@ import { renderArticlePreview } from '../Event/ArticlePreviewPublish';
 import { renderArticleReviewPreview } from '../Event/ArticleReviewPreview';
 import { extractSubjectFromZap } from 'src/utils/zaps';
 import { renderEmbeddedZap } from '../ProfileNoteZap/ProfileNoteZap';
+import { renderEmbeddedHighlight } from '../PrimalNoteHighlight/ProfileNoteHighlight';
 
 // import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 // import { fetchUserProfile } from '../handleFeeds';
@@ -296,6 +297,7 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
   let foundNotes: Record<string, PrimalNote> = {};
   let foundArticles: Record<string, PrimalArticle> = {};
   let foundZaps: Record<string, PrimalZap> = {};
+  let foundHighlights: Record<string, PrimalHighlight> = {};
   let zapSubjects: Record<string, PrimalArticle | PrimalNote | PrimalUser | undefined> = {};
 
   for (let i = 0; i < nostrIds.length;i++) {
@@ -320,7 +322,7 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
       // @ts-ignore
       const id: string = typeof data === 'string' ? data : data.id;
 
-      const { notes, reads, zaps, users } = result;
+      const { notes, reads, zaps, users, highlights } = result;
 
       if (notes.find(n => n.id === id)) {
         foundNotes[bech32] = { ...notes[0] };
@@ -330,6 +332,10 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
         foundZaps[bech32] = { ...zaps[0] };
         const sub = extractSubjectFromZap(zaps[0], { notes, reads, users });
         zapSubjects[bech32] = sub;
+      }
+
+      if (highlights.find(n => n.event?.id === id)) {
+        foundHighlights[bech32] = { ...highlights[0] };
       }
     }
 
@@ -413,6 +419,30 @@ export const processMarkdownForNostr = async (html: string): Promise<string> => 
         mention.setAttribute('id', zap.id);
         mention.setAttribute('kind', `${Kind.Zap}`);
         mention.setAttribute('author', typeof zap.sender === 'string' ? zap.sender : (zap.sender?.pubkey || ''));
+        mention.innerHTML = el;
+
+        return mention.outerHTML;
+      }
+
+      const highlight = foundHighlights[bech32];
+
+      if (highlight) {
+        el = renderEmbeddedHighlight({
+          highlight,
+        });
+
+
+        const mention = document.createElement('div');
+        mention.setAttribute('data-type', type);
+        mention.setAttribute('data-bech32', bech32);
+        mention.setAttribute('data-relays', '');
+        mention.setAttribute('data-id', highlight.event?.id || '');
+        mention.setAttribute('data-kind', `${Kind.Highlight}`);
+        mention.setAttribute('type', type);
+        mention.setAttribute('bech32', bech32);
+        mention.setAttribute('relays', '');
+        mention.setAttribute('id', highlight.event?.id || '');
+        mention.setAttribute('kind', `${Kind.Highlight}`);
         mention.innerHTML = el;
 
         return mention.outerHTML;
