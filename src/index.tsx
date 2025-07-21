@@ -12,4 +12,11 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(
+    import.meta.env.MODE === 'production' ? '/imageCacheWorker.js' : '/imageCacheWorker.js?dev-sw=1',
+    { scope: '/'}
+  )
+}
+
 render(() => <App />, root!);

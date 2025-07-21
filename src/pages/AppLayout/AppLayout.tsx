@@ -1,5 +1,5 @@
 import { A, RouteSectionProps, useLocation, useNavigate, } from '@solidjs/router';
-import { Component, createEffect, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, Match, Show, Switch } from 'solid-js';
 
 import primalBrandingLight from 'assets/images/primal_studio_light.svg';
 import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
@@ -7,8 +7,7 @@ import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
 import styles from './AppLayout.module.scss';
 import ProfileWidget from 'src/components/ProfileWidget/ProfileWidget';
 import { settingsStore } from 'src/stores/SettingsStore';
-import NoteContextMenu from 'src/components/NoteContextMenu/NoteContexMenu';
-import { appStore, closeNoteContextMenu, openEditNote, updateAppStore } from 'src/stores/AppStore';
+import { openEditNote } from 'src/stores/AppStore';
 import { uploadFile } from 'src/utils/upload';
 import { addMedia } from '../Media/Media.data';
 import { setGlobalNavigate } from 'src/App';

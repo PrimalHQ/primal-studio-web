@@ -125,6 +125,16 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
 
   setBlossomStore('media', () => ({ ...media }));
 
+  const urls = uniqueBlobs.map(b => b.url);
+
+  for (let i=0; i<urls.length; i++) {
+    navigator?.serviceWorker?.controller?.postMessage({
+      type: 'CACHE_IMAGE',
+      url: urls[i],
+    });
+  }
+
+
   setBlossomStore('isFetchingList', false);
 
   return media;
