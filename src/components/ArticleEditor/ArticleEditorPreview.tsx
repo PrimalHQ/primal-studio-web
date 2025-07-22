@@ -374,7 +374,7 @@ const ArticleEditorPreview: Component<{
         <div class={styles.articleFooter}>
           <ArticleFooter
             note={props.articlePreview!}
-            size={props.isPhone ? 'phone' : 'normal'}
+            size={props.isPhone ? 'very_short' : 'normal'}
           />
         </div>
       </div>

@@ -823,6 +823,11 @@
     }
   }
 
+  .contentEditor {
+    min-height: 100px;
+    padding-bottom: 42px;
+  }
+
   .keywords {
     width: calc(100% - 24px);
     margin-inline: 12px;

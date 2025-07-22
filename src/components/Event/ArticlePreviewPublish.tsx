@@ -1,15 +1,13 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './Event.module.scss';
-import { NoteReactionsState, PrimalArticle } from 'src/primal';
+import { PrimalArticle } from 'src/primal';
 import { getMediaUrl } from 'src/stores/MediaStore';
 import { shortDate } from 'src/utils/date';
 import { userName } from 'src/utils/profile';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { wordsPerMinute } from 'src/constants';
-import ArticleFooter from './ArticleFooter';
 
 export type ArticleProps = {
   id?: string,
