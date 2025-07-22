@@ -29,6 +29,17 @@
   }
 }
 
+.readsChooseMediaDialog {
+  width: 968px;
+  min-height: 300px;
+  max-height: 702px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 .suggest {
   background-color: var(--background-header-input);
 }

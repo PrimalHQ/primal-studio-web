@@ -150,7 +150,7 @@
   position: relative;
   color: var(--text-secondary);
   background-color: var(--background-input);
-  border: 1px solid transparent;
+  border: 1px solid var(--subtile-devider);
   border-radius: var(--border-radius-big);
 
   display: flex;
@@ -248,4 +248,13 @@
   -webkit-mask: url(../../assets/icons/weather.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/weather.svg) 0 / 100% no-repeat;
 
+}
+
+.chevronIcon {
+  width: 10px;
+  height: 10px;
+
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
 }

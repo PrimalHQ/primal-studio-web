@@ -64,6 +64,9 @@ import { EnhancedImage, SmartImagePasteHandler } from '../ArticleEditor/UrlPaste
 import UploaderBlossom from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
 import { readEmergencyNoteDraft, storeEmergencyNoteDraft } from 'src/utils/localStore';
+import { DropdownMenu } from '@kobalte/core/dropdown-menu';
+import ReadsChooseMediaDialog from '../ArticleEditor/ReadsDialogs/ReadsChooseMediaDialog';
+import { BlobDescriptor } from 'blossom-client-sdk';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -88,15 +91,17 @@ const NoteEditor: Component<{
   const [editorMode, setEditorMode] = createSignal<'html' | 'text' | 'phone'>('html');
   const [plainContent, setPlainContent] = createSignal('');
 
-  const [showMention, setShowMention] = createSignal(false);
+  const [showMention, setShowMention] = createSignal('');
   const [showAttach, setShowAttach] = createSignal(false);
 
   const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
   const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
   const [editScheduled, setEditScheduled] = createSignal(false);
 
-  const [showProposeDiaglog, setShowProposeDialog] = createSignal(false);
+  const [showProposeDialog, setShowProposeDialog] = createSignal(false);
   const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
+
+  const [showChooseMediaDialog, setShowChooseMediaDialog] = createSignal(false);
 
   const [isInboxDraft, setIsInboxDraft] = createSignal(false);
 
@@ -718,36 +723,104 @@ const NoteEditor: Component<{
     <>
       <div class={styles.editorNoteToolbar}>
         <div class={styles.contentContols}>
-          <button
-            id="attachFile"
-            class={styles.mdToolButton}
-            onClick={() => contentFileUpload?.click()}
-            title={'attach a file'}
-          >
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.mdToolButton} ${styles.long}`}
+              >
+                <div class={`${styles.attachIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => contentFileUpload?.click()}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <input
+                    id="upload-new-media"
+                    type="file"
+                    onChange={() => uploadFile()}
+                    ref={contentFileUpload}
+                    hidden={true}
+                    accept="image/*,video/*,audio/*"
+                  />
+                  <div>Upload media...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowChooseMediaDialog(true);
+                    }, 100)
+                  }}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add from Media Server...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
-            <input
-              id="upload-new-media"
-              type="file"
-              onChange={() => uploadFile()}
-              ref={contentFileUpload}
-              hidden={true}
-              accept="image/*,video/*,audio/*"
-            />
 
-            <div class={`${styles.attachIcon} ${styles.active}`}></div>
-          </button>
-
-          <button
-            id="addMention"
-            class={styles.mdToolButton}
-            onClick={() => setShowMention(true)}
-            title={'add a mention'}
-          >
-            <div class={`${styles.atIcon} ${styles.active}`}></div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.mdToolButton} ${styles.long}`}
+              >
+                <div class={`${styles.atIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowMention('users');
+                    }, 100)
+                  }}
+                  title={'add a user mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add User Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowMention('notes');
+                    }, 100)
+                  }}
+                  title={'add a note mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Note Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowMention('reads');
+                    }, 100)
+                  }}
+                  title={'add a article mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Article Mention...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
           <EmojiButton
-            class={styles.mdToolButton}
+            class={`${styles.mdToolButton} ${styles.long}`}
             onSelect={((emoji) => {
               saveEmoji(emoji);
               if (editorMode() === 'text') {
@@ -762,6 +835,7 @@ const NoteEditor: Component<{
 
               editorTipTap()?.chain().focus().insertContent(emoji.name).run();
             })}
+            extended={true}
           />
         </div>
         <div class={styles.editorModeControls}>
@@ -990,18 +1064,18 @@ const NoteEditor: Component<{
 
       <ReadsMentionDialog
         open={showMention()}
-        setOpen={(v: boolean) => setShowMention(() => v)}
+        setOpen={(v: boolean) => setShowMention(() => v ? 'users' : '')}
         onAddUser={(user: PrimalUser) => {
           addMentionToEditor(user, editorTipTap());
-          setShowMention(() => false);
+          setShowMention(() => '');
         }}
         onAddNote={(note: PrimalNote) => {
           addNoteToEditor(note, editorTipTap());
-          setShowMention(() => false);
+          setShowMention(() => '');
         }}
         onAddRead={(read: PrimalArticle) => {
           addReadToEditor(read, editorTipTap());
-          setShowMention(() => false);
+          setShowMention(() => '');
         }}
       />
 
@@ -1033,11 +1107,27 @@ const NoteEditor: Component<{
       />
 
       <ReadsProposeDialog
-        open={showProposeDiaglog()}
+        open={showProposeDialog()}
         setOpen={setShowProposeDialog}
         onAddUser={(user) => {
           setProposedUser(user);
           setShowProposeDialog(false);
+        }}
+      />
+
+      <ReadsChooseMediaDialog
+        open={showChooseMediaDialog()}
+        setOpen={setShowChooseMediaDialog}
+        onSelect={(blob: BlobDescriptor) => {
+          setShowChooseMediaDialog(false);
+
+          if (blob.type?.startsWith('image')) {
+            editorTipTap()?.chain().focus().setImage({ src: blob.url }).run();
+          }
+
+          if (blob.type?.startsWith('video')) {
+            editorTipTap()?.chain().focus().setVideo({ src: blob.url }).run();
+          }
         }}
       />
     </>

@@ -8,7 +8,7 @@ import tippy, { Instance } from 'tippy.js';
 
 import { APP_ID } from 'src/App';
 import Avatar from 'src/components/Avatar/Avatar';
-import Note, { NoteSuggestionSkeleton } from 'src/components/Event/Note';
+import Note from 'src/components/Event/Note';
 import SearchOption from 'src/components/Search/SearchOptions';
 import { Kind } from 'src/constants';
 import { PrimalUser, PrimalNote, PrimalArticle } from 'src/primal';
@@ -18,7 +18,7 @@ import { previousWord, nip05Verification } from 'src/utils/ui';
 import { addToUserHistory, clearSearch, findContent, findUserByNupub, findUsers, getRecomendedUsers, removeEvent, searchStore } from 'src/stores/SearchStore';
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Dialog from 'src/components/Dialogs/Dialog';
-import ArticlePreviewSuggestion, { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
+import { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
 import ArticleReviewPreview from 'src/components/Event/ArticleReviewPreview';
 
 
@@ -36,7 +36,7 @@ const placeholders: Record<string, string> = {
 
 const ReadsMentionDialog: Component<{
   id?: string,
-  open: boolean,
+  open: string,
   setOpen?: (v: boolean) => void,
   onAddUser: (user: PrimalUser, relays: string[]) => void,
   onAddNote: (note: PrimalNote) => void,
@@ -52,7 +52,15 @@ const ReadsMentionDialog: Component<{
   const [activeTab, setActiveTab] = createSignal('users');
 
   createEffect(() => {
-    if (props.open && activeTab()) {
+    const tab = props.open;
+
+    if (['users', 'notes', 'reads'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  });
+
+  createEffect(() => {
+    if (activeTab()) {
       setQuery(() => '')
       setTimeout(() => {
         if (!searchInput) return;
@@ -315,7 +323,7 @@ const ReadsMentionDialog: Component<{
   return (
     <Dialog
       triggerClass="displayNone"
-      open={props.open}
+      open={['users', 'notes', 'reads'].includes(props.open)}
       setOpen={props.setOpen}
       title="Add mention"
     >

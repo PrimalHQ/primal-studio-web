@@ -19,6 +19,7 @@ import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
 
 const MediaGrid: Component<{
   items: BlobDescriptor[],
+  onSelect?: (blob: BlobDescriptor) => void,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -175,6 +176,10 @@ const MediaGrid: Component<{
                 class={itemClass(blob.sha256)}
                 onClick={(e: MouseEvent) => {
                   e.preventDefault();
+                  if (props.onSelect) {
+                    props.onSelect(blob);
+                    return
+                  }
                   toggleMediaSelect(blob);
                 }}
               >

@@ -9,11 +9,19 @@ import { EmojiOption } from './EmojiPicker';
 const EmojiButton: Component<{
   id?: string,
   class?: string,
+  extended?: boolean,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
   const [open, setOpen] = createSignal(false);
 
-  const klass = () => `${props.class || ''}`
+  const klass = () => {
+    let k =`${props.class || ''}`;
+    if (props.extended) {
+      k += ` ${styles.extended}`;
+    }
+
+    return k;
+  }
 
   return (
 
@@ -25,6 +33,9 @@ const EmojiButton: Component<{
       >
         <Popover.Trigger class={klass()}>
           <div class={styles.emojiIconSmall}></div>
+          <Show when={props.extended}>
+            <div class={styles.chevronIcon}></div>
+          </Show>
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
