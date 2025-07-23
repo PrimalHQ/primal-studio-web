@@ -645,7 +645,7 @@ const ArticleEditorToolbar: Component<{
       />
 
       <ReadsMentionDialog
-        open={formatControls.enterMention}
+        open={formatControls.enterMention ? 'users' : ''}
         setOpen={(v: boolean) => updateFormatControls('enterMention', () => v)}
         onAddUser={(user: PrimalUser, relays: string[]) => {
           addMentionToEditor(user, relays);

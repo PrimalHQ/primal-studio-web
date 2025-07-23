@@ -1165,8 +1165,11 @@
       line-height: 28px;
     }
 
-    pre, code, mark {
-      background-color: var(--background-input);
+    pre {
+      code, mark {
+        display: block;
+        background-color: var(--background-input);
+      }
     }
 
     em {
