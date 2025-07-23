@@ -1,4 +1,4 @@
-import { Component, For, Show, createEffect } from 'solid-js';
+import { Component, For, Show, createEffect, createSignal } from 'solid-js';
 
 import styles from './ArticleEditor.module.scss';
 import { createStore } from 'solid-js/store';
@@ -13,6 +13,9 @@ import ReadsLinkDialog from './ReadsDialogs/ReadsLinkDialog';
 import ReadsImageDialog from './ReadsDialogs/ReadsImageDialog';
 import ReadsMentionDialog from './ReadsDialogs/ReadsMentionDialog';
 import ReadsEditorBubbleMenu from './ReadsEditorBubbleMenu';
+import { DropdownMenu } from '@kobalte/core/dropdown-menu';
+import ReadsChooseMediaDialog from './ReadsDialogs/ReadsChooseMediaDialog';
+import { BlobDescriptor } from 'blossom-client-sdk';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -22,7 +25,7 @@ export type FormatControls = {
   isLinkActive: boolean,
   isCodeActive: boolean,
   enterLink: boolean,
-  enterMention: boolean,
+  enterMention: string,
   enterImage: boolean,
   headingLevel: number,
 };
@@ -47,10 +50,13 @@ const ArticleEditorToolbar: Component<{
     isLinkActive: false,
     isCodeActive: false,
     enterLink: false,
-    enterMention: false,
+    enterMention: '',
     enterImage: false,
     headingLevel: 0,
   });
+
+  const [showChooseMediaDialog, setShowChooseMediaDialog] = createSignal(false);
+
 
   createEffect(() => {
     if (formatControls.enterLink) {
@@ -418,29 +424,97 @@ const ArticleEditorToolbar: Component<{
             onSelect={table}
           />
 
-          <button
-            id="attachBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterImage', () => true);
-            }}
-            title="image"
-            tabIndex={-1}
-          >
-            <div class={styles.attachIcon}></div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.tableSelectTrigger} ${styles.long}`}
+                tabIndex={-1}
+              >
+                <div class={`${styles.attachIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterImage', () => true);
+                    }, 100)
+                  }}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Upload media...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowChooseMediaDialog(true);
+                    }, 100)
+                  }}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add from Media Server...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
-          <button
-            id="mentionBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterMention', () => true);
-            }}
-            title="mention"
-            tabIndex={-1}
-          >
-            <div class={styles.atIcon}></div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.mdToolButton} ${styles.long}`}
+              >
+                <div class={`${styles.atIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'users');
+                    }, 100)
+                  }}
+                  title={'add a user mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add User Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'notes');
+                    }, 100)
+                  }}
+                  title={'add a note mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Note Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'reads');
+                    }, 100)
+                  }}
+                  title={'add a article mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Article Mention...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
           <button
             id="linkBtn"
@@ -560,29 +634,97 @@ const ArticleEditorToolbar: Component<{
             onSelect={table}
           />
 
-          <button
-            id="attachBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterImage', () => true);
-            }}
-            title="image"
-            tabIndex={-1}
-          >
-            <div class={styles.attachIcon}></div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.tableSelectTrigger} ${styles.long}`}
+                tabIndex={-1}
+              >
+                <div class={`${styles.attachIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterImage', () => true);
+                    }, 100)
+                  }}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Upload media...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      setShowChooseMediaDialog(true);
+                    }, 100)
+                  }}
+                  title={'attach a file'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add from Media Server...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
-          <button
-            id="mentionBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterMention', () => true);
-            }}
-            title="mention"
-            tabIndex={-1}
-          >
-            <div class={styles.atIcon}></div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenu.Trigger>
+              <button
+                id="attachFile"
+                class={`${styles.mdToolButton} ${styles.long}`}
+              >
+                <div class={`${styles.atIcon} ${styles.active}`}></div>
+                <div class={`${styles.chevronIcon} ${styles.active}`}></div>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                class={styles.editorMenu}
+              >
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'users');
+                    }, 100)
+                  }}
+                  title={'add a user mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add User Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'notes');
+                    }, 100)
+                  }}
+                  title={'add a note mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Note Mention...</div>
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    setTimeout(() => {
+                      updateFormatControls('enterMention', () => 'reads');
+                    }, 100)
+                  }}
+                  title={'add a article mention'}
+                  class={styles.editorMenuItem}
+                >
+                  <div>Add Article Mention...</div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu>
 
           <button
             id="linkBtn"
@@ -645,19 +787,19 @@ const ArticleEditorToolbar: Component<{
       />
 
       <ReadsMentionDialog
-        open={formatControls.enterMention ? 'users' : ''}
-        setOpen={(v: boolean) => updateFormatControls('enterMention', () => v)}
+        open={formatControls.enterMention}
+        setOpen={(v: boolean) => updateFormatControls('enterMention', () => v ? 'users' : '')}
         onAddUser={(user: PrimalUser, relays: string[]) => {
           addMentionToEditor(user, relays);
-          updateFormatControls('enterMention', () => false);
+          updateFormatControls('enterMention', () => '');
         }}
         onAddNote={(note: PrimalNote) => {
           addNoteToEditor(note);
-          updateFormatControls('enterMention', () => false);
+          updateFormatControls('enterMention', () => '');
         }}
         onAddRead={(read: PrimalArticle) => {
           addReadToEditor(read);
-          updateFormatControls('enterMention', () => false);
+          updateFormatControls('enterMention', () => '');
         }}
       />
 
@@ -669,6 +811,23 @@ const ArticleEditorToolbar: Component<{
           italic: () => {},
           uline: () => {},
           strike: () => {},
+        }}
+      />
+
+
+      <ReadsChooseMediaDialog
+        open={showChooseMediaDialog()}
+        setOpen={setShowChooseMediaDialog}
+        onSelect={(blob: BlobDescriptor) => {
+          setShowChooseMediaDialog(false);
+
+          if (blob.type?.startsWith('image')) {
+            props.editor?.chain().focus().setImage({ src: blob.url }).run();
+          }
+
+          if (blob.type?.startsWith('video')) {
+            props.editor?.chain().focus().setVideo({ src: blob.url }).run();
+          }
         }}
       />
     </>
