@@ -127,12 +127,10 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
 
   const urls = uniqueBlobs.map(b => b.url);
 
-  for (let i=0; i<urls.length; i++) {
-    navigator?.serviceWorker?.controller?.postMessage({
-      type: 'CACHE_IMAGE',
-      url: urls[i],
-    });
-  }
+  navigator?.serviceWorker?.controller?.postMessage({
+    type: 'CACHE_IMAGES',
+    urls,
+  });
 
 
   setBlossomStore('isFetchingList', false);

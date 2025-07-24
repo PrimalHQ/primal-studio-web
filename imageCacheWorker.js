@@ -64,7 +64,8 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then(fetchResponse => {
             return fetchResponse;
           }).catch(error => {
-            console.error('FAILED TO FETCH IMAGE: ', url);
+            console.log('FAILED TO FETCH IMAGE: ', url);
+            return new Response();
           });
         });
       })
@@ -73,15 +74,20 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('message', event => {
-  if (event.data.type === 'CACHE_IMAGE' && typeof event.data.url === 'string') {
-    const url = event.data.url;
+  if (event.data.type === 'CACHE_IMAGES' && event.data.urls.length > 0) {
 
-    event.waitUntil(
-      caches.open(IMAGE_CACHE).then(cache => {
-        return cache.add(url);
-      }).catch((e) => {
-        console.log('FAILED TO CACHE IMAGE: ', url)
-      })
-    )
+    const urls = event.data.urls;
+
+    caches.open(IMAGE_CACHE).then(cache => {
+      for (let i=0; i<urls.length; i++) {
+        const url = urls[i];
+        cache.match(url, { ignoreVary: true }).then(found => {
+          if (!found) return cache.add(url);
+        })
+      }
+      // return cache.add(url);
+    }).catch((e) => {
+      console.log('FAILED TO CACHE IMAGE: ', url)
+    })
   }
 });

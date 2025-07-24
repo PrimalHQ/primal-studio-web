@@ -232,7 +232,6 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
 
   setArticlesStore('graphSpan', () => ({ ...span }));
 
-
   const { since, until } = articlesStore.graphSpan;
 
   if (
