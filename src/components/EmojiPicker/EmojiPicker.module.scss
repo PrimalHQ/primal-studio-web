@@ -258,3 +258,13 @@
   -webkit-mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
 }
+
+.highlighted {
+  background-color: var(--background-input);
+  color: var(--text-primary);
+  border: 1px solid var(--subtile-devider);
+
+  >div {
+    background-color: var(--text-secondary);
+  }
+}

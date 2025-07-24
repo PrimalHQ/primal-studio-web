@@ -350,6 +350,17 @@
   }
 }
 
+[aria-expanded=true] {
+  .tableSelectTrigger, .mdToolButton {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+
+    >div {
+      background-color: var(--text-secondary);
+    }
+  }
+}
+
 .bubbleMenu {
   background-color: var(--background-header-input);
 

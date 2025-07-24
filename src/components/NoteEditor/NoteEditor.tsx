@@ -725,7 +725,7 @@ const NoteEditor: Component<{
     <>
       <div class={styles.editorNoteToolbar}>
         <div class={styles.contentContols}>
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
@@ -770,7 +770,7 @@ const NoteEditor: Component<{
           </DropdownMenu>
 
 
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"

@@ -47,7 +47,7 @@ const ReadsEditorTableSelector: Component<{
   }
 
   return (
-    <Popover placement="bottom-start">
+    <Popover placement="bottom-start" gutter={2}>
       <Popover.Trigger
         class={styles.tableSelectTrigger}
         tabIndex={-1}

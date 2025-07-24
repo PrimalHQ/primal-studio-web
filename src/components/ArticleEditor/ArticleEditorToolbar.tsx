@@ -424,7 +424,7 @@ const ArticleEditorToolbar: Component<{
             onSelect={table}
           />
 
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
@@ -465,7 +465,7 @@ const ArticleEditorToolbar: Component<{
             </DropdownMenu.Portal>
           </DropdownMenu>
 
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
@@ -634,7 +634,7 @@ const ArticleEditorToolbar: Component<{
             onSelect={table}
           />
 
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
@@ -675,7 +675,7 @@ const ArticleEditorToolbar: Component<{
             </DropdownMenu.Portal>
           </DropdownMenu>
 
-          <DropdownMenu>
+          <DropdownMenu gutter={2}>
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"

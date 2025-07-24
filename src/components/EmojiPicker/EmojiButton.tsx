@@ -16,8 +16,13 @@ const EmojiButton: Component<{
 
   const klass = () => {
     let k =`${props.class || ''}`;
+
     if (props.extended) {
       k += ` ${styles.extended}`;
+    }
+
+    if (open()) {
+      k += ` ${styles.highlighted}`;
     }
 
     return k;
@@ -30,6 +35,7 @@ const EmojiButton: Component<{
         open={open()}
         onOpenChange={setOpen}
         placement='bottom-start'
+        gutter={2}
       >
         <Popover.Trigger class={klass()}>
           <div class={styles.emojiIconSmall}></div>
