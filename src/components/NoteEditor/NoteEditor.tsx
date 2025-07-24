@@ -581,6 +581,8 @@ const NoteEditor: Component<{
     if (success && note) {
       toast?.sendSuccess('Saved draft');
 
+      storeEmergencyNoteDraft(accountStore.pubkey, '');
+
       fetchFeedTotals(accountStore.pubkey, {
         since: notesStore.graphSpan.since(),
         until: notesStore.graphSpan.until(),
