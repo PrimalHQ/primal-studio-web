@@ -8,6 +8,7 @@ import { translate } from 'src/translations/translate';
 import { PrimalArticle, PrimalDraft, PrimalNote, StatsWeights, StudioNoteStats } from 'src/primal';
 import { getStatWeights } from 'src/primal_api/studio';
 import { createStore, unwrap } from 'solid-js/store';
+import { humanizeNumber } from 'src/utils/ui';
 
 export type ConfirmDialogInfo = {
   title?: string,
@@ -129,9 +130,9 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
               {config => (
                 <tr>
                   <td>{config.label}</td>
-                  <td>{weights.find(w => w.label === config.label)?.stat || 0}</td>
-                  <td>{weights.find(w => w.label === config.label)?.weight || 0}</td>
-                  <td>{weights.find(w => w.label === config.label)?.score || 0}</td>
+                  <td>{humanizeNumber(weights.find(w => w.label === config.label)?.stat || 0)}</td>
+                  <td>{humanizeNumber(weights.find(w => w.label === config.label)?.weight || 0)}</td>
+                  <td>{humanizeNumber(weights.find(w => w.label === config.label)?.score || 0)}</td>
                 </tr>
               )}
             </For>
@@ -146,7 +147,7 @@ const ContentScoreBreakdownDialog: Component<ConfirmDialogInfo & {
               <td
                 class={styles.total}
               >
-                {totalScore()}
+                {humanizeNumber(totalScore())}
               </td>
             </tr>
           </tbody>

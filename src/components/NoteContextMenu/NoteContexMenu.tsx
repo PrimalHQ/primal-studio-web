@@ -175,7 +175,7 @@ const NoteContextMenu: Component<{
       copyText: 'Copy Note Text',
       copyId: 'Copy Note ID',
       copyRaw: 'Copy Raw Data',
-      score: 'Score BreakDown',
+      score: 'Score Breakdown',
     }
 
     let kindSpecificItems: MenuItem[] = [];
