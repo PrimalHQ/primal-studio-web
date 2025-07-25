@@ -57,7 +57,7 @@
     position: relative;
 
     opacity: 1;
-    // transition: opacity 300ms linear;
+    transition: opacity 300ms linear;
 
     &.hidden {
       opacity: 0;
@@ -156,7 +156,7 @@
 
     td {
       opacity: 1;
-      // transition: opacity 300ms linear;
+      transition: opacity 300ms linear;
     }
 
     &.hidden {
