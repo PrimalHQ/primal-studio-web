@@ -135,6 +135,7 @@ export const storeTheme = (pubkey: string | undefined, theme: PrimalTheme) => {
   store.theme = theme;
 
   setStorage(pubkey, store);
+  localStorage.setItem('theme', theme);
 };
 
 export const readTheme = (pubkey: string | undefined) => {

@@ -17,13 +17,13 @@ import {
   removeSocketListeners,
   socket,
 } from "../utils/socket";
-import { NostrEOSE, NostrEvent, NostrEvents } from "../primal";
+import { NostrEOSE, NostrEvent, NostrEvents, PrimalTheme } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
 import { accountStore, checkMembershipStatus, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadLicenseStatus, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
-import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings, settingsStore } from "src/stores/SettingsStore";
+import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings, setTheme, settingsStore } from "src/stores/SettingsStore";
 import { updateRelays } from "src/stores/RelayStore";
 import { loadUserHistory } from "src/stores/SearchStore";
 
@@ -140,6 +140,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
   // Load default settings -----------------------------------------------------
 
   onMount(() => {
+    const theme = (localStorage.getItem('theme') || 'studio-light') as PrimalTheme;
+
+    setTheme(theme);
+
     loadDefaults();
     loadStoredSettings();
     loadStoredPubkey();

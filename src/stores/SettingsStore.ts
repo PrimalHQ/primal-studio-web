@@ -190,12 +190,12 @@ export const resolveDarkMode = (useSystemDarkMode: boolean, currentTheme = setti
   storeSystemDarkMode(accountStore.pubkey, useSystemDarkMode);
 
   if (!useSystemDarkMode) {
-    setTheme(currentTheme, true);
+    setTheme(currentTheme);
     return;
   }
 
   runColorMode((isDark) => {
-    setTheme(isDark ? 'studio_dark' : 'studio_light', true);
+    setTheme(isDark ? 'studio_dark' : 'studio_light');
   }, () => {
     currentTheme && setTheme(currentTheme, true);
   });
