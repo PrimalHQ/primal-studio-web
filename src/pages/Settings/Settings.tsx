@@ -1,4 +1,4 @@
-import { Component, createEffect, JSXElement } from 'solid-js';
+import { Component, createEffect, JSXElement, onCleanup, onMount } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -18,6 +18,18 @@ const Settings: Component<{ children?: JSXElement }> = (props) => {
 
     return translate('settings', 'menu', keys[keys.length-1]);
   }
+
+  onMount(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = 'display: none';
+  });
+
+  onCleanup(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = '';
+  })
 
   return (
     <div class={styles.settingsLayout}>

@@ -110,9 +110,10 @@ body {
   font-family: 'Nacelle', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  // overflow-y: scroll;
+  overflow-y: scroll;
   background-color: var(--background-site);
   color: var(--text-primary);
+  scrollbar-gutter: stable both-edges;
 }
 
 code {

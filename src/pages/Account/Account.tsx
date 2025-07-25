@@ -1,4 +1,4 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -26,6 +26,19 @@ const Account: Component = () => {
 
     return now > expiration;
   };
+
+
+  onMount(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = 'display: none';
+  });
+
+  onCleanup(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = '';
+  })
 
   return (
     <div class={styles.accountPageLayout}>

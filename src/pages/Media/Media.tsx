@@ -4,16 +4,12 @@ import { translate } from '../../translations/translate';
 
 import styles from './Media.module.scss';
 import HeaderTitle from 'src/components/HeaderTitle/HeaderTitle';
-import { blossomStore, fetchBlossomMediaList, setBlossomStore, mediaSortOptions, deleteMultipleMedia } from './Media.data';
-import SelectBox, { SelectOption } from 'src/components/SelectBox/SelectBox';
+import { blossomStore, fetchBlossomMediaList } from './Media.data';
+import { SelectOption } from 'src/components/SelectBox/SelectBox';
 import { accountStore } from 'src/stores/AccountStore';
-import { fileSize } from 'src/utils/ui';
 import MediaGrid from './MediaGrid';
 import MediaList from './MediaList';
-import { storeMediaPageConfig } from 'src/utils/localStore';
-import { useToastContext } from 'src/context/ToastContext/ToastContext';
-import { openConfirmDialog, setMediaUsageUrl } from 'src/stores/AppStore';
-import MediaUsesDialog from './MediaUsesDialog';
+import { setMediaUsageUrl } from 'src/stores/AppStore';
 import MediaHeader from './MediaHeader';
 
 const Media: Component = () => {
