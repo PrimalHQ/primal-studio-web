@@ -65,6 +65,9 @@ const MediaList: Component<{
 
       setVisibleItems(() => [...visible]);
     },
+    {
+      rootMargin: '400px 0px 400px 0px',
+    }
   );
 
   createEffect(on(() => [visibleItems.length, blossomStore.server], (change) => {

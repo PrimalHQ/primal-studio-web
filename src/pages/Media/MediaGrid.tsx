@@ -60,6 +60,9 @@ const MediaGrid: Component<{
 
       setVisibleItems(() => [...visible]);
     },
+    {
+      rootMargin: '400px 0px 400px 0px',
+    }
   );
 
   onCleanup(() => {

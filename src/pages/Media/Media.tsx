@@ -52,9 +52,9 @@ const Media: Component = () => {
     return sorted;
   })
 
-  createEffect(on(() => blossomStore.server, () => {
-    if (blossomStore.isFetchingList) return;
-    fetchBlossomMediaList(accountStore.pubkey, { server: blossomStore.server })
+  createEffect(on(() => blossomStore.server, (server, prev) => {
+    if (blossomStore.isFetchingList || server === prev || prev === undefined) return;
+    fetchBlossomMediaList(accountStore.pubkey, { server: server })
   }));
 
 
