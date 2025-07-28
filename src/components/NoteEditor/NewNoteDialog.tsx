@@ -19,7 +19,7 @@ const NewNoteDialog: Component<{
     <KobalteDialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
       <KobalteDialog.Portal>
         <KobalteDialog.Overlay class={styles.dialogOverlay} />
-        <div class={styles.dialog}>
+        <div class={styles.dialog} data-new-note-dialog>
           <KobalteDialog.Content class={styles.dialogContent} >
             <KobalteDialog.Description class={styles.dialogDescription}>
               <NoteEditor

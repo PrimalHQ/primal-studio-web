@@ -725,7 +725,21 @@ const NoteEditor: Component<{
     <>
       <div class={styles.editorNoteToolbar}>
         <div class={styles.contentContols}>
-          <DropdownMenu gutter={2}>
+          <DropdownMenu gutter={2}
+            onOpenChange={(open) => {
+              const d = document.querySelector('[data-new-note-dialog]');
+              if (!d) return;
+
+              if (open) {
+                // @ts-ignore
+                d.style = 'padding-right: 6px;';
+              }
+              else {
+                // @ts-ignore
+                d.style = 'padding-right: 0;';
+              }
+            }}
+          >
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
@@ -770,7 +784,21 @@ const NoteEditor: Component<{
           </DropdownMenu>
 
 
-          <DropdownMenu gutter={2}>
+          <DropdownMenu gutter={2}
+            onOpenChange={(open) => {
+              const d = document.querySelector('[data-new-note-dialog]');
+              if (!d) return;
+
+              if (open) {
+                // @ts-ignore
+                d.style = 'padding-right: 6px;';
+              }
+              else {
+                // @ts-ignore
+                d.style = 'padding-right: 0;';
+              }
+            }}
+          >
             <DropdownMenu.Trigger>
               <button
                 id="attachFile"
