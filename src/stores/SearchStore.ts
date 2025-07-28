@@ -70,9 +70,13 @@ export const findUsers2 = (query: string, pubkey?: string) => {
         const { users } = pageResolve(page);
 
         const sorted = users.sort((a, b) => {
-          return (b.userStats?.follows_count || 0) - (a.userStats?.followers_count || 0);
+          const aScore = a.userStats?.followers_count || 0;
+          const bScore = b.userStats?.followers_count || 0;
+
+          return bScore - aScore;
         });
-        resolve(users)
+
+        resolve(sorted.slice(0, 10));
       },
       onNotice: () => {
         reject('failt_to_search_users')
@@ -103,35 +107,23 @@ export const findUserByNpub2 = async (npub: string) => {
 }
 
 
-export const findUsers = (query: string, publicKey?: string) => {
-  const subid = `search_users_${APP_ID}`;
+export const findUsers = (query: string, pubkey?: string) => {
+  const subId = `search_users_${APP_ID}`;
 
-  let users: PrimalUser[] = [];
+  let page = { ...emptyEventFeedPage() };
 
-  const unsub = subsTo(subid, {
-    onEvent: (_, content) => {
-      if (!content) {
-        return;
-      }
-
-      if (content.kind === Kind.Metadata) {
-        const user = content as NostrEventContent;
-
-        users.push(convertToUser(user, content.pubkey!));
-        return;
-      }
-
-      if (content.kind === Kind.UserScore) {
-        const scores = JSON.parse(content.content || '{}');
-
-        updateSearchStore('scores', () => ({ ...scores }));
-        return;
-      }
+  primalAPI({
+    subId,
+    action: () => searchUsers(pubkey, subId, query),
+    onEvent: (event) => {
+      updateFeedPage(page, event);
     },
     onEose: () => {
+      const { users } = pageResolve(page);
+
       const sorted = users.sort((a, b) => {
-        const aScore = searchStore.scores[a.pubkey];
-        const bScore = searchStore.scores[b.pubkey];
+        const aScore = a.userStats?.followers_count || 0;
+        const bScore = b.userStats?.followers_count || 0;
 
         return bScore - aScore;
       });
@@ -139,15 +131,58 @@ export const findUsers = (query: string, publicKey?: string) => {
       updateSearchStore('users', () => sorted.slice(0, 10));
       updateSearchStore('isFetchingUsers', () => false);
 
-      unsub();
-      return;
-    }
+    },
+    onNotice: () => {
+    },
   });
 
-  const pubkey = query.length > 0 ? undefined : publicKey;
 
-  updateSearchStore('isFetchingUsers', () => true);
-  searchUsers(pubkey, subid, query);
+
+
+
+
+  // let users: PrimalUser[] = [];
+
+  // const unsub = subsTo(subId, {
+  //   onEvent: (_, content) => {
+  //     if (!content) {
+  //       return;
+  //     }
+
+  //     if (content.kind === Kind.Metadata) {
+  //       const user = content as NostrEventContent;
+
+  //       users.push(convertToUser(user, content.pubkey!));
+  //       return;
+  //     }
+
+  //     if (content.kind === Kind.UserScore) {
+  //       const scores = JSON.parse(content.content || '{}');
+
+  //       updateSearchStore('scores', () => ({ ...scores }));
+  //       return;
+  //     }
+  //   },
+  //   onEose: () => {
+  //     const sorted = users.sort((a, b) => {
+  //       const aScore = searchStore.scores[a.pubkey];
+  //       const bScore = searchStore.scores[b.pubkey];
+
+  //       return bScore - aScore;
+  //     });
+
+  //     updateSearchStore('users', () => sorted.slice(0, 10));
+  //     updateSearchStore('isFetchingUsers', () => false);
+
+  //     unsub();
+  //     return;
+  //   }
+  // });
+
+  // const pubkey = query.length > 0 ? undefined : publicKey;
+
+  // updateSearchStore('isFetchingUsers', () => true);
+  // searchUsers(pubkey, subId, query);
 }
 
 
