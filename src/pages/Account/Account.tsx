@@ -27,7 +27,6 @@ const Account: Component = () => {
     return now > expiration;
   };
 
-
   onMount(() => {
     const el = document.querySelector('header');
 
@@ -38,7 +37,7 @@ const Account: Component = () => {
     const el = document.querySelector('header');
 
     if (el) el.style = '';
-  })
+  });
 
   return (
     <div class={styles.accountPageLayout}>

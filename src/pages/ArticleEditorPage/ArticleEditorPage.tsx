@@ -64,6 +64,18 @@ const ReadsEditor: Component = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  onMount(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = 'display: none';
+  });
+
+  onCleanup(() => {
+    const el = document.querySelector('header');
+
+    if (el) el.style = '';
+  });
+
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
