@@ -57,10 +57,13 @@ const ReadsMentionDialog: Component<{
     if (['users', 'notes', 'reads'].includes(tab)) {
       setActiveTab(tab);
     }
+    else {
+      setQuery('');
+    }
   });
 
   createEffect(() => {
-    if (activeTab()) {
+    if (props.open !== '') {
       setQuery(() => '')
       setTimeout(() => {
         if (!searchInput) return;

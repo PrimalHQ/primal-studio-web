@@ -135,54 +135,6 @@ export const findUsers = (query: string, pubkey?: string) => {
     onNotice: () => {
     },
   });
-
-
-
-
-
-
-  // let users: PrimalUser[] = [];
-
-  // const unsub = subsTo(subId, {
-  //   onEvent: (_, content) => {
-  //     if (!content) {
-  //       return;
-  //     }
-
-  //     if (content.kind === Kind.Metadata) {
-  //       const user = content as NostrEventContent;
-
-  //       users.push(convertToUser(user, content.pubkey!));
-  //       return;
-  //     }
-
-  //     if (content.kind === Kind.UserScore) {
-  //       const scores = JSON.parse(content.content || '{}');
-
-  //       updateSearchStore('scores', () => ({ ...scores }));
-  //       return;
-  //     }
-  //   },
-  //   onEose: () => {
-  //     const sorted = users.sort((a, b) => {
-  //       const aScore = searchStore.scores[a.pubkey];
-  //       const bScore = searchStore.scores[b.pubkey];
-
-  //       return bScore - aScore;
-  //     });
-
-  //     updateSearchStore('users', () => sorted.slice(0, 10));
-  //     updateSearchStore('isFetchingUsers', () => false);
-
-  //     unsub();
-  //     return;
-  //   }
-  // });
-
-  // const pubkey = query.length > 0 ? undefined : publicKey;
-
-  // updateSearchStore('isFetchingUsers', () => true);
-  // searchUsers(pubkey, subId, query);
 }
 
 
@@ -207,89 +159,59 @@ export const findUserByNupub = (npub: string) => {
     decoded.data :
     (decoded.data as nip19.ProfilePointer).pubkey;
 
-  let users: PrimalUser[] = [];
 
-  const unsub = subsTo(subId, {
-    onEvent: (_, content) => {
-      if (!content) return;
+  let page = { ...emptyEventFeedPage() };
 
-      if (content.kind === Kind.Metadata) {
-        const user = content as NostrEventContent;
+  updateSearchStore('isFetchingUsers', () => true);
 
-        users.push(convertToUser(user, content.pubkey!));
-      }
-
-      if (content.kind === Kind.UserScore) {
-        const scores = JSON.parse(content.content || '{}');
-
-        updateSearchStore('scores', () => ({ ...scores }));
-      }
+  primalAPI({
+    subId,
+    action: () => getUserInfos([hex], subId),
+    onEvent: (event) => {
+      updateFeedPage(page, event);
     },
     onEose: () => {
+      const { users } = pageResolve(page);
 
       if (users.length > 0) {
         updateSearchStore('users', () => [users[0]]);
       }
 
       updateSearchStore('isFetchingUsers', () => false);
-
-      unsub();
+    },
+    onNotice: () => {
     },
   });
-
-  getUserInfos([hex], subId);
 };
 
 export const getRecomendedUsers = (profiles?: PrimalUser[]) => {
-  const subid = `recomended_users_${APP_ID}`;
+  const subId = `recomended_users_${APP_ID}`;
 
-  let users: PrimalUser[] = [];
+  let page = { ...emptyEventFeedPage() };
 
-  const unsub = subsTo(subid, {
-    onEvent: (_, content) => {
-      if (!content) return;
+  updateSearchStore('isFetchingUsers', () => true);
 
-      if (content.kind === Kind.Metadata) {
-        const user = content as NostrEventContent;
-
-        users.push(convertToUser(user, content.pubkey!));
-      }
-
-      if (content.kind === Kind.UserScore) {
-        const scores = JSON.parse(content.content || '{}');
-
-        updateSearchStore('scores', () => ({ ...scores }));
-      }
+  primalAPI({
+    subId,
+    action: () => getUserMetadata(recomendedUsers, subId),
+    onEvent: (event) => {
+      updateFeedPage(page, event);
     },
     onEose: () => {
-
-      // let sorted: PrimalUser[] = [];
+      const { users } = pageResolve(page);
 
       const known = profiles?.map(p => p.pubkey) || [];
 
-      users = users.filter(u => !known.includes(u.pubkey))
-
-      // users.forEach((user) => {
-      //   const index = recomendedUsers.indexOf(user.pubkey);
-      //   sorted[index] = { ...user };
-      // });
-
-      if (profiles) {
-        users = [...profiles, ...users].slice(0, 9);
-      }
+      const recom = users.filter(u => !known.includes(u.pubkey))
 
       batch(() => {
-        updateSearchStore('users', () => users);
+        updateSearchStore('users', () => [ ...recom, ...(profiles || [])]);
         updateSearchStore('isFetchingUsers', () => false);
       })
-
-      unsub();
+    },
+    onNotice: () => {
     },
   });
-
-
-  updateSearchStore('isFetchingUsers', () => true);
-  getUserMetadata(recomendedUsers, subid);
 
 };
 
