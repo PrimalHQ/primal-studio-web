@@ -71,7 +71,7 @@ const App: Component = () => {
             when={accountStore.accountIsReady}
             fallback={
               <Router preload={true}>
-                <Route path="/" component={Landing} />
+                <Route path="/*" component={Landing} />
               </Router>
             }
           >
