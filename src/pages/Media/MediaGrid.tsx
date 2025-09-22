@@ -16,6 +16,7 @@ import { cancelUpload, uploadStore } from 'src/utils/upload';
 import { Progress } from '@kobalte/core/progress';
 
 import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
+import ThumbVideoPlayer from './ThumbVideoPlayer';
 
 const MediaGrid: Component<{
   items: BlobDescriptor[],
@@ -157,6 +158,10 @@ const MediaGrid: Component<{
     return k;
   }
 
+  const videoThumbnail = (url: string) => {
+    return blossomStore.thumbnails[url];
+  }
+
   return (
     <div
       class={styles.mediaListGrid}
@@ -235,14 +240,12 @@ const MediaGrid: Component<{
                     </div>
                   </Match>
                   <Match when={blob.type?.includes('video/')}>
-                    <video
-                      src={blob.url}
-                      title={shortDate(blob.uploaded)}
-                      width={177}
-                      height={149}
-                      controls
-                    >
-                    </video>
+                    <div class={styles.videoIcon}></div>
+                    <div class={styles.videoHolder}>
+                      <ThumbVideoPlayer
+                        blob={blob}
+                      />
+                    </div>
                     <div class={styles.itemFooter}>
                       <div class={styles.mediaSize}>{fileSize(blob.size)}</div>
                       <div class={styles.mediaType}>{humanizeFileType(blob.type)}</div>

@@ -2,6 +2,7 @@ import { query, RoutePreloadFuncArgs } from "@solidjs/router";
 import { BlobDescriptor, BlossomClient } from "blossom-client-sdk";
 import { createStore } from "solid-js/store";
 import { PrimalUser, PrimalNote, PrimalArticle, PrimalDraft } from "src/primal";
+import { fetchMediaMetadata } from "src/primal_api/media";
 import { getMediaUses } from "src/primal_api/studio";
 import { accountStore, fetchBlossomServers } from "src/stores/AccountStore";
 import { readMediaPageConfig } from "src/utils/localStore";
@@ -25,7 +26,8 @@ export type BlossomStore = {
     drafts: PrimalDraft[],
     usage: Record<string, string[]>,
     urls: string[],
-  }
+  },
+  thumbnails: Record<string, string>,
 };
 
 export const emptyBlossomStore = (): BlossomStore => ({
@@ -43,7 +45,8 @@ export const emptyBlossomStore = (): BlossomStore => ({
     drafts: [],
     usage: {},
     urls: [],
-  }
+  },
+  thumbnails: {},
 });
 
 export type BlossomListOptions = {
@@ -132,7 +135,9 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
     urls,
   });
 
+  const metadata = await fetchMediaMetadata(urls);
 
+  setBlossomStore('thumbnails', () => ({ ...metadata.thumbnails }));
   setBlossomStore('isFetchingList', false);
 
   return media;

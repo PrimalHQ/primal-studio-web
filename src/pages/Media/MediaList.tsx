@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, Show, Switch } from 'solid-js';
 
 import styles from './Media.module.scss';
 import { blossomStore, deleteMedia, fetchUsageInfo, toggleMediaSelect, urlUsage } from './Media.data';
@@ -8,7 +8,7 @@ import NoteContextTrigger from 'src/components/NoteContextMenu/NoteContextTrigge
 import { BlobDescriptor } from 'blossom-client-sdk';
 import { fileSize, humanizeFileType } from 'src/utils/ui';
 import CheckBox from 'src/components/CheckBox/CheckBox';
-import { createStore, unwrap } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import { openMediaContextMenu, profileLink } from 'src/stores/AppStore';
 import { useToastContext } from 'src/context/ToastContext/ToastContext';
 
@@ -17,8 +17,9 @@ import { cancelUpload, uploadStore } from 'src/utils/upload';
 import { Progress } from '@kobalte/core/progress';
 
 import stylesUploader from 'src/components/Uploader/Uploader.module.scss';
-import { getMediaUses } from 'src/primal_api/studio';
-import { utils } from 'src/utils/nTools';
+
+
+import missingVideo from '../../assets/icons/missing_video.svg';
 
 
 const MediaList: Component<{
@@ -183,6 +184,9 @@ const MediaList: Component<{
     return <div class={styles.usageList}>{[...list.slice(0, 4), more]}</div>;
   }
 
+  const videoThumbnail = (url: string) => {
+    return blossomStore.thumbnails[url];
+  }
 
   return (
     <table
@@ -314,14 +318,24 @@ const MediaList: Component<{
                     </td>
                     <td class={styles.file}>
                       <div>
-                        <video
+                        <Show
+                          when={videoThumbnail(blob.url)}
+                          fallback={
+                            <img src={missingVideo} class={styles.videoPlaceholder} />
+                          }
+                        >
+                          <img
+                            src={videoThumbnail(blob.url)}
+                          />
+                        </Show>
+                        {/* <video
                           src={blob.url}
                           title={shortDate(blob.uploaded)}
                           width={177}
                           height={149}
                           controls
                         >
-                        </video>
+                        </video> */}
                         <div>{shortSha(blob.sha256)}</div>
                       </div>
                     </td>
