@@ -167,7 +167,7 @@ const ReadsImageDialog: Component<{
                       >
                         <div class={styles.closeIcon}></div>
                       </div>
-                      <div>Chage hero Image</div>
+                      <div>Change hero Image</div>
                     </div>
                   </Show>
                 </div>
