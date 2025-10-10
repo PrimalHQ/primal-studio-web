@@ -11,6 +11,7 @@ import { fetchKnownProfiles } from "src/utils/profile";
 import { accountStore } from "src/stores/AccountStore";
 import { logInfo } from "src/utils/logger";
 import { readGraphSpan } from "src/utils/localStore";
+import { v4 as uuidv4 } from "uuid";
 
 export type GraphSpan = {
   name: string,
@@ -97,11 +98,14 @@ export const fetchHomeNotes = async (
 
     updatePageStore('homeNotes', 'isFetching', () => true);
 
+    const identifier = `home_${homeStore.graphSpan.name}_${uuidv4()}`;
+
     try {
       let result = await getTopEvents({
         ...options,
         pubkey,
         kind: Kind.Text,
+        identifier,
       });
 
       setHomeStore('noteOffset', (offset) => offset + result.paging.elements.length);
@@ -114,6 +118,12 @@ export const fetchHomeNotes = async (
 
       if (index === -1) {
         index = pageStore.homeNotes.feedPages.length;
+      }
+
+      const testId = `home_${homeStore.graphSpan.name}`;
+
+      if (!result.identifier.startsWith(testId)) {
+        return {};
       }
 
       result.notes = filterAndSortNotes(result.notes, result.paging);
@@ -142,11 +152,14 @@ export const fetchHomeArticles = async (
 
     updatePageStore('homeArticles', 'isFetching', () => true);
 
+    const identifier = `home_${homeStore.graphSpan.name}_${uuidv4()}`;
+
     try {
       let result = await getTopEvents({
         ...options,
         pubkey,
         kind: Kind.LongForm,
+        identifier,
       });
 
       setHomeStore('articleOffset', (offset) => offset + result.paging.elements.length);
@@ -159,6 +172,12 @@ export const fetchHomeArticles = async (
 
       if (index === -1) {
         index = pageStore.homeArticles.feedPages.length;
+      }
+
+      const testId = `home_${homeStore.graphSpan.name}`;
+
+      if (!result.identifier.startsWith(testId)) {
+        return {};
       }
 
       result.reads = filterAndSortReads(result.reads, result.paging);

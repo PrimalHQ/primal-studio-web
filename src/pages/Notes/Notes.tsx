@@ -25,9 +25,7 @@ import ProposalPreview from 'src/components/Event/ProposalPreview';
 import ScheduledInfo from 'src/components/Event/ScheduledInfo';
 import { humanizeNumber } from 'src/utils/ui';
 import { NoteHomeSkeleton } from 'src/components/Event/NoteHomePreview';
-import { parseDraftedEvent } from 'src/utils/drafts';
 import { openEditNote } from 'src/stores/AppStore';
-import ReadsApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsApproveDialog';
 import NotesApproveDialog from 'src/components/ArticleEditor/ReadsDialogs/NotesApproveDialog';
 import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs/ReadsPublishingDateDialog';
 import { scheduleNote } from 'src/primal_api/nostr';
@@ -173,6 +171,7 @@ const Notes: Component = () => {
       <Wormhole to="header">
         <PageHeader
           title={translate('notes', 'header')}
+          isFetching={pageStore.notes.isFetching}
           selection={notesStore.graphSpan.name}
           hideSpans={!['published', 'published-replied'].includes(notesStore.tab)}
           onSpanSelect={(span: GraphSpan) => {

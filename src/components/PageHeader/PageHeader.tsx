@@ -15,6 +15,7 @@ const PageHeader: Component<{
   title: string,
   selection: string,
   hideSpans?: boolean,
+  isFetching?: boolean,
   onSpanSelect?: (span: GraphSpan) => void,
 }> = (props) => {
 

@@ -12,6 +12,7 @@ import { openConfirmDialog } from "src/stores/AppStore";
 import { doRequestDelete } from "src/primal_api/events";
 import { Kind } from "src/constants";
 import { readGraphSpan } from "src/utils/localStore";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export type NotesStore = {
@@ -167,6 +168,8 @@ export const fetchNotes = async (
     until = Number.MAX_SAFE_INTEGER;
   }
 
+  const identifier = `notes_${state || ''}_${notesStore.graphSpan.name}`;
+
   try {
     let result = await getFeedEvents({
       ...options,
@@ -175,6 +178,7 @@ export const fetchNotes = async (
       state,
       since,
       until,
+      identifier,
     });
 
     setNotesStore('offset', (offset) => offset + result.paging.elements.length);
@@ -194,6 +198,11 @@ export const fetchNotes = async (
       result.notes = filterAndSortNotes(result.notes, result.paging);
     }
 
+    const testId = `notes_${notesStore.tab}_${notesStore.graphSpan.name}`;
+
+    if (!result.identifier.startsWith(testId)) {
+      return {};
+    }
 
     batch(() => {
       updatePageStore('notes', 'feedPages', index, () => ({ ...result }));

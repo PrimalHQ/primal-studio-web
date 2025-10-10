@@ -69,6 +69,7 @@ export type HomePayload = {
   criteria?: 'score' | 'sentiment' | 'oldest' | 'latest',
   state?: FeedEventState,
   kind?: number | 'notes' | 'articles',
+  identifier?: string,
 };
 
 export const getHomeTotals = async (opts?: HomePayload) => {
@@ -227,7 +228,7 @@ export const getHomeGraph = async (opts?: HomePayload) => {
 export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
   const kind: number = opts?.kind || Kind.Text;
 
-  const identifier = `${kind}_${uuidv4()}`;
+  const identifier = opts?.identifier || `${kind}_${uuidv4()}`;
 
   const subId = `home_events_${identifier}_${APP_ID}`;
 
@@ -311,7 +312,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
         updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve(pageResolve(page, { offset: payload.offset }));
+        resolve(pageResolve(page, { offset: payload.offset, identifier }));
       },
       onNotice: () => {
         reject('failed_to_fetch_top_events');
@@ -324,7 +325,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
 export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'articles' }) => {
   const kind = opts?.kind || 'notes';
 
-  const identifier = `${kind}_${opts?.state || ''}_${uuidv4()}`;
+  const identifier = opts?.identifier || `${kind}_${opts?.state || ''}_${uuidv4()}`;
 
   const subId = `feed_${identifier}_${APP_ID}`;
 
@@ -411,7 +412,7 @@ export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'art
         updateFeedPage(page, event);
       },
       onEose: () => {
-        resolve(pageResolve(page, { offset: payload.offset }));
+        resolve(pageResolve(page, { offset: payload.offset, identifier }));
       },
       onNotice: () => {
         reject('failed_to_fetch_top_events');

@@ -179,6 +179,9 @@ export const fetchArticles = async (
       until = Number.MAX_SAFE_INTEGER;
     }
 
+    const identifier = `notes_${state || ''}_${articlesStore.graphSpan.name}`;
+
+
     try {
       let result = await getFeedEvents({
         ...options,
@@ -187,6 +190,7 @@ export const fetchArticles = async (
         state,
         since,
         until,
+        identifier,
       });
 
       setArticlesStore('offset', (offset) => offset + result.paging.elements.length);
@@ -205,6 +209,12 @@ export const fetchArticles = async (
         result.drafts = await parseDraftContent(result.drafts);
       } else {
         result.reads = filterAndSortReads(result.reads, result.paging);
+      }
+
+      const testId = `notes_${articlesStore.tab}_${articlesStore.graphSpan.name}`;
+
+      if (!result.identifier.startsWith(testId)) {
+        return {};
       }
 
       batch(() => {

@@ -837,10 +837,11 @@ export const pageResolve = (
   page: EventFeedPage,
   opts?: {
     offset?: number,
+    identifier?: string
   }): EventFeedResult => {
 
 
-  const identifier = uuidv4();
+  const identifier = opts?.identifier || uuidv4();
 
   // If there are reposts that have empty content,
   // we need to add the content manualy
