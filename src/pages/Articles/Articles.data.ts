@@ -32,6 +32,7 @@ export type ArticlesStore = {
   showApproveDialog: boolean,
   approvedEvents: PrimalDraft[],
   changePublishDateArticle: PrimalArticle | undefined,
+  isFetchingTotals: boolean,
 }
 
 export const emptyHomeStore = (): ArticlesStore => ({
@@ -59,6 +60,7 @@ export const emptyHomeStore = (): ArticlesStore => ({
     scheduled: 0,
     'published-replied': 0,
   },
+  isFetchingTotals: false,
 });
 
 export const [articlesStore, setArticlesStore] = createStore<ArticlesStore>(emptyHomeStore());
@@ -149,7 +151,8 @@ export const fetchFeedTotals = async (
 
   const r = await getFeedTotals({ pubkey, ...options });
 
-  setArticlesStore('feedTotals', () => ({...r}))
+  setArticlesStore('feedTotals', () => ({...r}));
+  setArticlesStore('isFetchingTotals', false);
 };
 
 export const fetchArticles = async (
@@ -240,6 +243,8 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
 
   let search = new URLSearchParams(args.location.search);
   let tab: string | null = search.get('tab');
+
+
   const span = readGraphSpan(accountStore.pubkey, 'articles');
 
   setArticlesStore('graphSpan', () => ({ ...span }));
@@ -254,6 +259,7 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
     tab = null;
   }
 
+  setArticlesStore('isFetchingTotals', true);
   const criteria = articlesStore.tabCriteriaOptions[(tab as FeedEventState) || articlesStore.tab];
 
   query(fetchArticles, 'fetchArticles')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria });

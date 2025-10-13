@@ -27,6 +27,7 @@ export type NotesStore = {
   showApproveDialog: boolean,
   approvedEvents: PrimalDraft[],
   changePublishDateNote: PrimalNote | undefined,
+  isFetchingTotals: boolean,
 }
 
 export const emptyNotesStore = (): NotesStore => ({
@@ -55,6 +56,7 @@ export const emptyNotesStore = (): NotesStore => ({
     scheduled: 0,
     'published-replied': 0,
   },
+  isFetchingTotals: false,
 });
 
 export const [notesStore, setNotesStore] = createStore<NotesStore>(emptyNotesStore());
@@ -136,7 +138,8 @@ export const fetchFeedTotals = async (
 
   const r = await getFeedTotals({ pubkey, ...options });
 
-  setNotesStore('feedTotals', () => ({...r}))
+  setNotesStore('feedTotals', () => ({...r}));
+  setNotesStore('isFetchingTotals', false);
 };
 
 export const fetchNotes = async (
@@ -246,6 +249,7 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
 
   const criteria = notesStore.tabCriteriaOptions[(tab as FeedEventState) || notesStore.tab];
 
+  setNotesStore('isFetchingTotals', true);
   query(fetchNotes, 'fetchNotes')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria });
   query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since: since(), until: until(), kind: 'notes' });
   // fetchNotes(pk, { since, until, limit: 30, offset: 0 });

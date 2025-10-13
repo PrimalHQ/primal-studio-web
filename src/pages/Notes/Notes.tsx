@@ -159,7 +159,6 @@ const Notes: Component = () => {
     resetNotesLists(pubkey, { since: since(), until: until(), state });
   }));
 
-
   createEffect(on(() => notesStore.showReplies, (showReplies, prev) => {
     if (prev === undefined || showReplies === prev) return;
     const { since, until } = notesStore.graphSpan;
@@ -204,6 +203,7 @@ const Notes: Component = () => {
                 {translate('notes', 'tabs', tab)} ({humanizeNumber(notesStore.feedTotals[tab as FeedEventState])})
               </div>
             )}
+            hideIndicator={notesStore.isFetchingTotals}
           >
           </StudioTabs>
 

@@ -120,6 +120,7 @@ const Articles: Component = () => {
 
     setArticlesStore('tab', newTab as FeedEventState);
   }));
+
   createEffect(on(
     () => [articlesStore.graphSpan.since(), articlesStore.graphSpan.until()],
     (changes, prev) => {
@@ -201,6 +202,7 @@ const Articles: Component = () => {
                 {translate('articles', 'tabs', tab)} ({humanizeNumber(articlesStore.feedTotals[tab as FeedEventState])})
               </div>
             )}
+            hideIndicator={articlesStore.isFetchingTotals}
           >
           </StudioTabs>
           <SelectBox

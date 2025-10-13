@@ -2,6 +2,7 @@ import { Tabs } from '@kobalte/core/tabs';
 import { Component, For, JSXElement, Show } from 'solid-js';
 
 import styles from './Tabs.module.scss';
+import { FeedTotals } from 'src/primal_api/studio';
 
 
 const StudioTabs: Component<{
@@ -12,6 +13,7 @@ const StudioTabs: Component<{
   onChange?: (tab: string) => void,
   tabTriggerComponent?: (tab: string) => JSXElement,
   children?: JSXElement,
+  hideIndicator?: boolean,
 }> = (props) => {
 
   return (
@@ -34,7 +36,11 @@ const StudioTabs: Component<{
           )}
         </For>
 
-        <Tabs.Indicator class={styles.indicator} />
+        <Show
+          when={!props.hideIndicator}
+        >
+          <Tabs.Indicator class={styles.indicator} />
+        </Show>
       </Tabs.List>
 
       {props.children}
