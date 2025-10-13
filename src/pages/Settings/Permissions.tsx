@@ -14,7 +14,6 @@ import { addToSettingsList, removeFromSettingsList } from 'src/primal_api/studio
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import SearchOption from 'src/components/Search/SearchOptions';
 import { findUserByNpub2, findUsers2, searchStore } from 'src/stores/SearchStore';
-import { debounce, nip05Verification } from 'src/utils/ui';
 import DOMPurify from "dompurify";
 
 import { Search } from '@kobalte/core/search';

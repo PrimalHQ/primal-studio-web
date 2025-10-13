@@ -37,7 +37,6 @@ import { userName } from 'src/utils/profile';
 import { TextField } from '@kobalte/core/text-field';
 import { MarkdownPlugin, mdToHtml, processHTMLForNostr, processMarkdownForNostr } from '../ArticleEditor/markdownTransform';
 import ReadsMentionDialog from '../ArticleEditor/ReadsDialogs/ReadsMentionDialog';
-import ReadsImageDialog from '../ArticleEditor/ReadsDialogs/ReadsImageDialog';
 import { plainTextToTiptapJson, tiptapJsonToPlainText } from './plainTextTransform';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
@@ -67,6 +66,8 @@ import { readEmergencyNoteDraft, storeEmergencyNoteDraft } from 'src/utils/local
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import ReadsChooseMediaDialog from '../ArticleEditor/ReadsDialogs/ReadsChooseMediaDialog';
 import { BlobDescriptor } from 'blossom-client-sdk';
+
+import { v4 as uuidv4 } from 'uuid';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -197,6 +198,8 @@ const NoteEditor: Component<{
     el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
   }
 
+  let mentionDebounce = 0;
+
   const extensions = [
     Document, Paragraph, Text,
     Link.configure({
@@ -313,14 +316,22 @@ const NoteEditor: Component<{
             .run()
         },
         items: async ({ editor, query}) => {
-          const users = query.length < 2 ?
-            await fetchRecomendedUsersAsync() :
-            await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
+          return new Promise((resolve) => {
+            if (mentionDebounce) {
+              clearTimeout(mentionDebounce);
+            }
 
-          // userRelays = await getUserRelays();
-          setSuggestedUsers(() => [...users]);
+            mentionDebounce = setTimeout(async() => {
+              const users = query.length < 2 ?
+                await fetchRecomendedUsersAsync() :
+                await fetchUserSearch(undefined, `mention_users_${uuidv4()}_${APP_ID}`, query);
 
-          return users;
+              // userRelays = await getUserRelays();
+              setSuggestedUsers(() => [...users]);
+
+              resolve(users);
+            }, 300)
+          })
         },
         render: () => {
           let component: JSXElement | undefined;
