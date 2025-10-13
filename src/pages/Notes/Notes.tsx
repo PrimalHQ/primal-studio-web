@@ -11,8 +11,8 @@ import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
 import { accountStore } from 'src/stores/AccountStore';
-import { useParams } from '@solidjs/router';
-import { FeedEventState, HomePayload } from 'src/primal_api/studio';
+import { useParams, useSearchParams } from '@solidjs/router';
+import { FeedEventState, HomePayload, isFeedEventState } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import { PrimalDraft, PrimalNote } from 'src/primal';
@@ -34,6 +34,7 @@ import { storeGraphSpan } from 'src/utils/localStore';
 
 const Notes: Component = () => {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const notePages = () => pageStore.notes.feedPages;
   const [visibleNotesPages, setVisibleNotesPages] = createSignal<number[]>([]);
@@ -113,6 +114,15 @@ const Notes: Component = () => {
     );
   }
 
+  createEffect(on(() => searchParams.tab, (tab, prev) => {
+    let newTab = tab
+    if (!newTab || typeof newTab !== 'string' || !isFeedEventState(newTab)) {
+      newTab = 'published';
+    }
+
+    setNotesStore('tab', newTab as FeedEventState);
+  }));
+
   createEffect(on(
     () => [notesStore.graphSpan.since(), notesStore.graphSpan.until()],
     (changes, prev) => {
@@ -140,7 +150,7 @@ const Notes: Component = () => {
   }));
 
   createEffect(on(() => notesStore.tab, (state, prev) => {
-    if (!prev || state === prev) return;
+    if (state === prev) return;
 
     const { since, until } = notesStore.graphSpan;
 
@@ -188,7 +198,7 @@ const Notes: Component = () => {
             tabs={['published', 'scheduled', 'inbox', 'sent', 'drafts']}
             activeTab={notesStore.tab}
             defaultTab="published"
-            onChange={(tab: string) => setNotesStore('tab', tab as FeedEventState)}
+            onChange={(tab: string) => setSearchParams({ tab })}
             tabTriggerComponent={(tab: string) => (
               <div class={tab === notesStore.tab ? styles.activeTab : styles.inactiveTab}>
                 {translate('notes', 'tabs', tab)} ({humanizeNumber(notesStore.feedTotals[tab as FeedEventState])})

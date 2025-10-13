@@ -3,7 +3,7 @@ import { pageStore, removeEventFromPageStore, updatePageStore } from "../../stor
 import { PrimalArticle, PrimalDraft, PrimalNote } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload } from "src/primal_api/studio";
+import { deleteFromInbox, deleteScheduled, FEED_EVENT_STATES, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, isFeedEventState } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore, } from "../Home/Home.data";
@@ -226,6 +226,10 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
 
   if (!pk) return;
 
+  let search = new URLSearchParams(args.location.search);
+  let tab: string | null = search.get('tab');
+
+
   let span = readGraphSpan(accountStore.pubkey, 'notes');
 
   setNotesStore('graphSpan', () => ({ ...span }));
@@ -236,7 +240,13 @@ export const preloadNotes = (args: RoutePreloadFuncArgs) => {
     pageStore.notes.feedPages.length > 0
   ) return;
 
-  query(fetchNotes, 'fetchNotes')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria: notesStore.tabCriteriaOptions[notesStore.tab] });
+  if (tab && !isFeedEventState(tab)) {
+    tab = null;
+  }
+
+  const criteria = notesStore.tabCriteriaOptions[(tab as FeedEventState) || notesStore.tab];
+
+  query(fetchNotes, 'fetchNotes')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria });
   query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since: since(), until: until(), kind: 'notes' });
   // fetchNotes(pk, { since, until, limit: 30, offset: 0 });
 }

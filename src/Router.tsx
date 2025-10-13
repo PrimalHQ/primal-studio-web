@@ -1,13 +1,11 @@
 import { Component, lazy } from 'solid-js';
-import { Router, Route, RoutePreloadFunc } from "@solidjs/router";
+import { Router, Route, RoutePreloadFunc, Location } from "@solidjs/router";
 
-import { accountStore } from './stores/AccountStore';
 import { preloadNotes } from './pages/Notes/Notes.data';
 import { preloadHome } from './pages/Home/Home.data';
 import { preloadArticles } from './pages/Articles/Articles.data';
 import { preloadMedia } from './pages/Media/Media.data';
 
-import Landing from './pages/Landing/Landing';
 
 const AppRouter: Component = () => {
 

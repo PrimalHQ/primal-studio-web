@@ -50,12 +50,23 @@ export const emptyStudioTotals = () => ({
 });
 
 
-export type FeedEventState = 'published' |
-  'published-replied' |
-  'scheduled' |
-  'inbox' |
-  'sent' |
-  'drafts';
+export const FEED_EVENT_STATES = [
+  'published',
+  'published-replied',
+  'scheduled',
+  'inbox',
+  'sent',
+  'drafts'
+] as const;
+
+type typeOfFeedEventState = typeof FEED_EVENT_STATES;
+
+export type FeedEventState = typeOfFeedEventState[number];
+
+export const isFeedEventState = (value: string): value is FeedEventState => {
+  return FEED_EVENT_STATES.includes(value as FeedEventState);
+}
+
 
 export type FeedTotals = Record<FeedEventState, number>;
 

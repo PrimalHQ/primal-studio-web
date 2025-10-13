@@ -4,7 +4,7 @@ import { FeedRange, PrimalArticle, PrimalDraft } from "../../primal";
 import { Kind } from "../../constants";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, } from "src/primal_api/studio";
+import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, isFeedEventState, } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortReads } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
 import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore } from "../Home/Home.data";
@@ -238,6 +238,8 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
 
   if (!pk) return;
 
+  let search = new URLSearchParams(args.location.search);
+  let tab: string | null = search.get('tab');
   const span = readGraphSpan(accountStore.pubkey, 'articles');
 
   setArticlesStore('graphSpan', () => ({ ...span }));
@@ -248,7 +250,13 @@ export const preloadArticles = (args: RoutePreloadFuncArgs) => {
     pageStore.articles.feedPages.length > 0
   ) return;
 
-  query(fetchArticles, 'fetchArticles')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria: articlesStore.tabCriteriaOptions[articlesStore.tab] });
+  if (tab && !isFeedEventState(tab)) {
+    tab = null;
+  }
+
+  const criteria = articlesStore.tabCriteriaOptions[(tab as FeedEventState) || articlesStore.tab];
+
+  query(fetchArticles, 'fetchArticles')(pk, { since: since(), until: until(), limit: 30, offset: 0, criteria });
   query(fetchFeedTotals, 'fetchFeedTotals')(pk, { since: since(), until: until(), kind: 'articles' });
   // fetchArticles(pk, { since, until, limit: 30, offset: 0 });
 }

@@ -12,8 +12,8 @@ import { clearPageStore, pageStore, removeEventFromPageStore } from 'src/stores/
 import FeedPage from 'src/components/Event/FeedPage';
 import Paginator from 'src/components/Paginator/Paginator';
 import { accountStore } from 'src/stores/AccountStore';
-import { useNavigate, useParams } from '@solidjs/router';
-import { FeedEventState, HomePayload } from 'src/primal_api/studio';
+import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
+import { FeedEventState, HomePayload, isFeedEventState } from 'src/primal_api/studio';
 import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import ArticlePreview from 'src/components/Event/ArticlePreview';
@@ -36,6 +36,7 @@ import CheckBox from 'src/components/CheckBox/CheckBox';
 const Articles: Component = () => {
   const params = useParams();
   const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
   const articlePages = () => pageStore.articles.feedPages;
   const [visibleArticlesPages, setVisibleArticlesPages] = createSignal<number[]>([]);
@@ -111,6 +112,14 @@ const Articles: Component = () => {
     );
   }
 
+  createEffect(on(() => searchParams.tab, (tab, prev) => {
+    let newTab = tab
+    if (!newTab || typeof newTab !== 'string' || !isFeedEventState(newTab)) {
+      newTab = 'published';
+    }
+
+    setArticlesStore('tab', newTab as FeedEventState);
+  }));
   createEffect(on(
     () => [articlesStore.graphSpan.since(), articlesStore.graphSpan.until()],
     (changes, prev) => {
@@ -128,7 +137,7 @@ const Articles: Component = () => {
   );
 
   createEffect(on(() => articlesStore.tabCriteriaOptions[articlesStore.tab], (criteria, prev) => {
-    if (!prev || criteria === prev) return;
+    if (criteria === prev) return;
     const { since, until } = articlesStore.graphSpan;
 
     const pubkey = params.pubkey || accountStore.pubkey;
@@ -186,7 +195,7 @@ const Articles: Component = () => {
             tabs={['published', 'scheduled', 'inbox', 'sent', 'drafts']}
             activeTab={articlesStore.tab}
             defaultTab="published"
-            onChange={(tab: string) => setArticlesStore('tab', tab as FeedEventState)}
+            onChange={(tab: string) => setSearchParams({ tab })}
             tabTriggerComponent={(tab: string) => (
               <div class={tab === articlesStore.tab ? styles.activeTab : styles.inactiveTab}>
                 {translate('articles', 'tabs', tab)} ({humanizeNumber(articlesStore.feedTotals[tab as FeedEventState])})
