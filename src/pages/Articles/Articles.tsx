@@ -234,9 +234,10 @@ const Articles: Component = () => {
                   class={styles.bulkControlButton}
                   disabled={articlesStore.selected.length === 0}
                   onClick={() => {
-                    const drafts = pageStore.articles.feedPages.flatMap(page => page.drafts.filter(d => articlesStore.selected.includes(d.id)))
+                    const drafts = articlePages().map(page => page.drafts).flat();
+                    const selectedDrafts = drafts.filter(d => articlesStore.selected.includes(d.id));
 
-                    setArticlesStore('approvedEvents', drafts);
+                    setArticlesStore('approvedEvents', [...selectedDrafts]);
                     setArticlesStore('showApproveDialog', true);
                   }}
                 >

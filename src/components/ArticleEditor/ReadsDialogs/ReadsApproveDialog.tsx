@@ -1,4 +1,4 @@
-import { Component, createEffect, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 
 import styles from './ReadsMentionDialog.module.scss';
 import { PrimalArticle, PrimalDraft } from 'src/primal';
@@ -33,9 +33,19 @@ const ReadsApproveDialog: Component<{
     }
   });
 
-  const firstArticle = () => {
+  createEffect(() => {
+    if (props.open || props.drafts.length === 1) {
+      getFirstArticle();
+    }
+  });
+
+  const [firstArticle, setFirstArticle] = createSignal<PrimalArticle>();
+
+  const getFirstArticle = async () => {
     // @ts-ignore
-    return parseDraftedEvent(props.drafts[0]) as PrimalArticle;
+    const fa = await parseDraftedEvent(props.drafts[0]) as PrimalArticle;
+
+    setFirstArticle(() => ({...fa}));
   }
   const firstArticlePublishDate = () => {
     return props.drafts[0].draftedEvent?.created_at || 0;
@@ -49,7 +59,8 @@ const ReadsApproveDialog: Component<{
     let deletedDrafts: string[] = []
 
     for (let i=0; i<props.drafts.length; i++) {
-      let article = unwrap(parseDraftedEvent(props.drafts[i])) as PrimalArticle;
+      const draft = props.drafts[i];
+      let article = unwrap(await parseDraftedEvent(draft)) as PrimalArticle;
 
       article.created_at = today();
       article.tags = article.tags.map(
@@ -60,7 +71,7 @@ const ReadsApproveDialog: Component<{
         await sendArticle(article, article.tags);
 
       if (success && note) {
-        deletedDrafts.push(props.drafts[i].id)
+        deletedDrafts.push(draft.id)
       }
     }
 

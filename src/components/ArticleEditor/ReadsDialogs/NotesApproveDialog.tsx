@@ -1,4 +1,4 @@
-import { Component, createEffect, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 
 import styles from './ReadsMentionDialog.module.scss';
 import { PrimalNote, PrimalDraft } from 'src/primal';
@@ -33,9 +33,19 @@ const NotesApproveDialog: Component<{
     }
   });
 
-  const firstNote = () => {
+  createEffect(() => {
+    if (props.open || props.drafts.length === 1) {
+      getFirstNote();
+    }
+  });
+
+  const [firstNote, setFirstNote] = createSignal<PrimalNote>();
+
+  const getFirstNote = async() => {
     // @ts-ignore
-    return parseDraftedEvent(props.drafts[0]) as PrimalNote;
+    const fn = await parseDraftedEvent(props.drafts[0]) as PrimalNote;
+
+    setFirstNote(() => ({...fn}));
   }
   const firstNotePublishDate = () => {
     return props.drafts[0].draftedEvent?.created_at || 0;
@@ -49,14 +59,15 @@ const NotesApproveDialog: Component<{
     let deletedDrafts: string[] = []
 
     for (let i=0; i<props.drafts.length; i++) {
-      let noteToSend = unwrap(parseDraftedEvent(props.drafts[i])) as PrimalNote;
+      const draft = props.drafts[i];
+      let noteToSend = unwrap(await parseDraftedEvent(draft)) as PrimalNote;
 
       const { success, note } = publishDate(noteToSend) > today() ?
         await scheduleNote(noteToSend.content, noteToSend.tags, publishDate(noteToSend)) :
         await sendNote(noteToSend.content, noteToSend.tags);
 
       if (success && note) {
-        deletedDrafts.push(noteToSend.id)
+        deletedDrafts.push(draft.id)
       }
     }
 

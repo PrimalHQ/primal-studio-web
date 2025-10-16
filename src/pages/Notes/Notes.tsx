@@ -250,6 +250,13 @@ const Notes: Component = () => {
                 <button
                   class={styles.bulkControlButton}
                   disabled={notesStore.selected.length === 0}
+                  onClick={() => {
+                    const drafts = notePages().map(page => page.drafts).flat();
+                    const selectedDrafts = drafts.filter(d => notesStore.selected.includes(d.id));
+
+                    setNotesStore('approvedEvents', [...selectedDrafts]);
+                    setNotesStore('showApproveDialog', true);
+                  }}
                 >
                   Approve Selected
                 </button>
