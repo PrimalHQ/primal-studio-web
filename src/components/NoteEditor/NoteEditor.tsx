@@ -978,11 +978,11 @@ const NoteEditor: Component<{
             if (!file) return;
 
             if (file.type.startsWith('image')) {
-              editorTipTap()?.chain().focus().setImage({ src: url }).run();
+              editorTipTap()?.chain().focus().setImage({ src: url }).insertContent(' ').run();
             }
 
             if (file.type.startsWith('video')) {
-              editorTipTap()?.chain().focus().setVideo({ src: url }).run();
+              editorTipTap()?.chain().focus().setVideo({ src: url }).insertContent(' ').run();
             }
 
           }}
