@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "dev": "vite",
-    "dev:host": "vite --host",
+    "dev": "vite --port 3001",
+    "dev:host": "vite --host --port 3001",
     "build": "vite build",
     "build:unminified": "vite build --minify=false",
     "serve": "vite preview",

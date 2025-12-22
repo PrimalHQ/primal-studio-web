@@ -55,6 +55,7 @@ export const processTextWithImages = (view, text) => {
         const imageNode = schema.nodes.image.create({ src: part })
         tr = tr.insert(insertPos, imageNode)
         insertPos += imageNode.nodeSize
+        tr = tr.insert(insertPos, schema.text(' '));
       } else {
         lineContent.push(part)
       }
