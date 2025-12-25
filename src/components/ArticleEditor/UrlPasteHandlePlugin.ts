@@ -1,18 +1,19 @@
 import { Image } from '@tiptap/extension-image'
 import { Plugin } from 'prosemirror-state'
 import { Extension } from '@tiptap/core'
+import { EditorView } from 'prosemirror-view';
 
 
-export const isImageUrl = (text) => {
+export const isImageUrl = (text: string) => {
   return /^https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?$/i.test(text.trim())
 };
 
 
-export const containsImageUrls = (text) => {
+export const containsImageUrls = (text: string) => {
   return /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi.test(text)
 };
 
-export const processTextWithImages = (view, text) => {
+export const processTextWithImages = (view: EditorView, text: string) => {
   const { schema } = view.state
   let tr = view.state.tr.deleteSelection()
   let insertPos = tr.selection.from
@@ -20,7 +21,7 @@ export const processTextWithImages = (view, text) => {
   // Split by lines first
   const lines = text.split(/\r?\n/)
 
-  lines.forEach((line, lineIndex) => {
+  lines.forEach((line: string, lineIndex: number) => {
     if (!line.trim()) {
       // Empty line - add paragraph
       if (lineIndex < lines.length - 1) {
@@ -35,7 +36,7 @@ export const processTextWithImages = (view, text) => {
     const urlRegex = /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi
     const parts = splitTextByUrls(line, urlRegex)
 
-    let lineContent = []
+    let lineContent: string[] = []
 
     parts.forEach(part => {
       if (isImageUrl(part)) {
@@ -76,7 +77,7 @@ export const processTextWithImages = (view, text) => {
   view.dispatch(tr)
 };
 
-export const splitTextByUrls = (text, urlRegex) => {
+export const splitTextByUrls = (text: string, urlRegex: RegExp) => {
   const parts = []
   let lastIndex = 0
   let match
@@ -126,6 +127,7 @@ export const SmartImagePasteHandler = Extension.create({
 
 // Keep the paste rules as fallback
 export const EnhancedImage = Image.extend({
+  // @ts-ignore return type
   addPasteRules() {
     return [
       {

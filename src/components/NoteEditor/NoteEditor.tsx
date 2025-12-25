@@ -982,7 +982,11 @@ const NoteEditor: Component<{
             }
 
             if (file.type.startsWith('video')) {
-              editorTipTap()?.chain().focus().setVideo({ src: url }).run();
+
+              editorTipTap()?.chain().focus().insertContent([
+                { type: 'video', attrs: { src: url }},
+                {type: 'text', text: ' '},
+              ]).run();
             }
 
           }}
