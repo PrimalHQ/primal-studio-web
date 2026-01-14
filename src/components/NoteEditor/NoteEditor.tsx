@@ -978,7 +978,10 @@ const NoteEditor: Component<{
             if (!file) return;
 
             if (file.type.startsWith('image')) {
-              editorTipTap()?.chain().focus().setImage({ src: url }).insertContent(' ').run();
+              editorTipTap()?.chain().focus().insertContent([
+                { type: 'image', attrs: { src: url }},
+                {type: 'text', text: ' '},
+              ]).run();
             }
 
             if (file.type.startsWith('video')) {
