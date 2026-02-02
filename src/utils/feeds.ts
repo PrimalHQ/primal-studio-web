@@ -1231,8 +1231,7 @@ export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: Paginati
 
 export const referencesToTags = (value: string) => {
   const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
-  const regexMention =
-    /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1['qpzry9x8gf2tvdw0s3jn54khce6mua7l']+)\b|#\[(\d+)\]/g;
+  const regexMention = /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b|#\[(\d+)\]/g;
   const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 
   let refs: string[] = [];
