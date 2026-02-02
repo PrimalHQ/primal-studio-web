@@ -1,3 +1,4 @@
+import { unwrap } from "solid-js/store";
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { availableSpans, Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
@@ -22,6 +23,7 @@ export type LocalStore = {
   graphSpans: Record<string, { name: string, resolution: 'day' | 'month' | 'hour', since: number, until: number}>,
   mediaPageConfig: MediaPageConfig,
   emergencyNoteDraft: string,
+  noteMediaTags: string[][],
   userHistory: string[],
 };
 
@@ -38,6 +40,7 @@ export const emptyStorage: LocalStore = {
   graphSpans: {},
   mediaPageConfig: {},
   emergencyNoteDraft: '',
+  noteMediaTags: [],
   userHistory: [],
 }
 
@@ -375,6 +378,30 @@ export const readEmergencyNoteDraft  = (
   const store = getStorage(pubkey);
 
   return store.emergencyNoteDraft;
+}
+
+export const storeNoteMediaTags = (pubkey: string | undefined, mediaTags: string[][]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  console.log('STORE TAGS: ', mediaTags)
+  console.log('STORE TAGS: ', mediaTags[0])
+  store.noteMediaTags = [...mediaTags];
+
+  setStorage(pubkey, store);
+}
+
+export const readNoteMediaTags = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.noteMediaTags;
 }
 
 export const storeUserHistory = (

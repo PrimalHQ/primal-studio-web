@@ -27,7 +27,7 @@ import { PrimalArticle, PrimalDraft, PrimalNote, PrimalUser } from 'src/primal';
 import { nip19 } from 'src/utils/nTools';
 import { accountStore, activeUser, saveEmoji } from 'src/stores/AccountStore';
 import { addToUserHistory, fetchRecomendedUsersAsync, fetchUserSearch } from 'src/stores/SearchStore';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import { APP_ID } from 'src/App';
 import tippy, { Instance } from 'tippy.js';
 import SearchOption from '../Search/SearchOptions';
@@ -62,7 +62,7 @@ import { Video } from '../ArticleEditor/VideoPlugin';
 import { EnhancedImage, SmartImagePasteHandler } from '../ArticleEditor/UrlPasteHandlePlugin';
 import UploaderBlossom from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
-import { readEmergencyNoteDraft, storeEmergencyNoteDraft } from 'src/utils/localStore';
+import { readEmergencyNoteDraft, readNoteMediaTags, storeEmergencyNoteDraft, storeNoteMediaTags } from 'src/utils/localStore';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import ReadsChooseMediaDialog from '../ArticleEditor/ReadsDialogs/ReadsChooseMediaDialog';
 import { BlobDescriptor } from 'blossom-client-sdk';
@@ -475,6 +475,10 @@ const NoteEditor: Component<{
 
     const jsonString = readEmergencyNoteDraft(accountStore.pubkey);
 
+    const storedMediaTags = readNoteMediaTags(accountStore.pubkey);
+    console.log('READ TAGS: ', storedMediaTags)
+    mediaTags = [...storedMediaTags]
+
     if (jsonString === '') return;
 
     const json = JSON.parse(jsonString);
@@ -593,6 +597,7 @@ const NoteEditor: Component<{
       toast?.sendSuccess('Saved draft');
 
       storeEmergencyNoteDraft(accountStore.pubkey, '');
+      storeNoteMediaTags(accountStore.pubkey, []);
 
       fetchFeedTotals(accountStore.pubkey, {
         since: notesStore.graphSpan.since(),
@@ -639,6 +644,7 @@ const NoteEditor: Component<{
       toast?.sendSuccess('Proposal sent');
 
       storeEmergencyNoteDraft(accountStore.pubkey, '');
+      storeNoteMediaTags(accountStore.pubkey, []);
 
       fetchFeedTotals(accountStore.pubkey, {
         since: notesStore.graphSpan.since(),
@@ -671,13 +677,24 @@ const NoteEditor: Component<{
     const content = await getEditorContent(editorMode());
     let tags = referencesToTags(content);
 
+    let mediaTagsToAdd = mediaTags.filter(t => {
+      const data = t.find(p => p.startsWith('url'));
+      if (data) {
+        const [_, url] = data.split(' ');
+
+        return content.includes(url);
+      }
+      return false;
+    });
+
     if (proposedUser()) {
-      proposeDraft(content, tags);
+      proposeDraft(content, [...tags, ...mediaTagsToAdd]);
       return;
     }
 
     const relayTags = getRelayTags();
-    tags = [...tags, ...relayTags];
+
+    tags = [...tags, ...relayTags, ...mediaTagsToAdd];
 
     const pubDate = futurePublishDate();
 
@@ -688,6 +705,7 @@ const NoteEditor: Component<{
     if (success && note) {
 
       storeEmergencyNoteDraft(accountStore.pubkey, '');
+      storeNoteMediaTags(accountStore.pubkey, []);
 
       const draft = props.draft;
 
@@ -731,6 +749,71 @@ const NoteEditor: Component<{
     setFileToUpload(undefined);
     setIsUploading(false);
   };
+
+
+  let mediaTags: string[][] = [];
+
+  const attachFile = async (url: string, file: File) => {
+    const { type } = file;
+
+    if (type.startsWith('image')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const result = e.target?.result as string
+        if (result === undefined || result === null) return;
+
+        const img = document.createElement('img');
+        img.src = result;
+
+        // Get dimensions after the image is loaded
+        img.onload = function() {
+          const dim = `${img.width}x${img.height}`;
+
+          mediaTags = [
+            ...mediaTags,
+            [
+            'imeta',
+            `url ${url}`,
+            `m ${type}`,
+            `dim ${dim}`,
+            'service nip96',
+          ]];
+
+          storeNoteMediaTags(accountStore.pubkey, [ ...mediaTags]);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (type.startsWith('video')) {
+      const video = document.createElement('video');
+      video.preload = 'metadata'; // Hint to the browser to only load metadata
+
+      video.addEventListener('loadedmetadata', () => {
+        const dim = `${video.videoWidth}x${video.videoHeight}`;
+
+        const bitrate = (8 * file.size) / video.duration;
+
+        mediaTags = [
+          ...mediaTags,
+          [
+            'imeta',
+            `url ${url}`,
+            `m ${type}`,
+            `dim ${dim}`,
+            `duration ${video.duration}`,
+            `bitrate ${bitrate}`,
+            'service nip96',
+        ]];
+
+        storeNoteMediaTags(accountStore.pubkey, [ ...mediaTags]);
+
+        URL.revokeObjectURL(video.src);
+      });
+
+      video.src = URL.createObjectURL(file);
+    }
+  }
 
   return (
     <>
@@ -992,6 +1075,8 @@ const NoteEditor: Component<{
               ]).run();
             }
 
+            attachFile(url, file);
+
           }}
           onStart={(_, cancelUpload) => {
             setIsUploading(true);
@@ -1087,6 +1172,7 @@ const NoteEditor: Component<{
 
                 setTimeout(() => {
                   storeEmergencyNoteDraft(accountStore.pubkey, '');
+                  storeNoteMediaTags(accountStore.pubkey, []);
                 }, 0);
               }}
             >
