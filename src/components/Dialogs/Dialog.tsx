@@ -12,6 +12,7 @@ const Dialog: Component<{
   open?: boolean,
   setOpen?: (v: boolean) => void,
   id?: string,
+  noPadding?: boolean,
 }> = (props) => {
 
   return (
@@ -26,7 +27,7 @@ const Dialog: Component<{
       <KobalteDialog.Portal>
         <KobalteDialog.Overlay class={styles.dialogOverlay} />
         <div class={styles.dialog}>
-          <KobalteDialog.Content class={styles.dialogContent} >
+          <KobalteDialog.Content class={`${styles.dialogContent} ${props.noPadding ? styles.noPadding : ''}`} >
             <div class={styles.dialogHeader}>
               <KobalteDialog.Title class={styles.dialogTitle}>
                 {props.title}

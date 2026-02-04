@@ -150,6 +150,10 @@ export type NostrRelayEvent = {
   tags: string[][],
 };
 
+export type NostrRelay = { read: boolean, write: boolean };
+
+export type NostrRelays = Record<string, NostrRelay>;
+
 export type NostrRelaySignedEvent = NostrRelayEvent & {
   id: string,
   pubkey: string,

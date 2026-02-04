@@ -231,3 +231,7 @@ export const availableSpans: GraphSpan[] = [
     resolution: 'month',
   },
 ];
+
+export const appStoreLink = 'https://apps.apple.com/us/app/primal/id1673134518';
+
+export const playstoreLink = 'https://play.google.com/store/apps/details?id=net.primal.android';

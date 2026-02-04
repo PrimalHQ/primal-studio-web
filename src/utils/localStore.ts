@@ -4,6 +4,7 @@ import { availableSpans, Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
 import { mediaSortOptions } from "src/pages/Media/Media.data";
 import { NostrEventContent, NostrRelaySettings, PrimalTheme, PrimalUser, UserMetadataContent } from "src/primal";
+import { MembershipStatus } from "src/stores/AccountStore";
 
 export type MediaPageConfig = {
   server?: string,
@@ -25,6 +26,7 @@ export type LocalStore = {
   emergencyNoteDraft: string,
   noteMediaTags: string[][],
   userHistory: string[],
+  membershipStatus: MembershipStatus | undefined,
 };
 
 
@@ -42,6 +44,7 @@ export const emptyStorage: LocalStore = {
   emergencyNoteDraft: '',
   noteMediaTags: [],
   userHistory: [],
+  membershipStatus: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -426,3 +429,17 @@ export const readUserHistory  = (
 
   return store.userHistory;
 }
+
+
+export const readMembershipStatus = (pubkey: string) => {
+  const store = getStorage(pubkey)
+  return store.membershipStatus;
+};
+
+export const storeMembershipStatus = (pubkey: string, membershipStatus: MembershipStatus | undefined) => {
+  const store = getStorage(pubkey);
+
+  store.membershipStatus = membershipStatus ? { ...membershipStatus } : undefined;
+
+  setStorage(pubkey, store);
+};

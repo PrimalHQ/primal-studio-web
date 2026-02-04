@@ -210,3 +210,14 @@ export const sendPayment = async (paymentRequest: string) => {
     throw(reason);
   }
 };
+
+
+export const SIGN_TIMEOUT = 12_000;
+
+export const timeoutPromise = (timeout = 8_000) => {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject('promise_timeout');
+    }, timeout);
+  });
+}

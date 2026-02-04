@@ -74,8 +74,16 @@ export const noteIdToHex = (noteId: string) => {
 }
 
 
-  export const generateArticleIdentifier = (title: string) => {
-    let str = title.toLowerCase();
+export const generateArticleIdentifier = (title: string) => {
+  let str = title.toLowerCase();
 
-    return str.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-  }
+  return str.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+}
+
+
+export const uuidv4 = () => {
+  // @ts-ignore
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}

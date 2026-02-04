@@ -25,6 +25,11 @@ import BuyTeamDialog from './BuyTeamDialog';
 import { isPhone } from 'src/utils/ui';
 import { accountStore } from 'src/stores/AccountStore';
 import { globalNavigate } from 'src/App';
+import { appStore, updateAppStore } from 'src/stores/AppStore';
+import GetStartedModal from 'src/components/LoginModal/GetStartedModal';
+import CreateAccountModal from 'src/components/LoginModal/CreateAccountModal';
+import LoginModal from 'src/components/LoginModal/LoginModal';
+import PrivateAccountModal from 'src/components/LoginModal/PrivateAccountModal';
 
 const Landing: Component = () => {
   const navigate = globalNavigate();
@@ -73,7 +78,8 @@ const Landing: Component = () => {
                   navigate?.('/home');
                   return;
                 }
-                setShowGetStarted(true);
+                updateAppStore('showGettingStartedModal', true);
+                // setShowGetStarted(true);
               }}
             >
               Get Started
@@ -291,6 +297,40 @@ const Landing: Component = () => {
       <BuyTeamDialog
         open={showBuyTeam()}
         setOpen={setShowBuyTeam}
+      />
+
+
+      <GetStartedModal
+        open={appStore.showGettingStartedModal}
+        onAbort={() => {
+          updateAppStore('showGettingStartedModal', false);
+        }}
+      />
+
+      <CreateAccountModal
+        open={appStore.showCreateAccountModal}
+        onAbort={() => updateAppStore('showCreateAccountModal', false)}
+      />
+
+      <LoginModal
+        open={appStore.showLoginModal}
+        onAbort={() => {
+          updateAppStore('showLoginModal', false)
+
+          if (accountStore.loginType !== 'nip46') {
+            localStorage.removeItem('bunkerUrl');
+            localStorage.removeItem('clientConnectionUrl');
+            localStorage.removeItem('appNsec');
+            localStorage.removeItem('appPubkey');
+          }
+        }}
+      />
+
+      <PrivateAccountModal
+        open={appStore.showIncognitoModal}
+        onAbort={() => {
+          updateAppStore('showIncognitoModal', false)
+        }}
       />
 
     </div>

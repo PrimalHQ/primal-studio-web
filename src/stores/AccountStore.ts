@@ -1,10 +1,10 @@
 import { createStore } from "solid-js/store";
 import { LegendCustomizationConfig, NostrEventContent, NostrWindow } from "../primal";
 import { logError, logInfo } from "../utils/logger";
-import { readEmojiHistory, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storePubkey, storeRelaySettings } from "../utils/localStore";
+import { getStorage, readEmojiHistory, readMembershipStatus, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storePubkey, storeRelaySettings } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
-import { getPublicKey, nip19 } from "../utils/nTools";
+import { getPublicKey, nip19, nip46, SimplePool } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
 import { primalAPI, subTo } from "src/utils/socket";
 import { getUserMetadata } from "src/primal_api/profile";
@@ -20,6 +20,7 @@ import { createEffect } from "solid-js";
 import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
 import { updateAppStore } from "./AppStore";
 import { isPhone } from "src/utils/ui";
+import { appSigner, getAppSK, setAppSigner } from "src/utils/primalNip46";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -56,6 +57,8 @@ export type AccountStore = {
   emojiHistory: EmojiOption[],
   licenseStatus: LicenseStatus,
   legendConfig: LegendCustomizationConfig | undefined,
+  loginType: LoginType,
+  showPin: string,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -75,9 +78,13 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
     valid_until: null,
   },
   legendConfig: undefined,
+  loginType: 'none',
+  showPin: '',
 });
 
-let extensionAttempt = 0;
+const LOGIN_TYPES = ['extension', 'local', 'npub', 'guest', 'nip46', 'none'] as const;
+
+export type LoginType = (typeof LOGIN_TYPES)[number];
 
 export const loadLicenseStatus = async () => {
   const status = await getLicenceStatus();
@@ -90,16 +97,324 @@ export const loadLicenseStatus = async () => {
   }
 }
 
+export const setPublicKey = (pubkey: string | undefined) => {
 
-const logout = () => {
+  if (pubkey && pubkey.length > 0) {
+    updateAccountStore('pubkey', () => pubkey);
+    localStorage.setItem('pubkey', pubkey);
+  }
+  else {
+    updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
+    localStorage.removeItem('pubkey');
+  }
+};
+
+// export const logout = () => {
+//   updateAccountStore('sec', () => undefined);
+//   updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
+//   updateAccountStore('accountIsReady', () => false);
+//   localStorage.removeItem('pubkey');
+//   localStorage.removeItem('primalSec');
+// };
+
+export const setLoginType = (type: LoginType) => {
+  localStorage.setItem('loginType', type);
+  updateAccountStore('loginType', () => type);
+}
+
+export const logout = () => {
   updateAccountStore('sec', () => undefined);
-  updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
+  setPublicKey(undefined);
   updateAccountStore('accountIsReady', () => false);
   localStorage.removeItem('pubkey');
   localStorage.removeItem('primalSec');
+
+  localStorage.removeItem('bunkerUrl');
+  localStorage.removeItem('clientConnectionUrl');
+  localStorage.removeItem('appNsec');
+  localStorage.removeItem('appPubkey');
+
+  setLoginType('guest');
 };
 
-const setSec = (sec: string | undefined, force?: boolean) => {
+export const logUserIn = () => {
+  const storedLoginType = (localStorage.getItem('loginType') || 'none') as LoginType;
+
+  let type = accountStore.loginType;
+
+  if (LOGIN_TYPES.includes(storedLoginType)) {
+    setLoginType(storedLoginType);
+    type = storedLoginType;
+  }
+
+  const storedPk = fetchNostrKey();
+
+  switch (type) {
+    case 'npub':
+      loginUsingNpub();
+      break;
+    case 'extension':
+      if (storedPk) {
+        doAfterLogin(storedPk);
+      }
+      loginUsingExtension();
+      break;
+    case 'local':
+      loginUsingLocalNsec();
+      break;
+    case 'nip46':
+      loginUsingNip46(storedPk);
+      break;
+    case 'guest':
+      loginGuest();
+      break;
+    default:
+      findActiveLogin();
+      break;
+  }
+}
+
+export const findActiveLogin = (extensionAttempt = 0) => {
+  const sec = readSecFromStorage();
+
+  if (sec) {
+    loginUsingLocalNsec(sec);
+    return;
+  }
+
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (!nostr && extensionAttempt < 4) {
+    setTimeout(() => {
+      findActiveLogin(extensionAttempt + 1);
+    }, 500);
+    return;
+  }
+
+  if (nostr) {
+    loginUsingExtension();
+    return;
+  }
+
+  loginGuest();
+}
+
+export const loginGuest = () => {
+  setPublicKey(undefined);
+  updateAccountStore('metadata', () => undefined);
+  updateAccountStore('loginType', () => 'guest');
+  updateAccountStore('accountIsReady', () => true);
+};
+
+export const loginUsingExtension = async (extensionAttempt = 0) => {
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  updateAccountStore('accountIsReady', () => false);
+
+  if (!nostr) {
+    if (extensionAttempt > 4) {
+      logInfo('Nostr extension not found');
+      return;
+    }
+
+    logInfo('Nostr extension retry attempt: ', extensionAttempt)
+    setTimeout(() => loginUsingExtension(extensionAttempt + 1), 250);
+    return;
+  }
+
+  try {
+    setLoginType('extension');
+    const key = await getNostrPublicKey();
+
+    if (key === undefined) {
+      setTimeout(() => {
+        loginUsingExtension(extensionAttempt + 1);
+      }, 250);
+    }
+    else {
+      setPublicKey(key);
+
+      // Read profile from storage
+      const storedUser = readStoredProfile(key);
+
+      if (storedUser) {
+        // If it exists, set it as active user
+        updateAccountStore('metadata', () => ({...storedUser}));
+      }
+
+      doAfterLogin(key);
+    }
+  } catch (e: any) {
+    setLoginType('guest');
+    setPublicKey(undefined);
+    localStorage.removeItem('pubkey');
+    logError('error fetching public key: ', e);
+  }
+};
+
+export const loginUsingLocalNsec = (oSec?: string) => {
+  const sec = oSec || readSecFromStorage();
+
+  if (!sec) return;
+
+  setLoginType('local');
+
+  if (sec.startsWith(pinEncodePrefix)) {
+    updateAccountStore('showPin', () => sec);
+  }
+  else {
+    setSec(sec);
+    accountStore.pubkey && doAfterLogin(accountStore.pubkey)
+  }
+};
+
+export const loginUsingNpub = (npub?: string) => {
+  setLoginType('npub');
+
+  if (npub) {
+    const decoded = nip19.decode(npub);
+
+    if (decoded.type !== 'npub') return;
+
+    const pk = decoded.data;
+
+    setPublicKey(pk);
+    doAfterLogin(pk);
+    return;
+  }
+
+
+  let pk = localStorage.getItem('pubkey');
+
+  if (!pk) return;
+    setPublicKey(pk);
+  doAfterLogin(pk);
+};
+
+export const loginUsingNip46 = async (pk?: string) => {
+  setLoginType('nip46');
+
+  const sec = getAppSK();
+  const bunkerUrl = localStorage.getItem('bunkerUrl');
+
+  if (!sec || !bunkerUrl) {
+    setLoginType('guest');
+    return;
+  }
+
+  const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl)
+
+  if (!bunkerPointer) {
+    setLoginType('guest');
+    return;
+  }
+
+  const pool = new SimplePool();
+
+  setAppSigner(nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool }))
+
+  if (!appSigner) {
+    setLoginType('guest');
+    return;
+  }
+
+  const pubkey = pk || await appSigner.getPublicKey()
+
+  setPublicKey(pubkey);
+  doAfterLogin(pubkey);
+};
+
+export const doAfterLogin = async (pubkey: string) => {
+  // const storage = getStorage(pubkey);
+
+// ===========================================
+
+  // const eventQueue = readAccountStoreKey(pubkey, 'eventQueue');
+
+  // updateAccountStore('eventQueue', () => [ ...eventQueue]);
+
+  // if (eventQueue.length > 0) {
+  //   startEventQueueMonitor();
+  // }
+
+  updateAccountStore('accountIsReady', true);
+
+// ===========================================
+
+  updateAccountProfile(pubkey);
+
+// ===========================================
+
+  checkMembershipStatus();
+
+  // const bks = readBookmarks(pubkey);
+  // updateAccountStore('bookmarks', () => [...bks]);
+  // fetchBookmarks();
+
+// ===============================================
+
+  // let nwcActive = storage.nwcActive;
+  // nwcActive && setActiveNWC(nwcActive);
+
+// ===============================================
+
+  // if (accountStore.followingSince < storage.followingSince) {
+  //   updateAccountStore('following', () => ({ ...storage.following }));
+  //   updateAccountStore('followingSince', () => storage.followingSince);
+  // }
+
+  // updateContactsList();
+  // updateAccountStore('emojiHistory', () => readEmojiHistory(pubkey))
+
+// ==================================================
+
+  // if (accountStore.mutedSince < storage.mutedSince) {
+  //   updateAccountStore('muted', () => ({ ...storage.muted }));
+  //   updateAccountStore('mutedSince', () => storage.mutedSince);
+  //   updateAccountStore('mutedPrivate', () => storage.mutedPrivate);
+  // }
+
+  // const mutelistId = `mutelist_${APP_ID}`;
+
+  // handleSubscription(
+  //   mutelistId,
+  //   () => getProfileMuteList(pubkey, mutelistId),
+  //   handleMuteListEvent,
+  // );
+
+// ==================================================
+
+  // if (accountStore.mutedSince < storage.mutedSince) {
+  //   updateAccountStore('streamMuted', () => ({ ...storage.streamMuted }));
+  //   updateAccountStore('streamMutedSince', () => storage.streamMutedSince);
+  //   updateAccountStore('streamMutedPrivate', () => storage.streamMutedPrivate);
+  // }
+
+  // const streamMuteListid = `streammutelist_${APP_ID}`;
+
+  // handleSubscription(
+  //   streamMuteListid,
+  //   () => getReplacableEvent(pubkey, Kind.StreamMuteList, streamMuteListid),
+  //   handleStreamMuteListEvent,
+  // );
+
+// ==================================================
+
+  // getFilterLists(pubkey);
+  // getAllowList(pubkey);
+
+// ==================================================
+
+  // fetchBookmarks();
+
+
+// ==================================================
+
+}
+
+export const setSec = (sec: string | undefined, force?: boolean) => {
   if (!sec) {
     logout();
     return;
@@ -114,8 +429,7 @@ const setSec = (sec: string | undefined, force?: boolean) => {
     const pubkey = getPublicKey(decoded.data);
 
     if (pubkey !== accountStore.pubkey || force) {
-      updateAccountStore('pubkey', () => pubkey);
-      localStorage.setItem('pubkey', pubkey);
+      setPublicKey(pubkey);
     }
 
     updateAccountStore('accountIsReady', () => true);
@@ -134,87 +448,36 @@ export const loadStoredPubkey = () => {
 
   if (!pubkey) return;
 
-  updateAccountStore('pubkey', () => pubkey);
+  setPublicKey(pubkey);
 };
 
-export const fetchNostrKey = async () => {
-  if (isPhone() && window.location.pathname !== '/') {
-    updateAppStore('showNoPhoneDialog', true);
-    return;
-  }
+export const fetchNostrKey = () => {
   const storedKey = localStorage.getItem('pubkey');
 
-  if (storedKey) {
-    updateAccountStore('pubkey', storedKey);
+  if (!storedKey) return undefined;
 
-    // Read profile from storage
-    const storedUser = readStoredProfile(storedKey);
+  setPublicKey(storedKey);
 
-    if (storedUser) {
-      // If it exists, set it as active user
-      updateAccountStore('metadata', () => ({...storedUser}));
-    }
+  // Read profile from storage
+  const storedUser = readStoredProfile(storedKey);
+
+  if (storedUser) {
+    // If it exists, set it as active user
+    updateAccountStore('metadata', () => ({...storedUser}));
   }
 
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
+  const membershipStatus = readMembershipStatus(storedKey);
 
-  // Nostr extension not found
-  if (nostr === undefined) {
-    logError('Nostr extension not found');
-    // Try again after one second if extensionAttempts are not exceeded
-    if (extensionAttempt < 4) {
-      extensionAttempt += 1;
-      logInfo('Nostr extension retry attempt: ', extensionAttempt)
-      setTimeout(fetchNostrKey, 250);
-      return;
-    }
-
-    const sec = readSecFromStorage();
-
-    if (!sec) {
-      updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
-      localStorage.removeItem('pubkey');
-      updateAccountStore('accountIsReady', () => false);
-      return;
-    }
-
-    if (sec.startsWith(pinEncodePrefix)) {
-      // display enter pin modal
-      return
-    }
-
-    setSec(sec);
-    return;
+  if (membershipStatus) {
+    updateAccountStore('membershipStatus', () => ({ ...membershipStatus }));
   }
 
-  updateAccountStore('sec', () => undefined);
+  // Fetch it anyway, maybe there is an update
+  updateAccountProfile(storedKey);
 
-  try {
-    const key = await getNostrPublicKey();
+  return storedKey;
 
-    updateAccountStore('pubkey', () => key);
-    storePubkey(key);
-
-    // Read profile from storage
-    const storedUser = readStoredProfile(key);
-
-    if (storedUser) {
-      // If it exists, set it as active user
-      updateAccountStore('metadata', () => ({...storedUser}));
-    }
-
-    // Fetch it anyway, maybe there is an update
-    updateAccountProfile(key);
-
-    updateAccountStore('accountIsReady', () => true);
-  } catch (e: any) {
-    updateAccountStore('pubkey', () => PRIMAL_PUBKEY);
-    localStorage.removeItem('pubkey');
-    logError('error fetching public key: ', e);
-  updateAccountStore('accountIsReady', () => false);
-  }
-}
+};
 
 export const updateAccountProfile = (pubkey: string) => {
   if (pubkey !== accountStore.pubkey) return;
@@ -429,8 +692,5 @@ export const saveEmoji = (emoji: EmojiOption) => {
 
 export const loadEmojiHistoryFromLocalStore = () => {
   updateAccountStore('emojiHistory', () => readEmojiHistory(accountStore.pubkey));
-}
-function checkPremiumStatus() {
-  throw new Error("Function not implemented.");
 }
 

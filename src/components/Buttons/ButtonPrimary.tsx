@@ -1,4 +1,4 @@
-import { Component, JSXElement } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
@@ -9,6 +9,7 @@ const ButtonPrimary: Component<{
   children?: JSXElement,
   disabled?: boolean,
   type?: 'button' | 'submit' | 'reset' | undefined,
+  loading?: boolean,
 }> = (props) => {
   return (
     <Button
@@ -18,7 +19,12 @@ const ButtonPrimary: Component<{
       disabled={props.disabled}
       type={props.type}
     >
-      {props.children}
+      <Show
+        when={props.loading}
+        fallback={props.children}
+      >
+        <div class={styles.spinner}></div>
+      </Show>
     </Button>
   )
 }

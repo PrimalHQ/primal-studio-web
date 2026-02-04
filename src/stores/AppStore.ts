@@ -25,6 +25,11 @@ export type AppStore = {
   mediaUsageUrl: string | undefined,
   showTrialExpiredDialog: boolean,
   showNoPhoneDialog: boolean,
+
+  showGettingStartedModal: boolean,
+  showCreateAccountModal: boolean,
+  showLoginModal: boolean,
+  showIncognitoModal: boolean,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -45,6 +50,11 @@ export const emptyAppStore = (): AppStore => ({
   mediaUsageUrl: undefined,
   showTrialExpiredDialog: false,
   showNoPhoneDialog: false,
+
+  showGettingStartedModal: false,
+  showCreateAccountModal: false,
+  showLoginModal: false,
+  showIncognitoModal: false,
 });
 
 
