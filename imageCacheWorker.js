@@ -61,7 +61,7 @@ self.addEventListener('fetch', (event) => {
           }
 
 
-          return fetch(event.request).then(fetchResponse => {
+          return fetch(event.request, { mode: 'no-cors'}).then(fetchResponse => {
             return fetchResponse;
           }).catch(error => {
             console.log('FAILED TO FETCH IMAGE: ', url);
@@ -78,14 +78,27 @@ self.addEventListener('message', event => {
 
     const urls = event.data.urls;
 
-    caches.open(IMAGE_CACHE).then(cache => {
+
+    caches.open(IMAGE_CACHE).then(async (cache) => {
       for (let i=0; i<urls.length; i++) {
         const url = urls[i];
-        cache.match(url, { ignoreVary: true }).then(found => {
-          if (!found) return cache.add(url);
-        })
+        const response = await cache.match(url);
+
+        if (!!response) {
+          return;
+        }
+        else {
+          try {
+            // Fetch with no-cors for cross-origin avatars
+            const fetchResponse = await fetch(url, { mode: 'no-cors' });
+            await cache.put(url, fetchResponse);
+            return;
+          } catch {
+            console.error('Failed to cache avatar:', url, error);
+            return;
+          }
+        }
       }
-      // return cache.add(url);
     }).catch((e) => {
       console.log('FAILED TO CACHE IMAGE: ', url)
     })
