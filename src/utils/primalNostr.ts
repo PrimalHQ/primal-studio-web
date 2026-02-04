@@ -82,6 +82,7 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
     let ciphertext = base64.decode(ctb64)
     let iv = base64.decode(ivb64)
 
+    // @ts-ignore iv
     let plaintext = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, ciphertext)
 
     let text = utf8Decoder.decode(plaintext)

@@ -8,7 +8,7 @@ import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu, setMediaUsageUrl } from './stores/AppStore';
-import { accountStore, updateAccountStore } from './stores/AccountStore';
+import { accountStore, logUserIn, updateAccountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
 import { mediaStore } from './stores/MediaStore';
@@ -35,6 +35,7 @@ const App: Component = () => {
 
   onMount(() => {
     connect();
+    logUserIn();
   });
 
   onCleanup(() => {
@@ -44,10 +45,10 @@ const App: Component = () => {
   createEffect(on(() => accountStore.accountIsReady, (ready, prev) => {
     if (window.location.pathname === '/') return;
 
-    if (ready === false && prev === undefined) {
+    if (ready === false && prev !== undefined) {
       window.open('/', '_self');
+      return;
     }
-
   }));
 
 

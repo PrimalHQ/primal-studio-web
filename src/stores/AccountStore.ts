@@ -1,11 +1,11 @@
-import { createStore } from "solid-js/store";
-import { LegendCustomizationConfig, NostrEventContent, NostrWindow } from "../primal";
-import { logError, logInfo } from "../utils/logger";
+import { createStore, unwrap } from "solid-js/store";
+import { LegendCustomizationConfig, NostrEventContent, NostrRelayEvent, NostrRelaySignedEvent, NostrWindow } from "../primal";
+import { logError, logInfo, logWarning } from "../utils/logger";
 import { getStorage, readEmojiHistory, readMembershipStatus, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storePubkey, storeRelaySettings } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19, nip46, SimplePool } from "../utils/nTools";
-import { getPublicKey as getNostrPublicKey } from "../utils/nostrApi";
+import { getPublicKey as getNostrPublicKey, signEvent } from "../utils/nostrApi";
 import { primalAPI, subTo } from "src/utils/socket";
 import { getUserMetadata } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
@@ -21,6 +21,7 @@ import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
 import { updateAppStore } from "./AppStore";
 import { isPhone } from "src/utils/ui";
 import { appSigner, getAppSK, setAppSigner } from "src/utils/primalNip46";
+import { sendSignedEvent } from "src/primal_api/nostr";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -59,6 +60,9 @@ export type AccountStore = {
   legendConfig: LegendCustomizationConfig | undefined,
   loginType: LoginType,
   showPin: string,
+
+  eventQueue: NostrRelaySignedEvent[],
+  eventQueueRetry: number,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -80,6 +84,9 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
   legendConfig: undefined,
   loginType: 'none',
   showPin: '',
+
+  eventQueue: [],
+  eventQueueRetry: 16,
 });
 
 const LOGIN_TYPES = ['extension', 'local', 'npub', 'guest', 'nip46', 'none'] as const;
@@ -204,7 +211,7 @@ export const loginGuest = () => {
   setPublicKey(undefined);
   updateAccountStore('metadata', () => undefined);
   updateAccountStore('loginType', () => 'guest');
-  updateAccountStore('accountIsReady', () => true);
+  updateAccountStore('accountIsReady', () => false);
 };
 
 export const loginUsingExtension = async (extensionAttempt = 0) => {
@@ -339,7 +346,7 @@ export const doAfterLogin = async (pubkey: string) => {
   //   startEventQueueMonitor();
   // }
 
-  updateAccountStore('accountIsReady', true);
+  updateAccountStore('accountIsReady', () => true);
 
 // ===========================================
 
@@ -694,3 +701,156 @@ export const loadEmojiHistoryFromLocalStore = () => {
   updateAccountStore('emojiHistory', () => readEmojiHistory(accountStore.pubkey));
 }
 
+
+// Evet Queue Managment --------------------------------------------------------
+
+  export const enqueEvent = (event: NostrRelaySignedEvent) => {
+    const pubkey = accountStore.pubkey;
+    if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
+
+    if (accountStore.eventQueue.length === 0) {
+      startEventQueueMonitor();
+    }
+
+    updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
+  }
+
+  export const dequeEvent = (event: NostrRelaySignedEvent) => {
+    const pubkey = accountStore.pubkey;
+    const quedEvent = accountStore.eventQueue.find(e => e.id === event.id);
+
+    if (!quedEvent || !pubkey) return;
+
+    const queue = accountStore.eventQueue.filter(e => e.id !== event.id);
+    updateAccountStore('eventQueue', () => [...queue]);
+  }
+
+  export const dequeEvents = (events: NostrRelaySignedEvent[]) => {
+    const pubkey = accountStore.pubkey;
+    const ids = events.map(e => e.id);
+    const quedEvent = accountStore.eventQueue.filter(e => ids.includes(e.id));
+
+    if (quedEvent.length === 0 || !pubkey) return;
+
+    updateAccountStore('eventQueue', (que) => que.filter(e => !ids.includes(e.id)));
+  }
+
+  export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+    const pubkey = accountStore.pubkey;
+    const ev = { ...event, id, pubkey }
+    if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
+
+    if (accountStore.eventQueue.length === 0) {
+      startEventQueueMonitor();
+    }
+
+    updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
+  }
+
+  export const dequeUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+    const pubkey = accountStore.pubkey;
+    const quedEvent = accountStore.eventQueue.find(e => e.id === id);
+
+    if (!quedEvent || !pubkey) return;
+
+    const queue = accountStore.eventQueue.filter(e => e.id !== id);
+    updateAccountStore('eventQueue', () => queue);
+  }
+
+  let countdownInterval: number | undefined;
+
+  export const processArrayUntilFailure = async <T>(
+    items: T[],
+    sendToAPI: (item: T) => Promise<void>
+  ): Promise<T[]> => {
+    let queue = [...items];
+    let success: T[] = [];
+
+    while (queue.length > 0) {
+      const item = queue[0];
+
+      try {
+        await sendToAPI(item);
+        success.push(item)
+        // Success - remove the item and continue
+        queue.shift();
+      } catch (error) {
+        // Failed - abort iteration
+        logWarning('Failed to send item from queue: ', error);
+        break;
+      }
+    }
+
+    return [ ...success ];
+  }
+
+  export const refreshQueue = async () => {
+    const pubkey = accountStore.pubkey;
+    if (!pubkey) return;
+    clearInterval(countdownInterval);
+
+    let queue = unwrap(accountStore.eventQueue);
+
+    if (queue.length === 0) {
+      // clearTimeout(monitorInterval);
+      return;
+    }
+
+    const processedEvents = await processArrayUntilFailure<NostrRelaySignedEvent>([...queue], (item) => {
+      return new Promise<void>(async (resolve, reject) => {
+        if (!item.sig) {
+          try {
+            const event = await signEvent(item);
+
+            if (event) {
+              item = { ...event };
+            }
+          } catch (reason) {
+            reject('relay_send_timeout');
+            return;
+          }
+        }
+
+        let timeout = setTimeout(
+          () => reject('relay_send_timeout'),
+          8_000,
+        );
+
+        sendSignedEvent(item, {
+          success: () => {
+            clearTimeout(timeout);
+            resolve();
+          },
+        });
+      });
+    });
+
+    const processedIds = processedEvents.map(e => e.id);
+
+    const newQueue = accountStore.eventQueue.filter(e => !processedIds.includes(e.id));
+    updateAccountStore('eventQueue', () => [ ...newQueue ]);
+    startEventQueueMonitor();
+  }
+
+  export const startEventQueueMonitor = () => {
+    const pubkey = accountStore.pubkey;
+    if (!pubkey) return;
+
+    // clearTimeout(monitorInterval);
+    clearInterval(countdownInterval);
+
+    // if (accountStore.eventQueue.length === 0) return;
+
+    let countdown = 16;
+
+    countdownInterval = setInterval(() => {
+      if (countdown === 0) countdown = 16;
+      countdown--;
+
+      updateAccountStore('eventQueueRetry', () => countdown);
+    }, 1_000);
+
+    // monitorInterval = setTimeout(() => {
+    //   refereshQueue();
+    // }, 16_000);
+  }

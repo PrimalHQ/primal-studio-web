@@ -476,7 +476,7 @@ const NoteEditor: Component<{
     const jsonString = readEmergencyNoteDraft(accountStore.pubkey);
 
     const storedMediaTags = readNoteMediaTags(accountStore.pubkey);
-    console.log('READ TAGS: ', storedMediaTags)
+
     mediaTags = [...storedMediaTags]
 
     if (jsonString === '') return;

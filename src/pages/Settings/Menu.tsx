@@ -3,7 +3,8 @@ import styles from './Settings.module.scss';
 
 import { A } from '@solidjs/router';
 import { translate } from '../../translations/translate';
-import { accountStore } from 'src/stores/AccountStore';
+import { accountStore, logout } from 'src/stores/AccountStore';
+import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
 
 const Menu: Component = () => {
 
@@ -38,6 +39,14 @@ const Menu: Component = () => {
           {translate('settings', 'menu', 'network')}
           <div class={styles.chevron}></div>
         </A>
+      </div>
+
+      <div class={styles.webVersion}>
+        <ButtonPrimary onClick={() => {
+          logout();
+        }}>
+          Logout
+        </ButtonPrimary>
       </div>
 
       <div class={styles.webVersion}>

@@ -390,8 +390,6 @@ export const storeNoteMediaTags = (pubkey: string | undefined, mediaTags: string
 
   const store = getStorage(pubkey);
 
-  console.log('STORE TAGS: ', mediaTags)
-  console.log('STORE TAGS: ', mediaTags[0])
   store.noteMediaTags = [...mediaTags];
 
   setStorage(pubkey, store);

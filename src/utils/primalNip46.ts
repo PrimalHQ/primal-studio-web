@@ -50,7 +50,7 @@ export const generateClientConnectionUrl = (): string => {
       clientPubkey,
       relays: ['wss://relay.primal.net'],
       secret: `sec-${uuidv4()}`,
-      name: 'PrimalChat',
+      name: 'PrimalStudio',
       url: location.origin,
       image: `${location.origin}${primalLogo}`,
     });

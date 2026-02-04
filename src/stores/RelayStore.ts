@@ -2,7 +2,7 @@ import { createStore } from "solid-js/store";
 import { APP_ID } from "src/App";
 import { NostrRelaySettings } from "src/primal";
 import { getDefaultRelays, getRelays, sendRelays } from "src/primal_api/relays";
-import { Relay, utils } from "src/utils/nTools";
+import { Relay, RelayFactory, utils } from "src/utils/nTools";
 import { accountStore } from "./AccountStore";
 import { batch } from "solid-js";
 import { readRelaySettings, storeProxyThroughPrimal, storeRelaySettings } from "src/utils/localStore";
@@ -110,7 +110,7 @@ export const removeRelay = async (relay: Relay) => {
 export const suspendRelays = () => {
   if (relayStore.all.length === 0) {
     const urls: string[] = Object.keys(relayStore.settings || {}).map(utils.normalizeURL);
-    const suspendedRelays = urls.map(url => new Relay(url));
+    const suspendedRelays = urls.map(url => new RelayFactory(url));
     updateRelayStore('suspended', () => [ ...suspendedRelays ]);
   }
   else {
@@ -128,7 +128,7 @@ export const suspendRelays = () => {
     const pr = priorityRelays[i];
 
     if (!relayStore.suspended.find(r => r.url === pr)) {
-      updateRelayStore('suspended', updateRelayStore.length, () => new Relay(pr));
+      updateRelayStore('suspended', updateRelayStore.length, () => new RelayFactory(pr));
     }
   }
 
@@ -193,7 +193,7 @@ export const setRelaySettings = (stgns?: NostrRelaySettings, removeMissing?: boo
 
   const rs = relayStore.settings;
   const relayUrls = Object.keys(rs);
-  const relays = relayUrls.map(url => new Relay(url));
+  const relays = relayUrls.map(url => new RelayFactory(url));
 
   storeRelaySettings(accountStore.pubkey, ({ ...rs }));
 
@@ -290,7 +290,7 @@ export const connectToRelays = async (relayUrls: string[]) => {
 
     if (relayStore.connected.find(r => r.url === url)) continue;
 
-    const relay = new Relay(url);
+    const relay = new RelayFactory(url);
 
     connectToRelay(relay);
   }
