@@ -412,7 +412,8 @@ export const getUserInPage = (page: EventFeedPage, pubkey: string) => {
     tags: user.tags,
     userStats: stats ? { ...stats[user.pubkey!] } : undefined,
     event: { ...user },
-    legendConfig: page.legendCustomization[pubkey]
+    legendConfig: page.legendCustomization[pubkey],
+    kind: Kind.Metadata,
   } as PrimalUser;
 }
 
@@ -432,6 +433,7 @@ export const emptyUser = (pubkey: string) => {
     lud16: '',
     website: '',
     tags: [],
+    kind: Kind.Metadata,
   } as PrimalUser;
 };
 
@@ -777,16 +779,22 @@ export const getZapInPage = (page: EventFeedPage, eventOrId: string | NostrEvent
   const sender = page.users[senderPubkey] ? getUserInPage(page, senderPubkey) : senderPubkey;
   const reciver = page.users[receiverPubkey] ? getUserInPage(page, receiverPubkey) : receiverPubkey;
 
+  const senderUser = getUserInPage(page, senderPubkey);
+  const reciverUser = getUserInPage(page, receiverPubkey);
+
   const zap: PrimalZap = {
     id: zapContent.id,
     message: zapEvent.content || '',
     amount: parseBolt11(bolt11) || 0,
     sender,
     reciver,
+    senderUser,
+    reciverUser,
     created_at: zapContent.created_at,
     zappedId,
     zappedKind,
     zappedContent,
+    kind: Kind.Zap,
   };
 
   return zap;

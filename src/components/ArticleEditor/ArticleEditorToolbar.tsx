@@ -16,6 +16,7 @@ import ReadsEditorBubbleMenu from './ReadsEditorBubbleMenu';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
 import ReadsChooseMediaDialog from './ReadsDialogs/ReadsChooseMediaDialog';
 import { BlobDescriptor } from 'blossom-client-sdk';
+import MentionDialog from 'src/search/MentionDialog';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -786,7 +787,7 @@ const ArticleEditorToolbar: Component<{
         }}
       />
 
-      <ReadsMentionDialog
+      <MentionDialog
         open={formatControls.enterMention}
         setOpen={(v: boolean) => updateFormatControls('enterMention', () => v ? 'users' : '')}
         onAddUser={(user: PrimalUser, relays: string[]) => {
@@ -801,6 +802,7 @@ const ArticleEditorToolbar: Component<{
           addReadToEditor(read);
           updateFormatControls('enterMention', () => '');
         }}
+        onClose={() => props.editor?.chain().focus().run()}
       />
 
       <ReadsEditorBubbleMenu

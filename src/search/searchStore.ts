@@ -1,20 +1,33 @@
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import { APP_ID } from "src/App";
-import { Kind } from "src/constants";
-import { NostrEventContent, PaginationInfo, PrimalArticle, PrimalNote, PrimalUser, UserStats } from "src/primal";
-import { fetchMegaFeed } from "src/primal_api/feeds";
+import {
+  PaginationInfo,
+  PrimalArticle,
+  PrimalNote,
+  PrimalUser,
+  UserStats,
+} from "src/primal";
+import { fetchMegaFeed, fetchScoredContent } from "src/primal_api/feeds";
 import { getUserInfos, getUserMetadata, getUsers } from "src/primal_api/profile";
 import { searchUsers } from "src/primal_api/search";
-import { convertToUser, emptyEventFeedPage, emptyPaging, filterAndSortNotes, filterAndSortReads, pageResolve, updateFeedPage } from "src/utils/feeds";
+import {
+  emptyEventFeedPage,
+  emptyPaging,
+  filterAndSortNotes,
+  filterAndSortReads,
+  pageResolve,
+  updateFeedPage,
+} from "src/utils/feeds";
 import { nip19 } from "src/utils/nTools";
-import { primalAPI, subsTo } from "src/utils/socket";
-import { accountStore } from "./AccountStore";
+import { primalAPI } from "src/utils/socket";
+import { accountStore } from "src/stores/AccountStore";
 import { logError } from "src/utils/logger";
 import { batch } from "solid-js";
-import { readUserHistory, storeUserHistory } from "src/utils/localStore";
+import { uuidv4 } from "src/utils/kyes";
 
 export type SearchStore = {
   users: PrimalUser[],
+  recomendedUsers: PrimalUser[],
   scores: Record<string, number>,
   isFetchingUsers: boolean,
   userHistory: {
@@ -24,11 +37,20 @@ export type SearchStore = {
   paging: PaginationInfo,
   notes: PrimalNote[],
   reads: PrimalArticle[],
+  initNotes: PrimalNote[],
+  initReads: PrimalArticle[],
   isFetchingContent: boolean,
+  isFetchingInitNotes: boolean,
+  isFetchingInitReads: boolean,
+  selectedUser: PrimalUser | undefined,
+  searchQuery: string,
+  suggestedUsers: PrimalUser[],
+  highlightedUser: number,
 }
 
-export const [searchStore, updateSearchStore] = createStore<SearchStore>({
+export const initSearchStore = () => ({
   users: [],
+  recomendedUsers: [],
   scores: {},
   isFetchingUsers: false,
   userHistory: {
@@ -38,21 +60,45 @@ export const [searchStore, updateSearchStore] = createStore<SearchStore>({
   paging: { ...emptyPaging() },
   notes: [],
   reads: [],
+  initNotes: [],
+  initReads: [],
   isFetchingContent: false,
+  isFetchingInitNotes: false,
+  isFetchingInitReads: false,
+  selectedUser: undefined,
+  searchQuery: '',
+  suggestedUsers: [],
+  highlightedUser: 0,
 });
 
+export const [searchStore, updateSearchStore] = createStore<SearchStore>(initSearchStore());
+
 export const recomendedUsers = [
-  '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
-  'bf2376e17ba4ec269d10fcc996a4746b451152be9031fa48e74553dde5526bce', // carla
-  'c48e29f04b482cc01ca1f9ef8c86ef8318c059e0e9353235162f080f26e14c11', // walker
-  '85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204', // preston
-  'eab0e756d32b80bcd464f3d844b8040303075a13eabc3599a762c9ac7ab91f4f', // lyn
-  '04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9', // odell
-  '472f440f29ef996e92a186b8d320ff180c855903882e59d50de1b8bd5669301e', // marty
-  'e88a691e98d9987c964521dff60025f60700378a4879180dcbbb4a5027850411', // nvk
-  '91c9a5e1a9744114c6fe2d61ae4de82629eaaa0fb52f48288093c7e7e036f832', // rockstar
-  'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52', // pablo
+  "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // jack
+  "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63", // calle
+  "1afe0c74e3d7784eba93a5e3fa554a6eeb01928d12739ae8ba4832786808e36d", // hodl
+  "c48e29f04b482cc01ca1f9ef8c86ef8318c059e0e9353235162f080f26e14c11", // walker
+  "85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204", // preston
+  "eab0e756d32b80bcd464f3d844b8040303075a13eabc3599a762c9ac7ab91f4f", // lyn
+  "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9", // odell
+  "472f440f29ef996e92a186b8d320ff180c855903882e59d50de1b8bd5669301e", // marty
+  "e88a691e98d9987c964521dff60025f60700378a4879180dcbbb4a5027850411", // nvk
+  "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52", // pablo
 ];
+
+
+export const loadSearchStore = (pubkey: string) => {
+  batch(() => {
+    updateSearchStore('isFetchingContent', false);
+    updateSearchStore('isFetchingUsers', false);
+    updateSearchStore('isFetchingInitNotes', false);
+    updateSearchStore('isFetchingInitReads', false);
+  })
+
+  getRecomendedUsers(searchStore.userHistory.profiles);
+  fetchTrendingNotes();
+  fetchDefaultReads();
+}
 
 export const findUsers2 = (query: string, pubkey?: string) => {
   return new Promise<PrimalUser[]>((resolve, reject) => {
@@ -206,6 +252,7 @@ export const getRecomendedUsers = (profiles?: PrimalUser[]) => {
 
       batch(() => {
         updateSearchStore('users', () => [ ...recom, ...(profiles || [])]);
+        updateSearchStore('recomendedUsers', () => [ ...recom, ...(profiles || [])]);
         updateSearchStore('isFetchingUsers', () => false);
       })
     },
@@ -214,6 +261,49 @@ export const getRecomendedUsers = (profiles?: PrimalUser[]) => {
   });
 
 };
+
+export const fetchTrendingNotes = async () => {
+  if (searchStore.isFetchingInitNotes) return;
+  updateSearchStore('isFetchingInitNotes', true);
+  try {
+    const { notes, paging } = await fetchScoredContent(
+      accountStore.pubkey,
+      'trending_24h',
+      `get_init_notes_${APP_ID}`,
+    );
+
+    updateSearchStore('paging', () => ({ ...paging }));
+    updateSearchStore('notes', () => [ ...notes]);
+    updateSearchStore('initNotes', () => [ ...notes]);
+  } catch (error) {
+    logError('failed-to-fetch-init-notes');
+  } finally {
+    updateSearchStore('isFetchingInitNotes', false);
+  }
+
+}
+
+export const fetchDefaultReads = async () => {
+  if (searchStore.isFetchingInitReads) return;
+  updateSearchStore('isFetchingInitReads', true);
+
+  try {
+    const { reads, paging } = await fetchMegaFeed(
+      accountStore.pubkey,
+      JSON.stringify({ id: "nostr-reads-feed", kind: "reads"}),
+      `get_init_reads_${APP_ID}`,
+      { limit: 6 },
+    );
+
+    updateSearchStore('paging', () => ({ ...paging }));
+    updateSearchStore('reads', () => [ ...reads]);
+    updateSearchStore('initReads', () => [ ...reads]);
+  } catch (error) {
+    logError('failed-to-fetch-init-notes');
+  } finally {
+    updateSearchStore('isFetchingInitReads', false);
+  }
+}
 
 
 export const findContent = async (query: string, until = 0) => {
@@ -328,7 +418,8 @@ export const removeEvent = (id: string, kind: 'reads' | 'notes') => {
 }
 
 
-export const fetchUserSearch = (pubkey: string | undefined, subId: string, query: string, limit = 10) => {
+export const fetchUserSearch = (pubkey: string | undefined, query: string, limit = 10) => {
+  const subId = `mention_users_${uuidv4()}_${APP_ID}`;
   return new Promise<PrimalUser[]>((resolve, reject) => {
 
     let users: PrimalUser[] = [];
@@ -361,7 +452,6 @@ export const fetchUserSearch = (pubkey: string | undefined, subId: string, query
   });
 };
 
-
 export const fetchRecomendedUsersAsync = async (profiles?: PrimalUser[]) => {
   let recomended = await getUsers(recomendedUsers);
 
@@ -378,26 +468,22 @@ export const addToUserHistory = (user: PrimalUser) => {
   let history = searchStore.userHistory.profiles;
 
   if (history.map(p => p.pubkey).includes(user.pubkey)) {
-    history = [ {...user }, ...history.filter(p => p.pubkey !== user.pubkey)];
-    return;
+    history = [ {...user }, ...history.filter(p => p.pubkey !== user.pubkey)].slice(0, 9);
+  }
+  else {
+    history = [{...user }, ...history].slice(0, 9);
   }
 
-  history = [{...user }, ...history];
-
   batch(() => {
-    updateSearchStore('userHistory', 'profiles', profiles => [{ ...user}, ...profiles] );
+    updateSearchStore('userHistory', 'profiles', () => [...history] );
     if (stats) {
       updateSearchStore('userHistory', 'stats', hStats => ({...hStats, [user.pubkey]: { ...stats }}));
     }
   });
-
-  storeUserHistory(accountStore.pubkey, history);
 }
 
 export const loadUserHistory = async () => {
-  const history = readUserHistory(accountStore.pubkey);
-
-  const users = await getUsers(history);
+  const users = await getUsers(searchStore.userHistory.profiles.map(p => p.pubkey));
 
   updateSearchStore('userHistory', 'profiles', () => [...users]);
 }

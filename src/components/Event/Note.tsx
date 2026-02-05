@@ -1,134 +1,194 @@
-import { Component, For, Match, Show, Switch } from 'solid-js';
-import { EventDisplayVariant, PrimalNote } from '../../primal';
+import { Component, For, JSXElement, Match, Show, Switch } from 'solid-js';
+import { EventDisplayVariant, PrimalArticle, PrimalNote, PrimalUser } from 'src/primal';
 
 import styles from './Event.module.scss';
-import { userName } from '../../utils/profile';
+import { userNameFromUser } from 'src/utils/profile';
 import Avatar from '../Avatar/Avatar';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { nip05Verification } from 'src/utils/ui';
 import { date } from 'src/utils/date';
 import { NoteAST, parseTextToAST } from 'src/utils/parser';
 import { nip19 } from 'src/utils/nTools';
+import ArticleReviewPreview from './ArticleReviewPreview';
 
 
 export const renderEmbeddedNote = (config: { note: PrimalNote }) => {
   return (<div><Note note={config.note} /></div> as HTMLDivElement).innerHTML;
 }
 
-const Note: Component<{
+
+export const renderVideo = (ast: NoteAST) => {
+  return <div class={styles.mentionedVideo}>
+    <video
+      class={styles.video}
+      controls
+      muted={true}
+      loop={true}
+      playsinline={true}
+    >
+      <source src={ast.value} />
+    </video>
+  </div>;
+}
+
+export const renderHashtag = (ast: NoteAST) => {
+  return <span class="linkish">#{ast.value}</span>
+}
+
+export const renderNevent = (
+  ast: NoteAST,
   note: PrimalNote,
-  onClick?: () => void,
-  onRemove?: (id: string) => void,
-  embedded?: boolean,
-  variant?: EventDisplayVariant,
-}> = (props) => {
+  customRender?: (note: PrimalNote) => JSXElement,
+) => {
+  const nevent = ast?.value?.split(':')[1] || '';
 
-  const renderVideo = (ast: NoteAST) => {
-    return <div class={styles.mentionedVideo}>
-      <video
-        class={styles.video}
-        controls
-        muted={true}
-        loop={true}
-        playsinline={true}
-      >
-        <source src={ast.value} />
-      </video>
-    </div>;
-  }
+  try {
+    const decoded = nip19.decode(nevent);
 
-  const renderHashtag = (ast: NoteAST) => {
-    return <span class="linkish">#{ast.value}</span>
-  }
+    if (decoded.type === 'nevent') {
+      const id = decoded.data.id;
 
-  const renderNevent = (ast: NoteAST) => {
-    const nevent = ast?.value?.split(':')[1] || '';
+      const mentionedNote = note.mentionedNotes && note.mentionedNotes[id];
 
-    try {
-      const decoded = nip19.decode(nevent);
+      if (!mentionedNote) return <div>UNKOWN MENTION</div>
 
-      if (decoded.type === 'nevent') {
-        const id = decoded.data.id;
-
-        const mentionedNote = props.note.mentionedNotes && props.note.mentionedNotes[id];
-
-        if (!mentionedNote) return <div>UNKOWN MENTION</div>
-
-        return <Note note={mentionedNote} />
-      }
-
-      if (decoded.type === 'note') {
-        const id = decoded.data;
-
-        const mentionedNote = props.note.mentionedNotes && props.note.mentionedNotes[id];
-
-        if (!mentionedNote) return <div>UNKOWN MENTION</div>
-
-        return <Note note={mentionedNote} />
-      }
-
-      throw('not-found');
-    } catch (e) {
-      return <div>UNKOWN MENTION</div>;
+      return customRender?.(mentionedNote) || <Note note={mentionedNote} />
     }
-  }
 
-  const renderNprofile = (ast: NoteAST) => {
-    const nprofile = ast?.value?.split(':')[1] || '';
+    if (decoded.type === 'note') {
+      const id = decoded.data;
 
-    try {
-      const decoded = nip19.decode(nprofile);
+      const mentionedNote = note.mentionedNotes && note.mentionedNotes[id];
 
-      if (decoded.type === 'nprofile') {
-        const pubkey = decoded.data.pubkey;
+      if (!mentionedNote) return <div>UNKOWN MENTION</div>
 
-        return <span class="linkish">@{userName(pubkey)}</span>
-      }
-
-      if (decoded.type === 'npub') {
-        const pubkey = decoded.data;
-
-        return <span class="linkish">@{userName(pubkey)}</span>
-      }
-
-      throw('not-found');
-    } catch (e) {
-      return `@UNKNOWN`
+      return customRender?.(mentionedNote) || <Note note={mentionedNote} />
     }
+
+    throw('not-found');
+  } catch (e) {
+    return <div>UNKOWN MENTION</div>;
+  }
+}
+
+export const renderNaddr = (
+  ast: NoteAST,
+  note: PrimalNote,
+  customRender?: (article: PrimalArticle) => JSXElement,
+) => {
+  const naddr = ast?.value?.split(':')[1] || '';
+
+  try {
+    const decoded = nip19.decode(naddr);
+
+    if (decoded.type === 'naddr') {
+      const mentionedArticle = note.mentionedArticles && note.mentionedArticles[naddr];
+
+      if (!mentionedArticle) return <div>UNKOWN MENTION</div>
+
+      return customRender?.(mentionedArticle) || <ArticleReviewPreview
+        article={mentionedArticle}
+        bordered={true}
+      />
+    }
+
+    throw('not-found');
+  } catch (e) {
+    return <div>UNKOWN MENTION</div>;
+  }
+}
+
+export const renderNprofile = (
+  ast: NoteAST,
+  note: PrimalNote,
+  customRender?: (user: PrimalUser) => JSXElement,
+) => {
+  let nprofile = '';
+
+  if (ast?.value) {
+    nprofile = ast.value;
   }
 
-  const parsedContent = () => {
-    let asts = parseTextToAST(props.note.content || '');
+  if (ast?.value?.startsWith('nostr:')) {
+    nprofile = ast?.value?.split(':')[1]
+  }
 
-    let imgAst = asts.filter(ast => ast.type === 'image');
+  try {
+    const decoded = nip19.decode(nprofile);
 
-    const imgCount = imgAst.length;
 
-    const gridClass = imgCount < 7 ? `grid-${imgCount}` : 'grid-large';
+    if (decoded.type === 'nprofile') {
+      const pubkey = decoded.data.pubkey;
+      const user = note.mentionedUsers?.[pubkey];
 
-    return <>
-      <Switch>
-        <Match when={imgCount === 1}>
-          <div class={styles.mentionedImage}>
-            <img class={styles.image} src={imgAst[0].value} />
-          </div>
-        </Match>
+      if (user && customRender) return customRender(user);
 
-        <Match when={imgCount > 1}>
-          <div class={`${styles.imageGrid} ${styles[gridClass]}`}>
-            <For each={imgAst.slice(0, 6)}>
-              {(ast, index) => {
-                const cell = `cell_${index()+1}`;
+      return <span class="linkish">@{userNameFromUser(user)}</span>
+    }
 
-                return <img
-                  class={`${styles.image} ${styles[cell]}`}
-                  src={ast.value}
-                />
-              }}
-            </For>
-          </div>
-        </Match>
-      </Switch>
+    if (decoded.type === 'npub') {
+      const pubkey = decoded.data;
+      const user = note.mentionedUsers?.[pubkey];
+
+      if (user && customRender) return customRender(user);
+
+      return <span class="linkish">@{userNameFromUser(user)}</span>
+    }
+
+    throw('not-found');
+  } catch (e) {
+    return ast?.value || ' ----USER---- '
+  }
+}
+
+export type RenderOptions = {
+  note?: (note: PrimalNote) => JSXElement,
+  article?: (article: PrimalArticle) => JSXElement,
+  user?: (user: PrimalUser) => JSXElement,
+}
+
+export const parsedContent = (
+  note: PrimalNote,
+  opts?: {
+    styles?: CSSModuleClasses,
+    render?: RenderOptions,
+  }
+) => {
+  const imageStyles = opts?.styles || {};
+  let asts = parseTextToAST(note.content || '');
+
+  let imgAst = asts.filter(ast => ast.type === 'image');
+
+  const imgCount = imgAst.length;
+
+  const gridClass = imgCount < 7 ? `grid-${imgCount}` : 'grid-large';
+
+  const css = { ...styles, ...(imageStyles)}
+
+  return <>
+    <Switch>
+      <Match when={imgCount === 1}>
+        <div class={css.mentionedImage}>
+          <img class={styles.image} src={imgAst[0].value} />
+        </div>
+      </Match>
+
+      <Match when={imgCount > 1}>
+        <div class={`${css.imageGrid} ${css[gridClass]}`}>
+          <For each={imgAst.slice(0, 6)}>
+            {(ast, index) => {
+              const cell = `cell_${index()+1}`;
+
+              return <img
+                class={`${css.image} ${styles[cell]}`}
+                src={ast.value}
+              />
+            }}
+          </For>
+        </div>
+      </Match>
+    </Switch>
+    <div class={css.text}>
       <For each={asts}>
         {ast =>(
           <Switch fallback={<>{ast.value || ''}</>}>
@@ -137,11 +197,15 @@ const Note: Component<{
             </Match>
 
             <Match when={['nostrProfile', 'nostrNpub'].includes(ast.type)}>
-              {renderNprofile(ast)}
+              {renderNprofile(ast, note, opts?.render?.user)}
             </Match>
 
             <Match when={['nostrEvent', 'nostrNote'].includes(ast.type)}>
-              {renderNevent(ast)}
+              {renderNevent(ast, note, opts?.render?.note)}
+            </Match>
+
+            <Match when={['nostrReplaceable'].includes(ast.type)}>
+              {renderNaddr(ast, note, opts?.render?.article)}
             </Match>
 
             <Match when={['hashtag'].includes(ast.type)}>
@@ -155,13 +219,23 @@ const Note: Component<{
           </Switch>
         )}
       </For>
-    </>
+    </div>
+  </>
 
-  }
+}
+
+const Note: Component<{
+  note: PrimalNote,
+  onClick?: () => void,
+  onRemove?: (id: string) => void,
+  embedded?: boolean,
+  variant?: EventDisplayVariant,
+  highlighted?: boolean,
+}> = (props) => {
 
   return (
     <div
-      class={styles.noteMention}
+      class={`${styles.noteMention} ${props.highlighted ? styles.highlighted : ''}`}
       data-event-id={props.note.id}
       onClick={props.onClick}
     >
@@ -177,12 +251,12 @@ const Note: Component<{
               when={props.note?.user.nip05}
               fallback={
                 <span class={styles.userName}>
-                  {userName(props.note.pubkey)}
+                  {userNameFromUser(props.note.user)}
                 </span>
               }
             >
               <span class={styles.userName}>
-                {userName(props.note.pubkey)}
+                {userNameFromUser(props.note.user)}
               </span>
               <VerificationCheck user={props.note.user} />
               <span
@@ -203,7 +277,7 @@ const Note: Component<{
         </span>
       </div>
       <div class={styles.noteMentionContent}>
-        {parsedContent()}
+        {parsedContent(props.note)}
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ import { updateAppStore } from "./AppStore";
 import { isPhone } from "src/utils/ui";
 import { appSigner, getAppSK, setAppSigner } from "src/utils/primalNip46";
 import { sendSignedEvent } from "src/primal_api/nostr";
+import { loadSearchStore } from "src/search/searchStore";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -335,6 +336,7 @@ export const loginUsingNip46 = async (pk?: string) => {
 
 export const doAfterLogin = async (pubkey: string) => {
   // const storage = getStorage(pubkey);
+  loadSearchStore(pubkey);
 
 // ===========================================
 

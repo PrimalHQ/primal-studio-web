@@ -1,10 +1,12 @@
 import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
-import { EventCoordinate, EventFeedResult, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, } from "src/primal";
-import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
+import { EventCoordinate, EventFeedResult, FeedRange, NostrEventContent, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, } from "src/primal";
+import { emptyEventFeedPage, emptyFeedRange, pageResolve, updateFeedPage } from "src/utils/feeds";
 import { decodeIdentifier } from "src/utils/kyes";
 import { primalAPI, sendMessage, subsTo } from "src/utils/socket";
 import { sendDeleteEvent } from "./nostr";
+import { accountStore } from "src/stores/AccountStore";
+import { getUserInfos } from "./profile";
 
 export const getReplacableEvent = (pubkey: string, kind: number, subId: string) => {
   sendMessage(JSON.stringify([
@@ -205,3 +207,76 @@ export const doRequestDelete = async (pubkey: string | undefined, id: string, ki
 };
 
 
+
+export type NostrEventsPage = {
+  metadata: NostrEventContent[],
+  events: NostrEventContent[],
+  addressable: NostrEventContent[],
+  range: FeedRange,
+}
+
+export const fetchNostrEvents = (
+  eventIds: string[],
+  kind: number,
+  sub_id?: string,
+) => {
+  const subId = sub_id || `fetch_nostr_events_${APP_ID}`;
+
+  return new Promise<NostrEventsPage>((resolve, reject) => {
+
+    let page: NostrEventsPage = {
+      metadata: [],
+      events: [],
+      addressable: [],
+      range: emptyFeedRange(),
+    };
+
+    let action = () => getEvents(accountStore.pubkey, eventIds, subId);
+
+    if (kind === Kind.Metadata) {
+      action = () => getUserInfos(eventIds, subId);
+    }
+
+    if (30_000 <= kind && kind < 40_000) {
+      const cdrs: EventCoordinate[] = eventIds.map(
+        id => {
+          const [ kind, pubkey, identifier ] = id.split(':');
+
+          return {kind: parseInt(kind), pubkey, identifier }
+        }
+      );
+      action = () => getParametrizedEvents(cdrs, subId);
+    }
+
+    primalAPI({
+      subId,
+      action,
+      onEvent: (event) => {
+        if (event.kind === Kind.FeedRange) {
+          const feedRange: FeedRange = JSON.parse(event.content || '{}');
+
+          page.range = { ...feedRange }
+          return;
+        }
+
+        if (event.kind === Kind.Metadata) {
+          page.metadata.push({ ...event });
+          return;
+        }
+
+        if ( 30_000 <= event.kind && event.kind < 40_000) {
+          page.addressable.push({ ...event });
+          return;
+        }
+
+        page.events.push({ ...event });
+      },
+      onEose: () => {
+        resolve(page);
+      },
+      onNotice: () => {1
+        reject('failed_to_fetch_notes');
+      }
+    });
+  });
+};

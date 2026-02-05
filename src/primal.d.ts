@@ -381,6 +381,7 @@ export type PrimalUser = {
   userStats?: UserStats,
   event?: NostrEventContent,
   legendConfig?: LegendCustomizationConfig,
+  kind: number,
 };
 
 export type PrimalNote = {
@@ -389,7 +390,7 @@ export type PrimalNote = {
   event?: NostrEventContent,
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
-  mentionedArticles?: Record<string, PrimalNote>,
+  mentionedArticles?: Record<string, PrimalArticle>,
   mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
   replyTo?: string,
@@ -442,6 +443,8 @@ export type PrimalDraft = {
 export type PrimalZap = {
   sender?: PrimalUser | string,
   reciver?: PrimalUser | string,
+  senderUser?: PrimalUser,
+  reciverUser?: PrimalUser,
   created_at?: number,
   amount: number,
   message: string,
@@ -449,6 +452,7 @@ export type PrimalZap = {
   zappedId?: string,
   zappedKind?: number,
   zappedContent?: string,
+  kind: number,
 };
 
 export type PrimalRepost = {

@@ -12,6 +12,10 @@
   border-bottom: 1px solid var(--devider);
   cursor: pointer;
 
+  img {
+    margin-top: 0 !important;
+  }
+
   &.bordered {
     border: 1px solid var(--subtile-devider);
     border-radius: var(--border-radius-small);

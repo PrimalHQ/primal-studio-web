@@ -827,6 +827,10 @@
   display: flex;
   flex-direction: column;
 
+  img {
+    margin-top: 0 !important;
+  }
+
 
   .noteMentionHeader {
     display: flex;

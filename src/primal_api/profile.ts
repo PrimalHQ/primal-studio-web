@@ -12,9 +12,9 @@ export const getUserMetadata = (pubkeys: string[], subid: string) => {
   ]));
 }
 
-export const getUsers = (pubkeys: string[]) => {
+export const getUsers = (pubkeys: string[], sub_id?: string) => {
   return new Promise<PrimalUser[]>((resolve, reject) => {
-    const subId = `user_profiles_${APP_ID}`;
+    const subId = sub_id || `user_profiles_${APP_ID}`;
 
     let page = { ...emptyEventFeedPage() };
 

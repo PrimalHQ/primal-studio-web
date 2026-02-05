@@ -67,7 +67,7 @@ export const userName = (pubkey: string | undefined) => {
   return name;
 };
 
-export const nameFromUser = (user: PrimalUser) => {
+export const userNameFromUser = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }

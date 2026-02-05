@@ -1,0 +1,61 @@
+@use 'src/mixins';
+
+.eventPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 2px 1px 3px !important;
+  gap: 6px;
+  border-radius: 99px;
+  // border: 1px solid var(--subtile-devider);
+  background-color: var(--background-input);
+  width: fit-content;
+  height: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  vertical-align: middle;
+
+  .contentPill {
+    max-width: 188px;
+    padding: 1px 4px 1px 3px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .zapIcon {
+      @include mixins.icon;
+      --icon-color: var(--text-secondary);
+      --icon-url: url('src/assets/icons/zap.svg');
+      --icon-width: 12px;
+      --icon-height: 12px;
+    }
+  }
+
+  // &:hover {
+  //   background-color: var(--subtile-devider);
+  //   .closeButton {
+  //     background-color: var(--background-input);
+
+  //     .closeIcon {
+  //       --icon-color: var(--text-primary);
+  //     }
+  //   }
+  // }
+
+  &.readonly {
+    cursor: default;
+    padding: 1px 8px 1px 3px !important;
+    &:hover {
+      background: none;
+    }
+  }
+
+  &.dark {
+    background-color: var(--background-sheet);
+  }
+
+}

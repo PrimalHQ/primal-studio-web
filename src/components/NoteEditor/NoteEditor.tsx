@@ -68,6 +68,7 @@ import ReadsChooseMediaDialog from '../ArticleEditor/ReadsDialogs/ReadsChooseMed
 import { BlobDescriptor } from 'blossom-client-sdk';
 
 import { v4 as uuidv4 } from 'uuid';
+import MentionDialog from 'src/search/MentionDialog';
 
 let groupingTimeout: number | null = null;
 let classUpdateTimeout: number | null = null;
@@ -1196,7 +1197,7 @@ const NoteEditor: Component<{
           </div>
       </div>
 
-      <ReadsMentionDialog
+      <MentionDialog
         open={showMention()}
         setOpen={(v: boolean) => setShowMention(() => v ? 'users' : '')}
         onAddUser={(user: PrimalUser) => {
@@ -1211,24 +1212,8 @@ const NoteEditor: Component<{
           addReadToEditor(read, editorTipTap());
           setShowMention(() => '');
         }}
+        onClose={() => editorTipTap()?.chain().focus().run()}
       />
-
-      {/* <ReadsImageDialog
-        open={showAttach()}
-        setOpen={(v: boolean) => setShowAttach(() => v)}
-        editor={editorTipTap()}
-        onSubmit={(url: string, title:string, alt: string, fileType: string, metadata: any) => {
-          if (fileType.startsWith('image')) {
-            attachImage(url, title, alt);
-          }
-
-          if (fileType.startsWith('video')) {
-            attachVideo(url, metadata);
-          }
-
-          setShowAttach(false);
-        }}
-      /> */}
 
       <ReadsPublishingDateDialog
         open={showPublishDateDialog()}

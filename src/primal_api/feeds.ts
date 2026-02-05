@@ -7,7 +7,7 @@ import {
 } from "../primal";
 
 import { primalAPI, sendMessage, subsTo } from "../utils/socket";
-import { Kind } from "../constants";
+import { Kind, minKnownProfiles } from "../constants";
 import { emptyEventFeedPage, emptyFeedRange, pageResolve, updateFeedPage } from "src/utils/feeds";
 
 
@@ -125,4 +125,42 @@ export const fetchEvents = (
     });
 };
 
+export const getScoredContent = (user_pubkey: string | undefined, selector: string, limit: number, subid: string) => {
+  if (!user_pubkey) {
+    user_pubkey = minKnownProfiles.names.primal;
+  }
 
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['scored', { user_pubkey, selector, limit }]},
+  ]));
+};
+
+
+export const fetchScoredContent = (
+  pubkey: string | undefined,
+  selector: string,
+  subId: string,
+) => {
+  return new Promise<EventFeedResult>((resolve, reject) => {
+
+    let page = { ...emptyEventFeedPage() };
+
+    const limit = 6;
+
+    primalAPI({
+      subId,
+      action: () => getScoredContent(pubkey, selector, limit, subId),
+      onEvent: (event) => {
+        updateFeedPage(page, event);
+      },
+      onEose: () => {
+        resolve(pageResolve(page));
+      },
+      onNotice: () => {
+        reject('failed_to_fetch_scred_content');
+      }
+    });
+  });
+}
