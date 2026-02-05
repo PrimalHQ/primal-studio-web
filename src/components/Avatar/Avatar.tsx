@@ -1,13 +1,9 @@
-import { Component, createEffect, createSignal, onMount } from 'solid-js';
-import { translate } from '../../translations/translate';
+import { Component, createEffect, createSignal } from 'solid-js';
 
 import styles from './Avatar.module.scss';
-import { eventStore, getEventFromStore } from 'src/stores/EventStore';
-import { parseUserMetadata } from 'src/utils/profile';
 
 import defaultAvatar from '../../assets/images/default_avatar.svg';
-import { accountStore } from 'src/stores/AccountStore';
-import { LegendCustomizationConfig, PrimalUser } from 'src/primal';
+import { PrimalUser } from 'src/primal';
 
 const Avatar: Component<{
   user?: PrimalUser,
