@@ -118,6 +118,11 @@ export const sendMessage = (message: string, force = false) => {
   }
 }
 
+export const sendMessageOnSocket = (socket: WebSocket, message: string) => {
+  socket.readyState === WebSocket.OPEN && socket.send(message);
+}
+
+
 export const refreshSocketListeners = (
   ws: WebSocket | undefined,
   listeners: Record<string, (event: any) => any>,

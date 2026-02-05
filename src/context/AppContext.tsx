@@ -19,7 +19,7 @@ import {
 } from "../utils/socket";
 import { NostrEOSE, NostrEvent, NostrEvents, PrimalTheme } from "../primal";
 import { addEventsToStore, addEventToStore } from "../stores/EventStore";
-import { accountStore, checkMembershipStatus, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadLicenseStatus, loadStoredPubkey, PRIMAL_PUBKEY } from "../stores/AccountStore";
+import { accountStore, checkMembershipStatus, fetchBlossomServers, fetchNostrKey, getRecomendedBlossomServers, loadEmojiHistoryFromLocalStore, loadLicenseStatus, loadStoredPubkey } from "../stores/AccountStore";
 import { appStore, updateAppStore } from "../stores/AppStore";
 import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";

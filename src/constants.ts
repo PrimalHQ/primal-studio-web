@@ -33,6 +33,10 @@ export enum Kind  {
   Blossom = 10_063,
   TierList = 17_000,
 
+  WalletInfo = 13_194,
+  WalletRequest = 23_194,
+  WalletResponse = 23_195,
+
   CategorizedPeople = 30_000,
   LongForm = 30_023,
   Settings = 30_078,

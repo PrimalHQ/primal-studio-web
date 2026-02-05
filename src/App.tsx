@@ -8,7 +8,7 @@ import { connect, disconnect } from './utils/socket';
 import Toaster from './context/ToastContext/ToastContext';
 import NoteContextMenu from './components/NoteContextMenu/NoteContexMenu';
 import { appStore, closeNoteContextMenu, closeEditNote, openEditNote, updateAppStore, closeMediaContextMenu, setMediaUsageUrl } from './stores/AppStore';
-import { accountStore, logUserIn, updateAccountStore } from './stores/AccountStore';
+import { accountStore, dequeEvent, enqueEvent, logUserIn, refreshQueue, startEventQueueMonitor, updateAccountStore } from './stores/AccountStore';
 import { eventStore } from './stores/EventStore';
 import { pageStore } from './stores/PageStore';
 import { mediaStore } from './stores/MediaStore';
@@ -24,6 +24,7 @@ import FirstTimeDialog from './components/Dialogs/FirstTimeDialog';
 import TrialExpiredDialog from './components/Dialogs/TrialExpiredDialog';
 import { isPhone } from './utils/ui';
 import GetStartedDialog from './pages/Landing/GetStartedDialog';
+import { triggerImportEvents } from './primal_api/events';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -31,15 +32,24 @@ export const LANG = 'en';
 
 export const [globalNavigate, setGlobalNavigate] = createSignal<Navigator>();
 
+export const relayWorker = new Worker(
+  new URL(`../relayWorker.ts`, import.meta.url),
+  {
+    type: 'module'
+  },
+);
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
     logUserIn();
+    initRelayWorker();
   });
 
   onCleanup(() => {
     disconnect();
+    relayWorker?.terminate();
   });
 
   createEffect(on(() => accountStore.accountIsReady, (ready, prev) => {
@@ -49,6 +59,33 @@ const App: Component = () => {
       window.open('/', '_self');
       return;
     }
+  }));
+
+  const initRelayWorker = () => {
+    relayWorker.addEventListener('message', (e: MessageEvent) => {
+      const message = e.data;
+
+      if (message.type === 'ENQUE_EVENT' && message.event) {
+        enqueEvent(message.event);
+        startEventQueueMonitor();
+      }
+
+      if (message.type === 'DEQUE_EVENT' && message.event) {
+        dequeEvent(message.event);
+      }
+
+      if (message.type === 'EVENT_SENT' && message.event) {
+        triggerImportEvents([message.event], `import_event_${message.event.id}_${APP_ID}`);
+      }
+    });
+
+    relayWorker.postMessage({type: 'INIT'});
+  }
+
+  createEffect(on(() => accountStore.eventQueueRetry, (countdown) => {
+    if (countdown > 0) return;
+
+    refreshQueue();
   }));
 
 

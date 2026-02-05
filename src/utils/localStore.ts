@@ -3,7 +3,7 @@ import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
 import { availableSpans, Kind } from "src/constants";
 import { GraphSpan } from "src/pages/Home/Home.data";
 import { mediaSortOptions } from "src/pages/Media/Media.data";
-import { NostrEventContent, NostrRelaySettings, PrimalTheme, PrimalUser, UserMetadataContent } from "src/primal";
+import { NostrEventContent, NostrRelaySettings, NostrRelaySignedEvent, PrimalTheme, PrimalUser, UserMetadataContent } from "src/primal";
 import { MembershipStatus } from "src/stores/AccountStore";
 
 export type MediaPageConfig = {
@@ -27,6 +27,7 @@ export type LocalStore = {
   noteMediaTags: string[][],
   userHistory: string[],
   membershipStatus: MembershipStatus | undefined,
+  eventQueue: NostrRelaySignedEvent[],
 };
 
 
@@ -45,6 +46,7 @@ export const emptyStorage: LocalStore = {
   noteMediaTags: [],
   userHistory: [],
   membershipStatus: undefined,
+  eventQueue: [],
 }
 
 export const storageName = (pubkey?: string) => {
@@ -438,6 +440,21 @@ export const storeMembershipStatus = (pubkey: string, membershipStatus: Membersh
   const store = getStorage(pubkey);
 
   store.membershipStatus = membershipStatus ? { ...membershipStatus } : undefined;
+
+  setStorage(pubkey, store);
+};
+
+
+export const readEventQueue = (pubkey: string) => {
+  const store = getStorage(pubkey);
+
+  return store.eventQueue || [];
+};
+
+export const storeEventQueue = (pubkey: string, eventQueue: NostrRelaySignedEvent[]) => {
+  let store = getStorage(pubkey);
+
+  store.eventQueue = [ ...eventQueue ];
 
   setStorage(pubkey, store);
 };
