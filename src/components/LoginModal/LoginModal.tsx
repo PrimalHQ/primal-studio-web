@@ -351,9 +351,6 @@ const LoginModal: Component<{
                 <Tabs.Trigger class={styles.profileTab} value="nsec">
                   {login.tabs.nsec.defaultMessage}
                 </Tabs.Trigger>
-                <Tabs.Trigger class={styles.profileTab} value="npub">
-                  {login.tabs.npub.defaultMessage}
-                </Tabs.Trigger>
                 <Tabs.Indicator class={styles.profileTabIndicator} />
               </Tabs.List>
 
@@ -496,44 +493,6 @@ const LoginModal: Component<{
 
                       <ButtonPrimary onClick={() => {
                         onNsecLogin();
-                      }}>
-                        Login
-                      </ButtonPrimary>
-                    </div>
-                  </div>
-                </Tabs.Content>
-                <Tabs.Content value="npub" >
-                  <div class={styles.nsecLogin}>
-                    <div class={styles.npubImage} />
-                    <div class={styles.npubDesc}>
-                      <div class={styles.npubWarning}>
-                        <span class={styles.bold}>Be aware: </span>
-                          Logging in with your public key will allow you to browse Nostr in ready-only mode.
-                      </div>
-                      <div class={styles.inputGroup}>
-                        <div class={styles.description}>
-                          Your Nostr public key (npub):
-                        </div>
-                        <input
-                          ref={npubInput}
-                          class={styles.input}
-                          type="password"
-                          onInput={(e) => setEnteredNpub(e.target.value)}
-                          placeholder='npub1...'
-                          // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
-                          // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
-                          // inputClass={styles.nsecInput}
-                        />
-                      </div>
-
-                      <ButtonPrimary onClick={() => {
-                        if (isValidNpub()) {
-                          loginUsingNpub(enteredNpub());
-                          props.onAbort && props.onAbort();
-                        }
-                        else {
-                          // toaster?.sendWarning('Invalid npub. Make sure you entered a vaild npub that starts with "npub1..."')
-                        }
                       }}>
                         Login
                       </ButtonPrimary>
