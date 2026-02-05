@@ -1,7 +1,16 @@
 import { createStore, unwrap } from "solid-js/store";
 import { LegendCustomizationConfig, NostrEventContent, NostrRelayEvent, NostrRelaySignedEvent, NostrWindow } from "../primal";
 import { logError, logInfo, logWarning } from "../utils/logger";
-import { getStorage, readEmojiHistory, readEventQueue, readMembershipStatus, readPubkeyFromStorage, readSecFromStorage, readStoredProfile, storeEmojiHistory, storeEventQueue, storePubkey, storeRelaySettings } from "../utils/localStore";
+import {
+  readEmojiHistory,
+  readEventQueue,
+  readMembershipStatus,
+  readPubkeyFromStorage,
+  readSecFromStorage,
+  readStoredProfile,
+  storeEmojiHistory,
+  storeEventQueue,
+} from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19, nip46, SimplePool } from "../utils/nTools";
@@ -16,10 +25,8 @@ import { sendBlossomEvent } from "src/primal_api/relays";
 import { parseUserMetadata } from "src/utils/profile";
 import { getMembershipStatus, getPremiumStatus } from "src/primal_api/membership";
 import { EmojiOption } from "src/components/EmojiPicker/EmojiPicker";
-import { createEffect } from "solid-js";
 import { getLicenceStatus, LicenseStatus } from "src/primal_api/studio";
 import { updateAppStore } from "./AppStore";
-import { isPhone } from "src/utils/ui";
 import { appSigner, getAppSK, setAppSigner } from "src/utils/primalNip46";
 import { sendSignedEvent } from "src/primal_api/nostr";
 import { loadSearchStore } from "src/search/searchStore";

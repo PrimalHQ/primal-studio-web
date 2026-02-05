@@ -1,5 +1,5 @@
 import { A, RouteSectionProps, useLocation, useNavigate, } from '@solidjs/router';
-import { Component, createEffect, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
 
 import primalBrandingLight from 'assets/images/primal_studio_light.svg';
 import primalBrandingDark from 'assets/images/primal_studio_dark.svg';
@@ -20,6 +20,7 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
   let mediaUploadInput: HTMLInputElement | undefined;
 
   createEffect(() => {
+    console.log('NAVIGATE INIT')
     // Initialize the global navigator
     setGlobalNavigate(() => navigate);
   })

@@ -30,6 +30,14 @@ export default defineConfig({
     target: 'esnext',
     sourcemap: true,
     manifest: 'manifest.json',
+    assetsInlineLimit: (filePath, content) => {
+      // Don't inline files with 'logo' in the name
+      if (filePath.includes('logo')) {
+        return false;
+      }
+      // Default behavior for other files (4kb threshold)
+      return content.length < 4096;
+    }
   },
   envPrefix: 'PRIMAL_',
   define: {

@@ -16,7 +16,7 @@ import SignInDialog from './SignInDialog';
 import PrimalProFAQ from './PrimalProFAQ';
 
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
-import { useBeforeLeave } from '@solidjs/router';
+import { useBeforeLeave, useNavigate } from '@solidjs/router';
 import { settingsStore } from 'src/stores/SettingsStore';
 import PricingCardPro from './PricingCardPro';
 import PricingCardTeam from './PricingCardTeam';
@@ -32,10 +32,9 @@ import LoginModal from 'src/components/LoginModal/LoginModal';
 import PrivateAccountModal from 'src/components/LoginModal/PrivateAccountModal';
 
 const Landing: Component = () => {
-  const navigate = globalNavigate();
+  const navigate = useNavigate();
 
   const [showGetStarted, setShowGetStarted] = createSignal(false);
-  const [showSignIn, setShowSignIn] = createSignal(false);
   const [showFAQ, setShowFAQ] = createSignal(false);
   const [showBuyPro, setShowBuyPro] = createSignal(false);
   const [showBuyTeam, setShowBuyTeam] = createSignal(false);
@@ -59,18 +58,6 @@ const Landing: Component = () => {
         <div class={styles.header}>
           <img class={styles.logo} src={logo} />
           <div class={styles.headerActions}>
-            <button
-              class={styles.signInButton}
-              onClick={() => {
-                if (accountStore.accountIsReady) {
-                  navigate?.('/home');
-                  return;
-                }
-                setShowSignIn(true);
-              }}
-            >
-              Sign In
-            </button>
             <button
               class={styles.getStartedButton}
               onClick={() => {
@@ -279,11 +266,6 @@ const Landing: Component = () => {
         setOpen={setShowGetStarted}
       />
 
-      <SignInDialog
-        open={showSignIn()}
-        setOpen={setShowSignIn}
-      />
-
       <PrimalProFAQ
         open={showFAQ()}
         setOpen={setShowFAQ}
@@ -304,12 +286,26 @@ const Landing: Component = () => {
         open={appStore.showGettingStartedModal}
         onAbort={() => {
           updateAppStore('showGettingStartedModal', false);
+
+          if (!['guest', 'none'].includes(accountStore.loginType)) {
+            setTimeout(() => {
+              navigate?.('/home');
+            }, 1000)
+          }
         }}
       />
 
       <CreateAccountModal
         open={appStore.showCreateAccountModal}
-        onAbort={() => updateAppStore('showCreateAccountModal', false)}
+        onAbort={() =>{
+          updateAppStore('showCreateAccountModal', false);
+
+          if (!['guest', 'none'].includes(accountStore.loginType)) {
+            setTimeout(() => {
+              navigate?.('/home');
+            }, 1000)
+          }
+        }}
       />
 
       <LoginModal
@@ -322,6 +318,13 @@ const Landing: Component = () => {
             localStorage.removeItem('clientConnectionUrl');
             localStorage.removeItem('appNsec');
             localStorage.removeItem('appPubkey');
+          }
+
+          if (!['guest', 'none'].includes(accountStore.loginType)) {
+            setTimeout(() => {
+              console.log('NAVIGATE: ', accountStore.loginType, navigate)
+              navigate?.('/home');
+            }, 1000)
           }
         }}
       />

@@ -53,12 +53,19 @@ const App: Component = () => {
   });
 
   createEffect(on(() => accountStore.accountIsReady, (ready, prev) => {
+    if (window.location.pathname === '/' && ready) {
+      setTimeout(() => {
+        globalNavigate()?.('/home');
+      }, 100)
+    }
+
     if (window.location.pathname === '/') return;
 
     if (ready === false && prev !== undefined) {
       window.open('/', '_self');
       return;
     }
+
   }));
 
   const initRelayWorker = () => {
