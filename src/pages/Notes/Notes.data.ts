@@ -201,9 +201,7 @@ export const fetchNotes = async (
       result.notes = filterAndSortNotes(result.notes, result.paging);
     }
 
-    const testId = `notes_${notesStore.tab}_${notesStore.graphSpan.name}`;
-
-    if (!result.identifier.startsWith(testId)) {
+    if (!result.identifier.startsWith(identifier)) {
       return {};
     }
 
