@@ -137,15 +137,17 @@ export const tiptapJsonToPlainText = (json: any) => {
 
   // Handle media types - convert to URLs
   if (json.type === 'image') {
-    return json.attrs?.src || '';
+    return json.attrs?.src ? `${json.attrs.src}\n` : '';
   }
 
   if (json.type === 'video') {
-    return json.attrs?.src || '';
+    return json.attrs?.src ? `${json.attrs.src}\n` : '';
   }
 
   if (json.type === 'mediaEmbed') {
-    return json.attrs?.originalUrl || json.attrs?.src || '';
+    if (json.attrs?.originalUrl) return json.attrs?.originalUrl;
+    if (json.attrs?.src) return `${json.attrs?.src}\n`;
+    return '';
   }
 
   if (json.type === 'imageGrid') {

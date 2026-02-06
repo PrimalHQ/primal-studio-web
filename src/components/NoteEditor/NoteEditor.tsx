@@ -677,6 +677,7 @@ const NoteEditor: Component<{
 
   const publishNote = async () => {
     const content = await getEditorContent(editorMode());
+
     let tags = referencesToTags(content);
 
     let mediaTagsToAdd = mediaTags.filter(t => {
