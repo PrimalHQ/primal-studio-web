@@ -335,8 +335,8 @@ const MentionDialog: Component<{
     // @ts-ignore
     // return component?.ref?.onKeyDown(props)
   };
-  const [selectionAuthorIndex, setSelectionAuthorIndex] = createSignal(-1);
 
+  const [selectionAuthorIndex, setSelectionAuthorIndex] = createSignal(-1);
 
   const onSearchAuthorKeyDown = (event: KeyboardEvent) => {
     if (pop?.state.isVisible) return;

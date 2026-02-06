@@ -37,6 +37,7 @@ const SearchOption: Component<{
             id={props.id}
             class={klass()}
             onClick={props.onClick}
+            data-highlighted={props.highlighted}
           >
             {prp.children}
           </div>

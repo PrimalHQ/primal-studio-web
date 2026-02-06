@@ -1,4 +1,3 @@
-import { Tabs } from '@kobalte/core/tabs';
 import { Search } from '@kobalte/core/search';
 import { Component, createEffect, createSignal, For, on, Show } from 'solid-js';
 
@@ -8,21 +7,16 @@ import tippy, { Instance } from 'tippy.js';
 
 import { APP_ID } from 'src/App';
 import Avatar from 'src/components/Avatar/Avatar';
-import Note, { NoteSuggestionSkeleton } from 'src/components/Event/Note';
 import SearchOption from 'src/components/Search/SearchOptions';
 import { Kind } from 'src/constants';
-import { PrimalUser, PrimalNote, PrimalArticle } from 'src/primal';
+import { PrimalUser } from 'src/primal';
 import { userName } from 'src/utils/profile';
 import { subsTo } from 'src/utils/socket';
-import { previousWord, nip05Verification } from 'src/utils/ui';
-import { clearSearch, findContent, findUserByNupub, findUsers, getRecomendedUsers, removeEvent, searchStore } from 'src/stores/SearchStore';
+import { nip05Verification } from 'src/utils/ui';
+import { findUserByNupub, findUsers, getRecomendedUsers, searchStore } from 'src/stores/SearchStore';
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Dialog from 'src/components/Dialogs/Dialog';
-import ArticlePreviewSuggestion, { ArticlePreviewSuggestionSkeleton } from 'src/components/Event/ArticlePreviewSuggestion';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
-import ButtonPrimary from 'src/components/Buttons/ButtonPrimary';
-import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
-
 
 
 const contentKinds: Record<string, number> = {
@@ -55,6 +49,15 @@ const ReadsProposeDialog: Component<{
 
     searchUsers(q);
   }));
+
+  createEffect(() => {
+    if (props.open) {
+      setTimeout(() => {
+        searchInput?.focus();
+        setHighlightedUser(-1);
+      }, 100)
+    }
+  })
 
   const searchUsers = (q: string) => {
     if (q.length === 0) {
@@ -118,14 +121,11 @@ const ReadsProposeDialog: Component<{
     getUsersRelayInfo(uids, subId);
   }));
 
-  const [suggestedTerm, setSuggestedTerm] = createSignal('');
-  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+  const [highlightedUser, setHighlightedUser] = createSignal<number>(-1);
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (!pop?.state.isShown) return;
-
     if (event.key === 'Escape') {
-      pop?.hide();
+      props.setOpen?.(false);
       return true;
     }
 
@@ -153,8 +153,8 @@ const ReadsProposeDialog: Component<{
     }
 
 
-    if (['Enter', 'Space', 'Comma', 'Tab'].includes(event.code)) {
-      const sel = document.getElementById(`mention_suggested_user_${highlightedUser()}`);
+    if (['Enter'].includes(event.code)) {
+      const sel = document.querySelector('[data-highlighted=true]') as HTMLElement | undefined;
 
       sel && sel.click();
 
@@ -162,65 +162,7 @@ const ReadsProposeDialog: Component<{
     }
 
     return false;
-
-    // @ts-ignore
-    // return component?.ref?.onKeyDown(props)
   };
-
-  let pop: Instance | undefined;
-
-  createEffect(() => {
-    if (props.open) {
-      setTimeout(() => {
-        if (!searchInput) return;
-
-        let component = (
-          <div class={styles.suggest}>
-            <For each={searchStore.users}>
-              {(user, index) => (
-                <SearchOption
-                  id={`mention_suggested_user_${index()}`}
-                  title={userName(user.pubkey)}
-                  description={nip05Verification(user)}
-                  icon={<Avatar user={user} size={32} />}
-                  statNumber={searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
-                  statLabel={'Followers'}
-                  // @ts-ignore
-                  onClick={() => {
-                    if (!searchInput) return;
-                    pop?.hide()
-                    searchInput.value = user.npub;
-                    searchInput.focus();
-                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-                  }}
-                  highlighted={highlightedUser() === index()}
-                />
-              )}
-            </For>
-          </div>);
-
-        // @ts-ignore
-        pop = tippy(document.getElementById('search_users'), {
-          content: component,
-          // showOnCreate: true,
-          interactive: true,
-          trigger: 'manual',
-          placement: 'bottom-start',
-          appendTo: 'parent',
-          sticky: 'reference',
-          onShow(instance) {
-            document.addEventListener('keydown', onKeyDown);
-          },
-          onHide(instance) {
-            document.removeEventListener('keydown', onKeyDown);
-          },
-        });
-      }, 10)
-    }
-    else {
-      pop?.destroy();
-    }
-  })
 
   const onInput = (value: string) => {
     if (value.startsWith('npub') || value.startsWith('nprofile')) {
@@ -275,6 +217,7 @@ const ReadsProposeDialog: Component<{
               <Search.Input
                 id="search_users"
                 ref={searchInput}
+                onKeyDown={onKeyDown}
               />
             </Search.Control>
           </Search>
@@ -283,7 +226,7 @@ const ReadsProposeDialog: Component<{
         <div class={styles.searchResults}>
           <div>
             <For each={searchStore.users}>
-              {(user) => (
+              {(user, index) => (
                 <SearchOption
                   title={userName(user.pubkey)}
                   description={nip05Verification(user)}
@@ -291,6 +234,7 @@ const ReadsProposeDialog: Component<{
                   statNumber={user.userStats?.followers_count || searchStore.userHistory.stats[user.pubkey]?.followers_count || searchStore.scores[user.pubkey]}
                   statLabel={'Followers'}
                   onClick={() => selectUser(user)}
+                  highlighted={highlightedUser() === index()}
                 />
               )}
             </For>
