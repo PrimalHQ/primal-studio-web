@@ -74,7 +74,7 @@ export const parseTextToAST = (text: string): NoteAST[] => {
     }
 
     // 5. Emojis (text between two colons)
-    const emojiMatch = remaining.match(/:[^:]+:/);
+    const emojiMatch = remaining.match(/:[^:\s]+:/);
     if (emojiMatch && emojiMatch.index === 0) {
       result.push({
         type: 'emoji',
@@ -200,7 +200,7 @@ function findNextSpecialPattern(text: string) {
     /https?:\/\/\S+\.(mp4|webm|mov|avi)(\?\S*)?(\s|$)/i,                // Video URLs
     /https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(\?\S*)?(\s|$)/i, // YouTube
     /https?:\/\/\S+(\s|$)/i,                                            // Other URLs
-    /:[^:]+:/,                                                           // Emojis
+    /:[^:\s]+:/,                                                           // Emojis
     /#[^\s#]+/,                                                          // Hashtags
     /(nostr:)?nevent1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+/,               // Nostr events
     /(nostr:)?note1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+/,                 // Nostr notes

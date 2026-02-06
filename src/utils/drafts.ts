@@ -70,9 +70,9 @@ export const parseDraftedEvent = async (
       mentionedZaps,
     } = emptyMentions();
 
-    mentionedUsers = [...mentions.users];
-    mentionedNotes = [...mentions.users];
-    mentionedArticles = [...mentions.users];
+    mentionedUsers = { ...mentions.users };
+    mentionedNotes = { ...mentions.notes };
+    mentionedArticles = { ...mentions.articles };
 
     let newRead = {
       id: event.id,
@@ -179,9 +179,9 @@ export const parseDraftedEvent = async (
       mentionedZaps,
     } = emptyMentions();
 
-    mentionedUsers = [...mentions.users];
-    mentionedNotes = [...mentions.users];
-    mentionedArticles = [...mentions.users];
+    mentionedUsers = { ...mentions.users };
+    mentionedNotes = { ...mentions.notes };
+    mentionedArticles = { ...mentions.articles };
 
     const eventPointer: nip19.EventPointer = {
       id: note.id,
@@ -189,7 +189,6 @@ export const parseDraftedEvent = async (
       kind: note.kind,
       relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
     };
-
 
     const eventPointerShort: nip19.EventPointer = {
       id: note.id,
@@ -352,6 +351,9 @@ export const parseEventForMentions = async (event: NostrEventContent) => {
   const notes = await fetchNotes(accountStore.pubkey, eventIds, `get_notes_${APP_ID}`);
   const articles = await fetchArticles(adresses, `get_articles_${APP_ID}`);
 
-  return  { users, notes, articles };
-
+  return  {
+    users: users.reduce((acc, u) => ({ ...acc, [u.pubkey]: { ...u }}), {}),
+    notes: notes.reduce((acc, n) => ({ ...acc, [n.id]: { ...n }}), {}),
+    articles: articles.reduce((acc, a) => ({ ...acc, [a.id]: { ...a }}), {}),
+  };
 }

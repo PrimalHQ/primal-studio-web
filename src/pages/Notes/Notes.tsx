@@ -31,6 +31,7 @@ import ReadsPublishingDateDialog from 'src/components/ArticleEditor/ReadsDialogs
 import { scheduleNote } from 'src/primal_api/nostr';
 import { unwrap } from 'solid-js/store';
 import { storeGraphSpan } from 'src/utils/localStore';
+import { parseDraftedEvent } from 'src/utils/drafts';
 
 const Notes: Component = () => {
   const params = useParams();
@@ -357,8 +358,8 @@ const Notes: Component = () => {
                           >
                             <ProposalPreview
                               draft={draft!}
-                              onEdit={() => {
-                                const note = JSON.parse(draft!.plain) as PrimalNote;
+                              onEdit={async () => {
+                                const note = await parseDraftedEvent(draft!) as PrimalNote;
                                 openEditNote(note, draft);
                               }}
                               onDelete={(id: string) => {

@@ -20,7 +20,6 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
   let mediaUploadInput: HTMLInputElement | undefined;
 
   createEffect(() => {
-    console.log('NAVIGATE INIT')
     // Initialize the global navigator
     setGlobalNavigate(() => navigate);
   })

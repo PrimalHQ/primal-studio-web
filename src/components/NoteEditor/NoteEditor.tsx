@@ -501,6 +501,7 @@ const NoteEditor: Component<{
     const json = plainTextToTiptapJson(plainText);
 
     let html = generateHTML(json, extensions);
+    html = processHTMLForNostr(html);
     html = await processMarkdownForNostr(html);
     editor.chain().setContent(html).run();
 

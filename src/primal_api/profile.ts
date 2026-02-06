@@ -2,6 +2,7 @@ import { APP_ID } from "src/App";
 import { Kind } from "src/constants";
 import { NostrEventContent, PrimalUser } from "src/primal";
 import { emptyEventFeedPage, pageResolve, updateFeedPage } from "src/utils/feeds";
+import { uuidv4 } from "src/utils/kyes";
 import { primalAPI, sendMessage } from "src/utils/socket";
 
 export const getUserMetadata = (pubkeys: string[], subid: string) => {
@@ -14,7 +15,7 @@ export const getUserMetadata = (pubkeys: string[], subid: string) => {
 
 export const getUsers = (pubkeys: string[], sub_id?: string) => {
   return new Promise<PrimalUser[]>((resolve, reject) => {
-    const subId = sub_id || `user_profiles_${APP_ID}`;
+    const subId = sub_id || `user_profiles_${uuidv4()}_${APP_ID}`;
 
     let page = { ...emptyEventFeedPage() };
 

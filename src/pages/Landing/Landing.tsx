@@ -322,7 +322,6 @@ const Landing: Component = () => {
 
           if (!['guest', 'none'].includes(accountStore.loginType)) {
             setTimeout(() => {
-              console.log('NAVIGATE: ', accountStore.loginType, navigate)
               navigate?.('/home');
             }, 1000)
           }

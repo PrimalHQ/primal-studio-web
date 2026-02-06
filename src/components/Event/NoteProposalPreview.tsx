@@ -3,12 +3,12 @@ import { noteRegexG, profileRegexG } from '../../constants';
 import { EventDisplayVariant, NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from '../../primal';
 
 import styles from './Event.module.scss';
-import { userName } from '../../utils/profile';
+import { userName, userNameFromUser } from '../../utils/profile';
 import { nip19 } from 'nostr-tools';
 import { eventStore } from '../../stores/EventStore';
 import { isYouTube, NoteAST, parseTextToAST } from 'src/utils/parser';
 import { FeedEvent } from './FeedPage';
-import { getMediaUrl, getUsersBlossomUrls } from 'src/stores/MediaStore';
+import { getMediaUrl, getThumbnail, getUsersBlossomUrls } from 'src/stores/MediaStore';
 import { createStore } from 'solid-js/store';
 import Avatar from '../Avatar/Avatar';
 import { longDate } from 'src/utils/date';
@@ -63,7 +63,8 @@ const NotePorposalPreview: Component<{
         setImages(images.length, () => ast);
         break;
       // case 'video':
-      //   return renderImage(ast);
+      //   setImages(images.length, () => ast);
+      //   break;
       // case 'youtube':
       //   return renderImage(ast);
       // case 'link':
@@ -88,7 +89,8 @@ const NotePorposalPreview: Component<{
   };
 
   const renderNprofile = (ast: NoteAST) => {
-    const nprofile = ast?.value?.split(':')[1] || '';
+    const splitprof = ast?.value?.split(':');
+    const nprofile = splitprof.length > 1 ? splitprof[1] : (ast?.value || '');
 
     try {
       const decoded = nip19.decode(nprofile);
@@ -96,13 +98,13 @@ const NotePorposalPreview: Component<{
       if (decoded.type === 'nprofile') {
         const pubkey = decoded.data.pubkey;
 
-        return <span>@{userName(pubkey)}</span>
+        return <span>@{userNameFromUser(props.note.mentionedUsers?.[pubkey])}</span>
       }
 
       if (decoded.type === 'npub') {
         const pubkey = decoded.data;
 
-        return <span>@{userName(pubkey)}</span>
+        return <span>@{userNameFromUser(props.note.mentionedUsers?.[pubkey])}</span>
       }
 
       throw('not-found');
