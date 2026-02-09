@@ -18,7 +18,7 @@ export const BUNKER_RESPONSE_TIMEOUT = 8_000;
 export const login = {
   title: {
     id: 'login.title',
-    defaultMessage: 'Login to Primal.Chat',
+    defaultMessage: 'Login to Primal Studio',
     description: 'Login ',
   },
   tabs: {
