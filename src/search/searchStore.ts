@@ -24,6 +24,7 @@ import { accountStore } from "src/stores/AccountStore";
 import { logError } from "src/utils/logger";
 import { batch } from "solid-js";
 import { uuidv4 } from "src/utils/kyes";
+import { readUserHistory, storeUserHistory } from "src/utils/localStore";
 
 export type SearchStore = {
   users: PrimalUser[],
@@ -88,6 +89,7 @@ export const recomendedUsers = [
 
 
 export const loadSearchStore = (pubkey: string) => {
+  loadUserHistory();
   batch(() => {
     updateSearchStore('isFetchingContent', false);
     updateSearchStore('isFetchingUsers', false);
@@ -480,10 +482,13 @@ export const addToUserHistory = (user: PrimalUser) => {
       updateSearchStore('userHistory', 'stats', hStats => ({...hStats, [user.pubkey]: { ...stats }}));
     }
   });
+
+  storeUserHistory(accountStore.pubkey, history);
 }
 
 export const loadUserHistory = async () => {
-  const users = await getUsers(searchStore.userHistory.profiles.map(p => p.pubkey));
+  const history = readUserHistory(accountStore.pubkey);
+  const users = await getUsers(history);
 
   updateSearchStore('userHistory', 'profiles', () => [...users]);
 }

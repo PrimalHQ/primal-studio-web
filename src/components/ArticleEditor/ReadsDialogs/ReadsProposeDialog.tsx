@@ -13,10 +13,11 @@ import { PrimalUser } from 'src/primal';
 import { userName } from 'src/utils/profile';
 import { subsTo } from 'src/utils/socket';
 import { nip05Verification } from 'src/utils/ui';
-import { findUserByNupub, findUsers, getRecomendedUsers, searchStore } from 'src/stores/SearchStore';
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Dialog from 'src/components/Dialogs/Dialog';
 import ButtonSecondary from 'src/components/Buttons/ButtonSecondary';
+import { createStore } from 'solid-js/store';
+import { addToUserHistory, fetchRecomendedUsersAsync, findUserByNupub, findUsers, getRecomendedUsers, searchStore } from 'src/search/searchStore';
 
 
 const contentKinds: Record<string, number> = {
@@ -56,8 +57,25 @@ const ReadsProposeDialog: Component<{
         searchInput?.focus();
         setHighlightedUser(-1);
       }, 100)
+
+      updateRecomendedAuthors()
     }
   })
+
+  const [recomendedAuthors, setRecomendedAuthors] = createStore<PrimalUser[]>([]);
+
+  const updateRecomendedAuthors = () => {
+    const recs = searchStore.recomendedUsers;
+    const history = searchStore.userHistory.profiles;
+
+    if (recs.length > 0) {
+      return setRecomendedAuthors([...history, ...recs].slice(0, 9));
+    }
+
+    fetchRecomendedUsersAsync(history).then(authors => {
+      setRecomendedAuthors([...authors].slice(0, 9))
+    })
+  }
 
   const searchUsers = (q: string) => {
     if (q.length === 0) {
@@ -183,6 +201,7 @@ const ReadsProposeDialog: Component<{
   };
 
   const selectUser = (user: PrimalUser) => {
+    addToUserHistory(user)
     setSelectedUser(user);
     props.onAddUser(selectedUser())
     // resetQuery();
@@ -225,7 +244,7 @@ const ReadsProposeDialog: Component<{
 
         <div class={styles.searchResults}>
           <div>
-            <For each={searchStore.users}>
+            <For each={query().length > 0 ? searchStore.users : recomendedAuthors}>
               {(user, index) => (
                 <SearchOption
                   title={userName(user.pubkey)}
