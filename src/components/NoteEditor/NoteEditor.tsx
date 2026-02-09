@@ -107,6 +107,8 @@ const NoteEditor: Component<{
 
   const [isInboxDraft, setIsInboxDraft] = createSignal(false);
 
+  const [isPublishing, setIsPublishing] = createSignal(false);
+
   createEffect(() => {
     if (!props.open) {
       resetUpload();
@@ -676,6 +678,9 @@ const NoteEditor: Component<{
   };
 
   const publishNote = async () => {
+    if (isPublishing()) return;
+
+    setIsPublishing(true);
     const content = await getEditorContent(editorMode());
 
     let tags = referencesToTags(content);
@@ -692,6 +697,7 @@ const NoteEditor: Component<{
 
     if (proposedUser()) {
       proposeDraft(content, [...tags, ...mediaTagsToAdd]);
+      setIsPublishing(false);
       return;
     }
 
@@ -731,6 +737,8 @@ const NoteEditor: Component<{
 
       props.onDone && props.onDone();
     }
+
+    setIsPublishing(false);
 
   };
 
@@ -1186,6 +1194,7 @@ const NoteEditor: Component<{
               onClick={() => {
                 publishNote();
               }}
+              loading={isPublishing()}
             >
               <Switch fallback={<>Publish</>}>
                 <Match when={proposedUser()}>
