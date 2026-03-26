@@ -29,6 +29,10 @@
   overflow: hidden
 }
 
+.legend {
+  box-sizing: content-box !important;
+}
+
 .legend_GOLD {
   @include highlight;
   background: var(--legend-gold) !important;

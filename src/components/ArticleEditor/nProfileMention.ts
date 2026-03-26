@@ -99,28 +99,28 @@ export const PROFILE_REGEX = /nostr:(np(ub|rofile)1[qpzry9x8gf2tvdw0s3jn54khce6m
 
 // export type NProfileOptions = Nip19Options
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    nprofile: {
-      applyNProfilePasteRules: (text: string) => ReturnType,
-      insertNProfile: (
-        options: {
-          user: PrimalUser | undefined,
-          relays: string[],
-          nprofile: string,
-        },
-      ) => ReturnType,
-      insertNProfileAt: (
-        range: Range,
-        options: {
-          user: PrimalUser | undefined,
-          relays: string[],
-          nprofile: string,
-        },
-      ) => ReturnType
-    }
-  }
-}
+// declare module '@tiptap/core' {
+//   interface Commands<ReturnType> {
+//     nprofile: {
+//       applyNProfilePasteRules: (text: string) => ReturnType,
+//       insertNProfile: (
+//         options: {
+//           user: PrimalUser | undefined,
+//           relays: string[],
+//           nprofile: string,
+//         },
+//       ) => ReturnType,
+//       insertNProfileAt: (
+//         range: Range,
+//         options: {
+//           user: PrimalUser | undefined,
+//           relays: string[],
+//           nprofile: string,
+//         },
+//       ) => ReturnType
+//     }
+//   }
+// }
 
 export const NProfileExtension = Node.create({
   name: 'nprofile',

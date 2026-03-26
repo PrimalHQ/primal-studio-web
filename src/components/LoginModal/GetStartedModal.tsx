@@ -1,15 +1,18 @@
 import { Component, createEffect, createSignal, Show } from 'solid-js';
 
 import styles from './LoginModal.module.scss';
-import { nip46, SimplePool } from 'src/utils/nTools';
+import { SimplePool } from 'src/utils/nTools';
 import { doAfterLogin, setLoginType, setPublicKey } from 'src/stores/AccountStore';
+
+import * as nip46 from 'src/utils/nip46';
 
 import QrCode from 'components/QrCode/QrCode';
 import { generateAppKeys, generateClientConnectionUrl, getAppSK, storeBunker } from 'src/utils/primalNip46';
 import { logWarning } from 'src/utils/logger';
 import { login } from './LoginModal';
-import { appStore, updateAppStore } from 'src/stores/AppStore';
+import { updateAppStore } from 'src/stores/AppStore';
 import Dialog from '../Dialogs/Dialog';
+import { settingsStore } from 'src/stores/SettingsStore';
 
 
 const GetStartedModal: Component<{
@@ -85,7 +88,7 @@ const GetStartedModal: Component<{
     >
       <div id={props.id} class={styles.gsModal}>
         <div class={styles.getStartedDialog}>
-          <div class={`${styles.img} ${appStore.theme === 'light' ? styles.ssLight : styles.ssDark}`}></div>
+          <div class={`${styles.img} ${settingsStore.theme === 'studio_light' ? styles.ssLight : styles.ssDark}`}></div>
           <div class={styles.simpleDesc}>
             <div class={styles.loginExplain}>
               The simplest way to login:

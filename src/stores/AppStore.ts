@@ -32,6 +32,8 @@ export type AppStore = {
   showCreateAccountModal: boolean,
   showLoginModal: boolean,
   showIncognitoModal: boolean,
+
+  showMentionModal: string,
 };
 
 export const emptyAppStore = (): AppStore => ({
@@ -59,6 +61,8 @@ export const emptyAppStore = (): AppStore => ({
   showCreateAccountModal: false,
   showLoginModal: false,
   showIncognitoModal: false,
+
+  showMentionModal: '',
 });
 
 

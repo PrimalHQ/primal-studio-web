@@ -131,6 +131,11 @@ export const tiptapJsonToPlainText = (json: any) => {
 
   // Handle Nostr specific types
 
+  if (['nostrReference'].includes(json.type)) {
+    const bech32 = json.attrs?.reference;
+    return bech32 ? `nostr:${bech32}` : '';
+  }
+
   if (['nprofile', 'nevent', 'naddr'].includes(json.type)) {
     const bech32 = json.attrs?.bech32;
     return bech32 ? `nostr:${bech32}` : '';

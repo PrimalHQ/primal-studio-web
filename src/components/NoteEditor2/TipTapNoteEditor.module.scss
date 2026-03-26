@@ -1,0 +1,329 @@
+@use 'src/mixins';
+
+.mainInput {
+  width: 800px;
+  min-height: 64px;
+  padding: 12px 12px 12px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+
+  z-index: var(--z-index-header);
+
+  border-radius: 24px;
+  background: var(--background-input);
+
+  transition: padding-bottom 0.2s ease-in-out;
+
+  cursor: text;
+
+  &.hidden {
+    visibility: collapse;
+  }
+
+  &[data-expanded=true] {
+    padding-bottom: 72px;
+
+    .promptInput {
+      height: fit-content !important;
+    }
+  }
+
+  .promptInput {
+    position: relative;
+    flex-grow: 1;
+    z-index: 20;
+    width: fit-content;
+    height: 40px;
+    width: 764px;
+
+    background-color: var(--background-input);
+    border: none;
+    resize: none;
+    padding-block: 3px;
+
+    color: var(--text-primary);
+    font-family: Nacelle;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+
+    .placeholder {
+      color: var(--text-tertiary);
+    }
+
+
+    >div {
+      &:focus, &:focus-visible {
+        outline: none;
+        border: none;
+      }
+      p {
+        height: 24px;
+      }
+      p.isEditorEmpty:first-child::before {
+        color: var(--text-tertiary);
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        pointer-events: none;
+      }
+
+      .userMention {
+        display: inline-flex;
+        vertical-align: middle;
+        color: var(--text-secondary);
+        line-height: 26px;
+
+        >div {
+          display: inline-flex;
+        }
+      }
+    }
+  }
+
+  .promptTools {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    width: 776px;
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .advancedTools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 12px;
+
+      .buttonIcon {
+        width: 18px;
+        height: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .simpleTools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-top: 12px;
+      gap: 8px;
+
+      .recordButton {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 99px;
+        background-color: var(--text-primary);
+
+        div {
+          --icon-color: var(--background-input);
+          --icon-width: 13px;
+          --icon-height: 15px;
+        }
+      }
+    }
+
+  }
+
+  &[data-expanded=true] {
+    .promptTools {
+      .advancedTools {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// .micIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/microphone.svg');
+//   --icon-width: 20px;
+//   --icon-height: 20px;
+// }
+
+// .stopIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/stop.svg');
+//   --icon-width: 13px;
+//   --icon-height: 13px;
+// }
+
+// .sendIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/send.svg');
+//   --icon-width: 12px;
+//   --icon-height: 14px;
+// }
+
+// .attachIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/attach.svg');
+//   --icon-width: 10px;
+//   --icon-height: 16px;
+// }
+
+// .userIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/user.svg');
+//   --icon-width: 13px;
+//   --icon-height: 14px;
+// }
+
+// .nostrIcon {
+//   @include mixins.icon;
+
+//   --icon-color: var(--text-secondary);
+//   --icon-url: url('src/assets/icons/logo_flat.svg');
+//   --icon-width: 16px;
+//   --icon-height: 16px;
+// }
+
+.selectOptionsList {
+  background-color: var(--devider);
+  border: 1px solid var(--subtile-devider);
+  border-radius: 8px;
+  list-style: none;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userMentionList {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.eventText {
+  display: contents;
+  color: inherit;
+}
+
+.eventPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 2px 1px 3px !important;
+  gap: 6px;
+  border-radius: 99px;
+  // border: 1px solid var(--subtile-devider);
+  background-color: var(--background-input);
+  width: fit-content;
+  height: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  vertical-align: middle;
+
+  .contentPill {
+    max-width: 188px;
+    padding: 1px 4px 1px 3px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .zapIcon {
+      @include mixins.icon;
+      --icon-color: var(--text-secondary);
+      --icon-url: url('src/assets/icons/zap.svg');
+      --icon-width: 12px;
+      --icon-height: 12px;
+    }
+  }
+
+  // &:hover {
+  //   background-color: var(--subtile-devider);
+  //   .closeButton {
+  //     background-color: var(--background-input);
+
+  //     .closeIcon {
+  //       --icon-color: var(--text-primary);
+  //     }
+  //   }
+  // }
+
+  &.readonly {
+    cursor: default;
+    padding: 1px 8px 1px 3px !important;
+    &:hover {
+      background: none;
+    }
+  }
+
+  &.dark {
+    background-color: var(--background-sheet);
+  }
+
+}
+
+.closeButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+
+  border-radius: 99px;
+  background-color: var(--background-input);
+  transition: background-color 0.3s ease-in-out;
+
+  .closeIcon {
+    @include mixins.icon;
+    --icon-color: var(--text-secondary);
+    --icon-url: url('src/assets/icons/close.svg');
+    --icon-width: 8px;
+    --icon-height: 8px;
+  }
+
+  // &:hover {
+  //   background-color: var(--subtile-devider);
+
+  //   .closeIcon {
+  //     --icon-color: var(--text-primary);
+  //   }
+  // }
+}
+
+.userSuggestions{
+  background-color: var(--background-input);
+  border: 1px solid var(--subtile-devider);
+  border-radius: var(--border-radius-big);
+  padding: 4px;
+  width: fit-content;
+}
+
+.scrollDownGizmo {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.linkish {
+  color: var(--accent-links) !important;
+}

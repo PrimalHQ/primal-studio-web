@@ -25,7 +25,7 @@ import { logInfo } from "../utils/logger";
 import { MINUTE } from "../constants";
 import { loadContentImportSettings, loadDefaults, loadInboxPermissionSettings, loadSettings, loadStoredSettings, setTheme, settingsStore } from "src/stores/SettingsStore";
 import { updateRelays } from "src/stores/RelayStore";
-import { loadUserHistory } from "src/stores/SearchStore";
+import { loadSearchStore, loadUserHistory } from "src/stores/SearchStore";
 
 
 export type AppContextStore = {
@@ -162,11 +162,12 @@ export const AppProvider = (props: { children: JSXElement }) => {
     if (!pubkey || pubkey.length === 0 || pubkey === prev) return;
 
     setTimeout(() => {
-      loadSettings(accountStore.pubkey);
+      loadSettings(pubkey);
       updateRelays();
       fetchBlossomServers(pubkey);
       loadInboxPermissionSettings();
       loadContentImportSettings();
+      loadSearchStore(pubkey)
     }, 100)
   }));
 

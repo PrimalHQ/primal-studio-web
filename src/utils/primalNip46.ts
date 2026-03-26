@@ -1,11 +1,13 @@
 
-import { nip46, getPublicKey, generatePrivateKey, utils } from './nTools';
+import { getPublicKey, generatePrivateKey, utils } from './nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from 'src/primal';
 
 import { logWarning } from './logger';
 import primalLogo from 'assets/icons/logo.png?url';
 import { timeoutPromise } from './nostrApi';
 import { uuidv4 } from './kyes';
+
+import * as nip46 from './nip46';
 
 export let appSigner: nip46.BunkerSigner | undefined;
 
