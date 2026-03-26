@@ -109,7 +109,9 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
   // for (let i=0; i<blossomServers.length; i++) {
     const server = blossomServers[0];
 
-    const host = utils.normalizeURL(server);
+
+    const host = utils.normalizeURL(server).replace('wss', 'https');
+
 
     const blobs = await BlossomClient.listBlobs(
       host,
