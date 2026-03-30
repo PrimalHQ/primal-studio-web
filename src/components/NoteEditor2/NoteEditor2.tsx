@@ -197,16 +197,22 @@ const NoteEditor2: Component<{
       plainTextToTiptapJson(plainContent()) :
       (editor()?.getJSON() || { type: 'doc', content: [] });
 
+    console.log('JSON TEXT: ', json);
     if (mode === 'text') {
       const pt = tiptapJsonToPlainText(json);
+    console.log('PLAIN TEXT: ', pt);
       setPlainContent(pt);
       return;
     }
 
+    const pt = `${plainContent().trim()}`;
+
+
     editor()?.chain().clearContent().focus('end').run();
 
     setTimeout(() => {
-      simulatePaste(editor(), plainContent().trim());
+      console.log('PLAIN TEXT E: ', pt);
+      simulatePaste(editor(), pt);
 
       setTimeout(() => {
         editor()?.chain().focus('end')
@@ -990,6 +996,8 @@ const NoteEditor2: Component<{
         setOpen={v => updateEditorState('showChooseMediaDialog', v)}
         onSelect={(blob: BlobDescriptor) => {
           updateEditorState('showChooseMediaDialog', false);
+
+          console.log('SELECTED: ', blob.url)
 
           if (blob.type?.startsWith('image')) {
             editor()?.chain().focus().setImage({ src: blob.url }).run();

@@ -311,6 +311,7 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
           continue;
         }
         if (token.match(/\.(mp4|webm|ogg|mov)$/i)) {
+          console.log('TOKEN: ', token)
           paragraphContent.push({
             type: 'video',
             attrs: {
