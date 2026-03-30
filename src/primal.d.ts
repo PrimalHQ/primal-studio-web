@@ -144,6 +144,7 @@ export type UserMetadata = {
 export type NostrRelayConfig = Record<string, { read: boolean, write: boolean }>;
 
 export type NostrRelayEvent = {
+  id?: string,
   kind: number,
   content: any,
   created_at: number,

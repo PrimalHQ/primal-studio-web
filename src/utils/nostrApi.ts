@@ -31,8 +31,10 @@ export class Queue {
 
   enqueue<T>(action: () => Promise<T>) {
     return new Promise<T>((resolve, reject) => {
-      this.#items.push({ action, resolve, reject });
-      this.dequeue();
+      setTimeout(() => {
+        this.#items.push({ action, resolve, reject });
+        this.dequeue();
+      }, 0)
     });
   }
 
@@ -87,6 +89,7 @@ const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) =>
 
   if (['none', 'guest', 'npub'].includes(loginType)) throw('no_login');
 
+
   let nostr: NostrExtension | undefined;
 
   if (loginType === 'extension') {
@@ -132,7 +135,7 @@ export const timeoutPromise = (timeout = 8_000) => {
 }
 
 export const signEvent = async (event: NostrRelayEvent) => {
-  const tempId = `${uuidv4()}`;
+  const tempId = event.id || `${uuidv4()}`;
   try {
     return await enqueueNostr<NostrRelaySignedEvent>(async (nostr) => {
       try {
@@ -141,7 +144,6 @@ export const signEvent = async (event: NostrRelayEvent) => {
           timeoutPromise(),
         ]) as NostrRelaySignedEvent;
         // const signed = await nostr.signEvent(event);
-
         dequeUnsignedEvent(unwrap(event), tempId);
         return signed;
       } catch(reason) {
