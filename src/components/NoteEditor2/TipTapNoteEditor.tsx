@@ -146,16 +146,18 @@ export const TipTapNoteEditor = (
       },
       // @ts-ignore HTMLElement vs JSXElement
       renderContent: (reference: string, uuid: string) => {
+        const ref = reference.startsWith('nostr:') ? reference.substring(6) : reference;
+
         const eventReference = referencedEvents.find(r => r.uuid === uuid);
 
         if (!eventReference || !eventReference.event) {
           return <div
             class={stylesChat.userMentionItem}
-            data-reference={reference}
+            data-reference={ref}
           >
             <EventPill
               reference={{
-                reference: reference,
+                reference: ref,
               }}
               dark={true}
             />
@@ -338,7 +340,6 @@ export const TipTapNoteEditor = (
     content: '',
     editorProps: {
       handleKeyDown: (view, event) => {
-        console.log('KEY: ', event.key);
         // if (event.key === 'Enter' && !(event.ctrlKey || event.metaKey || event.shiftKey || mentionInProgress())) {
         //   event.preventDefault();
         //   document.getElementById('sendChatButton')?.click();

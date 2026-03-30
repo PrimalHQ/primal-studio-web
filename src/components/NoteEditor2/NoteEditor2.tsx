@@ -165,6 +165,22 @@ const NoteEditor2: Component<{
     setIsInboxDraft(!isMyDraft);
   }));
 
+  const simulatePaste = (editor: Editor | undefined, text: string) => {
+    if (!editor) return;
+
+    const { view } = editor
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/plain', text)
+
+    const event = new ClipboardEvent('paste', {
+      clipboardData,
+      bubbles: true,
+      cancelable: true,
+    })
+
+    view.dom.dispatchEvent(event)
+  }
+
   createEffect(on(editorMode, async (mode, prev) => {
     if (prev === undefined || mode === prev) return;
 
@@ -187,15 +203,26 @@ const NoteEditor2: Component<{
       return;
     }
 
-    let html = generateHTML(json, extensions);
-    html = processHTMLForNostr(html);
-    html = await processMarkdownForNostr(html);
+    editor()?.chain().clearContent().focus('end').run();
 
-    editor()?.chain().setContent(html).run();
+    setTimeout(() => {
+      simulatePaste(editor(), plainContent().trim());
 
-    html = html.replaceAll('<p></p>', '');
-    html += '<p></p>';
-    editor()?.chain().setContent(html).focus('end').run();
+      setTimeout(() => {
+        editor()?.chain().focus('end')
+      }, 100)
+    }, 100)
+
+
+    // let html = generateHTML(json, extensions);
+    // html = processHTMLForNostr(html);
+    // html = await processMarkdownForNostr(html);
+
+    // editor()?.chain().setContent(html).run();
+
+    // html = html.replaceAll('<p></p>', '');
+    // html += '<p></p>';
+    // editor()?.chain().setContent(html).focus('end').run();
 
   }));
 

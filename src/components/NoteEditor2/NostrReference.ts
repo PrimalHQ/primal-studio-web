@@ -184,6 +184,50 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
     // Track node counts by reference
     const nodeCounts = new Map<string, number>();
 
+    const revertToText = (reference: string) => {
+      const currentTr = editor.state.tr;
+      let found = false;
+      editor.state.doc.descendants((n, p) => {
+        if (n.type === nodeType && n.attrs.reference === reference) {
+          currentTr.replaceWith(p, p + n.nodeSize, editor.schema.text(reference));
+          found = true;
+          return false;
+        }
+      });
+      if (found) editor.view.dispatch(currentTr);
+    };
+
+    const fetchAndUpdate = (fullMatch: string, uuid: string) => {
+      fetchDataByReference(fullMatch).then((dataInfo) => {
+        if (dataInfo.error !== undefined) {
+          cache.set(fullMatch, { ...dataInfo });
+          revertToText(fullMatch);
+          return;
+        }
+        onAdd?.(dataInfo, uuid);
+        cache.set(fullMatch, { ...dataInfo });
+
+        const currentTr = editor.state.tr;
+        let found = false;
+        editor.state.doc.descendants((n, p) => {
+          if (n.type === nodeType && n.attrs.reference === fullMatch && !n.attrs.userName) {
+            currentTr.setNodeMarkup(p, undefined, {
+              ...n.attrs,
+              reference: fullMatch,
+              kind: dataInfo.kind,
+              pk: dataInfo.pk,
+            });
+            found = true;
+            return false;
+          }
+        });
+        if (found) editor.view.dispatch(currentTr);
+      }).catch((error: any) => {
+        cache.set(fullMatch, { reference: fullMatch, error });
+        revertToText(fullMatch);
+      });
+    };
+
     return [
       new Plugin({
         key: pluginKey,
@@ -270,16 +314,12 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
           const docChanged = transactions.some((tr) => tr.docChanged);
           if (!docChanged) return null;
 
-          // Check if this was a paste operation
           const isPaste = transactions.some((tr) => tr.getMeta('paste'));
 
-          // For typing, check if the last character typed is NOT a valid reference character
           let shouldConvert = isPaste;
 
           if (!isPaste && transactions.length > 0) {
             const lastTr = transactions[transactions.length - 1];
-
-            // Get the last inserted text
             let lastChar = '';
             lastTr.steps.forEach((step) => {
               if (step instanceof ReplaceStep) {
@@ -292,11 +332,7 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
                 }
               }
             });
-
-            // Convert if the last character is not a valid reference character
-            if (lastChar) {
-              shouldConvert = true;
-            }
+            if (lastChar) shouldConvert = true;
           }
 
           if (!shouldConvert) return null;
@@ -304,42 +340,47 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
           const tr = newState.tr;
           let modified = false;
 
+          // Collect all matches first to avoid mutation during iteration
+          const pendingFetches: Array<{
+            fullMatch: string;
+            reference: string;
+            matchStart: number;
+            matchEnd: number;
+          }> = [];
+
           newState.doc.descendants((node, pos) => {
             if (!node.isText || !node.text) return;
 
-            // Reset regex lastIndex for global regex
             referencePattern!.lastIndex = 0;
             const matches = Array.from(node.text.matchAll(referencePattern!));
 
-            // Process matches in reverse to maintain positions
             for (let i = matches.length - 1; i >= 0; i--) {
               const match = matches[i];
-              const reference = match[1]; // Capture group without optional prefix
+              const reference = match[1];
               const fullMatch = match[0];
               const matchStart = pos + match.index!;
               const matchEnd = matchStart + fullMatch.length;
 
-              // Check if this position already has a nostrReference node
               let hasNode = false;
               newState.doc.nodesBetween(matchStart, matchEnd, (n) => {
-                if (n.type === nodeType) {
-                  hasNode = true;
-                  return false;
-                }
+                if (n.type === nodeType) { hasNode = true; return false; }
               });
 
-              let uuid = uuidv4();
+              if (hasNode) continue;
 
-              if (!hasNode) {
-                // Check if we have a cached value first
-                let pk: string | undefined = undefined;
-                let kind: number | undefined = undefined;
+              if (isPaste) {
+                // For paste: defer node creation until fetch resolves
+                pendingFetches.push({ fullMatch, reference, matchStart, matchEnd });
+              } else {
+                // For typing: immediate node creation (existing behavior)
+                let uuid = uuidv4();
+                let pk: string | undefined;
+                let kind: number | undefined;
                 let shouldRevert = false;
 
                 if (cache.has(fullMatch)) {
                   const cachedValue = cache.get(fullMatch)!;
                   if (cachedValue.error) {
-                    // Don't create a node if we know it will fail
                     shouldRevert = true;
                   } else {
                     pk = cachedValue.pk;
@@ -348,12 +389,8 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
                   }
                 }
 
-                if (shouldRevert) {
-                  // Skip creating the node for known errors
-                  continue;
-                }
+                if (shouldRevert) continue;
 
-                // Create a node with the reference and kind if cached
                 const newNode = nodeType.create({
                   reference: fullMatch,
                   pk: npubToHex(reference),
@@ -361,88 +398,87 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
                   uuid,
                 });
 
-                  tr.replaceRangeWith(matchStart, matchEnd, newNode);
-                  modified = true;
+                tr.replaceRangeWith(matchStart, matchEnd, newNode);
+                modified = true;
 
-                // If not cached, fetch user info asynchronously
                 if (!pk) {
-                  const fetchAndUpdate = async () => {
-                    try {
-                      const dataInfo = await fetchDataByReference(fullMatch);
-
-                      // Check if the response contains an error
-                      if (dataInfo.error !== undefined) {
-                        cache.set(fullMatch, { ...dataInfo });
-                        // Revert the node back to text
-                        revertToText(fullMatch);
-                        return;
-                      }
-
-                      onAdd?.(dataInfo, uuid);
-                      cache.set(fullMatch, { ...dataInfo });
-                      // Update the node with the fetched user name
-                      const currentTr = editor.state.tr;
-                      let found = false;
-
-                      editor.state.doc.descendants((n, p) => {
-                        if (
-                          n.type === nodeType &&
-                          n.attrs.reference === fullMatch &&
-                          !n.attrs.userName
-                        ) {
-                          currentTr.setNodeMarkup(p, undefined, {
-                            ...n.attrs,
-                            reference: fullMatch,
-                            kind: dataInfo.kind,
-                            pk: dataInfo.pk,
-                          });
-                          found = true;
-                          return false;
-                        }
-                      });
-
-                      if (found) {
-                        editor.view.dispatch(currentTr);
-                      }
-
-                    } catch (error: any) {
-                      console.error('Failed to fetch user info:', error);
-                      cache.set(fullMatch, { reference: fullMatch, error });
-                      revertToText(fullMatch);
-                    }
-                  };
-
-                  fetchAndUpdate();
+                  fetchAndUpdate(fullMatch, uuid);
                 }
               }
-
-              // Helper function to revert node back to text
-              const revertToText = (reference: string) => {
-                const currentTr = editor.state.tr;
-                let found = false;
-
-                editor.state.doc.descendants((n, p) => {
-                  if (
-                    n.type === nodeType &&
-                    n.attrs.reference === reference
-                  ) {
-                    // Replace the node with plain text
-                    currentTr.replaceWith(
-                      p,
-                      p + n.nodeSize,
-                      editor.schema.text(reference)
-                    );
-                    found = true;
-                    return false;
-                  }
-                });
-
-                if (found) {
-                  editor.view.dispatch(currentTr);
-                }
-              };
             }
           });
+
+          // For paste: fetch first, then insert nodes (preserving reverse order for positions)
+          if (isPaste && pendingFetches.length > 0) {
+            // Sort descending by position so replacements don't shift each other
+            pendingFetches.sort((a, b) => b.matchStart - a.matchStart);
+
+            const fetchAndInsertAll = async () => {
+              // Fetch all in parallel
+              const results = await Promise.all(
+                pendingFetches.map(async ({ fullMatch, reference, matchStart, matchEnd }) => {
+                  let dataInfo: EventReference | null = null;
+                  let shouldSkip = false;
+
+                  if (cache.has(fullMatch)) {
+                    const cached = cache.get(fullMatch)!;
+                    if (cached.error) {
+                      shouldSkip = true;
+                    } else {
+                      dataInfo = cached;
+                    }
+                  } else {
+                    try {
+                      dataInfo = await fetchDataByReference(fullMatch);
+                      if (dataInfo.error !== undefined) {
+                        cache.set(fullMatch, { ...dataInfo });
+                        shouldSkip = true;
+                      } else {
+                        cache.set(fullMatch, { ...dataInfo });
+                      }
+                    } catch (error: any) {
+                      cache.set(fullMatch, { reference: fullMatch, error });
+                      shouldSkip = true;
+                    }
+                  }
+
+                  return { fullMatch, reference, matchStart, matchEnd, dataInfo, shouldSkip };
+                })
+              );
+
+              // Now dispatch a single transaction with all resolved nodes
+              const insertTr = editor.state.tr;
+              let insertModified = false;
+
+              // Apply in descending position order to keep positions valid
+              for (const { fullMatch, reference, matchStart, matchEnd, dataInfo, shouldSkip } of results) {
+                if (shouldSkip || !dataInfo) continue;
+
+                const uuid = uuidv4();
+                onAdd?.(dataInfo, uuid);
+
+                const newNode = nodeType.create({
+                  reference: fullMatch,
+                  pk: dataInfo.pk ?? npubToHex(reference),
+                  kind: dataInfo.kind ?? Kind.Metadata,
+                  uuid,
+                });
+
+                // Map position through any prior steps in this transaction
+                const mappedStart = insertTr.mapping.map(matchStart);
+                const mappedEnd = insertTr.mapping.map(matchEnd);
+
+                insertTr.replaceRangeWith(mappedStart, mappedEnd, newNode);
+                insertModified = true;
+              }
+
+              if (insertModified) {
+                editor.view.dispatch(insertTr);
+              }
+            };
+
+            fetchAndInsertAll();
+          }
 
           return modified ? tr : null;
         },
