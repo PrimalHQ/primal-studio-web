@@ -100,6 +100,7 @@ const ReadsChooseMediaDialog: Component<{
             items={blobs()}
             server={blossomStore.server || ''}
             onShowUsage={setMediaUsageUrl}
+            dark={true}
           />
         </Match>
       </Switch>

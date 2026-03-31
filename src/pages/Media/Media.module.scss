@@ -151,14 +151,14 @@
 }
 
 .mediaList {
-  // border: 1px solid var(--subtile-devider);
+  border-right: 1px solid var(--devider);
   border-collapse: collapse;
 
   tr {
-    border-bottom: 1px solid var(--subtile-devider);
+    border-bottom: 1px solid var(--devider);
 
     &.selected {
-      background-color: var(--subtile-devider);
+      background-color: var(--devider);
     }
 
     td {
@@ -171,6 +171,16 @@
         opacity: 0;
         visibility: hidden;
         transition: visibility 0s 300ms, opacity 300ms linear;
+      }
+    }
+  }
+
+  &.dark {
+    tr {
+      border-bottom: 1px solid var(--subtile-devider);
+
+      &.selected {
+        background-color: var(--subtile-devider);
       }
     }
   }

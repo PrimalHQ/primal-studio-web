@@ -26,6 +26,7 @@ const MediaList: Component<{
   server?: string,
   items: BlobDescriptor[],
   onShowUsage?: (url?: string) => void,
+  dark?: boolean,
 }> = (props) => {
   const toast = useToastContext();
 
@@ -190,7 +191,7 @@ const MediaList: Component<{
 
   return (
     <table
-      class={styles.mediaList}
+      class={`${styles.mediaList} ${props.dark ? styles.dark : ''}`}
       ref={containerRef}
     >
       <thead>
