@@ -21,7 +21,16 @@ export default defineConfig({
         type: 'module',
         /* other options */
       }
-    })
+    }),
+    {
+      name: 'html-cache-bust',
+      transformIndexHtml(html) {
+        return html.replace(
+          '<head>',
+          `<head><meta name="deploy-id" content="${Date.now()}">`
+        );
+      }
+    }
   ],
   server: {
     port: 3000,
