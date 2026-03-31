@@ -12,7 +12,7 @@ import {
 import { PrimalNip46 } from "src/utils/primalNip46";
 import { PrimalNostr } from "src/utils/primalNostr";
 import { uuidv4 } from "./kyes";
-import { closeSignerUnreachableDialog, openSignerUnreachableDialog } from "src/stores/AppStore";
+import { closeConfirmDialog, closeSignerUnreachableDialog, openConfirmDialog, openSignerUnreachableDialog } from "src/stores/AppStore";
 
 
 type QueueItem = {
@@ -183,6 +183,17 @@ export const signEvent = async (event: NostrRelayEvent) => {
           logout();
           closeSignerUnreachableDialog();
         }
+      });
+    }
+
+    if (reason === 'promise_timeout' && accountStore.loginType === 'extension') {
+      openConfirmDialog({
+        title: `Failed to sign event (kind: ${event.kind})`,
+        description: 'Primal Studio was unable to sign your event. Check if your extension is active and working.',
+        confirmLabel: 'Close',
+        onConfirm: () => {
+          closeConfirmDialog();
+        },
       });
     }
 
