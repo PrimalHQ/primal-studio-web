@@ -69,7 +69,7 @@ const DraftOtherParty: Component<{
         </div>
       </div>
       <Switch>
-        <Match when={props.type === 'sent'}>
+        <Match when={props.type === 'sent' && !props.draft.encrypted}>
           <button
             class={styles.draftAction}
             onClick={props.onView}
@@ -77,7 +77,7 @@ const DraftOtherParty: Component<{
             View
           </button>
         </Match>
-        <Match when={props.type === 'inbox'}>
+        <Match when={props.type === 'inbox' && !props.draft.encrypted}>
           <div class={styles.actions}>
             <button
               class={styles.draftAction}
