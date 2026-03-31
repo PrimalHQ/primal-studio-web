@@ -439,6 +439,7 @@ export type PrimalDraft = {
   sender: PrimalUser,
   receiver: PrimalUser,
   studioStats?: StudioNoteStats,
+  encrypted?: boolean,
 }
 
 export type PrimalZap = {

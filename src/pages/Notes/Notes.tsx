@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, on, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, on, onMount, Show } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
@@ -17,7 +17,7 @@ import StudioTabs from 'src/components/Tabs/Tabs';
 import FeedItemCard from 'src/components/Event/FeedItemCard';
 import { PrimalDraft, PrimalNote } from 'src/primal';
 import EventStats from 'src/components/Event/EventStats';
-import { deleteSelected, fetchFeedTotals, fetchNotes, isAllSelected, notesStore, setNotesStore, toggleSelectAll, toggleSelected } from './Notes.data';
+import { deleteSelected, fetchFeedTotals, fetchNotes, isAllSelected, loadNotesGraphSpan, notesStore, setNotesStore, toggleSelectAll, toggleSelected } from './Notes.data';
 import NotePreview from 'src/components/Event/NotePreview';
 import CheckBox from 'src/components/CheckBox/CheckBox';
 import DraftPreview from 'src/components/Event/DraftPreview';
@@ -114,6 +114,10 @@ const Notes: Component = () => {
       },
     );
   }
+
+  onMount(() => {
+    loadNotesGraphSpan();
+  });
 
   createEffect(on(() => searchParams.tab, (tab, prev) => {
     let newTab = tab

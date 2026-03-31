@@ -196,7 +196,7 @@ export const fetchNotes = async (
     }
 
     if (['drafts', 'sent', 'inbox'].includes(notesStore.tab)) {
-      result.drafts = await parseDraftContent(result.drafts);
+      result.drafts = await parseDraftContent(result.drafts, Kind.Text);
     } else {
       result.notes = filterAndSortNotes(result.notes, result.paging);
     }
@@ -217,6 +217,10 @@ export const fetchNotes = async (
   }
 };
 
+export const loadNotesGraphSpan = () => {
+  const span = readGraphSpan(accountStore.pubkey, 'articles');
+  setHomeStore('graphSpan', () => ({ ...span }));
+}
 
 export const preloadNotes = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;

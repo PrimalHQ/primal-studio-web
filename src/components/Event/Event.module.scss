@@ -633,6 +633,10 @@
 
     padding-left: 8px;
     border-left: 1px solid var(--subtile-devider);
+
+    &.hidden {
+      visibility: hidden;
+    }
   }
 
   .draftInfoSection {
@@ -1025,4 +1029,14 @@
 
 .emptyFeedItem {
   height: 36px;
+}
+
+.encryptedDraft {
+  height: 36px;
+  display: flex;
+  align-items: center;
+
+  color: var(--text-tertiary-2);
+  font-weight: 600;
+  text-transform: uppercase;
 }

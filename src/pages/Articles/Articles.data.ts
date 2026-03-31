@@ -209,7 +209,7 @@ export const fetchArticles = async (
       }
 
       if (['drafts', 'sent', 'inbox'].includes(articlesStore.tab)) {
-        result.drafts = await parseDraftContent(result.drafts);
+        result.drafts = await parseDraftContent(result.drafts, Kind.LongForm);
       } else {
         result.reads = filterAndSortReads(result.reads, result.paging);
       }
@@ -231,6 +231,11 @@ export const fetchArticles = async (
       return ;
     }
   };
+
+export const loadArticlesGraphSpan = () => {
+  const span = readGraphSpan(accountStore.pubkey, 'articles');
+  setArticlesStore('graphSpan', () => ({ ...span }));
+}
 
 export const preloadArticles = (args: RoutePreloadFuncArgs) => {
   let pk = args.params?.pubkey;

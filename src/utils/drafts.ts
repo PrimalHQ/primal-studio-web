@@ -1,7 +1,7 @@
 import { NostrEventContent, PrimalArticle, PrimalDraft, PrimalNote } from "src/primal";
 import { decrypt44 } from "./nostrApi";
 import { logError, logWarning } from "./logger";
-import { emptyMentions, encodeCoordinate, extractReplyToFromTags, noActions } from "./feeds";
+import { emptyMentions, extractReplyToFromTags, noActions } from "./feeds";
 import { Kind } from "src/constants";
 import DOMPurify from 'dompurify';
 import { nip19 } from "./nTools";
@@ -9,18 +9,19 @@ import { accountStore } from "src/stores/AccountStore";
 import { getUsers } from "src/primal_api/profile";
 import { fetchArticles, fetchNotes } from "src/primal_api/events";
 import { APP_ID } from "src/App";
+import { uuidv4 } from "./kyes";
 
-export const parseDraftContent = async (drafts: PrimalDraft[]) => {
+export const parseDraftContent = async (drafts: PrimalDraft[], defaultKind = Kind.Text) => {
   let parsedDrafts: PrimalDraft[] = [];
 
-  try {
-    for (let i=0; i<drafts.length; i++) {
-      let draft = { ...drafts[i] };
+  for (let i=0; i<drafts.length; i++) {
+    let draft = { ...drafts[i] };
 
-      const pubkey = accountStore.pubkey === draft.sender.pubkey ?
-        draft.receiver.pubkey :
-        draft.sender.pubkey;
+    const pubkey = accountStore.pubkey === draft.sender.pubkey ?
+      draft.receiver.pubkey :
+      draft.sender.pubkey;
 
+    try {
       const decryptedContent = await decrypt44(pubkey, draft.content);
 
       if (!decryptedContent) continue;
@@ -30,21 +31,36 @@ export const parseDraftContent = async (drafts: PrimalDraft[]) => {
         plain: decryptedContent,
         draftedEvent: JSON.parse(decryptedContent),
       })
+
+    } catch(e) {
+      logError('failed-to-decrypt44: ', e);
+      const unknownDraft = {
+        id: uuidv4(),
+        content: '',
+        kind: defaultKind,
+        tags: [],
+        created_at: Math.floor((new Date()).getTime() / 1_000),
+      }
+
+      parsedDrafts.push({
+        ...draft,
+        plain: JSON.stringify(unknownDraft),
+        draftedEvent: unknownDraft,
+        encrypted: true,
+      })
     }
-
-    return parsedDrafts;
-
-  } catch(e) {
-    logError('failed-to-decrypt44: ', e);
-    return parsedDrafts;
   }
+
+  console.log('PARSED DRAFTS: ', parsedDrafts);
+
+  return parsedDrafts;
 }
 
 
 export const parseDraftedEvent = async (
   draft: PrimalDraft,
 ): Promise<PrimalArticle | PrimalNote | undefined> => {
-  if (!draft) return;
+  if (!draft || draft.encrypted) return;
 
   const event = draft.draftedEvent;
 

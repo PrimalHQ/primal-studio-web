@@ -19,7 +19,7 @@ const DraftInfo: Component<{
       <div class={styles.draftInfoSection}>
         <div
           onClick={props.onEdit}
-          class={styles.draftInfoLink}
+          class={`${styles.draftInfoLink} ${props.onEdit ? '' : styles.hidden}`}
         >
           Continue Editing
         </div>

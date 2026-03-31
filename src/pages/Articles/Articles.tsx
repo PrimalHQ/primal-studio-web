@@ -1,10 +1,10 @@
-import { Component, createEffect, createSignal, For, on, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, on, onMount, Show } from 'solid-js';
 import Wormhole from '../../helpers/Wormhole/Wormhole';
 import { translate } from '../../translations/translate';
 
 import styles from './Articles.module.scss';
 import PageHeader from 'src/components/PageHeader/PageHeader';
-import { articlesStore, deleteSelected, fetchArticles, fetchFeedTotals, isAllSelected, setArticlesStore, toggleSelectAll, toggleSelected } from './Articles.data';
+import { articlesStore, deleteSelected, fetchArticles, fetchFeedTotals, isAllSelected, loadArticlesGraphSpan, setArticlesStore, toggleSelectAll, toggleSelected } from './Articles.data';
 import { FeedCriteria, GraphSpan } from '../Home/Home.data';
 import SelectBox from 'src/components/SelectBox/SelectBox';
 import { headerSortOptions } from 'src/constants';
@@ -111,6 +111,10 @@ const Articles: Component = () => {
       },
     );
   }
+
+  onMount(() => {
+    loadArticlesGraphSpan();
+  });
 
   createEffect(on(() => searchParams.tab, (tab, prev) => {
     let newTab = tab

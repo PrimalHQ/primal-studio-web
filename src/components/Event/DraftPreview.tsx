@@ -27,6 +27,15 @@ const DraftPreview: Component<{
 
   return (
     <Switch>
+      <Match when={props.draft.encrypted}>
+        <div class={styles.encryptedDraft}>
+          Content Encrypted (Unable to decrypt)
+        </div>
+        <DraftInfo
+          draft={props.draft}
+          onDelete={props.onDelete}
+        />
+      </Match>
       <Match when={!event()}>
         <div class={styles.emptyFeedItem}></div>
       </Match>
