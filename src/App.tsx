@@ -152,6 +152,17 @@ const App: Component = () => {
             onAbort={appStore.confirmDialogInfo?.onAbort}
           />
 
+          <ConfirmDialog
+            open={appStore.showSignerUnreachableDialog}
+            setOpen={(v) => updateAppStore('showSignerUnreachableDialog', v)}
+            title={appStore.signerUnreachableDialogInfo?.title}
+            description={appStore.signerUnreachableDialogInfo?.description}
+            confirmLabel={appStore.signerUnreachableDialogInfo?.confirmLabel}
+            onConfirm={appStore.signerUnreachableDialogInfo?.onConfirm}
+            abortLabel={appStore.signerUnreachableDialogInfo?.abortLabel}
+            onAbort={appStore.signerUnreachableDialogInfo?.onAbort}
+          />
+
           <NewNoteDialog
             open={appStore.showNewNoteEditor}
             setOpen={(v) => v ? openEditNote() : closeEditNote()}

@@ -17,6 +17,8 @@ export type AppStore = {
   mediaContextMenuInfo: MediaContextMenuInfo | undefined,
   showConfirmDialog: boolean,
   confirmDialogInfo: ConfirmDialogInfo | undefined,
+  showSignerUnreachableDialog: boolean,
+  signerUnreachableDialogInfo: ConfirmDialogInfo | undefined,
   showContentScoreBreakdown: boolean,
   scoreBrakdownEvent: PrimalNote | PrimalArticle | PrimalDraft | undefined,
   showNewNoteEditor: boolean,
@@ -42,6 +44,8 @@ export const emptyAppStore = (): AppStore => ({
   mediaContextMenuInfo: undefined,
   showConfirmDialog: false,
   confirmDialogInfo: undefined,
+  showSignerUnreachableDialog: false,
+  signerUnreachableDialogInfo: undefined,
   showContentScoreBreakdown: false,
   scoreBrakdownEvent: undefined,
   showNewNoteEditor: false,
@@ -148,6 +152,16 @@ export const openConfirmDialog = (config: ConfirmDialogInfo) => {
 
 export const closeConfirmDialog = () => {
   updateAppStore('showConfirmDialog', () => false);
+};
+
+
+export const openSignerUnreachableDialog = (config: ConfirmDialogInfo) => {
+  updateAppStore('signerUnreachableDialogInfo', reconcile({ ...config }));
+  updateAppStore('showSignerUnreachableDialog', () => true);
+};
+
+export const closeSignerUnreachableDialog = () => {
+  updateAppStore('showSignerUnreachableDialog', () => false);
 };
 
 export const openScoreBreakdown = (event: PrimalNote | PrimalArticle | PrimalDraft | undefined) => {

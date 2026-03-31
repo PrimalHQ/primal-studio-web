@@ -12,7 +12,7 @@ import {
 import { PrimalNip46 } from "src/utils/primalNip46";
 import { PrimalNostr } from "src/utils/primalNostr";
 import { uuidv4 } from "./kyes";
-import { closeConfirmDialog, openConfirmDialog } from "src/stores/AppStore";
+import { closeSignerUnreachableDialog, openSignerUnreachableDialog } from "src/stores/AppStore";
 
 
 type QueueItem = {
@@ -146,6 +146,7 @@ export const signEvent = async (event: NostrRelayEvent) => {
         ]) as NostrRelaySignedEvent;
         // const signed = await nostr.signEvent(event);
         dequeUnsignedEvent(unwrap(event), tempId);
+        closeSignerUnreachableDialog();
         return signed;
       } catch(reason) {
         throw(reason);
@@ -161,19 +162,18 @@ export const signEvent = async (event: NostrRelayEvent) => {
     enqueUnsignedEvent(unwrap(event), tempId);
 
     if (reason === 'promise_timeout' && accountStore.loginType === 'nip46') {
-      console.log('Remote signer not available')
-      openConfirmDialog({
+      openSignerUnreachableDialog({
         title: 'Remote signer unreachable',
         description: 'Primal Studio can\'t reach the remote signer. Please make sure your signer is online and the Primal Studio session is active',
         confirmLabel: 'Retry',
         onConfirm: () => {
           refreshQueue();
-          closeConfirmDialog();
+          closeSignerUnreachableDialog();
         },
         abortLabel: 'Log out',
         onAbort: () => {
           logout();
-          closeConfirmDialog();
+          closeSignerUnreachableDialog();
         }
       });
     }
