@@ -2,6 +2,7 @@ import { unwrap } from "solid-js/store";
 import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent, logout, refreshQueue } from "src/stores/AccountStore";
 import {
   NostrExtension,
+  NostrRelayConfig,
   NostrRelayEvent,
   NostrRelays,
   NostrRelaySignedEvent,
@@ -143,6 +144,42 @@ export const timeoutPromiseResolve = (timeout = 8_000) => {
   });
 }
 
+export const handleSignerFailure = (reason: any) => {
+  if (reason === 'promise_timeout' && accountStore.loginType === 'nip46') {
+    openSignerUnreachableDialog({
+      title: 'Remote signer unreachable',
+      description: 'Primal Studio can\'t reach the remote signer. Please make sure your signer is online and the Primal Studio session is active',
+      confirmLabel: 'Retry',
+      onConfirm: () => {
+        refreshQueue();
+        closeSignerUnreachableDialog();
+      },
+      abortLabel: 'Log out',
+      onAbort: () => {
+        logout();
+        closeSignerUnreachableDialog();
+      }
+    });
+  }
+
+  if (reason === 'promise_timeout' && accountStore.loginType === 'extension') {
+    openConfirmDialog({
+      title: 'Cant find a nostr extension',
+      description: 'Primal Studio was unable to find an active nostr extension. Please make sure an extension is available and active',
+      confirmLabel: 'Retry',
+      onConfirm: () => {
+        refreshQueue();
+        closeConfirmDialog();
+      },
+      abortLabel: 'Log out',
+      onAbort: () => {
+        logout();
+        closeConfirmDialog();
+      }
+    });
+  }
+}
+
 export const signEvent = async (event: NostrRelayEvent) => {
   const tempId = event.id || `${uuidv4()}`;
   try {
@@ -169,33 +206,7 @@ export const signEvent = async (event: NostrRelayEvent) => {
     }
     enqueUnsignedEvent(unwrap(event), tempId);
 
-    if (reason === 'promise_timeout' && accountStore.loginType === 'nip46') {
-      openSignerUnreachableDialog({
-        title: 'Remote signer unreachable',
-        description: 'Primal Studio can\'t reach the remote signer. Please make sure your signer is online and the Primal Studio session is active',
-        confirmLabel: 'Retry',
-        onConfirm: () => {
-          refreshQueue();
-          closeSignerUnreachableDialog();
-        },
-        abortLabel: 'Log out',
-        onAbort: () => {
-          logout();
-          closeSignerUnreachableDialog();
-        }
-      });
-    }
-
-    if (reason === 'promise_timeout' && accountStore.loginType === 'extension') {
-      openConfirmDialog({
-        title: `Failed to sign event (kind: ${event.kind})`,
-        description: 'Primal Studio was unable to sign your event. Check if your extension is active and working.',
-        confirmLabel: 'Close',
-        onConfirm: () => {
-          closeConfirmDialog();
-        },
-      });
-    }
+    handleSignerFailure(reason);
 
     throw(reason);
   }
@@ -205,8 +216,12 @@ export const getPublicKey = async () => {
   try {
     return await enqueueNostr<string>(async (nostr) => {
       try {
-        return await nostr.getPublicKey();
+        return await Promise.race([
+          nostr.getPublicKey(),
+          timeoutPromise(),
+        ]) as string;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -218,9 +233,13 @@ export const getPublicKey = async () => {
 export const getRelays = async () => {
   try {
     return await enqueueNostr<NostrRelays>(async (nostr) => {
-      try {
-        return await nostr.getRelays();
+       try {
+        return await Promise.race([
+          nostr.getRelays(),
+          timeoutPromise(),
+        ]) as NostrRelayConfig;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -233,8 +252,12 @@ export const encrypt = async (pubkey: string, message: string) => {
   try {
     return await enqueueNostr<string>(async (nostr) => {
       try {
-        return await nostr.nip04.encrypt(pubkey, message);
+        return await Promise.race([
+          nostr.nip04.encrypt(pubkey, message),
+          timeoutPromise(),
+        ]) as string;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -247,8 +270,12 @@ export const decrypt = async (pubkey: string, message: string) => {
   try {
     return await enqueueNostr<string>(async (nostr) => {
       try {
-        return await nostr.nip04.decrypt(pubkey, message);
+        return await Promise.race([
+          nostr.nip04.decrypt(pubkey, message),
+          timeoutPromise(),
+        ]) as string;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -262,8 +289,12 @@ export const encrypt44 = async (pubkey: string, message: string) => {
   try {
     return await enqueueNostr<string>(async (nostr) => {
       try {
-        return await nostr.nip44.encrypt(pubkey, message);
+        return await Promise.race([
+          nostr.nip44.encrypt(pubkey, message),
+          timeoutPromise(),
+        ]) as string;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -276,8 +307,12 @@ export const decrypt44 = async (pubkey: string, message: string) => {
   try {
     return await enqueueNostr<string>(async (nostr) => {
       try {
-        return await nostr.nip44.decrypt(pubkey, message);
+        return await Promise.race([
+          nostr.nip44.decrypt(pubkey, message),
+          timeoutPromise(),
+        ]) as string;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -290,8 +325,12 @@ export const enableWebLn = async () => {
   try {
     return await enqueueWebLn<void>(async (webln) => {
       try {
-        return await webln.enable();
+        return await Promise.race([
+          webln.enable(),
+          timeoutPromise(),
+        ]) as void;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
@@ -304,8 +343,12 @@ export const sendPayment = async (paymentRequest: string) => {
   try {
     return await enqueueWebLn<SendPaymentResponse>(async (webln) => {
       try {
-        return await webln.sendPayment(paymentRequest);
+        return await Promise.race([
+          webln.sendPayment(paymentRequest),
+          timeoutPromise(),
+        ]) as SendPaymentResponse;
       } catch(reason) {
+        handleSignerFailure(reason);
         throw(reason);
       }
     });
