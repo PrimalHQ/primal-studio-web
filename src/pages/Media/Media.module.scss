@@ -51,7 +51,7 @@
     align-items: flex-start;
     justify-content: flex-end;
     background-color: var(--background-input);
-    border: 2px solid var(--background-site);
+    // border: 2px solid var(--background-site);
     border-radius: 8px;
     overflow: hidden;
     position: relative;
@@ -110,7 +110,7 @@
     width: calc(100% - 16px);
     padding: 6px 8px;
     align-items: center;
-    background-color: var(--background-input);
+    background-color: var(--background-header-input);
 
     color: var(--brand-text);
     font-size: 12px;
@@ -151,14 +151,14 @@
 }
 
 .mediaList {
-  border: 1px solid var(--devider);
+  // border: 1px solid var(--subtile-devider);
   border-collapse: collapse;
 
   tr {
-    border-bottom: 1px solid var(--devider);
+    border-bottom: 1px solid var(--subtile-devider);
 
     &.selected {
-      background-color: var(--devider);
+      background-color: var(--subtile-devider);
     }
 
     td {
