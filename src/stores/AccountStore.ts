@@ -13,7 +13,7 @@ import {
 } from "../utils/localStore";
 import { Kind, pinEncodePrefix } from "../constants";
 
-import { getPublicKey, nip19, nip46, SimplePool } from "../utils/nTools";
+import { getPublicKey, nip19, SimplePool } from "../utils/nTools";
 import { getPublicKey as getNostrPublicKey, signEvent, timeoutPromiseResolve } from "../utils/nostrApi";
 import { primalAPI, subTo } from "src/utils/socket";
 import { getUserMetadata } from "src/primal_api/profile";
@@ -30,6 +30,8 @@ import { updateAppStore } from "./AppStore";
 import { appSigner, getAppSK, setAppSigner } from "src/utils/primalNip46";
 import { sendSignedEvent } from "src/primal_api/nostr";
 import { loadSearchStore } from "src/search/searchStore";
+
+import * as nip46 from "src/utils/nip46";
 
 export const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
 
@@ -335,7 +337,7 @@ export const loginUsingNip46 = async (pk?: string) => {
 
   const pool = new SimplePool();
 
-  setAppSigner(nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool }))
+  setAppSigner(nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool }));
 
   if (!appSigner) {
     setLoginType('guest');

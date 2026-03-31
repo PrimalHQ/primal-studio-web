@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import styles from './LoginModal.module.scss';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
-import { nip19, nip46, SimplePool } from 'src/utils/nTools';
+import { nip19, SimplePool } from 'src/utils/nTools';
 import { storeSec } from '../../utils/localStore';
 import { doAfterLogin, loginUsingExtension, loginUsingLocalNsec, loginUsingNpub, setLoginType, setPublicKey, setSec } from 'src/stores/AccountStore';
 import { Tabs } from '@kobalte/core/tabs';
@@ -11,6 +11,8 @@ import { logWarning } from 'src/utils/logger';
 import { encryptWithPin, setCurrentPin } from 'src/utils/primalNostr';
 import Dialog from 'components/Dialogs/Dialog';
 import QrCode from 'components/QrCode/QrCode';
+
+import * as nip46 from 'src/utils/nip46';
 
 
 export const BUNKER_RESPONSE_TIMEOUT = 8_000;
