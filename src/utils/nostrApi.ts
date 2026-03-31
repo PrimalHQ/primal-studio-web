@@ -1,5 +1,5 @@
 import { unwrap } from "solid-js/store";
-import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent } from "src/stores/AccountStore";
+import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent, logout, refreshQueue } from "src/stores/AccountStore";
 import {
   NostrExtension,
   NostrRelayEvent,
@@ -165,8 +165,16 @@ export const signEvent = async (event: NostrRelayEvent) => {
       openConfirmDialog({
         title: 'Remote signer unreachable',
         description: 'Primal Studio can\'t reach the remote signer. Please make sure your signer is online and the Primal Studio session is active',
-        confirmLabel: 'Close',
-        onConfirm: () => closeConfirmDialog(),
+        confirmLabel: 'Retry',
+        onConfirm: () => {
+          refreshQueue();
+          closeConfirmDialog();
+        },
+        abortLabel: 'Log out',
+        onAbort: () => {
+          logout();
+          closeConfirmDialog();
+        }
       });
     }
 
