@@ -135,6 +135,14 @@ export const timeoutPromise = (timeout = 8_000) => {
   });
 }
 
+export const timeoutPromiseResolve = (timeout = 8_000) => {
+  return new Promise<undefined>((resolve, reject) => {
+    setTimeout(() => {
+      resolve(undefined);
+    }, timeout);
+  });
+}
+
 export const signEvent = async (event: NostrRelayEvent) => {
   const tempId = event.id || `${uuidv4()}`;
   try {

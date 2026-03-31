@@ -14,7 +14,7 @@ import {
 import { Kind, pinEncodePrefix } from "../constants";
 
 import { getPublicKey, nip19, nip46, SimplePool } from "../utils/nTools";
-import { getPublicKey as getNostrPublicKey, signEvent } from "../utils/nostrApi";
+import { getPublicKey as getNostrPublicKey, signEvent, timeoutPromiseResolve } from "../utils/nostrApi";
 import { primalAPI, subTo } from "src/utils/socket";
 import { getUserMetadata } from "src/primal_api/profile";
 import { APP_ID } from "src/App";
@@ -172,7 +172,7 @@ export const logUserIn = () => {
       if (storedPk) {
         doAfterLogin(storedPk);
       }
-      loginUsingExtension();
+      loginUsingExtension(1, storedPk);
       break;
     case 'local':
       loginUsingLocalNsec();
@@ -222,7 +222,7 @@ export const loginGuest = () => {
   updateAccountStore('accountIsReady', () => false);
 };
 
-export const loginUsingExtension = async (extensionAttempt = 0) => {
+export const loginUsingExtension = async (extensionAttempt = 0, pk?: string) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
@@ -241,7 +241,14 @@ export const loginUsingExtension = async (extensionAttempt = 0) => {
 
   try {
     setLoginType('extension');
-    const key = await getNostrPublicKey();
+    let key = pk;
+
+    if (key === undefined) {
+      key = await Promise.race([
+        getNostrPublicKey(),
+        timeoutPromiseResolve(3_000)
+      ]);
+    }
 
     if (key === undefined) {
       setTimeout(() => {
