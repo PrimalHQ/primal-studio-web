@@ -3,16 +3,15 @@ import { pageStore, removeEventFromPageStore, updatePageStore } from "../../stor
 import { PrimalArticle, PrimalDraft, PrimalNote } from "../../primal";
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { deleteFromInbox, deleteScheduled, FEED_EVENT_STATES, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, isFeedEventState } from "src/primal_api/studio";
+import { deleteFromInbox, deleteScheduled, FeedEventState, FeedTotals, getFeedEvents, getFeedTotals, HomePayload, isFeedEventState } from "src/primal_api/studio";
 import { emptyEventFeedPage, filterAndSortNotes, } from "src/utils/feeds";
 import { accountStore } from "src/stores/AccountStore";
-import { defaultSpan, FeedCriteria, GraphSpan, setHomeStore, } from "../Home/Home.data";
+import { defaultSpan, FeedCriteria, GraphSpan, } from "../Home/Home.data";
 import { parseDraftContent } from "src/utils/drafts";
 import { openConfirmDialog } from "src/stores/AppStore";
 import { doRequestDelete } from "src/primal_api/events";
 import { Kind } from "src/constants";
 import { readGraphSpan } from "src/utils/localStore";
-import { v4 as uuidv4 } from 'uuid';
 
 
 export type NotesStore = {
@@ -218,8 +217,8 @@ export const fetchNotes = async (
 };
 
 export const loadNotesGraphSpan = () => {
-  const span = readGraphSpan(accountStore.pubkey, 'articles');
-  setHomeStore('graphSpan', () => ({ ...span }));
+  const span = readGraphSpan(accountStore.pubkey, 'notes');
+  setNotesStore('graphSpan', () => ({ ...span }));
 }
 
 export const preloadNotes = (args: RoutePreloadFuncArgs) => {

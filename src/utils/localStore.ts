@@ -330,7 +330,7 @@ export const readGraphSpan = (
 
     const available = availableSpans.find(span => span.name === storedSpan.name);
 
-    return available || availableSpans[0];
+    return available || availableSpans.find(s => s.name === 'all') || availableSpans[0];
   }
 
   return defaultSpans()[page] || availableSpans[2];
