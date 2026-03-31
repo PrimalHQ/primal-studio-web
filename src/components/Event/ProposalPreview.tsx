@@ -33,6 +33,20 @@ const ProposalPreview: Component<{
 
   return (
     <Switch>
+      <Match when={props.draft.encrypted}>
+        <div class={styles.encryptedDraft}>
+          Content Encrypted (Unable to decrypt)
+        </div>
+        <DraftOtherParty
+          draft={props.draft}
+          event={event()!}
+          onEdit={props.onEdit}
+          onDelete={props.onDelete}
+          onView={props.onView}
+          onApprove={props.onApprove}
+          type={props.type}
+        />
+      </Match>
       <Match when={!event()}>
         <div class={styles.emptyFeedItem}></div>
       </Match>
