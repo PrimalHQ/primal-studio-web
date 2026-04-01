@@ -8,7 +8,8 @@ export default defineConfig({
   plugins: [
     solidPlugin(),
     VitePWA({
-      srcDir: "/",
+      registerType: 'prompt',
+      srcDir: ".",
       filename: "imageCacheWorker.js",
       strategies: "injectManifest",
       injectRegister: false,
@@ -34,6 +35,9 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
+    headers: {
+      'Service-Worker-Allowed': '/',
+    }
   },
   build: {
     target: 'esnext',
