@@ -7,7 +7,7 @@ import Avatar from '../Avatar/Avatar';
 import VerificationCheck from 'src/components/VerificationCheck/VerificationCheck';
 import { longDate } from 'src/utils/date';
 import { parseTextToAST } from 'src/utils/parser';
-import EventPill from 'src/components/NoteEditor2/EventPill';
+import EventPill from 'src/components/NoteEditor/EventPill';
 import { renderHashtag, renderNaddr, renderNevent, renderNprofile, RenderOptions } from '../Event/Note';
 import { nip05Verification } from 'src/utils/ui';
 import { getMediaUrl } from 'src/stores/MediaStore';

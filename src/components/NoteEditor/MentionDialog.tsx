@@ -8,7 +8,7 @@ import tippy, { Instance } from 'tippy.js';
 
 import { APP_ID } from 'src/App';
 import Avatar from 'src/components/Avatar/Avatar';
-import SearchOption from 'src/components/NoteEditor2/SearchOption';
+import SearchOption from 'src/components/NoteEditor/SearchOption';
 import { Kind } from 'src/constants';
 import { PrimalUser, PrimalNote, PrimalArticle } from 'src/primal';
 import { userName, userNameFromUser } from 'src/utils/profile';
@@ -27,7 +27,7 @@ import {
 import { getUsersRelayInfo } from 'src/primal_api/relays';
 import Modal from 'src/components/Dialogs/Dialog';
 import { createStore, unwrap } from 'solid-js/store';
-import NotePreview, { NotePreviewSkeleton } from 'src/components/NoteEditor2/NotePreview';
+import NotePreview, { NotePreviewSkeleton } from 'src/components/NoteEditor/NotePreview';
 import ArticlePreview, { ArticlePreviewSkeleton } from './ArticlePreview';
 import UserPreview, { UserPreviewSkeleton } from './UserPreview';
 

@@ -515,6 +515,17 @@
       }
     }
   }
+
+  .userMention {
+    display: inline-flex;
+    vertical-align: middle;
+    color: var(--text-secondary);
+    line-height: 26px;
+
+    >div {
+      display: inline-flex;
+    }
+  }
 }
 
 .editorHtmlHolder {

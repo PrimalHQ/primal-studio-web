@@ -1,4 +1,7 @@
 import { JSONContent } from '@tiptap/core';
+import { nip19 } from 'nostr-tools';
+import { Kind } from 'src/constants';
+import { uuidv4 } from 'src/utils/kyes';
 
 export type ExtMediaConfig = {
   src: string,
@@ -131,6 +134,11 @@ export const tiptapJsonToPlainText = (json: any) => {
 
   // Handle Nostr specific types
 
+  if (['nostrReference'].includes(json.type)) {
+    let bech32 = json.attrs?.reference || '';
+    return bech32.startsWith('nostr:') ? bech32 : `nostr:${bech32}`;
+  }
+
   if (['nprofile', 'nevent', 'naddr'].includes(json.type)) {
     const bech32 = json.attrs?.bech32;
     return bech32 ? `nostr:${bech32}` : '';
@@ -247,47 +255,45 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
 
       if (token.startsWith('nostr:')) {
         // Handle Nostr entities
-        const bech32 = token.substring(6); // Remove 'nostr:' prefix
+        const reference = token.substring(6); // Remove 'nostr:' prefix
 
-        let nostrType = 'nprofile';
+        let nostrType = 'nostrReference';
 
-        if (bech32.startsWith('nevent')) {
-          nostrType = 'nevent';
+        const decoded = nip19.decode(reference);
+
+        let pk = reference;
+        let kind = Kind.Text;
+
+        if (decoded.type === 'npub') {
+          pk = decoded.data;
+          kind = Kind.Metadata;
         }
-
-        if (bech32.startsWith('naddr')) {
-          nostrType = 'naddr';
+        if (decoded.type === 'nprofile') {
+          pk = decoded.data.pubkey;
+          kind = Kind.Metadata;
+        }
+        if (decoded.type === 'note') {
+          pk = decoded.data;
+          kind = Kind.Text;
+        }
+        if (decoded.type === 'nevent') {
+          pk = decoded.data.id;
+          kind = decoded.data.kind || Kind.Text;
+        }
+        if (decoded.type === 'naddr') {
+          pk = `${decoded.data.kind}:${decoded.data.pubkey}:${decoded.data.identifier}`;
+          kind = decoded.data.kind;
         }
 
         const nostrNode = {
           type: nostrType,
           attrs: {
-            type: nostrType,
-            bech32: bech32
+            reference,
+            pk,
+            kind,
+            uuid: uuidv4(),
           }
         };
-
-        // Add additional attrs based on type
-        if (nostrType === 'nprofile') {
-          // @ts-ignore
-          nostrNode.attrs.pubkey = '';
-          // @ts-ignore
-          nostrNode.attrs.relays = [];
-          // @ts-ignore
-          nostrNode.attrs.name = '';
-          // @ts-ignore
-        }
-
-        if (nostrType === 'nevent') {
-          // @ts-ignore
-          nostrNode.attrs.id = '';
-          // @ts-ignore
-          nostrNode.attrs.kind = 1;
-          // @ts-ignore
-          nostrNode.attrs.author = '';
-          // @ts-ignore
-          nostrNode.attrs.relays = [];
-        }
 
         paragraphContent.push(nostrNode);
         continue;
@@ -305,6 +311,7 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
           continue;
         }
         if (token.match(/\.(mp4|webm|ogg|mov)$/i)) {
+          console.log('TOKEN: ', token)
           paragraphContent.push({
             type: 'video',
             attrs: {

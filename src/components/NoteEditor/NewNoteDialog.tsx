@@ -3,7 +3,7 @@ import { Component } from 'solid-js';
 import styles from './NoteEditor.module.scss';
 import { Dialog as KobalteDialog } from '@kobalte/core/dialog';
 import { PrimalDraft, PrimalNote } from 'src/primal';
-import NoteEditor2 from '../NoteEditor2/NoteEditor2';
+import NoteEditor2 from './NoteEditor2';
 
 
 const NewNoteDialog: Component<{
