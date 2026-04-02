@@ -162,62 +162,62 @@ export const ImageGrid = Node.create({
       })
 
       setTimeout(() => {
-      // Create scrollable container if needed
-      if (hasOverflow) {
-        let containerW = container.getBoundingClientRect().width;
-        let containerH = containerW;
-        container.style.maxHeight = `${containerH}px`;
-        container.style.overflow = 'hidden';
-        // container.style.overflowY = 'scroll';
+        // Create scrollable container if needed
+        if (hasOverflow) {
+          let containerW = container.getBoundingClientRect().width;
+          let containerH = containerW;
+          container.style.maxHeight = `${containerH}px`;
+          container.style.overflow = 'hidden';
+          // container.style.overflowY = 'scroll';
 
-        // Add scroll indicator
-        const scrollIndicator = document.createElement('div')
-        scrollIndicator.className = styles.scrollIndicator;
-        scrollIndicator.textContent = `+${totalImages - maxVisible}`;
+          // Add scroll indicator
+          const scrollIndicator = document.createElement('div')
+          scrollIndicator.className = styles.scrollIndicator;
+          scrollIndicator.textContent = `+${totalImages - maxVisible}`;
 
-        const indicatorDim = containerW/2;
-        scrollIndicator.style.top = `${indicatorDim+0.5}px`;
-        scrollIndicator.style.left = `${indicatorDim+0.5}px`;
-        scrollIndicator.style.width = `${indicatorDim-0.5}px`;
-        scrollIndicator.style.height = `${indicatorDim-0.5}px`;
+          const indicatorDim = containerW/2;
+          scrollIndicator.style.top = `${indicatorDim+0.5}px`;
+          scrollIndicator.style.left = `${indicatorDim+0.5}px`;
+          scrollIndicator.style.width = `${indicatorDim-0.5}px`;
+          scrollIndicator.style.height = `${indicatorDim-0.5}px`;
 
-        container.appendChild(scrollIndicator)
+          container.appendChild(scrollIndicator)
 
-        container.addEventListener('mouseenter', (event: MouseEvent) => {
-          const c = event.target as HTMLDivElement | null;
-          if (!c) return;
+          container.addEventListener('mouseenter', (event: MouseEvent) => {
+            const c = event.target as HTMLDivElement | null;
+            if (!c) return;
 
-          const cW = c.getBoundingClientRect().width;
-          c.style.width = `${cW + 6}px`;
-          c.style.overflowY = 'scroll';
-          c.style.paddingRight = '6px';
-          scrollIndicator.style.opacity = '0';
-        })
+            const cW = c.getBoundingClientRect().width;
+            c.style.width = `${cW + 6}px`;
+            c.style.overflowY = 'scroll';
+            c.style.paddingRight = '6px';
+            scrollIndicator.style.opacity = '0';
+          })
 
-        container.addEventListener('mouseleave', (event: MouseEvent) => {
-          const c = event.target as HTMLDivElement | null;
-          if (!c) return;
+          container.addEventListener('mouseleave', (event: MouseEvent) => {
+            const c = event.target as HTMLDivElement | null;
+            if (!c) return;
 
-          c.style.width = 'min(100%, 500px)';
-          c.style.overflowY = 'hidden';
-          c.style.paddingRight = '0px';
+            c.style.width = 'min(100%, 500px)';
+            c.style.overflowY = 'hidden';
+            c.style.paddingRight = '0px';
 
-          const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
+            const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
 
-          scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
-        })
+            scrollIndicator.style.opacity = isAtBottom ? '0' : '1';
+          })
 
-        // Hide indicator when scrolled to bottom
-        container.addEventListener('scroll', (event: Event) => {
-          const c = event.target as HTMLDivElement | null;
-          if (!c) return;
+          // Hide indicator when scrolled to bottom
+          container.addEventListener('scroll', (event: Event) => {
+            const c = event.target as HTMLDivElement | null;
+            if (!c) return;
 
-          const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
+            const isAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 10;
 
-          if (isAtBottom && scrollIndicator.style.opacity === '1')
-          scrollIndicator.style.opacity = '0';
-        })
-      }
+            if (isAtBottom && scrollIndicator.style.opacity === '1')
+            scrollIndicator.style.opacity = '0';
+          })
+        }
 
       }, 100)
 

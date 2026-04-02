@@ -1,25 +1,34 @@
 import { Editor } from '@tiptap/core';
+import { TextSelection } from '@tiptap/pm/state';
 import styles from './ImageGrid.module.scss';
 
 export const areNodesConsecutive = (node1: any, node2: any, state: any) => {
-  const between = state.doc.slice(
-    node1.pos + node1.node.nodeSize,
-    node2.pos
-  )
+  const afterFirst = node1.parentPos + node1.parentNode.nodeSize;
+  const beforeSecond = node2.parentPos;
 
-  // Consider nodes consecutive if there's only whitespace or empty paragraphs between
-  let hasOnlyWhitespace = true
-  between.content.forEach((node: any) => {
-    if (node.type.name === 'paragraph' && (node.content.size === 0 || node.textContent.trim().length === 0)) {
-      return // Empty paragraph is OK
-    }
-    if (node.type.name === 'text' && /^\s*$/.test(node.text)) {
-      return // Whitespace-only text is OK
-    }
-    hasOnlyWhitespace = false
-  })
+  // Adjacent or same block
+  if (afterFirst >= beforeSecond) return true;
 
-  return hasOnlyWhitespace
+  // Check all top-level doc children between the two parent blocks
+  const startIdx = state.doc.resolve(afterFirst).index(0);
+  const endIdx = state.doc.resolve(beforeSecond).index(0);
+
+  for (let i = startIdx; i < endIdx; i++) {
+    const child = state.doc.child(i);
+    // Only truly empty paragraphs (no inline nodes, no non-whitespace text) are allowed
+    if (child.type.name === 'paragraph') {
+      let hasContent = false;
+      child.forEach((c: any) => {
+        if (c.type.name !== 'text' || c.text.trim() !== '') {
+          hasContent = true;
+        }
+      });
+      if (!hasContent) continue;
+    }
+    return false;
+  }
+
+  return true;
 }
 
 export const autoGroupImages = (editor: Editor) => {
@@ -27,15 +36,46 @@ export const autoGroupImages = (editor: Editor) => {
   const tr = state.tr
   let modified = false
 
-  // Find all image and imageGrid nodes with their positions
+  // Find all image and imageGrid nodes with their positions and parent block info
   const nodes: any[] = []
   state.doc.descendants((node, pos) => {
-    if (node.type.name === 'image' || node.type.name === 'imageGrid') {
-      nodes.push({ node, pos, type: node.type.name })
+    if (node.type.name === 'image') {
+      const $pos = state.doc.resolve(pos);
+      const parentDepth = Math.max(1, $pos.depth);
+      const parentPos = $pos.before(parentDepth);
+      const parentNode = $pos.node(parentDepth);
+
+      // Only consider images that are alone in their parent paragraph
+      // (no other content besides other images or whitespace text)
+      if (parentNode.type.name === 'paragraph') {
+        let hasOtherContent = false;
+        parentNode.forEach((child: any) => {
+          if (child.type.name === 'image') return; // other images are fine
+          if (child.type.name === 'text' && child.text?.trim() === '') return; // whitespace ok
+          hasOtherContent = true;
+        });
+        if (hasOtherContent) return; // skip images that share a paragraph with other content
+      }
+
+      nodes.push({ node, pos, type: 'image', parentPos, parentNode });
+    } else if (node.type.name === 'imageGrid') {
+      nodes.push({ node, pos, type: 'imageGrid', parentPos: pos, parentNode: node });
     }
 
     return node.type.name !== 'imageGrid';
   })
+
+  const setCursorAfterGrid = (gridStartPos: number, gridNodeSize: number) => {
+    const afterGrid = gridStartPos + gridNodeSize;
+    let sel = TextSelection.findFrom(tr.doc.resolve(afterGrid), 1);
+    if (!sel) {
+      tr.insert(afterGrid, state.schema.nodes.paragraph.create());
+      sel = TextSelection.findFrom(tr.doc.resolve(afterGrid), 1);
+    }
+    if (sel) {
+      tr.setSelection(sel);
+    }
+  }
 
   // Process nodes to find grouping opportunities
   for (let i = 0; i < nodes.length; i++) {
@@ -63,10 +103,11 @@ export const autoGroupImages = (editor: Editor) => {
         )
 
         tr.replaceRangeWith(
-          current.pos,
-          next.pos + next.node.nodeSize,
+          current.parentPos,
+          next.parentPos + next.parentNode.nodeSize,
           newGrid
         )
+        setCursorAfterGrid(current.parentPos, newGrid.nodeSize)
         modified = true
         break // Process one change at a time
       }
@@ -91,10 +132,11 @@ export const autoGroupImages = (editor: Editor) => {
         )
 
         tr.replaceRangeWith(
-          current.pos,
-          next.pos + next.node.nodeSize,
+          current.parentPos,
+          next.parentPos + next.parentNode.nodeSize,
           newGrid
         )
+        setCursorAfterGrid(current.parentPos, newGrid.nodeSize)
         modified = true
         break
       }
@@ -122,10 +164,11 @@ export const autoGroupImages = (editor: Editor) => {
         )
 
         tr.replaceRangeWith(
-          current.pos,
-          next.pos + next.node.nodeSize,
+          current.parentPos,
+          next.parentPos + next.parentNode.nodeSize,
           newGrid
         )
+        setCursorAfterGrid(current.parentPos, newGrid.nodeSize)
         modified = true
         break
       }
@@ -153,10 +196,11 @@ export const autoGroupImages = (editor: Editor) => {
         )
 
         tr.replaceRangeWith(
-          current.pos,
-          next.pos + next.node.nodeSize,
+          current.parentPos,
+          next.parentPos + next.parentNode.nodeSize,
           newGrid
         )
+        setCursorAfterGrid(current.parentPos, newGrid.nodeSize)
         modified = true
         break
       }
