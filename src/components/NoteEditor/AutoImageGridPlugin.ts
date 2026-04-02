@@ -212,6 +212,70 @@ export const autoGroupImages = (editor: Editor) => {
   }
 }
 
+export const isolateImages = (editor: Editor) => {
+  const { state } = editor
+  const tr = state.tr
+  let modified = false
+
+  // Find images that share a paragraph with non-image, non-whitespace content
+  // and split them into their own paragraphs
+  state.doc.descendants((node, pos) => {
+    if (modified) return false;
+    if (node.type.name !== 'paragraph') return true;
+
+    let hasImage = false;
+    let hasOtherContent = false;
+
+    node.forEach((child) => {
+      if (child.type.name === 'image') { hasImage = true; return; }
+      if (child.type.name === 'text' && child.text?.trim() === '') return;
+      hasOtherContent = true;
+    });
+
+    if (!hasImage || !hasOtherContent) return false;
+
+    // Split: collect images and non-image content separately
+    const images: any[] = [];
+    const otherContent: any[] = [];
+
+    node.forEach((child) => {
+      if (child.type.name === 'image') {
+        images.push(child);
+      } else {
+        otherContent.push(child);
+      }
+    });
+
+    const blocks: any[] = [];
+
+    // Non-image content stays in a paragraph (drop trailing whitespace)
+    const trimmed = otherContent.filter((n, i) =>
+      !(n.type.name === 'text' && n.text?.trim() === '' && i === otherContent.length - 1)
+    );
+
+    if (trimmed.length > 0) {
+      blocks.push(state.schema.nodes.paragraph.create(null, trimmed));
+    }
+
+    // Each image gets its own paragraph
+    for (const img of images) {
+      blocks.push(state.schema.nodes.paragraph.create(null, img));
+    }
+
+    // Add empty paragraph after images for cursor placement
+    blocks.push(state.schema.nodes.paragraph.create());
+
+    tr.replaceWith(pos, pos + node.nodeSize, blocks);
+    modified = true;
+
+    return false;
+  })
+
+  if (modified) {
+    editor.view.dispatch(tr)
+  }
+}
+
 export const updateGridClassesDirectly = (editor: Editor) => {
   const gridElements = editor.view.dom.querySelectorAll('[data-type="image-grid"]')
 

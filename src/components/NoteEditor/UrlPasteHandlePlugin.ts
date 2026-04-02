@@ -1,6 +1,7 @@
 import { Image } from '@tiptap/extension-image'
 import { Plugin } from 'prosemirror-state'
 import { Extension } from '@tiptap/core'
+import { Fragment } from '@tiptap/pm/model'
 import { EditorView } from 'prosemirror-view';
 
 
@@ -16,64 +17,53 @@ export const containsImageUrls = (text: string) => {
 export const processTextWithImages = (view: EditorView, text: string) => {
   const { schema } = view.state
   let tr = view.state.tr.deleteSelection()
-  let insertPos = tr.selection.from
+  const insertPos = tr.selection.from
 
-  // Split by lines first
+  // Build all content as block-level paragraphs upfront to avoid
+  // position tracking issues from incremental inserts
+  const blocks: any[] = []
   const lines = text.split(/\r?\n/)
 
   lines.forEach((line: string, lineIndex: number) => {
     if (!line.trim()) {
-      // Empty line - add paragraph
       if (lineIndex < lines.length - 1) {
-        const emptyParagraph = schema.nodes.paragraph.create()
-        tr = tr.insert(insertPos, emptyParagraph)
-        insertPos += emptyParagraph.nodeSize
+        blocks.push(schema.nodes.paragraph.create())
       }
       return
     }
 
-    // Process each line for URLs
     const urlRegex = /https?:\/\/[^\s]+\.(?:png|jpg|jpeg|gif|webp|svg)(?:\?[^\s]*)?/gi
     const parts = splitTextByUrls(line, urlRegex)
-
     let lineContent: string[] = []
+
+    const flushText = () => {
+      if (lineContent.length > 0) {
+        const textContent = lineContent.join(' ').trim()
+        if (textContent) {
+          blocks.push(schema.nodes.paragraph.create({}, schema.text(textContent)))
+        }
+        lineContent = []
+      }
+    }
 
     parts.forEach(part => {
       if (isImageUrl(part)) {
-        // Add any accumulated text first
-        if (lineContent.length > 0) {
-          const textContent = lineContent.join(' ').trim()
-          if (textContent) {
-            const textNode = schema.text(textContent)
-            const paragraph = schema.nodes.paragraph.create({}, textNode)
-            tr = tr.insert(insertPos, paragraph)
-            insertPos += paragraph.nodeSize
-          }
-          lineContent = []
-        }
-
-        // Add image
+        flushText()
         const imageNode = schema.nodes.image.create({ src: part })
-        tr = tr.insert(insertPos, imageNode)
-        insertPos += imageNode.nodeSize
-        tr = tr.insert(insertPos, schema.text(' '));
+        blocks.push(schema.nodes.paragraph.create({}, imageNode))
       } else {
         lineContent.push(part)
       }
     })
 
-    // Add any remaining text
-    if (lineContent.length > 0) {
-      const textContent = lineContent.join(' ').trim()
-      if (textContent) {
-        const textNode = schema.text(textContent)
-        const paragraph = schema.nodes.paragraph.create({}, textNode)
-        tr = tr.insert(insertPos, paragraph)
-        insertPos += paragraph.nodeSize
-      }
-    }
+    flushText()
   })
 
+  if (blocks.length > 0) {
+    tr = tr.insert(insertPos, Fragment.from(blocks))
+  }
+
+  tr.setMeta('paste', true)
   view.dispatch(tr)
 };
 

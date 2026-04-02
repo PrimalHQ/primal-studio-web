@@ -320,19 +320,28 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
 
           if (!isPaste && transactions.length > 0) {
             const lastTr = transactions[transactions.length - 1];
-            let lastChar = '';
+            let hasText = false;
             lastTr.steps.forEach((step) => {
+              if (hasText) return;
               if (step instanceof ReplaceStep) {
                 const slice = (step as any).slice;
                 if (slice && slice.content && slice.content.size > 0) {
-                  const textNode = slice.content.firstChild;
-                  if (textNode && textNode.isText && textNode.text) {
-                    lastChar = textNode.text.slice(-1);
-                  }
+                  slice.content.forEach((node: any) => {
+                    if (hasText) return;
+                    if (node.isText && node.text) {
+                      hasText = true;
+                      return;
+                    }
+                    if (node.content && node.content.size > 0) {
+                      node.content.forEach((child: any) => {
+                        if (child.isText && child.text) hasText = true;
+                      });
+                    }
+                  });
                 }
               }
             });
-            if (lastChar) shouldConvert = true;
+            if (hasText) shouldConvert = true;
           }
 
           if (!shouldConvert) return null;
@@ -398,7 +407,9 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
                   uuid,
                 });
 
-                tr.replaceRangeWith(matchStart, matchEnd, newNode);
+                const mappedStart = tr.mapping.map(matchStart);
+                const mappedEnd = tr.mapping.map(matchEnd);
+                tr.replaceRangeWith(mappedStart, mappedEnd, newNode);
                 modified = true;
 
                 if (!pk) {
@@ -408,15 +419,12 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
             }
           });
 
-          // For paste: fetch first, then insert nodes (preserving reverse order for positions)
+          // For paste: fetch first, then insert nodes
           if (isPaste && pendingFetches.length > 0) {
-            // Sort descending by position so replacements don't shift each other
-            pendingFetches.sort((a, b) => b.matchStart - a.matchStart);
-
             const fetchAndInsertAll = async () => {
               // Fetch all in parallel
-              const results = await Promise.all(
-                pendingFetches.map(async ({ fullMatch, reference, matchStart, matchEnd }) => {
+              const fetchResults = await Promise.all(
+                pendingFetches.map(async ({ fullMatch, reference }) => {
                   let dataInfo: EventReference | null = null;
                   let shouldSkip = false;
 
@@ -442,32 +450,60 @@ export const NostrReference = Node.create<NostrReferenceOptions>({
                     }
                   }
 
-                  return { fullMatch, reference, matchStart, matchEnd, dataInfo, shouldSkip };
+                  return { fullMatch, reference, dataInfo, shouldSkip };
                 })
               );
 
-              // Now dispatch a single transaction with all resolved nodes
+              // Re-scan the current document for text positions (old positions are stale)
               const insertTr = editor.state.tr;
               let insertModified = false;
 
-              // Apply in descending position order to keep positions valid
-              for (const { fullMatch, reference, matchStart, matchEnd, dataInfo, shouldSkip } of results) {
-                if (shouldSkip || !dataInfo) continue;
+              // Build a lookup of fetched data by fullMatch
+              const dataByMatch = new Map<string, { reference: string, dataInfo: EventReference }>();
+              for (const { fullMatch, reference, dataInfo, shouldSkip } of fetchResults) {
+                if (!shouldSkip && dataInfo) {
+                  dataByMatch.set(fullMatch, { reference, dataInfo });
+                }
+              }
 
+              if (dataByMatch.size === 0) return;
+
+              // Find all matching text in the current document, collect replacements
+              const replacements: Array<{ start: number, end: number, fullMatch: string }> = [];
+
+              editor.state.doc.descendants((node, pos) => {
+                if (!node.isText || !node.text) return;
+
+                referencePattern!.lastIndex = 0;
+                const matches = Array.from(node.text.matchAll(referencePattern!));
+
+                for (const match of matches) {
+                  const fullMatch = match[0];
+                  if (!dataByMatch.has(fullMatch)) continue;
+
+                  const start = pos + match.index!;
+                  const end = start + fullMatch.length;
+                  replacements.push({ start, end, fullMatch });
+                }
+              });
+
+              // Sort descending so replacements don't shift each other
+              replacements.sort((a, b) => b.start - a.start);
+
+              for (const { start, end, fullMatch } of replacements) {
+                const data = dataByMatch.get(fullMatch)!;
                 const uuid = uuidv4();
-                onAdd?.(dataInfo, uuid);
+                onAdd?.(data.dataInfo, uuid);
 
                 const newNode = nodeType.create({
                   reference: fullMatch,
-                  pk: dataInfo.pk ?? npubToHex(reference),
-                  kind: dataInfo.kind ?? Kind.Metadata,
+                  pk: data.dataInfo.pk ?? npubToHex(data.reference),
+                  kind: data.dataInfo.kind ?? Kind.Metadata,
                   uuid,
                 });
 
-                // Map position through any prior steps in this transaction
-                const mappedStart = insertTr.mapping.map(matchStart);
-                const mappedEnd = insertTr.mapping.map(matchEnd);
-
+                const mappedStart = insertTr.mapping.map(start);
+                const mappedEnd = insertTr.mapping.map(end);
                 insertTr.replaceRangeWith(mappedStart, mappedEnd, newNode);
                 insertModified = true;
               }

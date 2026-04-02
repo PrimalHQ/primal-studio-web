@@ -214,7 +214,18 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
       continue;
     }
 
-    const paragraphContent = [];
+    // Accumulate inline (non-media) content separately from media nodes.
+    // When a media node is encountered, flush any pending inline content
+    // as its own paragraph first, so media ends up in image-only paragraphs
+    // that the auto-grouping plugin can process.
+    let inlineContent: JSONContent[] = [];
+
+    const flushInline = () => {
+      if (inlineContent.length > 0) {
+        content.push({ type: 'paragraph', content: inlineContent });
+        inlineContent = [];
+      }
+    };
 
     // Split line by spaces to process each token
     const tokens = line.split(/(\s+)/); // Keep whitespace in the split
@@ -235,18 +246,20 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
       }
 
       if (externalMediaEmbed) {
-        paragraphContent.push({
-          type: 'mediaEmbed',
-          attrs: {
-            ...externalMediaEmbed
-          }
+        flushInline();
+        content.push({
+          type: 'paragraph',
+          content: [{
+            type: 'mediaEmbed',
+            attrs: { ...externalMediaEmbed }
+          }]
         });
         continue;
       }
 
       if (token.match(/^\s+$/) && token.length > 0) {
-        // Pure whitespace token
-        paragraphContent.push({
+        // Pure whitespace token — attach to current inline content
+        inlineContent.push({
           type: 'text',
           text: token
         });
@@ -285,7 +298,7 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
           kind = decoded.data.kind;
         }
 
-        const nostrNode = {
+        const nostrNode: JSONContent = {
           type: nostrType,
           attrs: {
             reference,
@@ -295,34 +308,37 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
           }
         };
 
-        paragraphContent.push(nostrNode);
+        inlineContent.push(nostrNode);
         continue;
       }
 
       if (token.match(/^https?:\/\//)) {
         // Handle URLs - could be images, videos, or regular links
         if (token.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-          paragraphContent.push({
-            type: 'image',
-            attrs: {
-              src: token
-            }
+          flushInline();
+          content.push({
+            type: 'paragraph',
+            content: [{
+              type: 'image',
+              attrs: { src: token }
+            }]
           });
           continue;
         }
         if (token.match(/\.(mp4|webm|ogg|mov)$/i)) {
-          console.log('TOKEN: ', token)
-          paragraphContent.push({
-            type: 'video',
-            attrs: {
-              src: token
-            }
+          flushInline();
+          content.push({
+            type: 'paragraph',
+            content: [{
+              type: 'video',
+              attrs: { src: token }
+            }]
           });
           continue;
         }
 
         // Regular text that happens to be a URL
-        paragraphContent.push({
+        inlineContent.push({
           type: 'text',
           text: token
         });
@@ -331,7 +347,7 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
 
       if (token.trim() !== '') {
         // Regular text
-        paragraphContent.push({
+        inlineContent.push({
           type: 'text',
           text: token
         });
@@ -339,13 +355,11 @@ export const plainTextToTiptapJson = (plainText: string): JSONContent => {
       }
     }
 
-    // Create paragraph with content, or empty paragraph if no content
-    if (paragraphContent.length > 0) {
-      content.push({
-        type: 'paragraph',
-        content: paragraphContent
-      });
-    } else {
+    // Flush any remaining inline content
+    if (inlineContent.length > 0) {
+      content.push({ type: 'paragraph', content: inlineContent });
+      inlineContent = [];
+    } else if (tokens.every(t => t.trim() === '')) {
       content.push({ type: 'paragraph' });
     }
   }

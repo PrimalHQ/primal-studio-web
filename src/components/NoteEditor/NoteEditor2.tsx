@@ -93,19 +93,13 @@ const NoteEditor2: Component<{
 
   let editorPlainText: HTMLTextAreaElement | undefined;
 
-  const [selectedUser, setSelectedUser] = createSignal<PrimalUser>();
-  const [searchQuery, setSearchQuery] = createSignal('');
-  const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
-  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
-
   const [editorMode, setEditorMode] = createSignal<'html' | 'text' | 'phone'>('html');
   const [plainContent, setPlainContent] = createSignal('');
-
-  const [showAttach, setShowAttach] = createSignal(false);
+  const [savedJson, setSavedJson] = createSignal<JSONContent | null>(null);
+  const [savedPlainText, setSavedPlainText] = createSignal('');
 
   const [showPublishDateDialog, setShowPublishDateDialog] = createSignal(false);
   const [futurePublishDate, setFuturePublishDate] = createSignal<number>();
-  const [editScheduled, setEditScheduled] = createSignal(false);
 
   const [showProposeDialog, setShowProposeDialog] = createSignal(false);
   const [proposedUser, setProposedUser] = createSignal<PrimalUser>();
@@ -193,43 +187,35 @@ const NoteEditor2: Component<{
       return;
     }
 
-    const json: JSONContent = prev === 'text' ?
-      plainTextToTiptapJson(plainContent()) :
-      (editor()?.getJSON() || { type: 'doc', content: [] });
-
-    console.log('JSON TEXT: ', json);
+    // html/phone → text: save JSON for possible lossless restore
     if (mode === 'text') {
+      const json = editor()?.getJSON() || { type: 'doc', content: [] };
       const pt = tiptapJsonToPlainText(json);
-    console.log('PLAIN TEXT: ', pt);
+      setSavedJson(json);
+      setSavedPlainText(pt);
       setPlainContent(pt);
       return;
     }
 
-    const pt = `${plainContent().trim()}`;
-
-
-    editor()?.chain().clearContent().focus('end').run();
-
-    setTimeout(() => {
-      console.log('PLAIN TEXT E: ', pt);
-      simulatePaste(editor(), pt);
+    // text → html/phone: restore or reconstruct
+    if (plainContent() === savedPlainText() && savedJson()) {
+      // No edits in text mode — restore original JSON exactly
+      editor()?.chain().setContent(savedJson()!).focus('end').run();
+    } else {
+      // Text was edited — paste to trigger NostrReference detection and rendering
+      const pt = plainContent().trim();
+      editor()?.chain().clearContent().focus('end').run();
 
       setTimeout(() => {
-        editor()?.chain().focus('end')
-      }, 100)
-    }, 100)
+        simulatePaste(editor(), pt);
 
-
-    // let html = generateHTML(json, extensions);
-    // html = processHTMLForNostr(html);
-    // html = await processMarkdownForNostr(html);
-
-    // editor()?.chain().setContent(html).run();
-
-    // html = html.replaceAll('<p></p>', '');
-    // html += '<p></p>';
-    // editor()?.chain().setContent(html).focus('end').run();
-
+        setTimeout(() => {
+          editor()?.chain().focus('end').run();
+        }, 100);
+      }, 100);
+    }
+    setSavedJson(null);
+    setSavedPlainText('');
   }));
 
   const getEditorContent = async (mode: 'html' | 'text' | 'phone') => {

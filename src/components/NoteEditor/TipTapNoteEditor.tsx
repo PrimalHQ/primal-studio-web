@@ -36,7 +36,7 @@ import { Video } from './VideoPlugin';
 import FileHandler from '@tiptap/extension-file-handler';
 import { EnhancedImage, SmartImagePasteHandler } from './UrlPasteHandlePlugin';
 import { ImageGrid } from './ImageGrid';
-import { autoGroupImages, autoUngroupImages, updateGridClassesDirectly } from './AutoImageGridPlugin';
+import { autoGroupImages, autoUngroupImages, isolateImages, updateGridClassesDirectly } from './AutoImageGridPlugin';
 import CodeBlock from '@tiptap/extension-code-block';
 import Link from '@tiptap/extension-link';
 import MediaEmbed from './MediaEmbedExtension';
@@ -378,6 +378,7 @@ export const TipTapNoteEditor = (
         }
 
         groupingTimeout = setTimeout(() => {
+          isolateImages(editor);
           autoUngroupImages(editor);
           autoGroupImages(editor);
           groupingTimeout = null;
