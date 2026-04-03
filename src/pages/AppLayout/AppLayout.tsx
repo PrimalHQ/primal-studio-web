@@ -11,6 +11,7 @@ import { openEditNote } from 'src/stores/AppStore';
 import { uploadFile } from 'src/utils/upload';
 import { addMedia } from '../Media/Media.data';
 import { setGlobalNavigate } from 'src/App';
+import UpdateAvailableDialog from 'src/components/Dialogs/UpdateAvailableDialog';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -150,6 +151,8 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
                 </button>
               </Match>
             </Switch>
+
+            <UpdateAvailableDialog />
 
             <footer>
               <ProfileWidget />

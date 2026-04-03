@@ -25,7 +25,6 @@ import TrialExpiredDialog from './components/Dialogs/TrialExpiredDialog';
 import { isPhone } from './utils/ui';
 import GetStartedDialog from './pages/Landing/GetStartedDialog';
 import { triggerImportEvents } from './primal_api/events';
-import UpdateAvailableDialog from './components/Dialogs/UpdateAvailableDialog';
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_studio_${version}_${Math.floor(Math.random()*10_000_000_000)}`;
@@ -163,8 +162,6 @@ const App: Component = () => {
             abortLabel={appStore.signerUnreachableDialogInfo?.abortLabel}
             onAbort={appStore.signerUnreachableDialogInfo?.onAbort}
           />
-
-          <UpdateAvailableDialog />
 
           <NewNoteDialog
             open={appStore.showNewNoteEditor}

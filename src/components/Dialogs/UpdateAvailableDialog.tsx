@@ -1,9 +1,8 @@
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
 import styles from './Dialog.module.scss';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import Dialog from './Dialog';
 import { useRegisterSW } from 'virtual:pwa-register/solid';
 import { logError, logInfo } from 'src/utils/logger';
 
@@ -34,49 +33,33 @@ const UpdateAvailableDialog: Component<{
   });
 
   return (
-    <Dialog
-      open={needRefresh() && import.meta.env.PROD}
-      setOpen={v => !v || setNeedRefresh(false)}
-      title={
-        <div class={styles.confirmDialogTitle}>
-          Update has been detected
-        </div>
-      }
-      triggerClass={'displayNone'}
+    <Show
+      when={needRefresh() && import.meta.env.PROD}
     >
-      <div id={props.id} class={styles.confirmDialog}>
+      <div id={props.id} class={styles.updateAvailable}>
         <div
-          class={styles.confirmDialogDescription}
+          class={styles.description}
         >
-          A new version of the app has been detected. Refresh the page to update.
+          A new version of Primal Studio is ready
         </div>
-        <div class={styles.confirmDialogActions}>
-            <ButtonPrimary
-              onClick={() => {
-                // Wait until the NEW service worker has taken control
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                  // Cache-bust the reload so the browser doesn't serve stale HTML
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('_sw', Date.now().toString());
-                  window.location.replace(url.toString());
-                });
+        <button
+          onClick={() => {
+            // Wait until the NEW service worker has taken control
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              // Cache-bust the reload so the browser doesn't serve stale HTML
+              const url = new URL(window.location.href);
+              url.searchParams.set('_sw', Date.now().toString());
+              window.location.replace(url.toString());
+            });
 
-                // Tell the waiting SW to activate — don't auto-reload
-                updateServiceWorker(false);
-              }}
-            >
-              Refresh
-            </ButtonPrimary>
-
-            <ButtonSecondary
-              onClick={() => setNeedRefresh(false)}
-              light={true}
-            >
-              I'll do it later
-            </ButtonSecondary>
-        </div>
+            // Tell the waiting SW to activate — don't auto-reload
+            updateServiceWorker(false);
+          }}
+        >
+          Update Now
+        </button>
       </div>
-    </Dialog>
+    </Show>
   );
 }
 
