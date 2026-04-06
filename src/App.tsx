@@ -39,12 +39,30 @@ export const relayWorker = new Worker(
   },
 );
 
+
+const removeSWTimestamp = () => {
+  // 1. Get current URL and parameters
+  const url = new URL(window.location.href);
+  const params = new URLSearchParams(url.search);
+
+  // 2. Delete the specific parameter
+  params.delete('_sw');
+
+  // 3. Update the URL object's search string
+  url.search = params.toString();
+
+  // 4. Update the browser address bar without reloading
+  window.history.replaceState({}, '', url.toString());
+
+}
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
     logUserIn();
     initRelayWorker();
+    removeSWTimestamp();
   });
 
   onCleanup(() => {
