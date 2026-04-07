@@ -1,16 +1,14 @@
-import { Component, For, createEffect, createSignal, on, onMount } from 'solid-js';
+import { Component, For, createEffect, createSignal, on } from 'solid-js';
 
 import styles from './ThemeChooser.module.scss';
 import ThemeOption from './ThemeOption';
 import { THEMES } from '../../constants';
 import { PrimalTheme } from 'src/primal';
-import { chooseTheme, setTheme, settingsStore, updateSettingsStore } from 'src/stores/SettingsStore';
-import { accountStore } from 'src/stores/AccountStore';
-import { readTheme } from 'src/utils/localStore';
+import { chooseTheme, settingsStore } from 'src/stores/SettingsStore';
 
 const ThemeChooser: Component<{ id?: string }> = (props) => {
 
-  const [checkedTheme, setCheckedTheme] = createSignal<PrimalTheme>(settingsStore.theme);
+  const [checkedTheme, setCheckedTheme] = createSignal<PrimalTheme>(settingsStore.theme || 'studio_light');
 
   createEffect(on(() => settingsStore.chooserTheme, (theme, prev) => {
     if (!theme || theme === prev) return;

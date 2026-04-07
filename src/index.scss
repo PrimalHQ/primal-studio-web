@@ -3,7 +3,7 @@
 /* Default theme */
 :root[data-theme="dark"],
 :root[data-theme="studio_dark"],
-:root:not([data-theme="dark"]),
+:root:not([data-theme="light"]),
 :root:not([data-theme="studio_light"])
 {
   @include palette.studio_dark;

@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import ThemeChooser from 'src/components/ThemeChooser/ThemeChooser';
@@ -10,9 +10,7 @@ const Appearance: Component = () => {
   return (
     <div class={styles.appearancePage}>
 
-
       <ThemeChooser />
-
 
       <div>
         <CheckBox
