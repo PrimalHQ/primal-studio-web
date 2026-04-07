@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 import styles from './EventQueueWidget.module.scss';
 import { accountStore } from 'src/stores/AccountStore';
 
-export const EVENT_PUBLISH_DELAY = 8_000;
+export const EVENT_PUBLISH_DELAY = 12_000;
 
 const EventQueueWidget: Component<{ id?: string, isSmall?: boolean }> = (props) => {
 
@@ -25,14 +25,19 @@ const EventQueueWidget: Component<{ id?: string, isSmall?: boolean }> = (props) 
   }));
 
   return (
-    <Show when={queueLength() > 0}>
-      <a id={props.id} href="/pending" class={`${styles.publishQueueInfo} ${props.isSmall ? styles.small : ''}`}>
-        <div class={styles.clockIcon}></div>
-        <div class={styles.label}>
-          Publish pending ({queueLength()})
-        </div>
-      </a>
-    </Show>
+    <div
+      id={props.id}
+       class={styles.publishQueueInfo}
+    >
+      <Show when={queueLength() > 0}>
+        <a href="/pending">
+          <div class={styles.clockIcon}></div>
+          <div class={styles.label}>
+            Publish pending ({queueLength()})
+          </div>
+        </a>
+      </Show>
+    </div>
   );
 }
 

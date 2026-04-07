@@ -155,9 +155,8 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
 
             <UpdateAvailableDialog />
 
-            <EventQueueWidget />
-
             <footer>
+              <EventQueueWidget />
               <ProfileWidget />
             </footer>
           </div>

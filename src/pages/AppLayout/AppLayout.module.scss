@@ -28,8 +28,11 @@
   }
 
   footer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     width: 100%;
-    height: 67px;
+    height: 109px;
     // border: 1px solid darkgreen;
   }
 

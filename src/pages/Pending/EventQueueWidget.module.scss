@@ -1,36 +1,31 @@
 .publishQueueInfo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
   width: 160px;
   height: 30px;
-  margin-inline: 24px;
-  border-radius: 99px;
-  border: 1px solid var(--subtile-devider);
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 13px;
-  cursor: pointer;
-  text-decoration: none;
 
-  &:hover {
+  a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    width: 160px;
+    height: 30px;
+    border-radius: 99px;
     border: 1px solid var(--subtile-devider);
     color: var(--text-secondary);
-    background-color: var(--background-header-input);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 13px;
+    cursor: pointer;
+    text-decoration: none;
 
-    .clockIcon {
-      background-color: var(--text-secondary);
-    }
-  }
+    &:hover {
+      border: 1px solid var(--subtile-devider);
+      color: var(--text-secondary);
+      background-color: var(--background-header-input);
 
-  &.small {
-    width: fit-content;
-    padding-inline: 6px;
-    margin-left: 6px;
-    .label {
-      display: none;
+      .clockIcon {
+        background-color: var(--text-secondary);
+      }
     }
   }
 }
