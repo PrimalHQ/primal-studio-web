@@ -29,10 +29,6 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
         relayPool.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
       } catch (e) {
         console.log('FAILED TO OPEN RELAY: ', e);
-        // setTimeout(() => {
-        //   console.log('SECOND RELAY OPEN ATTEMPT: ', url);
-        //   relayPool?.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
-        // }, 500)
       }
     }
   }
@@ -68,9 +64,9 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
 
             subInfo.close();
             self.postMessage({
-              event: eInfo,
               secret,
               pubkey,
+              event: eInfo,
             })
           }
         }
@@ -116,15 +112,26 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
       }
     )
 
-    try {
-      Promise.any(relayPool.publish(relays, event)).then(() => {
+    Promise.any(relayPool.publish(relays, event)).then(() => {
+      self.postMessage({ type: 'EVENT_SENT', event });
+      self.postMessage({ type: 'DEQUE_EVENT', event });
+    }).catch(reason => {
+      if (reason instanceof AggregateError) {
+        console.log('Failed to publish the event: ', reason);
+
+        const shouldRetry = reason.errors.some(e => e.message.startsWith('rate-limited:') || e.message.startsWith('error:'));
+
+        if (shouldRetry) {
+          self.postMessage({ type: 'EVENT_NOT_SENT', success: false, event, reason: reason.errors[0].message || '' });
+          return;
+        }
+
         self.postMessage({ type: 'EVENT_SENT', event });
         self.postMessage({ type: 'DEQUE_EVENT', event });
-      })
-    }
-    catch (e) {
-      console.log('Failed to publish the event: ', e);
-      self.postMessage({ success: false, note: event });
-    }
+        return;
+      }
+
+      self.postMessage({ type: 'EVENT_NOT_SENT', success: false, event, reason });
+    })
   }
 });

@@ -73,6 +73,9 @@ export type AccountStore = {
 
   eventQueue: NostrRelaySignedEvent[],
   eventQueueRetry: number,
+
+  signerTimeout: boolean,
+  sendErrors: Record<string, string>,
 }
 
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
@@ -97,6 +100,9 @@ export const [accountStore, updateAccountStore] = createStore<AccountStore>({
 
   eventQueue: [],
   eventQueueRetry: 16,
+
+  signerTimeout: false,
+  sendErrors: {},
 });
 
 const LOGIN_TYPES = ['extension', 'local', 'npub', 'guest', 'nip46', 'none'] as const;
@@ -886,7 +892,7 @@ export const refreshQueue = async () => {
             item = { ...event };
           }
         } catch (reason) {
-          reject('relay_send_timeout');
+          reject('event_sign_timeout');
           return;
         }
       }

@@ -6,6 +6,7 @@ import articles from './articles';
 import media from './media';
 import account from './account';
 import settings from './settings';
+import pending from './pending';
 import profile from './profile';
 import thread from './thread';
 import notFound from './notFound';
@@ -19,6 +20,7 @@ export default {
   media: media as NestedRecord,
   account: account as NestedRecord,
   settings: settings as NestedRecord,
+  pending: pending as NestedRecord,
   profile: profile as NestedRecord,
   thread: thread as NestedRecord,
   notFound: notFound as NestedRecord,

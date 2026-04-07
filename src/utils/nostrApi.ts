@@ -1,5 +1,5 @@
 import { unwrap } from "solid-js/store";
-import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent, logout, refreshQueue } from "src/stores/AccountStore";
+import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent, logout, refreshQueue, updateAccountStore } from "src/stores/AccountStore";
 import {
   NostrExtension,
   NostrRelayConfig,
@@ -13,7 +13,7 @@ import {
 import { PrimalNip46 } from "src/utils/primalNip46";
 import { PrimalNostr } from "src/utils/primalNostr";
 import { uuidv4 } from "./kyes";
-import { closeConfirmDialog, closeSignerUnreachableDialog, openConfirmDialog, openSignerUnreachableDialog } from "src/stores/AppStore";
+import { closeSignerUnreachableDialog, openSignerUnreachableDialog } from "src/stores/AppStore";
 
 
 type QueueItem = {
@@ -163,20 +163,7 @@ export const handleSignerFailure = (reason: any) => {
   }
 
   if (reason === 'promise_timeout' && accountStore.loginType === 'extension') {
-    openConfirmDialog({
-      title: 'Cant find a nostr extension',
-      description: 'Primal Studio was unable to find an active nostr extension. Please make sure an extension is available and active',
-      confirmLabel: 'Retry',
-      onConfirm: () => {
-        refreshQueue();
-        closeConfirmDialog();
-      },
-      abortLabel: 'Log out',
-      onAbort: () => {
-        logout();
-        closeConfirmDialog();
-      }
-    });
+    updateAccountStore('signerTimeout', true);
   }
 }
 

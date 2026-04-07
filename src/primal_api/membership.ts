@@ -1,12 +1,12 @@
 import { signEvent } from "src/utils/nostrApi";
-import { Kind } from "../constants";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 
 export const getMembershipStatus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
   if (!pubkey) return;
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getMembershipStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({}),
   };
@@ -77,7 +77,7 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
 
     const event = {
       kind: Kind.Settings,
-      tags: [['p', pubkey]],
+      tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getPremiumStatus]],
       created_at: Math.floor((new Date()).getTime() / 1000),
       content: JSON.stringify({}),
     };

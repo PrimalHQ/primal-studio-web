@@ -12,6 +12,7 @@ import { uploadFile } from 'src/utils/upload';
 import { addMedia } from '../Media/Media.data';
 import { setGlobalNavigate } from 'src/App';
 import UpdateAvailableDialog from 'src/components/Dialogs/UpdateAvailableDialog';
+import EventQueueWidget from '../Pending/EventQueueWidget';
 
 const AppLayout: Component<RouteSectionProps> = (props) => {
 
@@ -153,6 +154,8 @@ const AppLayout: Component<RouteSectionProps> = (props) => {
             </Switch>
 
             <UpdateAvailableDialog />
+
+            <EventQueueWidget />
 
             <footer>
               <ProfileWidget />

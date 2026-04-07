@@ -1,5 +1,5 @@
 import { APP_ID } from "src/App";
-import { Kind } from "src/constants";
+import { Kind, settingsApp, settingsDescription } from "src/constants";
 import { signEvent } from "src/utils/nostrApi";
 import { primalAPI, sendMessage } from "src/utils/socket";
 import { EventFeedResult, FeedRange, FeedResult, NostrEventContent, SendNoteResult, StatsWeights } from "src/primal";
@@ -118,7 +118,7 @@ export const getHomeTotals = async (opts?: HomePayload) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getHomeTotals]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: "home_totals",
@@ -197,7 +197,7 @@ export const getHomeGraph = async (opts?: HomePayload) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getHomeGraph]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: "home_graph",
@@ -291,7 +291,7 @@ export const getTopEvents = async (opts?: HomePayload & { kind?: number }) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getTopEvents]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op,
@@ -391,7 +391,7 @@ export const getFeedEvents = async (opts?: HomePayload & { kind?: 'notes' | 'art
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getFeedEvents]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'feed',
@@ -480,7 +480,7 @@ export const getFeedTotals = async (opts?: HomePayload) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getFeedTotals]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: "feed_totals",
@@ -533,7 +533,7 @@ export const getSettingsList = async (
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getSettingsList]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `settings_${listType}_list`,
@@ -605,7 +605,7 @@ export const addToSettingsList = async (
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.addToSettingsList]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `settings_${listType}_add`,
@@ -677,7 +677,7 @@ export const removeFromSettingsList = async (
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.removeFromSettingsList]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `settings_${listType}_remove`,
@@ -725,7 +725,7 @@ export const importScheduled = async (draft: any) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.importScheduled]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'import_scheduled',
@@ -769,7 +769,7 @@ export const replaceScheduled = async (draft: any, replace_id: string) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.replaceScheduled]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'replace_scheduled',
@@ -814,7 +814,7 @@ export const deleteFromInbox = async (ids: string[]) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.deleteFromInbox]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'delete_from_inbox',
@@ -856,7 +856,7 @@ export const getScheduledEvents = async (ids: string[]) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getScheduledEvents]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'get_scheduled',
@@ -904,7 +904,7 @@ export const deleteScheduled = async (ids: string[]) => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.deleteScheduled]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: 'delete_scheduled',
@@ -949,7 +949,7 @@ export const getStatWeights = async (
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getStatWeights]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `scoring`,
@@ -1001,7 +1001,7 @@ export const getMediaUses = async (
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getMediaUses]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `media_files_usage`,
@@ -1059,7 +1059,7 @@ export const getLicenceStatus = async () => {
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [['d', settingsApp, settingsDescription.getLicenceStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       op: `license_status`,

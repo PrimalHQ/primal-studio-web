@@ -1,5 +1,6 @@
 import { SelectOption } from "./components/SelectBox/SelectBox";
 import { GraphSpan } from "./pages/Home/Home.data";
+import { getScheduledEvents } from "./primal_api/studio";
 
 export const THEMES = ['studio_dark', 'studio_light'];
 
@@ -20,6 +21,11 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  UserPoll = 1068,
+  UserPollVote = 1018,
+  ZapPoll = 6969,
+
+  LiveChatMessage = 1_311,
   ReportContent = 1_984,
 
   Subscribe = 7_001,
@@ -32,6 +38,7 @@ export enum Kind  {
   Bookmarks = 10_003,
   Blossom = 10_063,
   TierList = 17_000,
+  StreamMuteList = 10_555,
 
   WalletInfo = 13_194,
   WalletRequest = 23_194,
@@ -91,9 +98,9 @@ export enum Kind  {
   LegendLeaderboard=10_000_170,
   PremiumLeaderboard=10_000_171,
   ArticlesStats=10_000_174,
-  StudioNoteStats=10_000_905,
-  StudioMediaUseage=10_000_910,
-  StudioLicenseStatus=10_000_911,
+  LiveEventStats=10_000_176,
+
+  PollResults=10_000_179,
 
   WALLET_OPERATION = 10_000_300,
   WALLET_NWC_ACTIVE = 10_000_802,
@@ -103,6 +110,14 @@ export enum Kind  {
   OrderHistory = 10_000_605,
 
   LongFormShell = 10_030_023,
+
+  LiveChatReload = 11_000_001,
+
+  HLSVideo = 10_000_178,
+
+  StudioNoteStats=10_000_905,
+  StudioMediaUseage=10_000_910,
+  StudioLicenseStatus=10_000_911,
 }
 
 export const FEED_LIMIT = 20;
@@ -239,3 +254,59 @@ export const availableSpans: GraphSpan[] = [
 export const appStoreLink = 'https://apps.apple.com/us/app/primal/id1673134518';
 
 export const playstoreLink = 'https://play.google.com/store/apps/details?id=net.primal.android';
+
+
+export const settingsApp = 'Primal-Web App';
+
+export const settingsDescription = {
+  resetDirectMessages: 'reset_direct_message_count',
+  markAllAsRead: 'mark_all_dms_as_read',
+  nofiticationsLastSeen: 'notifications_laste_seen',
+  changePremiumName: 'change_premium_name',
+
+  getHomeTotals: 'get_home_totals',
+  getHomeGraph: 'get_home_graph',
+  getTopEvents: 'get_top_events',
+  getFeedEvents: 'get_feed_events',
+  getFeedTotals: 'get_feed_totals',
+  getSettingsList: 'get_settings_list',
+  addToSettingsList: 'add_to_settings_list',
+  removeFromSettingsList: 'remove_from_settings_list',
+  importScheduled: 'import_scheduled',
+  replaceScheduled: 'replace_scheduled',
+  deleteFromInbox: 'delete_from_inbox',
+  getScheduledEvents: 'get_scheduled_events',
+  deleteScheduled: 'delete_scheduled',
+  getStatWeights: 'get_stat_weights',
+  getMediaUses: 'get_media_uses',
+  getLicenceStatus: 'get_licence_status',
+
+  getMembershipStatus: 'get_membership_status',
+  getPremiumQRCode: 'membership_purchase_premium',
+  getLegendQRCode: 'membership_purchase_legend',
+  getPremiumStatus: 'membership_status',
+  getPremiumMediaStats: 'membership_media_management_stats',
+  getPremiumMediaList: 'membership_media_management_uploads',
+  deletePremiumMedia: 'membership_media_management_delete',
+  getContactListHistory: 'membership_recovery_contact_lists',
+  getContentDownloadData: 'membership_content_backup',
+  getContentListHistory: 'membership_content_stats',
+  startContentBroadcast: 'membership_content_rebroadcast_start',
+  cancelContentBroadcast: 'membership_content_rebroadcast_cancel',
+  startListeningForContentBroadcastStaus: 'rebroadcasting_status',
+  getOrderListHistory: 'membership_purchase_history',
+  setLegendCustumization: 'membership_legend_customization',
+  initStripe: 'membership_purchase_product',
+  resolveStripe: 'membership_stripe_checkout_session_check_status',
+
+  reportUser: 'report_user',
+
+  sendSettings: 'set_app_settings',
+  getSettings: 'get_app_settings',
+  getHomeSettings: 'get_app_subsettings_home',
+  setHomeSettings: 'set_app_subsettings_home',
+  getReadsSettings: 'get_app_subsettings_reads',
+  setReadsSettings: 'set_app_subsettings_reads',
+  getNWCSettings: 'get_app_subsettings_nwc',
+  setNWCSettings: 'set_app_subsettings_nwc',
+}

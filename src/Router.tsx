@@ -32,6 +32,7 @@ const AppRouter: Component = () => {
   const ArticleEditorPage = lazy(() => import('./pages/ArticleEditorPage/ArticleEditorPage'));
 
   const NotFound = lazy(() => import('./pages/NotFound'));
+  const Pending = lazy(() => import('./pages/Pending/EventQueuePage'));
 
   const homePreload: RoutePreloadFunc = (args) => preloadHome(args);
   const articlesPreload: RoutePreloadFunc = (args) => preloadArticles(args);
@@ -54,6 +55,7 @@ const AppRouter: Component = () => {
         <Route path="/imports" component={SettingsImports} />
         <Route path="/permissions" component={SettingsPermissions} />
       </Route>
+      <Route path="/pending" component={Pending} />
       <Route path="/edit/article/:id?" component={ArticleEditorPage} />
       <Route path="/view/draft/:id?" component={ArticleEditorPage} />
       <Route path="/e/:id" component={Thread} />

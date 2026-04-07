@@ -1,4 +1,4 @@
-import { Kind, THEMES } from "src/constants";
+import { Kind, settingsApp, settingsDescription, THEMES } from "src/constants";
 import { PrimalTheme } from "src/primal";
 import { signEvent } from "src/utils/nostrApi";
 import { primalAPI, sendMessage } from "src/utils/socket";
@@ -7,7 +7,7 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
   const event = {
     content: '{ "description": "Sync app settings" }',
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [['d', settingsApp, settingsDescription.getSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -42,7 +42,7 @@ export const sendSettings = async (settings: any, subid: string) => {
   const event = {
     content: JSON.stringify(content),
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [['d', settingsApp, settingsDescription.sendSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
