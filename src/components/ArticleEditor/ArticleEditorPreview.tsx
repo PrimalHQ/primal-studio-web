@@ -146,11 +146,8 @@ const ArticleEditorPreview: Component<{
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
         element: document.getElementById('bubble_menu_one'),
-        tippyOptions: {
-          triggerTarget: document.getElementById('tableTrigger'),
-          popperOptions: {
-            strategy: 'fixed',
-          },
+        options: {
+          strategy: 'fixed',
         },
         shouldShow: ({ editor, view, state, oldState, from, to }) => {
 

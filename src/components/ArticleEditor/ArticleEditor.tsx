@@ -76,9 +76,6 @@ const ArticleEditor: Component<{
   const toast = useToastContext();
 
   const [editorMarkdown, setEditorMarkdown] = createSignal(false);
-  // const [markdownContent, setMarkdownContent] = createSignal<string>('')
-
-  // const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
@@ -100,10 +97,6 @@ const ArticleEditor: Component<{
 
     setEditorContent(editor, props.article.content);
 
-    // if (location.pathname.includes('/view/draft')) {
-    //   editor.setEditable(false);
-    //   setViewMode(true);
-    // }
   });
 
   createEffect(() => {
@@ -133,12 +126,6 @@ const ArticleEditor: Component<{
       }),
       Image.configure({ inline: true }),
       CodeBlock,
-      // Markdown.configure({
-      //   html: true,
-      //   breaks: false,
-      //   transformPastedText: true,
-      //   transformCopiedText: true,
-      // }),
       NAddrExtension,
       Gapcursor,
       TableKit.configure({
@@ -156,20 +143,12 @@ const ArticleEditor: Component<{
       MediaEmbed,
       MarkdownPlugin.configure({
         exportOnUpdate: true,
-        // onMarkdownUpdate: (md) => {
-          // console.log('MD UPDATE: ', md)
-          // props.setMarkdownContent(() => md)
-          // setMarkdown(md);
-        // }
       }),
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
         element: document.getElementById('bubble_menu_one'),
-        tippyOptions: {
-          triggerTarget: document.getElementById('tableTrigger'),
-          popperOptions: {
-            strategy: 'fixed',
-          },
+        options: {
+          strategy: 'fixed',
         },
         shouldShow: ({ editor, view, state, oldState, from, to }) => {
 
@@ -185,140 +164,6 @@ const ArticleEditor: Component<{
         minPadding: 32,  // Minimum padding in pixels
         useDynamicPadding: true // Use the node height as padding
       })
-      // Mention.configure({
-      //   suggestion: {
-      //     char: '@',
-      //     command: ({ editor, range, props }) => {
-      //       const user = selectedUser();
-
-      //       if (!user) return;
-
-      //       let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
-      //       const relays = userRelays[user.pubkey] || [];
-
-      //       if (relays.length > 0) {
-      //         pInfo.relays = [...relays];
-      //       }
-
-      //       const nprofile = nip19.nprofileEncode(pInfo);
-
-      //       const delRange = {
-      //         from: range.from,
-      //         to: range.from + searchQuery().length,
-      //       };
-
-      //       setSearchQuery(() => '');
-
-      //       editor
-      //         .chain()
-      //         .focus()
-      //         .deleteRange({ ...delRange })
-      //         .insertNProfileAt(range, { nprofile, user, relays})
-      //         .insertContent({ type: 'text', text: ' ' })
-      //         .run()
-      //     },
-      //     items: async ({ editor, query}) => {
-      //       users = query.length < 2 ?
-      //         await fetchRecomendedUsersAsync() :
-      //         await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
-
-      //       userRelays = await getUserRelays();
-      //       setSuggestedUsers(() => [...users]);
-
-      //       return users;
-      //     },
-      //     render: () => {
-      //       let component: JSXElement | undefined;
-      //       let popup: Instance[] = [];
-
-      //       return {
-      //         onStart: props => {
-
-      //           component = <div>
-      //             <For each={suggestedUsers}>
-      //               {(user, index) => (
-      //                 <SearchOption
-      //                   id={`reads_suggested_user_${index()}`}
-      //                   title={userName(user)}
-      //                   description={nip05Verification(user)}
-      //                   icon={<Avatar user={user} size="xs" />}
-      //                   statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-      //                   statLabel={intl.formatMessage(tSearch.followers)}
-      //                   // @ts-ignore
-      //                   onClick={() => {
-      //                     setSelectedUser(() => user);
-      //                     props.command({ id: user.pubkey, label: user.name})
-      //                   }}
-      //                   highlighted={highlightedUser() === index()}
-      //                   hasBackground={true}
-      //                 />
-      //               )}
-      //             </For>
-      //           </div>
-
-      //           // @ts-ignore
-      //           popup = tippy('#tiptapEditor', {
-      //             getReferenceClientRect: props.clientRect,
-      //             content: component,
-      //             showOnCreate: true,
-      //             interactive: true,
-      //             trigger: 'manual',
-      //             placement: 'bottom-start',
-      //           })
-      //         },
-      //         onUpdate: (props) => {
-      //           setSearchQuery(() => props.query || '');
-      //         },
-
-      //         onKeyDown(props) {
-      //           if (props.event.key === 'Escape') {
-      //             popup[0].hide();
-
-      //             return true;
-      //           }
-
-      //           if (props.event.key === 'ArrowDown') {
-      //             setHighlightedUser(i => {
-      //               if (!search?.users || search.users.length === 0) {
-      //                 return 0;
-      //               }
-
-      //               return i < search.users.length ? i + 1 : 0;
-      //             });
-
-      //             return true;
-      //           }
-
-      //           if (props.event.key === 'ArrowUp') {
-      //             setHighlightedUser(i => {
-      //               if (!search?.users || search.users.length === 0) {
-      //                 return 0;
-      //               }
-
-      //               return i > 0 ? i - 1 : search.users.length;
-      //             });
-      //             return true;
-      //           }
-
-
-      //           if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
-      //             const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
-
-      //             sel && sel.click();
-
-      //             return true;
-      //           }
-
-      //           // @ts-ignore
-      //           return component?.ref?.onKeyDown(props)
-      //         },
-      //         onExit: () => {
-      //           popup[0].destroy();
-      //         }
-      //       }
-      //     },
-      //   },
-      // }),
     ],
     editorProps: { handleDOMEvents: {
       drop: (view, e) => { e.preventDefault(); },
@@ -338,20 +183,10 @@ const ArticleEditor: Component<{
   const setEditorContent = async (editor: Editor, content: string) => {
     let c = await mdToHtml(content);
 
-    // c = c.replaceAll('<p></p>', '');
-    // c += '<p></p>';
 
     editor.chain().
-      setContent(c, false).
+      setContent(c, { emitUpdate: false }).
       focus().run();
-
-
-    // c = c.replaceAll('<p></p>', '');
-    // c += '<p></p>';
-
-    // editor.chain().
-    //   setContent(c, false).
-    //   focus().run();
   }
 
 
