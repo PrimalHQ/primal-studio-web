@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import { Kind } from "src/constants";
-import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult, LeaderboardInfo, PaginationInfo, UserStats } from "src/primal";
+import { NostrEventContent, FeedRange, EventFeedPage, PrimalRepost, PrimalNote, PrimalUser, PrimalHighlight, PrimalArticle, PrimalZap, PrimalDraft, DMContact, TopZap, LegendCustomizationConfig, CohortInfo, EventFeedResult, LeaderboardInfo, PaginationInfo, UserStats, PrimalUserPoll, PrimalPollChoice } from "src/primal";
 import { parseLinkPreviews } from "src/stores/LinkPreviewStore";
 import { logError } from "./logger";
 import { hexToNpub } from "./profile";
@@ -798,6 +798,80 @@ export const getZapInPage = (page: EventFeedPage, eventOrId: string | NostrEvent
   };
 
   return zap;
+}
+
+export const convertToUserPoll = (
+  event: NostrEventContent,
+  user?: PrimalUser,
+): PrimalUserPoll => {
+  const tags = event.tags || [];
+  const pubkey = event.pubkey || '';
+
+  // NIP-88 uses ["option", id, label]; some clients use ["poll_option", id, label, ...].
+  const choices: PrimalPollChoice[] = tags.reduce<PrimalPollChoice[]>((acc, t) => {
+    if ((t[0] === 'option' || t[0] === 'poll_option') && t[1] !== undefined) {
+      acc.push({
+        id: t[1],
+        label: t[2] || '',
+        index: acc.length,
+      });
+    }
+    return acc;
+  }, []);
+
+  const endsAtTag = tags.find(t => t[0] === 'endsAt' || t[0] === 'closed_at' || t[0] === 'ends_at');
+  const endsAt = endsAtTag ? parseInt(endsAtTag[1] || '0') || 0 : 0;
+
+  const zapOptionsTag = tags.find(t => t[0] === 'zap_options' || t[0] === 'zap');
+  let zapLimits: { min: number, max: number } | undefined;
+  if (zapOptionsTag) {
+    const min = parseInt((
+      tags.find(t => t[0] === 'value_minimum') ||
+      ['value_minimum', zapOptionsTag[1] || '0']
+    )[1]);
+    const max = parseInt((
+      tags.find(t => t[0] === 'value_maximum') ||
+      ['value_maximum', zapOptionsTag[2] || '0']
+    )[1]);
+    zapLimits = { min, max };
+  }
+
+  const eventPointer: nip19.EventPointer = {
+    id: event.id,
+    author: pubkey,
+    kind: event.kind,
+  };
+
+  const noteId = nip19.neventEncode(eventPointer);
+  const noteIdShort = nip19.neventEncode({ id: event.id });
+
+  return {
+    user: user || emptyUser(pubkey),
+    msg: { ...event },
+    id: event.id,
+    pubkey,
+    noteId,
+    noteIdShort,
+    tags,
+    question: event.content || '',
+    choices,
+    results: {},
+    noteActions: noActions(event.id),
+    endsAt,
+    topZaps: [],
+    stats: {
+      likes: 0,
+      mentions: 0,
+      reposts: 0,
+      replies: 0,
+      zaps: 0,
+      satszapped: 0,
+      score: 0,
+      score24h: 0,
+      bookmarks: 0,
+    },
+    zapLimits,
+  };
 }
 
 export const getTopicStatsInPage = (page: EventFeedPage) => {

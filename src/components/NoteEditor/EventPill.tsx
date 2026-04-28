@@ -3,7 +3,7 @@ import { Component, createEffect, Match, Show, Switch } from 'solid-js';
 import styles from './TipTapNoteEditor.module.scss';
 import { EventReference, fetchEventsFromReference } from 'src/primal_api/references';
 import { Kind } from 'src/constants';
-import { NostrEventContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from 'src/primal';
+import { NostrEventContent, PrimalArticle, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap } from 'src/primal';
 import Avatar from 'src/components/Avatar/Avatar';
 import { userNameFromUser } from 'src/utils/profile';
 import { emptyUser } from 'src/utils/feeds';
@@ -11,9 +11,11 @@ import { createStore } from 'solid-js/store';
 import Note from '../Event/Note';
 import NotePreview from './NotePreview';
 import ArticlePreview from './ArticlePreview';
+import UserPoll from '../UserPoll/UserPoll';
+import ZapPoll from '../UserPoll/ZapPoll';
 
 export type EventPillData = {
-  event?: PrimalUser | PrimalNote | PrimalArticle | NostrEventContent,
+  event?: PrimalUser | PrimalNote | PrimalArticle | PrimalUserPoll | NostrEventContent,
   user?: PrimalUser,
   content: string,
 }
@@ -72,6 +74,16 @@ const EventPill: Component<{
       return;
     }
 
+    if (kind === Kind.UserPoll || kind === Kind.ZapPoll) {
+      const poll = reference.event as PrimalUserPoll;
+      setData({
+        event: poll,
+        user: poll?.user,
+        content: poll?.question || '',
+      });
+      return;
+    }
+
     if (!kind && reference.reference) {
       const eventReference = await fetchEventsFromReference(reference.reference);
 
@@ -109,6 +121,20 @@ const EventPill: Component<{
         </Match>
         <Match when={props.reference.kind === Kind.Metadata}>
           <span class={styles.linkish}>@{userNameFromUser(props.reference.event as PrimalUser)}</span>
+        </Match>
+        <Match when={props.reference.kind === Kind.UserPoll && props.reference.event}>
+          <UserPoll
+            id={props.id || `user_poll_${props.reference.pk}`}
+            poll={props.reference.event as PrimalUserPoll}
+            pollType="embedded"
+          />
+        </Match>
+        <Match when={props.reference.kind === Kind.ZapPoll && props.reference.event}>
+          <ZapPoll
+            id={props.id || `zap_poll_${props.reference.pk}`}
+            poll={props.reference.event as PrimalUserPoll}
+            pollType="embedded"
+          />
         </Match>
         <Match when={true}>
           {props.reference.pk}

@@ -394,6 +394,7 @@ export type PrimalNote = {
   mentionedArticles?: Record<string, PrimalArticle>,
   mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
+  mentionedLiveEvents?: Record<string, StreamingData>,
   replyTo?: string,
   id: string,
   pubkey: string,
@@ -534,4 +535,69 @@ export type StatsWeights = {
   replies_short?: number,
   reposts?: number,
   zaps?: number,
+};
+
+export type StreamingData = {
+  id?: string,
+  url?: string,
+  image?: string,
+  status?: string,
+  starts?: number,
+  ends?: number,
+  summary?: string,
+  title?: string,
+  client?: string,
+  pubkey?: string,
+  currentParticipants?: number,
+  event?: NostrEventContent,
+  hosts?: string[],
+  participants?: string[],
+  msg?: NostrEventContent,
+}
+
+export type PollResults = Record<string, { votes: number, satszapped: number }>;
+
+export type PrimalPollChoice = {
+  id: string,
+  label: string,
+  index: number,
+};
+
+export type PrimalUserPoll = {
+  user: PrimalUser,
+  msg: NostrEventContent,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedUsers?: Record<string, PrimalUser>,
+  mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedZaps?: Record<string, PrimalZap>,
+  mentionedHighlights?: Record<string, any>,
+  mentionedLiveEvents?: Record<string, StreamingData>,
+  mentionedUserPolls?: Record<string, PrimalUserPoll>,
+  mentionedZapPolls?: Record<string, PrimalUserPoll>,
+  replyTo?: string,
+  id: string,
+  pubkey: string,
+  noteId: string,
+  noteIdShort: string,
+  tags: string[][],
+  question: string,
+  choices: PrimalPollChoice[],
+  results: PollResults,
+  relayHints?: Record<string, string>,
+  noteActions: NoteActions,
+  endsAt: number,
+  topZaps: TopZap[],
+  stats: {
+    likes: number,
+    mentions: number,
+    reposts: number,
+    replies: number,
+    zaps: number,
+    satszapped: number,
+    score: number,
+    score24h: number,
+    bookmarks: number,
+  },
+  repost?: PrimalRepost,
+  zapLimits?: { min: number, max: number},
 };

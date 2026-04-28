@@ -1,5 +1,5 @@
-import { NostrEventContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from "src/primal";
-import { emptyUser, encodeCoordinate } from "src/utils/feeds";
+import { NostrEventContent, PrimalArticle, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap } from "src/primal";
+import { convertToUser, convertToUserPoll, emptyUser, encodeCoordinate } from "src/utils/feeds";
 import { nip19 } from "src/utils/nTools";
 import { getUsers } from "./profile";
 import { Kind } from "src/constants";
@@ -11,7 +11,7 @@ import { APP_ID } from "src/App";
 export type EventReference = {
   pk?: string,
   kind?: number,
-  event?: PrimalUser | PrimalNote | PrimalArticle | PrimalZap | NostrEventContent | undefined,
+  event?: PrimalUser | PrimalNote | PrimalArticle | PrimalZap | PrimalUserPoll | NostrEventContent | undefined,
   error?: string,
   reference?: string,
   uuid?: string,
@@ -106,6 +106,31 @@ export const fetchEventsFromReference = async (reference: string): Promise<Event
           event: article,
           reference
         }
+      case Kind.UserPoll:
+      case Kind.ZapPoll: {
+        const page = await fetchNostrEvents(
+          [pk],
+          kind,
+          `event_ref_${pk}_${APP_ID}`,
+        );
+
+        const pollEvent = page.events.find(e => e.id === pk);
+
+        if (!pollEvent) {
+          throw 'poll-not-found';
+        }
+
+        const authorPubkey = pollEvent.pubkey || '';
+        const author = page.metadata.find(m => m.pubkey === authorPubkey);
+        const authorUser = author ? convertToUser(author, authorPubkey) : undefined;
+
+        return {
+          pk,
+          kind,
+          event: convertToUserPoll(pollEvent, authorUser),
+          reference,
+        };
+      }
       default:
         const page = await fetchNostrEvents(
           [pk],
