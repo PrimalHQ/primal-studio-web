@@ -7,7 +7,7 @@ import { getMediaUses } from "src/primal_api/studio";
 import { accountStore, fetchBlossomServers } from "src/stores/AccountStore";
 import { readMediaPageConfig } from "src/utils/localStore";
 import { signEvent } from "src/utils/nostrApi";
-import { utils } from 'src/utils/nTools';
+import { normalizeBlossomURL } from "src/utils/blossom";
 
 export const mediaSortOptions = ['latest', 'oldest', 'size', 'type'] as const;
 
@@ -110,7 +110,7 @@ export const fetchBlossomMediaList = async (pubkey: string, options?: BlossomLis
     const server = blossomServers[0];
 
 
-    const host = utils.normalizeURL(server).replace('wss', 'https');
+    const host = normalizeBlossomURL(server);
 
 
     const blobs = await BlossomClient.listBlobs(
@@ -171,7 +171,7 @@ export const deleteMedia = async (sha256: string) => {
     { message: `delete media file: ${sha256}`},
   );
 
-  const host = utils.normalizeURL(server);
+  const host = normalizeBlossomURL(server);
 
   const success = await BlossomClient.deleteBlob(
     host,

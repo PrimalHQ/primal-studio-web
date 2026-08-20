@@ -24,3 +24,27 @@ export const areUrlsSame = (a: string, b: string) => {
 
   return trimA === trimB;
 }
+
+/**
+ * Normalizes a Blossom server URL for HTTP use, and guarantees a trailing
+ * slash so callers can append `upload` / `media` to it.
+ *
+ * Do NOT use `nostr-tools`' `utils.normalizeURL` here: that is a *relay*
+ * normalizer and rewrites `http:`/`https:` into `ws:`/`wss:`, which `fetch`
+ * refuses to load.
+ */
+export const normalizeBlossomURL = (url: string) => {
+  const withScheme = url.indexOf('://') === -1 ? `https://${url}` : url;
+
+  const u = new URL(withScheme);
+
+  if (u.protocol === 'ws:') u.protocol = 'http:';
+  else if (u.protocol === 'wss:') u.protocol = 'https:';
+
+  u.pathname = u.pathname.replace(/\/+/g, '/');
+  if (!u.pathname.endsWith('/')) u.pathname = `${u.pathname}/`;
+  u.search = '';
+  u.hash = '';
+
+  return u.toString();
+}

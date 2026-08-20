@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MB } from "src/constants";
 import { signEvent } from "./nostrApi";
 import { sha256 } from "./ui";
-import { utils } from 'src/utils/nTools';
+import { areUrlsSame, normalizeBlossomURL } from "./blossom";
 import { batch } from "solid-js";
 
 export const uploadLimit = {
@@ -74,7 +74,7 @@ export const uploadFile = async (
   file: File,
   callbacks?: UploadCallbacks,
 ) => {
-  const url = utils.normalizeURL(accountStore.blossomServers[0] || primalBlossom);
+  const url = normalizeBlossomURL(accountStore.blossomServers[0] || primalBlossom);
 
   let uploadState = newUploadState(file);
 
@@ -82,7 +82,7 @@ export const uploadFile = async (
 
   let allow = true;
 
-  if (url === primalBlossom) {
+  if (areUrlsSame(url, primalBlossom)) {
     uploadState.uploadLimit = calcUploadLimit(accountStore.membershipStatus.tier, file.size);
     allow = file.size <= MB * uploadState.uploadLimit;
   }
